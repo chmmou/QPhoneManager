@@ -1,0 +1,5 @@
+qt_add_executable(tst_version core/tst_version.cpp)
+target_link_libraries(tst_version PRIVATE qpm_core Qt6::Test)
+qpm_set_project_warnings(tst_version)
+add_test(NAME tst_version COMMAND tst_version)
+set_tests_properties(tst_version PROPERTIES TIMEOUT 60)
