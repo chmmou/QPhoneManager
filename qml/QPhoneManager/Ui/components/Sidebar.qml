@@ -10,6 +10,8 @@ Pane {
     required property list<SectionEntry> sections
     required property int currentIndex
     property bool compact: false
+    /// Width at which the longest label fits next to its icon.
+    readonly property int fittingWidth: Math.ceil(root.widestLabel(labelMetrics.font.pixelSize) + settingsButton.leftPadding + settingsButton.rightPadding + settingsButton.spacing + Theme.sidebarIconSize + Theme.gridUnit * 4)
 
     signal sectionSelected(int index)
     signal settingsRequested
@@ -52,6 +54,8 @@ Pane {
         }
 
         SidebarButton {
+            id: settingsButton
+
             Layout.fillWidth: true
             objectName: "section-settings"
             text: qsTr("Settings")
@@ -68,5 +72,22 @@ Pane {
             compact: root.compact
             enabled: false
         }
+    }
+
+    FontMetrics {
+        id: labelMetrics
+
+        font: settingsButton.font
+    }
+
+    // The font size is passed in so that the width follows the font; a method
+    // call alone does not make the binding depend on it.
+    function widestLabel(pixelSize: int): real {
+        if (pixelSize <= 0)
+            return 0;
+        let widest = Math.max(labelMetrics.advanceWidth(qsTr("Settings")), labelMetrics.advanceWidth(qsTr("Help")));
+        for (let i = 0; i < root.sections.length; ++i)
+            widest = Math.max(widest, labelMetrics.advanceWidth(root.sections[i].title));
+        return widest;
     }
 }

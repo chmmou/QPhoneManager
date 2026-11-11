@@ -15,6 +15,7 @@
 #include <chrono>
 #include <memory>
 #include <optional>
+#include <utility>
 
 class QTcpServer;
 class QTcpSocket;
@@ -103,6 +104,11 @@ struct FakePhoneConfig
  * violation of the protocol rules a client must keep, such as two commands in
  * one write or a wrong answer to a keep-alive.
  *
+ * Contacts written to "telecom/pb" are treated like the client does: a new
+ * contact gets a LUID and keys for its entries, a change touches only the
+ * entries it names, and an empty body deletes the contact. A dial or hang-up
+ * command is answered with OK and only recorded.
+ *
  * Never sends text messages or places calls: there is nothing behind it.
  */
 class FakePhone : public QObject
@@ -126,6 +132,8 @@ public:
 
     /// AT commands as received and OBEX requests as "OBEX <op> <name>".
     [[nodiscard]] QStringList receivedCommands() const { return m_received; }
+    /// Name and body of every PUT on IRMC-SYNC, in order; a delete has an empty body.
+    [[nodiscard]] QList<std::pair<QString, QByteArray>> syncPuts() const { return m_syncPuts; }
     [[nodiscard]] QStringList protocolErrors() const { return m_protocolErrors; }
     void clearLog();
 
@@ -179,6 +187,7 @@ private:
     void handleObex(const QByteArray &bytes);
     void handleSyncGet(const QString &name);
     void handleSyncPut(const QString &name, const QByteArray &body, bool hasBody);
+    void handleContactPut(const QString &rest, const QByteArray &body);
     void handleFileRequest(const qpm::core::protocol::ObexPacket &request);
     void sendPacket(const QByteArray &packet);
     void sendFirst(const QByteArray &packet);
@@ -199,6 +208,9 @@ private:
     QByteArray m_buffer;
     QStringList m_received;
     QStringList m_protocolErrors;
+    QList<std::pair<QString, QByteArray>> m_syncPuts;
+    /// Next key for a contact entry the fake phone creates.
+    quint64 m_nextDataId = 1000;
     QHash<QString, FakeSyncArea> m_areas;
     QMap<QString, FakeFile> m_files;
     QSet<QString> m_folders;

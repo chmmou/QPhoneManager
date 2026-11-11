@@ -7,8 +7,10 @@ ToolBar {
     id: root
 
     required property string title
+    required property string iconName
     required property bool connected
     property bool canSearch: false
+    readonly property alias searchText: searchField.text
 
     signal syncRequested
     signal connectRequested
@@ -59,6 +61,17 @@ ToolBar {
             FocusRing {
                 shown: phonesButton.visualFocus
             }
+        }
+
+        ToolSeparator {}
+
+        TintedIcon {
+            objectName: "sectionIcon"
+            Layout.preferredWidth: Theme.sidebarIconSize
+            Layout.preferredHeight: Theme.sidebarIconSize
+            visible: root.iconName.length > 0
+            name: root.iconName
+            color: Theme.foregroundOnSurface
         }
 
         Label {
@@ -121,5 +134,9 @@ ToolBar {
 
     function focusSearch(): void {
         searchField.forceActiveFocus(Qt.ShortcutFocusReason);
+    }
+
+    function clearSearch(): void {
+        searchField.clear();
     }
 }

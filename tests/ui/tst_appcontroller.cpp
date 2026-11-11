@@ -76,7 +76,7 @@ private Q_SLOTS:
     void qrCodeCarriesSessionAndAddressAndListensOnlyWhileShown();
     void ownAddressPrefersAPrivateIpv4Address_data();
     void ownAddressPrefersAPrivateIpv4Address();
-    void syncWithoutAreasSaysSo();
+    void syncNeedsAConnectionAndAlwaysCoversTheContacts();
     void syncReportsTheChangesOfEachArea();
     void signalValueMapsToBars_data();
     void signalValueMapsToBars();
@@ -506,7 +506,7 @@ void TestAppController::ownAddressPrefersAPrivateIpv4Address()
     QVERIFY(QrCodeProvider::newSessionId() != QrCodeProvider::newSessionId());
 }
 
-void TestAppController::syncWithoutAreasSaysSo()
+void TestAppController::syncNeedsAConnectionAndAlwaysCoversTheContacts()
 {
     const std::unique_ptr<AppController> controller = makeController();
     QSignalSpy errors(controller.get(), &AppController::errorOccurred);
@@ -519,14 +519,15 @@ void TestAppController::syncWithoutAreasSaysSo()
     QTRY_VERIFY_WITH_TIMEOUT(controller->isConnected(), connectTimeoutMs);
     controller->syncAll();
 
-    QCOMPARE(finished.count(), 1);
-    QCOMPARE(finished.first().first().toString(), QStringLiteral("There is nothing to sync yet."));
+    QTRY_COMPARE_WITH_TIMEOUT(finished.count(), 1, connectTimeoutMs);
+    QCOMPARE(finished.first().first().toString(),
+             QStringLiteral("Contacts: 0 new, 0 changed, 0 deleted"));
 }
 
 void TestAppController::syncReportsTheChangesOfEachArea()
 {
     const std::unique_ptr<AppController> controller = makeController();
-    controller->registerSyncArea(QStringLiteral("Contacts"), []() {
+    controller->registerSyncArea(QStringLiteral("Calendar"), []() {
         return QtFuture::makeReadyValueFuture(
             Result<AppController::SyncChanges>(AppController::SyncChanges{1, 2, 3}));
     });
@@ -542,9 +543,10 @@ void TestAppController::syncReportsTheChangesOfEachArea()
 
     QTRY_COMPARE(finished.count(), 1);
     const QStringList lines = finished.first().first().toString().split(u'\n');
-    QCOMPARE(lines.size(), 2);
-    QCOMPARE(lines.at(0), QStringLiteral("Contacts: 1 new, 2 changed, 3 deleted"));
-    QVERIFY(lines.at(1).startsWith(QStringLiteral("Notes: not synced.")));
+    QCOMPARE(lines.size(), 3);
+    QCOMPARE(lines.at(0), QStringLiteral("Contacts: 0 new, 0 changed, 0 deleted"));
+    QCOMPARE(lines.at(1), QStringLiteral("Calendar: 1 new, 2 changed, 3 deleted"));
+    QVERIFY(lines.at(2).startsWith(QStringLiteral("Notes: not synced.")));
     QVERIFY(!controller->isSyncing());
 }
 

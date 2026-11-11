@@ -9,8 +9,11 @@ ApplicationWindow {
     id: root
 
     readonly property bool connected: AppController.connected
-    readonly property bool hasData: false
+    readonly property string currentKey: sectionCatalog.all[root.currentSection].key
+    readonly property bool hasData: root.currentKey === "contacts" && AppController.contacts.hasPhone
     property int currentSection: 0
+    /// Number a new message should go to, handed over from another area.
+    property string messageRecipient: ""
 
     signal connectRequested
 
@@ -31,6 +34,7 @@ ApplicationWindow {
         id: appHeader
 
         title: sectionCatalog.all[root.currentSection].title
+        iconName: sectionCatalog.all[root.currentSection].iconName
         connected: root.connected
         canSearch: root.hasData
         onSyncRequested: AppController.syncAll()
@@ -41,7 +45,31 @@ ApplicationWindow {
     footer: StatusBar {}
 
     onConnectRequested: connectDialog.open()
+    onCurrentSectionChanged: appHeader.clearSearch()
     Component.onCompleted: AppController.start()
+
+    Binding {
+        target: AppController.contacts
+        property: "searchText"
+        value: root.currentKey === "contacts" ? appHeader.searchText : ""
+    }
+
+    Connections {
+        target: AppController.contacts
+
+        function onErrorOccurred(message: string): void {
+            messageBar.show(message, true);
+        }
+
+        function onInfoMessage(message: string): void {
+            messageBar.show(message, false);
+        }
+
+        function onMessageRequested(number: string): void {
+            root.messageRecipient = number;
+            root.showSection("messages");
+        }
+    }
 
     Connections {
         target: AppController
@@ -92,7 +120,7 @@ ApplicationWindow {
 
             objectName: "sidebar"
             Layout.fillHeight: true
-            Layout.preferredWidth: sidebar.compact ? Theme.compactSidebarWidth : Theme.sidebarWidth
+            Layout.preferredWidth: sidebar.compact ? Theme.compactSidebarWidth : Math.max(Theme.sidebarWidth, sidebar.fittingWidth)
             sections: sectionCatalog.all
             currentIndex: root.currentSection
             compact: root.width < Theme.compactWindowWidth
@@ -179,5 +207,14 @@ ApplicationWindow {
         id: profilesDialog
 
         objectName: "profilesDialog"
+    }
+
+    function showSection(key: string): void {
+        for (let i = 0; i < sectionCatalog.all.length; ++i) {
+            if (sectionCatalog.all[i].key === key) {
+                root.currentSection = i;
+                return;
+            }
+        }
     }
 }

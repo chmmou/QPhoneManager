@@ -13,6 +13,7 @@
 #include "ui/ProfileListModel.h"
 #include "ui/QrCodeProvider.h"
 #include "ui/Settings.h"
+#include "ui/contacts/PhoneImageProvider.h"
 
 #include <QBluetoothAddress>
 #include <QDir>
@@ -101,7 +102,9 @@ AppController::AppController(Settings *settings, std::unique_ptr<SecretStore> se
       m_wifiPhones(new FoundPhoneModel(this)),
       m_usbPhones(new FoundPhoneModel(this)),
       m_bluetoothPhones(new FoundPhoneModel(this)),
-      m_qrCode(new QrCodeProvider(this))
+      m_qrCode(new QrCodeProvider(this)),
+      m_photos(std::make_shared<PhotoSource>()),
+      m_contacts(new ContactsArea(m_connection, m_photos, this))
 {
     Q_ASSERT(settings);
     const QString configured = settings->dataDirectory();
@@ -113,6 +116,15 @@ AppController::AppController(Settings *settings, std::unique_ptr<SecretStore> se
     connect(m_connection, &PhoneConnection::deviceIdentified, this, &AppController::onIdentified);
     connect(m_connection, &PhoneConnection::failed, this, &AppController::onFailed);
     connect(m_qrCode, &QrCodeProvider::activeChanged, this, &AppController::updateListening);
+    registerSyncArea(tr("Contacts"), [this]() {
+        return m_contacts->sync().then(
+            this, [](const Result<core::store::ContactChanges> &pulled) -> Result<SyncChanges> {
+                if (!pulled.hasValue())
+                    return pulled.error();
+                return SyncChanges{pulled.value().added, pulled.value().changed,
+                                   pulled.value().removed};
+            });
+    });
     connect(settings, &Settings::listenForPhoneChanged, this, &AppController::updateListening);
     connect(settings, &Settings::dataDirectoryChanged, this, [this]() {
         const QString configuredNow = m_settings->dataDirectory();
@@ -121,7 +133,7 @@ AppController::AppController(Settings *settings, std::unique_ptr<SecretStore> se
         if (directory == m_profilesDirectory)
             return;
         m_profilesDirectory = directory;
-        m_store.reset();
+        closeStore();
         if (!m_currentDevice.isEmpty() && (isConnected() || isConnecting()))
             static_cast<void>(openStore(m_currentDevice));
         else
@@ -142,7 +154,11 @@ AppController *AppController::create(QQmlEngine *qmlEngine, QJSEngine *jsEngine)
 {
     Q_UNUSED(jsEngine)
     auto *settings = qmlEngine->singletonInstance<Settings *>("QPhoneManager.Ui", "Settings");
-    return new AppController(settings, std::make_unique<SecretStore>(), Environment());
+    auto *controller = new AppController(settings, std::make_unique<SecretStore>(), Environment());
+    // The engine takes ownership of the provider.
+    qmlEngine->addImageProvider(QStringLiteral("qpm"),
+                                new PhoneImageProvider(controller->photoSource()));
+    return controller;
 }
 
 AppController::ConnectionState AppController::connectionState() const
@@ -375,6 +391,7 @@ void AppController::onStateChanged()
         m_connection->state() == PhoneConnection::State::Lost) {
         m_waitingForPin = false;
     }
+    m_contacts->setConnected(isConnected());
     Q_EMIT connectionStateChanged();
 }
 
@@ -726,7 +743,7 @@ bool AppController::removeDevice(const QString &deviceId)
     if (deviceId == m_currentDevice) {
         if (isConnected() || isConnecting())
             disconnectPhone();
-        m_store.reset();
+        closeStore();
     }
     const Result<void> removed = ProfileStore::removeProfile(m_profilesDirectory, deviceId);
     if (!removed.hasValue()) {
@@ -855,7 +872,7 @@ bool AppController::openStore(const QString &deviceId)
 {
     if (m_store && m_store->deviceId() == deviceId)
         return true;
-    m_store.reset();
+    closeStore();
     auto store = std::make_unique<ProfileStore>(m_profilesDirectory, deviceId);
     const Result<void> opened = store->open();
     if (!opened.hasValue()) {
@@ -865,7 +882,15 @@ bool AppController::openStore(const QString &deviceId)
         return false;
     }
     m_store = std::move(store);
+    m_contacts->setProfileStore(m_store.get());
     return true;
+}
+
+void AppController::closeStore()
+{
+    // The contacts hold the store; they let go of it before it closes.
+    m_contacts->setProfileStore(nullptr);
+    m_store.reset();
 }
 
 void AppController::setCurrentDevice(const QString &deviceId)

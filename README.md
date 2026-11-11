@@ -102,6 +102,12 @@ report themselves as skipped. They read these environment variables:
 | `QPM_TEST_SMS_TO` | The only number a test may send a text message to. Optional. |
 | `QPM_TEST_CALL_TO` | The only number a test may call. Optional. |
 
+The contacts test writes freely only to an emulator, that is a serial that
+starts with `emulator-`. On any other phone it only reads the contacts and
+checks their form, and it writes nothing but one contact named
+`QPM Testkontakt` with six digits, which it deletes again. It never prints or
+keeps the contents of a phone's contacts.
+
 All traffic of these tests goes through a guard. It lets a text message
 through only to the number in `QPM_TEST_SMS_TO` and a call only to the number
 in `QPM_TEST_CALL_TO`. Without these variables, every message and every call

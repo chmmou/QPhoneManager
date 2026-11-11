@@ -44,9 +44,23 @@ Item {
         }
     }
 
+    Component {
+        id: contacts
+
+        ContactsPage {
+            emptyText: root.entry.emptyText
+            onConnectRequested: root.connectRequested()
+        }
+    }
+
     Loader {
         anchors.fill: parent
-        sourceComponent: root.entry.key === "overview" ? overview
-                                                       : (root.entry.hasList ? listAndDetail : placeholder)
+        sourceComponent: {
+            if (root.entry.key === "overview")
+                return overview;
+            if (root.entry.key === "contacts")
+                return contacts;
+            return root.entry.hasList ? listAndDetail : placeholder;
+        }
     }
 }
