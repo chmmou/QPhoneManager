@@ -32,6 +32,29 @@ QByteArray continueBytes()
     return QByteArray(obex::continueRequest, obex::continueRequestSize);
 }
 
+// The phone puts a Java exception into App-Parameters. Its message can name
+// files on the phone, so only the class name in front of it is kept, and
+// nothing when the text does not start with one.
+QString exceptionClass(const QByteArray &trace)
+{
+    static constexpr qsizetype maxClassName = 120;
+    const QByteArray text = trace.trimmed();
+    qsizetype end = 0;
+    while (end < text.size() && end <= maxClassName) {
+        const char c = text.at(end);
+        const bool namePart = (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
+                              (c >= '0' && c <= '9') || c == '.' || c == '_' || c == '$';
+        if (!namePart)
+            break;
+        ++end;
+    }
+    if (end == 0 || end > maxClassName)
+        return {};
+    if (end < text.size() && text.at(end) != ':' && !QChar::isSpace(uchar(text.at(end))))
+        return {};
+    return QString::fromLatin1(text.first(end));
+}
+
 Error errorForResponse(const ObexPacket &packet)
 {
     const QString code = QStringLiteral("0x%1").arg(uint(packet.code), 2, 16, QLatin1Char('0'));
@@ -57,16 +80,13 @@ Error errorForResponse(const ObexPacket &packet)
         return Error(ErrorCode::IoFailure,
                      QStringLiteral("Phone storage full (OBEX %1)").arg(code));
     case obex::rspInternalServerError: {
-        // The phone puts the Java exception into App-Parameters; only its first
-        // line is kept, cut short, so that file names deep in a trace stay out.
-        static constexpr qsizetype maxDetail = 120;
-        const QByteArray trace = packet.appParameters.value_or(QByteArray());
-        const QString firstLine =
-            QString::fromUtf8(
-                trace.left(trace.indexOf('\r') < 0 ? trace.size() : trace.indexOf('\r')))
-                .left(maxDetail);
+        const QString exception = exceptionClass(packet.appParameters.value_or(QByteArray()));
+        if (exception.isEmpty()) {
+            return Error(ErrorCode::ProtocolError,
+                         QStringLiteral("Phone error (OBEX %1)").arg(code));
+        }
         return Error(ErrorCode::ProtocolError,
-                     QStringLiteral("Phone error (OBEX %1): %2").arg(code, firstLine));
+                     QStringLiteral("Phone error (OBEX %1): %2").arg(code, exception));
     }
     default:
         break;
@@ -446,8 +466,10 @@ void ObexClient::handlePacket(const QByteArray &bytes)
         return;
     }
 
+    // Only a successful answer carries the fields of its request type; the
+    // phone refuses a CONNECT with a bare response code.
     const ObexPacket::Layout layout =
-        code == obex::rspContinue ? ObexPacket::Layout::Plain : request.responseLayout;
+        code == obex::rspOk ? request.responseLayout : ObexPacket::Layout::Plain;
     Result<ObexPacket> decoded = ObexPacket::decode(bytes, layout);
     if (!decoded.hasValue()) {
         finishCurrent(decoded.error());
@@ -474,13 +496,20 @@ void ObexClient::handlePacket(const QByteArray &bytes)
     }
 
     packet.body = request.body;
-    if (request.endsObex) {
-        m_connected = false;
-        const QByteArray leftover = m_buffer;
-        m_buffer.clear();
-        m_session->leaveObex(leftover);
+    if (!request.endsObex) {
+        finishCurrent(packet);
+        return;
     }
-    finishCurrent(packet);
+    // The bytes behind the DISCONNECT answer go to the AT session, and a
+    // connection-level line among them ends the session at once, which fails
+    // every request. The answered request is taken out before that.
+    m_timer->stop();
+    m_connected = false;
+    std::unique_ptr<Request> answered = std::move(m_current);
+    const QByteArray leftover = m_buffer;
+    m_buffer.clear();
+    m_session->leaveObex(leftover);
+    complete(std::move(answered), packet);
 }
 
 void ObexClient::startAbort(const Error &reason)
@@ -496,7 +525,11 @@ void ObexClient::startAbort(const Error &reason)
 void ObexClient::finishCurrent(const Result<ObexPacket> &result)
 {
     m_timer->stop();
-    std::unique_ptr<Request> request = std::move(m_current);
+    complete(std::move(m_current), result);
+}
+
+void ObexClient::complete(std::unique_ptr<Request> request, const Result<ObexPacket> &result)
+{
     if (request->abortDone)
         request->abortDone(Result<void>());
     request->done(result);
@@ -532,17 +565,17 @@ void ObexClient::onTimeout()
 {
     if (!m_current)
         return;
-    qCWarning(lcProtocol) << "OBEX request timed out:" << Qt::hex << uint(m_current->opcode);
-    m_buffer.clear();
-    if (m_current->aborting) {
-        finishCurrent(m_current->abortError);
-        return;
-    }
-    if (m_current->endsObex) {
-        m_connected = false;
-        m_session->leaveObex();
-    }
-    finishCurrent(Error(ErrorCode::Timeout, QStringLiteral("No OBEX answer in time")));
+    qCWarning(lcProtocol) << "OBEX request timed out, ending the session:" << Qt::hex
+                          << uint(m_current->opcode);
+    // An OBEX answer names no request, so a late answer would be taken for
+    // the answer to the next one. The channel is not used again: the session
+    // ends, and with it every waiting request and any half received packet.
+    const Error timeout(ErrorCode::Timeout, QStringLiteral("No OBEX answer in time"));
+    std::unique_ptr<Request> request = std::move(m_current);
+    m_session->terminate(timeout);
+    if (request->abortDone)
+        request->abortDone(timeout);
+    request->done(request->aborting ? request->abortError : timeout);
 }
 
 } // namespace qpm::core::protocol

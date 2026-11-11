@@ -72,6 +72,12 @@ private Q_SLOTS:
     void socketUploadGoesOverTheSideChannel();
     void socketDownloadComesOverTheSideChannel();
     void lostConnectionFailsOpenRequests();
+    void timeoutEndsTheObexSession();
+    void connectionChangeRightAfterDisconnectEndsTheSessionCleanly();
+    void phoneExceptionKeepsOnlyItsClassName_data();
+    void phoneExceptionKeepsOnlyItsClassName();
+    void refusedConnectReportsItsMappedError_data();
+    void refusedConnectReportsItsMappedError();
 
 private:
     [[nodiscard]] bool connectTo(ObexClient::Target target);
@@ -398,6 +404,113 @@ void TestObexClient::lostConnectionFailsOpenRequests()
     QVERIFY(waitFor(queued));
     QCOMPARE(dump.result().error().code(), ErrorCode::ConnectionClosed);
     QCOMPARE(queued.result().error().code(), ErrorCode::ConnectionClosed);
+}
+
+// OBEX answers carry nothing that ties them to a request. After a timeout the
+// channel used to stay open: the next request went out and took the late
+// answer of the first one as its own.
+void TestObexClient::timeoutEndsTheObexSession()
+{
+    m_phone->config().unansweredObex.insert(QStringLiteral("telecom/pb/info.log"));
+    QVERIFY(connectTo(ObexClient::Target::IrmcSync));
+    QSignalSpy fatal(m_session.get(), &AtSession::fatal);
+
+    const QFuture<Result<ObexResponse>> silent =
+        m_obex->get(QStringLiteral("telecom/pb/info.log"), {}, std::chrono::milliseconds(200));
+    const QFuture<Result<ObexResponse>> next =
+        m_obex->get(QStringLiteral("telecom/pb/luid/cc.log"));
+    QVERIFY(waitFor(next));
+
+    QVERIFY(waitFor(silent));
+    QCOMPARE(silent.result().error().code(), ErrorCode::Timeout);
+    QCOMPARE(next.result().error().code(), ErrorCode::ConnectionClosed);
+    QVERIFY(m_session->isEnded());
+    QCOMPARE(fatal.count(), 1);
+    QCOMPARE(fatal.first().first().value<Error>().code(), ErrorCode::Timeout);
+    QVERIFY(!m_phone->receivedCommands().contains(
+        QStringLiteral("OBEX GET telecom/pb/luid/cc.log")));
+    QTRY_VERIFY(!m_transport->isOpen());
+}
+
+// The bytes behind the DISCONNECT answer go to the AT session when OBEX mode
+// ends. A connection-level line among them ended the session at once and
+// emptied the request list under the DISCONNECT that was still being handled,
+// which then was read through a null pointer.
+void TestObexClient::connectionChangeRightAfterDisconnectEndsTheSessionCleanly()
+{
+    QVERIFY(connectTo(ObexClient::Target::IrmcSync));
+    m_phone->config().afterDisconnect = QByteArrayLiteral("CONNECTION CHANGE\r\n");
+    QSignalSpy fatal(m_session.get(), &AtSession::fatal);
+
+    const QFuture<Result<void>> disconnected = m_obex->disconnectTarget();
+    QVERIFY(waitFor(disconnected));
+
+    QVERIFY(disconnected.result().hasValue());
+    QVERIFY(!m_obex->isConnected());
+    QTRY_COMPARE(fatal.count(), 1);
+    QCOMPARE(fatal.first().first().value<Error>().code(), ErrorCode::ConnectionClosed);
+    QVERIFY(m_session->isEnded());
+}
+
+void TestObexClient::phoneExceptionKeepsOnlyItsClassName_data()
+{
+    QTest::addColumn<QByteArray>("trace");
+    QTest::addColumn<QString>("kept");
+
+    QTest::newRow("message with a path")
+        << QByteArrayLiteral("java.io.FileNotFoundException: /sdcard/Private/holiday.jpg (No "
+                             "such file)\r\n\tat java.io.FileInputStream.open(Native Method)")
+        << QStringLiteral("java.io.FileNotFoundException");
+    QTest::newRow("class only") << QByteArrayLiteral("java.lang.IllegalStateException")
+                                << QStringLiteral("java.lang.IllegalStateException");
+    QTest::newRow("no class name")
+        << QByteArrayLiteral("/sdcard/Private/holiday.jpg: broken") << QString();
+}
+
+// The phone puts the Java exception into the answer, and its message can name
+// files on the phone. That text went into the error message and from there
+// into the log.
+void TestObexClient::phoneExceptionKeepsOnlyItsClassName()
+{
+    QFETCH(QByteArray, trace);
+    QFETCH(QString, kept);
+    QVERIFY(connectTo(ObexClient::Target::FileBrowser));
+    m_phone->setFailNext(0xD0, trace);
+
+    const QFuture<Result<ObexResponse>> answer = m_obex->get(QStringLiteral("a.jpg"));
+    QVERIFY(waitFor(answer));
+
+    QCOMPARE(answer.result().error().code(), ErrorCode::ProtocolError);
+    const QString message = answer.result().error().message();
+    QVERIFY2(message.contains(kept), qPrintable(message));
+    QVERIFY2(!message.contains(QStringLiteral("holiday")), qPrintable(message));
+    QVERIFY2(!message.contains(QStringLiteral("Native")), qPrintable(message));
+}
+
+void TestObexClient::refusedConnectReportsItsMappedError_data()
+{
+    QTest::addColumn<int>("response");
+    QTest::addColumn<int>("code");
+
+    QTest::newRow("unauthorized") << 0xC1 << int(ErrorCode::PermissionDenied);
+    QTest::newRow("forbidden") << 0xC3 << int(ErrorCode::AccessDenied);
+    QTest::newRow("not implemented") << 0xD1 << int(ErrorCode::NotSupported);
+}
+
+// The phone refuses a CONNECT with a bare response code. That answer was read
+// with the CONNECT layout, failed on its length and hid the code.
+void TestObexClient::refusedConnectReportsItsMappedError()
+{
+    QFETCH(int, response);
+    QFETCH(int, code);
+    m_phone->config().connectRefusal = quint8(response);
+
+    const QFuture<Result<void>> connected = m_obex->connectTarget(ObexClient::Target::IrmcSync);
+    QVERIFY(waitFor(connected));
+
+    QVERIFY(!connected.result().hasValue());
+    QCOMPARE(int(connected.result().error().code()), code);
+    QVERIFY(!m_obex->isConnected());
 }
 
 QTEST_GUILESS_MAIN(TestObexClient)

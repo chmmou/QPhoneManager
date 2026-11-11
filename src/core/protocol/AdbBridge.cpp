@@ -212,15 +212,26 @@ QFuture<Result<QByteArray>> AdbBridge::run(const QStringList &arguments)
             finish(Error(ErrorCode::LimitExceeded, QStringLiteral("adb printed too much")));
         }
     });
-    connect(process, &QProcess::readyReadStandardError, process, [state, process]() {
-        state->errors += process->readAllStandardError().left(limits::maxProcessOutputBytes);
-    });
+    // Only the first line of the error output is used. A program that keeps
+    // writing errors is stopped like one that floods its normal output.
+    const auto collectErrors = [state, process, finish](const QByteArray &chunk) {
+        if (state->done)
+            return;
+        state->errors += chunk.left(limits::maxProcessOutputBytes + 1 - state->errors.size());
+        if (state->errors.size() > limits::maxProcessOutputBytes) {
+            process->kill();
+            finish(Error(ErrorCode::LimitExceeded, QStringLiteral("adb printed too many errors")));
+        }
+    };
+    connect(process, &QProcess::readyReadStandardError, process,
+            [process, collectErrors]() { collectErrors(process->readAllStandardError()); });
     connect(process, &QProcess::errorOccurred, process, [finish](QProcess::ProcessError error) {
         if (error == QProcess::FailedToStart)
             finish(Error(ErrorCode::IoFailure, QStringLiteral("adb could not be started")));
     });
     connect(process, &QProcess::finished, process,
-            [state, process, finish](int exitCode, QProcess::ExitStatus status) {
+            [state, process, finish, collectErrors](int exitCode, QProcess::ExitStatus status) {
+                collectErrors(process->readAllStandardError());
                 state->output += process->readAllStandardOutput();
                 if (status != QProcess::NormalExit || exitCode != 0) {
                     finish(Error(ErrorCode::IoFailure, QStringLiteral("adb failed (exit %1): %2")

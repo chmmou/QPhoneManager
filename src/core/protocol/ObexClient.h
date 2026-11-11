@@ -48,8 +48,13 @@ struct ObexResponse
  * Response codes other than OK and Created map to ErrorCode values:
  * C1 PermissionDenied, C3 AccessDenied, C4 and E1 NotFound, C8 Timeout, C9
  * Rejected, D1 NotSupported, E0 IoFailure (phone storage full), everything else
- * ProtocolError. When the session ends, open requests fail with
+ * ProtocolError; of an internal error (D0) only the class name of the phone's
+ * exception is kept. When the session ends, open requests fail with
  * ErrorCode::ConnectionClosed.
+ *
+ * A request without an answer in time fails with ErrorCode::Timeout and ends
+ * the AT session through AtSession::terminate(), which closes the transport;
+ * the requests waiting behind it fail with ErrorCode::ConnectionClosed.
  *
  * The client does not own the session; the session must outlive it.
  */
@@ -177,6 +182,7 @@ private:
     void handlePacket(const QByteArray &bytes);
     void startAbort(const Error &reason);
     void finishCurrent(const Result<ObexPacket> &result);
+    void complete(std::unique_ptr<Request> request, const Result<ObexPacket> &result);
     void failAll(const Error &error);
     void onTimeout();
 

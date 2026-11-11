@@ -10,6 +10,8 @@
 #include <QTcpSocket>
 #include <QTimer>
 
+#include <utility>
+
 namespace qpm::core::protocol {
 
 namespace {
@@ -74,6 +76,10 @@ PhoneConnection::~PhoneConnection()
     // The members go in reverse order of declaration: OBEX client, session,
     // transport. None of their signals may reach this object meanwhile.
     ++m_generation;
+    // OBEX work that still waits fails now. New work that a continuation
+    // starts meanwhile is turned away, because the state shows no link.
+    m_state = State::Disconnected;
+    failObexJobs();
     if (m_obex)
         m_obex->disconnect(this);
     if (m_session)
@@ -213,12 +219,19 @@ quint16 PhoneConnection::listeningPort() const
 
 void PhoneConnection::submitPin(const QString &pin)
 {
-    if (!m_pinPending || !m_session)
+    if (!m_pinPending || m_pinInFlight || !m_session)
         return;
+    m_pinInFlight = true;
     const quint64 generation = m_generation;
-    m_session->send(QStringLiteral("AT*PIN=") + pinHash(pin))
+    m_session->send(QStringLiteral("AT*PIN=") + pinHash(pin), m_options.commandTimeout)
         .then(this, [this, generation](const AtReply &reply) {
+            // A client that has seen too many wrong PINs closes the
+            // connection instead of answering; onLost() needs to see that
+            // the PIN is still in flight then.
             if (generation != m_generation || reply.status == AtReply::Status::Closed)
+                return;
+            m_pinInFlight = false;
+            if (lostOnTimeout(reply))
                 return;
             std::optional<PinStatus> pinStatus;
             for (const QString &line : reply.lines) {
@@ -261,20 +274,24 @@ void PhoneConnection::disconnectFromPhone()
 
 void PhoneConnection::refreshStatus()
 {
-    if (m_state != State::Ready || !m_session)
+    if (m_state != State::Ready || !m_session || m_statusPending)
         return;
+    m_statusPending = true;
     const quint64 generation = m_generation;
     const QStringList commands = {QStringLiteral("AT+CBCEX"), QStringLiteral("AT+CSQ"),
                                   QStringLiteral("AT*ECPU")};
     for (qsizetype i = 0; i < commands.size(); ++i) {
         const bool last = i == commands.size() - 1;
-        m_session->send(commands.at(i)).then(this, [this, generation, last](const AtReply &reply) {
-            if (generation != m_generation)
-                return;
-            handleReply(reply);
-            if (last)
-                Q_EMIT statusUpdated(m_status);
-        });
+        m_session->send(commands.at(i), m_options.commandTimeout)
+            .then(this, [this, generation, last](const AtReply &reply) {
+                if (generation != m_generation || lostOnTimeout(reply))
+                    return;
+                handleReply(reply);
+                if (last) {
+                    m_statusPending = false;
+                    Q_EMIT statusUpdated(m_status);
+                }
+            });
     }
 }
 
@@ -306,6 +323,7 @@ void PhoneConnection::start(std::unique_ptr<Transport> transport, Method method)
     m_identity = {};
     m_status = {};
     m_pinPending = false;
+    m_pinInFlight = false;
     m_transport = std::move(transport);
     m_session = std::make_unique<AtSession>(m_transport.get());
     m_obex = std::make_unique<ObexClient>(m_session.get());
@@ -324,41 +342,43 @@ void PhoneConnection::beginHandshake()
 {
     setState(State::Authenticating);
     const quint64 generation = m_generation;
-    m_session->send(QStringLiteral("AT+CGSN")).then(this, [this, generation](const AtReply &reply) {
-        if (generation != m_generation || reply.status == AtReply::Status::Closed)
-            return;
-        const QString deviceId = reply.lines.value(0).trimmed();
-        if (reply.status != AtReply::Status::Ok || deviceId.isEmpty() ||
-            deviceId.size() > maxDeviceIdLength) {
-            onLost(Error(ErrorCode::ProtocolError,
-                         QStringLiteral("The phone sent no usable device id (status %1)")
-                             .arg(static_cast<int>(reply.status))));
-            return;
-        }
-        m_identity.deviceId = deviceId;
-    });
-    m_session->send(QStringLiteral("AT*PIN?")).then(this, [this, generation](const AtReply &reply) {
-        if (generation != m_generation || reply.status == AtReply::Status::Closed)
-            return;
-        std::optional<PinStatus> pinStatus;
-        for (const QString &line : reply.lines) {
-            pinStatus = parsePinLine(line);
-            if (pinStatus)
-                break;
-        }
-        if (reply.status != AtReply::Status::Ok || !pinStatus) {
-            onLost(Error(ErrorCode::ProtocolError,
-                         QStringLiteral("The phone sent no PIN state (status %1)")
-                             .arg(static_cast<int>(reply.status))));
-            return;
-        }
-        if (pinStatus->state == PinStatus::State::AccessProtected) {
-            m_pinPending = true;
-            Q_EMIT pinRequired(pinStatus->remainingTries);
-            return;
-        }
-        continueHandshake();
-    });
+    m_session->send(QStringLiteral("AT+CGSN"), m_options.commandTimeout)
+        .then(this, [this, generation](const AtReply &reply) {
+            if (generation != m_generation || reply.status == AtReply::Status::Closed)
+                return;
+            const QString deviceId = reply.lines.value(0).trimmed();
+            if (reply.status != AtReply::Status::Ok || deviceId.isEmpty() ||
+                deviceId.size() > maxDeviceIdLength) {
+                onLost(Error(ErrorCode::ProtocolError,
+                             QStringLiteral("The phone sent no usable device id (status %1)")
+                                 .arg(static_cast<int>(reply.status))));
+                return;
+            }
+            m_identity.deviceId = deviceId;
+        });
+    m_session->send(QStringLiteral("AT*PIN?"), m_options.commandTimeout)
+        .then(this, [this, generation](const AtReply &reply) {
+            if (generation != m_generation || reply.status == AtReply::Status::Closed)
+                return;
+            std::optional<PinStatus> pinStatus;
+            for (const QString &line : reply.lines) {
+                pinStatus = parsePinLine(line);
+                if (pinStatus)
+                    break;
+            }
+            if (reply.status != AtReply::Status::Ok || !pinStatus) {
+                onLost(Error(ErrorCode::ProtocolError,
+                             QStringLiteral("The phone sent no PIN state (status %1)")
+                                 .arg(static_cast<int>(reply.status))));
+                return;
+            }
+            if (pinStatus->state == PinStatus::State::AccessProtected) {
+                m_pinPending = true;
+                Q_EMIT pinRequired(pinStatus->remainingTries);
+                return;
+            }
+            continueHandshake();
+        });
 }
 
 void PhoneConnection::continueHandshake()
@@ -380,18 +400,16 @@ void PhoneConnection::continueHandshake()
     const quint64 generation = m_generation;
     for (qsizetype i = 0; i < commands.size(); ++i) {
         const bool last = i == commands.size() - 1;
-        m_session->send(commands.at(i)).then(this, [this, generation, last](const AtReply &reply) {
-            if (generation != m_generation || reply.status == AtReply::Status::Closed)
-                return;
-            if (reply.status == AtReply::Status::Timeout) {
-                onLost(Error(ErrorCode::Timeout,
-                             QStringLiteral("The phone did not answer %1").arg(reply.command)));
-                return;
-            }
-            handleReply(reply);
-            if (last)
-                finishHandshake();
-        });
+        m_session->send(commands.at(i), m_options.commandTimeout)
+            .then(this, [this, generation, last](const AtReply &reply) {
+                if (generation != m_generation || reply.status == AtReply::Status::Closed ||
+                    lostOnTimeout(reply)) {
+                    return;
+                }
+                handleReply(reply);
+                if (last)
+                    finishHandshake();
+            });
     }
 }
 
@@ -459,6 +477,15 @@ void PhoneConnection::handleReply(const AtReply &reply)
     }
 }
 
+bool PhoneConnection::lostOnTimeout(const AtReply &reply)
+{
+    if (reply.status != AtReply::Status::Timeout)
+        return false;
+    onLost(Error(ErrorCode::Timeout,
+                 QStringLiteral("The phone did not answer %1").arg(reply.command)));
+    return true;
+}
+
 void PhoneConnection::handleUnsolicited(const QString &line)
 {
     static constexpr QLatin1StringView alivePrefix("*ALIVE:");
@@ -478,7 +505,7 @@ void PhoneConnection::onLost(const Error &error)
     if (m_state == State::Disconnected || m_state == State::Lost)
         return;
     Error reported = error;
-    if (m_pinPending && error.code() == ErrorCode::ConnectionClosed) {
+    if (m_pinInFlight && error.code() == ErrorCode::ConnectionClosed) {
         reported = Error(ErrorCode::WrongPin,
                          QStringLiteral("The phone stopped after too many wrong PINs"));
     }
@@ -497,12 +524,9 @@ void PhoneConnection::teardown()
     ++m_generation;
     m_statusTimer->stop();
     m_pinPending = false;
-    m_obexRunning = false;
-
-    std::deque<ObexJob> jobs;
-    jobs.swap(m_obexJobs);
-    for (const ObexJob &job : jobs)
-        job.fail(closedError());
+    m_pinInFlight = false;
+    m_statusPending = false;
+    failObexJobs();
 
     // The objects may be in the middle of emitting the signal that led here,
     // so they are handed to the event loop for deletion instead of being
@@ -520,6 +544,21 @@ void PhoneConnection::teardown()
         m_transport->close();
         m_transport.release()->deleteLater();
     }
+}
+
+void PhoneConnection::failObexJobs()
+{
+    m_obexRunning = false;
+    const std::function<void()> deliver = std::exchange(m_pendingObexDelivery, {});
+    const std::function<void(const Error &)> failRunning = std::exchange(m_runningObexFail, {});
+    std::deque<ObexJob> jobs;
+    jobs.swap(m_obexJobs);
+    if (deliver)
+        deliver();
+    else if (failRunning)
+        failRunning(closedError());
+    for (const ObexJob &job : jobs)
+        job.fail(closedError());
 }
 
 void PhoneConnection::setState(State state)
@@ -547,19 +586,27 @@ void PhoneConnection::runNextObexJob()
     ObexJob job = std::move(m_obexJobs.front());
     m_obexJobs.pop_front();
     m_obexRunning = true;
+    m_runningObexFail = job.fail;
     setState(State::Busy);
 
     const quint64 generation = m_generation;
     // Ends the OBEX session and hands the result over once the phone is back
-    // in AT mode.
+    // in AT mode. When the connection ends meanwhile, failObexJobs() hands it
+    // over instead.
     const auto finish = [this, generation](std::function<void()> deliver) {
         if (generation != m_generation || m_session->isEnded()) {
             deliver();
             return;
         }
-        m_obex->disconnectTarget().then(this, [this, generation, deliver](const Result<void> &) {
-            deliver();
-            if (generation == m_generation && !m_session->isEnded())
+        m_runningObexFail = {};
+        m_pendingObexDelivery = std::move(deliver);
+        m_obex->disconnectTarget().then(this, [this, generation](const Result<void> &) {
+            if (generation != m_generation)
+                return;
+            const std::function<void()> pending = std::exchange(m_pendingObexDelivery, {});
+            if (pending)
+                pending();
+            if (!m_session->isEnded())
                 afterObex();
         });
     };
@@ -590,13 +637,14 @@ void PhoneConnection::afterObex()
     const quint64 generation = m_generation;
     for (qsizetype i = 0; i < commands.size(); ++i) {
         const bool last = i == commands.size() - 1;
-        m_session->send(commands.at(i)).then(this, [this, generation, last](const AtReply &reply) {
-            if (generation != m_generation)
-                return;
-            handleReply(reply);
-            if (last)
-                Q_EMIT statusUpdated(m_status);
-        });
+        m_session->send(commands.at(i), m_options.commandTimeout)
+            .then(this, [this, generation, last](const AtReply &reply) {
+                if (generation != m_generation || lostOnTimeout(reply))
+                    return;
+                handleReply(reply);
+                if (last)
+                    Q_EMIT statusUpdated(m_status);
+            });
     }
     runNextObexJob();
 }

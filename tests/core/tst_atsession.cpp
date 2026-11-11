@@ -31,6 +31,7 @@ private Q_SLOTS:
     void linesBeforeErrorDetermineTheStatus();
     void longTextCommandGetsATrailingComma();
     void silentPhoneTimesOutAndTheNextCommandStillWorks();
+    void aliveLinesDoNotKeepAnUnansweredCommandAlive();
     void cancelledCommandIsNeverSent();
     void accessDeniedEndsTheSession();
     void droppedConnectionCompletesOpenCommands();
@@ -179,6 +180,24 @@ void TestAtSession::silentPhoneTimesOutAndTheNextCommandStillWorks()
     QVERIFY(waitFor(next));
     QCOMPARE(slow.result().status, AtReply::Status::Timeout);
     QCOMPARE(next.result().status, AtReply::Status::Ok);
+}
+
+// The phone sends "*ALIVE" every ten seconds, and the command timeout is 15
+// seconds. Every received chunk used to restart that timeout, so a command the
+// phone never answered waited for good on a link that carried keep-alives.
+void TestAtSession::aliveLinesDoNotKeepAnUnansweredCommandAlive()
+{
+    m_phone->config().unanswered.insert(QStringLiteral("AT+SLOW"));
+    m_phone->config().alivePeriod = std::chrono::milliseconds(50);
+    QVERIFY(open());
+    QSignalSpy unsolicited(m_session.get(), &AtSession::unsolicited);
+
+    const QFuture<AtReply> slow =
+        m_session->send(QStringLiteral("AT+SLOW"), std::chrono::milliseconds(300));
+    QVERIFY(waitFor(slow, 3000));
+
+    QCOMPARE(slow.result().status, AtReply::Status::Timeout);
+    QVERIFY(unsolicited.count() >= 2);
 }
 
 void TestAtSession::cancelledCommandIsNeverSent()

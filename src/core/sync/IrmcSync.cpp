@@ -6,6 +6,7 @@
 
 #include <QCryptographicHash>
 #include <QHash>
+#include <QPointer>
 #include <QPromise>
 #include <QtConcurrentRun>
 
@@ -89,7 +90,7 @@ Error protocolError(const QString &what)
 
 struct IrmcSync::Job
 {
-    ObexClient *obex = nullptr;
+    QPointer<ObexClient> obex;
     QPromise<Result<SyncDelta>> promise;
     std::optional<quint64> storedCounter;
     quint64 currentCounter = 0;
@@ -110,6 +111,16 @@ struct IrmcSync::Job
         qCWarning(lcSync) << "Sync failed:" << error.message();
         promise.addResult(Result<SyncDelta>(error));
         promise.finish();
+    }
+
+    /// The OBEX client, or null after failing the job when the client is gone.
+    ObexClient *clientOrFail()
+    {
+        if (!obex) {
+            fail(Error(ErrorCode::ConnectionClosed,
+                       QStringLiteral("The OBEX session ended during the sync")));
+        }
+        return obex.data();
     }
 };
 
@@ -274,7 +285,10 @@ QString IrmcSync::path(const QString &relative) const
 
 void IrmcSync::readInfo(const std::shared_ptr<Job> &job)
 {
-    job->obex->get(path(QStringLiteral("info.log")), {}, shortTimeout)
+    ObexClient *obex = job->clientOrFail();
+    if (!obex)
+        return;
+    obex->get(path(QStringLiteral("info.log")), {}, shortTimeout)
         .then(this, [this, job](const Result<ObexResponse> &info) {
             if (job->stopIfCanceled())
                 return;
@@ -282,8 +296,11 @@ void IrmcSync::readInfo(const std::shared_ptr<Job> &job)
                 job->fail(info.error());
                 return;
             }
+            ObexClient *obex = job->clientOrFail();
+            if (!obex)
+                return;
             // The phone only updates its change log during initsync.
-            job->obex->get(path(QStringLiteral("initsync")), {}, longTimeout)
+            obex->get(path(QStringLiteral("initsync")), {}, longTimeout)
                 .then(this, [this, job](const Result<ObexResponse> &initsync) {
                     if (job->stopIfCanceled())
                         return;
@@ -295,7 +312,10 @@ void IrmcSync::readInfo(const std::shared_ptr<Job> &job)
                         readCounter(job);
                         return;
                     }
-                    job->obex->get(path(QStringLiteral("metadata.xml")), {}, shortTimeout)
+                    ObexClient *obex = job->clientOrFail();
+                    if (!obex)
+                        return;
+                    obex->get(path(QStringLiteral("metadata.xml")), {}, shortTimeout)
                         .then(this, [this, job](const Result<ObexResponse> &metadata) {
                             if (job->stopIfCanceled())
                                 return;
@@ -312,7 +332,10 @@ void IrmcSync::readInfo(const std::shared_ptr<Job> &job)
 
 void IrmcSync::readCounter(const std::shared_ptr<Job> &job)
 {
-    job->obex->get(path(QStringLiteral("luid/cc.log")), {}, shortTimeout)
+    ObexClient *obex = job->clientOrFail();
+    if (!obex)
+        return;
+    obex->get(path(QStringLiteral("luid/cc.log")), {}, shortTimeout)
         .then(this, [this, job](const Result<ObexResponse> &response) {
             if (job->stopIfCanceled())
                 return;
@@ -339,8 +362,11 @@ void IrmcSync::readCounter(const std::shared_ptr<Job> &job)
 
 void IrmcSync::readChangeLog(const std::shared_ptr<Job> &job)
 {
+    ObexClient *obex = job->clientOrFail();
+    if (!obex)
+        return;
     const QString name = path(QStringLiteral("luid/%1.log").arg(*job->storedCounter));
-    job->obex->get(name, {}, shortTimeout)
+    obex->get(name, {}, shortTimeout)
         .then(this, [this, job](const Result<ObexResponse> &response) {
             if (job->stopIfCanceled())
                 return;
@@ -383,10 +409,13 @@ void IrmcSync::fetchNext(const std::shared_ptr<Job> &job)
         applyAndFinish(job);
         return;
     }
+    ObexClient *obex = job->clientOrFail();
+    if (!obex)
+        return;
     const quint32 luid = job->toFetch.takeFirst();
     const QString name =
         path(QStringLiteral("luid/%1.%2").arg(luidText(luid), extension(m_domain)));
-    job->obex->get(name, {}, shortTimeout)
+    obex->get(name, {}, shortTimeout)
         .then(this, [this, job, luid](const Result<ObexResponse> &response) {
             if (job->stopIfCanceled())
                 return;
@@ -418,12 +447,15 @@ void IrmcSync::fetchNext(const std::shared_ptr<Job> &job)
 
 void IrmcSync::loadAll(const std::shared_ptr<Job> &job)
 {
+    ObexClient *obex = job->clientOrFail();
+    if (!obex)
+        return;
     job->delta.full = true;
     job->delta.deletes.clear();
     job->toFetch.clear();
     const QString name =
         QStringLiteral("telecom/%1.%2").arg(areaName(m_domain), extension(m_domain));
-    job->obex->get(name, {}, longTimeout)
+    obex->get(name, {}, longTimeout)
         .then(this, [this, job](const Result<ObexResponse> &response) {
             if (job->stopIfCanceled())
                 return;
@@ -443,6 +475,7 @@ void IrmcSync::loadAll(const std::shared_ptr<Job> &job)
                 return;
             }
             QtConcurrent::run([dump, domain]() {
+                qCDebug(lcSync) << "Splitting a dump of" << dump.size() << "bytes";
                 return splitObjects(dump, domain);
             }).then(this, [this, job](const Result<QList<RawObject>> &objects) {
                 if (job->stopIfCanceled())
@@ -465,9 +498,12 @@ void IrmcSync::finishFullLoad(const std::shared_ptr<Job> &job, const QList<RawOb
         }
         job->delta.upserts.append(object);
     }
+    ObexClient *obex = job->clientOrFail();
+    if (!obex)
+        return;
     // Reading the dump is what fills the phone's change table, so the counter
     // read before it can be behind.
-    job->obex->get(path(QStringLiteral("luid/cc.log")), {}, shortTimeout)
+    obex->get(path(QStringLiteral("luid/cc.log")), {}, shortTimeout)
         .then(this, [this, job](const Result<ObexResponse> &response) {
             if (job->stopIfCanceled())
                 return;

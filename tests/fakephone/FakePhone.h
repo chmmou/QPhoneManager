@@ -18,6 +18,7 @@
 
 class QTcpServer;
 class QTcpSocket;
+class QTimer;
 
 namespace qpm::core::protocol {
 struct ObexPacket;
@@ -79,6 +80,16 @@ struct FakePhoneConfig
     QHash<QString, QList<QByteArray>> scriptedReplies;
     /// AT commands that get no answer at all.
     QSet<QString> unanswered;
+    /// Period of the unsolicited "*ALIVE" line in AT mode; zero sends none.
+    std::chrono::milliseconds alivePeriod{0};
+    /// Names of OBEX requests that get no answer at all.
+    QSet<QString> unansweredObex;
+    /// Response code sent to every OBEX CONNECT instead of accepting it; zero accepts.
+    quint8 connectRefusal = 0;
+    /// Bytes written right behind the answer to DISCONNECT, in the same write.
+    QByteArray afterDisconnect;
+    /// Name of an OBEX GET; the connection is closed right after its last answer packet.
+    QString dropAfterGet;
 };
 
 /**
@@ -136,8 +147,15 @@ public:
     void addFile(const QString &path, const QByteArray &data, const QDateTime &modified);
     [[nodiscard]] std::optional<FakeFile> file(const QString &path) const;
 
-    /// Answers the next OBEX request other than CONNECT and DISCONNECT with `code`.
-    void setFailNext(quint8 code) { m_failNext = code; }
+    /**
+     * Answers the next OBEX request other than CONNECT and DISCONNECT with
+     * `code`, and with `appParameters` as App-Parameters when not empty.
+     */
+    void setFailNext(quint8 code, const QByteArray &appParameters = {})
+    {
+        m_failNext = code;
+        m_failNextAppParameters = appParameters;
+    }
 
     /// Writes an unsolicited line in AT mode.
     void sendUnsolicited(const QByteArray &line);
@@ -166,6 +184,7 @@ private:
     void sendFirst(const QByteArray &packet);
     void sendBody(const QByteArray &body);
     void sendNextChunk();
+    void endOfStream();
     void recordChange(const QString &area, char type, quint32 luid);
     void finishTransfer();
     [[nodiscard]] QString resolve(const QString &name) const;
@@ -175,6 +194,7 @@ private:
 
     FakePhoneConfig m_config;
     QTcpServer *m_server = nullptr;
+    QTimer *m_aliveTimer = nullptr;
     QPointer<QTcpSocket> m_socket;
     QByteArray m_buffer;
     QStringList m_received;
@@ -183,9 +203,11 @@ private:
     QMap<QString, FakeFile> m_files;
     QSet<QString> m_folders;
     std::optional<quint8> m_failNext;
+    QByteArray m_failNextAppParameters;
     int m_wrongPins = 0;
     bool m_authenticated = false;
     bool m_obexMode = false;
+    bool m_dropAfterStream = false;
     QByteArray m_target;
     QString m_currentFolder;
     quint16 m_maxPacket = 0xFFFF;

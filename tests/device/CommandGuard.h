@@ -14,9 +14,19 @@ namespace qpm::test {
 /**
  * A transport for tests against a real phone that refuses to pass on anything
  * that sends a text message or places, answers or ends a call: ATD, ATA, ATH,
- * AT+CHUP, every AT+CMGS= except the probe AT+CMGS=?, AT*NOTIACTION, and an
- * OBEX PUT below telecom/msg/ other than the setflags switch, which would
- * schedule a message.
+ * AT+CHUP, every AT+CMGS= except the probe AT+CMGS=?, AT*NOTIACTION, an OBEX
+ * PUT whose name contains "/msg" other than telecom/msg/setflags, since the
+ * phone hands such a PUT to its message handler, and an OBEX PUT it cannot
+ * decode. Each line of a frame is checked after trimming it the way the phone
+ * does, without regard to case.
+ *
+ * Two exceptions come from the environment. AT+CMGS=<number>,<text>,... and
+ * AT+CMGS=<number>,,<flags> pass when <number> is the one in QPM_TEST_SMS_TO,
+ * and ATD<number>; or ATD<number>;,<sim> passes when <number> is the one in
+ * QPM_TEST_CALL_TO. Spaces do not count, and +49 equals a leading 0. A value
+ * that is not a full number, with a leading 0 or a + and at least eight
+ * characters, counts as unset. While a variable is unset, its commands stay
+ * refused. Neither number ever appears in a refusal reason or in the log.
  *
  * A refused frame is not written. The guard records the reason, reports
  * ErrorCode::Rejected through failed() and closes the connection, so the
@@ -40,10 +50,16 @@ public:
     /// The reasons of all refused frames, in order.
     [[nodiscard]] QStringList blocked() const { return m_blocked; }
 
-    /// Returns why `command` must not reach a phone, or nothing when it may.
+    /**
+     * Returns why the AT command `command` must not reach a phone, or nothing
+     * when it may. Reads the allowed numbers from the environment on each call.
+     */
     [[nodiscard]] static std::optional<QString> blockReason(const QString &command);
 
-    /// Same for a frame as written to the transport: an AT line or an OBEX packet.
+    /**
+     * Same for a frame as written to the transport: one or more AT lines or
+     * an OBEX packet.
+     */
     [[nodiscard]] static std::optional<QString> blockReasonForFrame(const QByteArray &frame);
 
 private:

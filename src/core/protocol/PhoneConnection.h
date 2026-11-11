@@ -100,6 +100,12 @@ public:
         std::chrono::milliseconds statusInterval = std::chrono::seconds(30);
         /// Delay before connecting again after Lost; zero turns reconnecting off.
         std::chrono::milliseconds reconnectDelay{0};
+        /**
+         * How long the phone may leave a command of this connection
+         * unanswered. A command without an answer in this time means the
+         * link is lost.
+         */
+        std::chrono::milliseconds commandTimeout = std::chrono::seconds(15);
     };
 
     explicit PhoneConnection(QObject *parent = nullptr);
@@ -137,13 +143,22 @@ public:
     [[nodiscard]] bool isListening() const;
     [[nodiscard]] quint16 listeningPort() const;
 
-    /// Sends the PIN after pinRequired(); ignored at any other time.
+    /**
+     * Sends the PIN after pinRequired(); ignored at any other time and while
+     * an earlier PIN still waits for its answer.
+     */
     void submitPin(const QString &pin);
 
     /// Ends the connection on request; no reconnect follows.
     void disconnectFromPhone();
 
-    /// Asks for battery, signal and processor load now; statusUpdated() follows.
+    /**
+     * Asks for battery, signal and processor load now; statusUpdated()
+     * follows. While an earlier round still waits for its answers, no new
+     * one starts and the earlier one's statusUpdated() is the one that
+     * follows. A command of the round that gets no answer within
+     * Options::commandTimeout counts as a lost link.
+     */
     void refreshStatus();
 
     /// The AT session while Ready or Busy, otherwise null.
@@ -162,8 +177,12 @@ public:
      * after its future ends, and the status is asked for again afterwards,
      * since the phone drops its own messages during OBEX. The returned future
      * ends after the disconnect. Fails with ErrorCode::ConnectionClosed when
-     * the connection ends first. `work` gets a client that is valid until its
-     * future ends.
+     * the connection ends or this object is destroyed first, also while `work`
+     * still runs; what `work` delivers later is then dropped.
+     *
+     * `work` gets a client that stays valid until its future ends or the
+     * connection ends, whichever comes first. Work that can outlive the
+     * connection holds the client in a QPointer.
      */
     template <typename T>
     QFuture<Result<T>> withObex(ObexClient::Target target,
@@ -196,8 +215,20 @@ private:
     void finishHandshake();
     void handleUnsolicited(const QString &line);
     void handleReply(const AtReply &reply);
+    /**
+     * A command without an answer means that the phone or the link is gone:
+     * on status Timeout the connection counts as lost, so that reconnecting
+     * can start, and true is returned.
+     */
+    bool lostOnTimeout(const AtReply &reply);
     void onLost(const Error &error);
     void teardown();
+    /**
+     * Ends the running and the queued OBEX jobs. The running job gets the
+     * result of its work when only the disconnect was still open, and fails
+     * with ErrorCode::ConnectionClosed otherwise.
+     */
+    void failObexJobs();
     void setState(State state);
     void forwardNextPort(QList<quint16> phonePorts);
     void enqueueObexJob(ObexJob job);
@@ -217,8 +248,15 @@ private:
     DeviceStatus m_status;
     quint64 m_generation = 0;
     bool m_pinPending = false;
+    /// An AT*PIN= is on its way and its answer has not arrived.
+    bool m_pinInFlight = false;
+    bool m_statusPending = false;
     bool m_obexRunning = false;
     std::deque<ObexJob> m_obexJobs;
+    /// Fails the running OBEX job while its work runs.
+    std::function<void(const Error &)> m_runningObexFail;
+    /// Hands over the result of the running OBEX job while its session is disconnected.
+    std::function<void()> m_pendingObexDelivery;
     QTcpServer *m_server = nullptr;
     QTimer *m_statusTimer = nullptr;
     QTimer *m_reconnectTimer = nullptr;
@@ -235,28 +273,29 @@ QFuture<Result<T>> PhoneConnection::withObex(ObexClient::Target target,
     auto promise = std::make_shared<QPromise<Result<T>>>();
     promise->start();
     QFuture<Result<T>> future = promise->future();
+    // The connection can fail the job while the work still runs, and the
+    // work ends later; the first result is kept.
+    const auto settle = [promise](const Result<T> &result) {
+        if (promise->future().isFinished())
+            return;
+        promise->addResult(result);
+        promise->finish();
+    };
 
     ObexJob job;
     job.target = target;
-    job.fail = [promise](const Error &error) {
-        promise->addResult(Result<T>(error));
-        promise->finish();
-    };
-    job.run = [this, promise, work = std::move(work)](
+    job.fail = [settle](const Error &error) { settle(Result<T>(error)); };
+    job.run = [this, settle, work = std::move(work)](
                   ObexClient &obex, std::function<void(std::function<void()>)> done) {
         work(obex)
             .then(this,
-                  [promise, done](const Result<T> &result) {
-                      done([promise, result]() {
-                          promise->addResult(result);
-                          promise->finish();
-                      });
+                  [settle, done](const Result<T> &result) {
+                      done([settle, result]() { settle(result); });
                   })
-            .onCanceled(this, [promise, done]() {
-                done([promise]() {
-                    promise->addResult(Result<T>(Error(
-                        ErrorCode::Cancelled, QStringLiteral("The OBEX work was cancelled"))));
-                    promise->finish();
+            .onCanceled(this, [settle, done]() {
+                done([settle]() {
+                    settle(Result<T>(Error(ErrorCode::Cancelled,
+                                           QStringLiteral("The OBEX work was cancelled"))));
                 });
             });
     };
