@@ -45,7 +45,8 @@ struct IrmcChangeLog
  * adapter, which keeps the new counter with the data, and returned.
  *
  * Lives in the main thread. A full dump above 64 KiB is split into objects on
- * a worker thread. The store adapter must outlive this object.
+ * a worker thread. The store adapter must outlive this object; the OBEX client
+ * need not, see pull().
  */
 class IrmcSync : public QObject
 {
@@ -55,10 +56,14 @@ public:
     IrmcSync(IrmcDomain domain, SyncStoreAdapter *store, QObject *parent = nullptr);
 
     /**
-     * Runs one pull through `obex`, which must be connected to IRMC-SYNC and
-     * must stay so until the future ends. Fails with the OBEX error, with
-     * ErrorCode::ProtocolError for a malformed answer, or with the store's
-     * error; in every failure case nothing reaches the store.
+     * Runs one pull through `obex`, which must be connected to IRMC-SYNC.
+     * Fails with the OBEX error, with ErrorCode::ProtocolError for a
+     * malformed answer, or with the store's error; in every failure case
+     * nothing reaches the store.
+     *
+     * `obex` may be deleted before the pull is done. The future then fails
+     * with ErrorCode::ConnectionClosed, or ends cancelled when a request of
+     * the pull was still open on the deleted client.
      */
     QFuture<Result<SyncDelta>> pull(qpm::core::protocol::ObexClient &obex);
 

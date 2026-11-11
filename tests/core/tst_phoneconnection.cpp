@@ -5,6 +5,7 @@
 
 #include <QCryptographicHash>
 #include <QFile>
+#include <QPromise>
 #include <QSignalSpy>
 #include <QTcpServer>
 #include <QTemporaryDir>
@@ -78,6 +79,12 @@ private Q_SLOTS:
     void obexWorkFailsWhenTheConnectionDrops();
     void phoneCanConnectToThisComputer();
     void usbConnectionGoesThroughForwardedPorts();
+    void runningObexWorkFailsWhenTheConnectionEnds();
+    void runningObexWorkFailsWhenTheConnectionIsDestroyed();
+    void unansweredStatusPollCountsAsLostLink();
+    void statusPollsDoNotPileUpBehindSlowAnswers();
+    void droppedLinkBeforeAnyPinIsNoWrongPin();
+    void pinIsSentOnceWhileItsAnswerIsPending();
 
 private:
     [[nodiscard]] bool reachReady(PhoneConnection &connection);
@@ -417,6 +424,125 @@ void TestPhoneConnection::usbConnectionGoesThroughForwardedPorts()
     QVERIFY(invoked.startsWith("start-server\n"));
     QVERIFY(invoked.contains("-s emulator-5554 shell am start -n "
                              "com.fjsoft.myphoneexplorer.client/.MainActivity --ez adb true\n"));
+}
+
+// OBEX work that still ran when the connection ended kept its future open for
+// good, although its OBEX client was already handed over for deletion.
+void TestPhoneConnection::runningObexWorkFailsWhenTheConnectionEnds()
+{
+    QVERIFY(reachReady(*m_connection));
+    QPromise<Result<void>> endless;
+    endless.start();
+    bool started = false;
+
+    const QFuture<Result<void>> work = m_connection->withObex<void>(
+        ObexClient::Target::IrmcSync, [&endless, &started](ObexClient &) {
+            started = true;
+            return endless.future();
+        });
+    QTRY_VERIFY(started);
+    m_connection->disconnectFromPhone();
+
+    QVERIFY(waitFor(work, 2000));
+    QCOMPARE(work.result().error().code(), ErrorCode::ConnectionClosed);
+    endless.addResult(Result<void>());
+    endless.finish();
+}
+
+// Destroying the connection while OBEX work ran left that work's future
+// without a result.
+void TestPhoneConnection::runningObexWorkFailsWhenTheConnectionIsDestroyed()
+{
+    QVERIFY(reachReady(*m_connection));
+    QPromise<Result<void>> endless;
+    endless.start();
+    bool started = false;
+
+    const QFuture<Result<void>> work = m_connection->withObex<void>(
+        ObexClient::Target::IrmcSync, [&endless, &started](ObexClient &) {
+            started = true;
+            return endless.future();
+        });
+    QTRY_VERIFY(started);
+    m_connection.reset();
+
+    QVERIFY(work.isFinished());
+    QVERIFY(!work.isCanceled());
+    QCOMPARE(work.result().error().code(), ErrorCode::ConnectionClosed);
+    endless.finish();
+}
+
+// A status poll that got no answer was dropped without a word, so a dead link
+// stayed Ready and was never reconnected.
+void TestPhoneConnection::unansweredStatusPollCountsAsLostLink()
+{
+    PhoneConnection::Options options;
+    options.statusInterval = std::chrono::milliseconds(50);
+    options.commandTimeout = std::chrono::milliseconds(300);
+    options.reconnectDelay = std::chrono::milliseconds(50);
+    m_connection->setOptions(options);
+    QVERIFY(reachReady(*m_connection));
+    QSignalSpy failed(m_connection.get(), &PhoneConnection::failed);
+    QSignalSpy states(m_connection.get(), &PhoneConnection::stateChanged);
+    m_phone->config().unanswered.insert(QStringLiteral("AT+CBCEX"));
+
+    QVERIFY(failed.wait());
+    QCOMPARE(failed.first().first().value<Error>().code(), ErrorCode::Timeout);
+    QCOMPARE(states.first().first().value<State>(), State::Lost);
+    m_phone->config().unanswered.clear();
+    QTRY_COMPARE_WITH_TIMEOUT(m_connection->state(), State::Ready, connectTimeoutMs);
+}
+
+// Each tick of the status timer queued a new round of three commands, also
+// while the previous round still waited for its answers. On a slow link the
+// rounds piled up, and every other command waited behind all of them.
+void TestPhoneConnection::statusPollsDoNotPileUpBehindSlowAnswers()
+{
+    PhoneConnection::Options options;
+    options.statusInterval = std::chrono::milliseconds(10);
+    m_connection->setOptions(options);
+    QVERIFY(reachReady(*m_connection));
+    QSignalSpy status(m_connection.get(), &PhoneConnection::statusUpdated);
+    m_phone->config().replyDelay = std::chrono::milliseconds(100);
+
+    QTRY_VERIFY_WITH_TIMEOUT(status.count() >= 3, connectTimeoutMs);
+    const QFuture<AtReply> maker = m_connection->session()->send(QStringLiteral("AT+CGMI"));
+
+    QVERIFY(waitFor(maker, 3000));
+    QCOMPARE(maker.result().status, AtReply::Status::Ok);
+}
+
+// A dropped link while the PIN was asked for counted as a client locked by
+// wrong PINs, although no PIN had been sent at all.
+void TestPhoneConnection::droppedLinkBeforeAnyPinIsNoWrongPin()
+{
+    m_phone->config().pin = QStringLiteral("2580");
+    QSignalSpy pinRequired(m_connection.get(), &PhoneConnection::pinRequired);
+    QSignalSpy failed(m_connection.get(), &PhoneConnection::failed);
+    m_connection->connectTcp(QStringLiteral("127.0.0.1"), m_phone->port());
+    QVERIFY(pinRequired.wait());
+
+    m_phone->dropConnection();
+
+    QVERIFY(failed.wait());
+    QCOMPARE(failed.first().first().value<Error>().code(), ErrorCode::ConnectionClosed);
+    QCOMPARE(m_connection->state(), State::Lost);
+}
+
+// A second submitPin() while the first answer was outstanding sent the PIN
+// again, and two "ACCESS OK" answers ran the handshake twice.
+void TestPhoneConnection::pinIsSentOnceWhileItsAnswerIsPending()
+{
+    m_phone->config().pin = QStringLiteral("2580");
+    QSignalSpy pinRequired(m_connection.get(), &PhoneConnection::pinRequired);
+    m_connection->connectTcp(QStringLiteral("127.0.0.1"), m_phone->port());
+    QVERIFY(pinRequired.wait());
+
+    m_connection->submitPin(QStringLiteral("2580"));
+    m_connection->submitPin(QStringLiteral("2580"));
+
+    QTRY_COMPARE_WITH_TIMEOUT(m_connection->state(), State::Ready, connectTimeoutMs);
+    QCOMPARE(m_phone->receivedCommands().count(expectedPinCommand(QStringLiteral("2580"))), 1);
 }
 
 QTEST_GUILESS_MAIN(TestPhoneConnection)

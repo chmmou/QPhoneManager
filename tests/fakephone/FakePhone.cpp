@@ -132,8 +132,10 @@ struct FakePhone::Transfer
     bool statusPending = false;
 };
 
-FakePhone::FakePhone(QObject *parent) : QObject(parent), m_server(new QTcpServer(this))
+FakePhone::FakePhone(QObject *parent)
+    : QObject(parent), m_server(new QTcpServer(this)), m_aliveTimer(new QTimer(this))
 {
+    connect(m_aliveTimer, &QTimer::timeout, this, [this]() { sendUnsolicited("*ALIVE: 0,72,0"); });
     connect(m_server, &QTcpServer::newConnection, this, [this]() {
         while (m_server->hasPendingConnections()) {
             QTcpSocket *socket = m_server->nextPendingConnection();
@@ -288,6 +290,9 @@ void FakePhone::attach(QTcpSocket *socket)
     m_currentFolder.clear();
     m_discard = 0;
     m_pendingStream.clear();
+    m_dropAfterStream = false;
+    if (m_config.alivePeriod.count() > 0)
+        m_aliveTimer->start(m_config.alivePeriod);
     connect(socket, &QTcpSocket::readyRead, this, &FakePhone::onReadyRead);
     connect(socket, &QTcpSocket::disconnected, this, [this, socket]() {
         if (m_socket == socket)
@@ -508,6 +513,10 @@ void FakePhone::handleObex(const QByteArray &bytes)
         label += QStringLiteral(" -> ") + *request.targetName;
     m_received.append(label);
     Q_EMIT commandReceived(label);
+    if (request.name && m_config.unansweredObex.contains(*request.name))
+        return;
+    m_dropAfterStream = code == obex::opGetFinal && request.name &&
+                        !m_config.dropAfterGet.isEmpty() && *request.name == m_config.dropAfterGet;
 
     if (code != obex::opConnect && code != obex::opAbort && request.connectionId != 1u)
         protocolError(QStringLiteral("%1 without Connection-ID 1").arg(label));
@@ -515,14 +524,22 @@ void FakePhone::handleObex(const QByteArray &bytes)
         protocolError(QStringLiteral("%1 split over several packets").arg(label));
 
     if (m_failNext && code != obex::opConnect && code != obex::opDisconnect) {
-        const quint8 failure = *m_failNext;
+        ObexPacket failure;
+        failure.code = *m_failNext;
+        if (!m_failNextAppParameters.isEmpty())
+            failure.appParameters = m_failNextAppParameters;
         m_failNext.reset();
-        sendFirst(codeOnly(failure));
+        m_failNextAppParameters.clear();
+        sendFirst(encoded(failure));
         return;
     }
 
     switch (code) {
     case obex::opConnect: {
+        if (m_config.connectRefusal != 0) {
+            sendPacket(codeOnly(m_config.connectRefusal));
+            return;
+        }
         if (request.target != QByteArrayLiteral("IRMC-SYNC") &&
             request.target != fileBrowserUuid()) {
             sendPacket(codeOnly(obex::rspNotImplemented));
@@ -540,7 +557,7 @@ void FakePhone::handleObex(const QByteArray &bytes)
         return;
     }
     case obex::opDisconnect:
-        sendPacket(codeOnly(obex::rspOk));
+        sendPacket(codeOnly(obex::rspOk) + m_config.afterDisconnect);
         m_obexMode = false;
         m_target.clear();
         m_pendingStream.clear();
@@ -969,6 +986,7 @@ void FakePhone::sendBody(const QByteArray &body)
         packet.bodyKind = ObexPacket::BodyKind::EndOfBody;
         packet.body = body;
         sendFirst(encoded(packet));
+        endOfStream();
         return;
     }
     packet.code = obex::rspContinue;
@@ -994,6 +1012,16 @@ void FakePhone::sendNextChunk()
         m_pendingStream.remove(0, chunk);
     }
     sendPacket(encoded(packet));
+    if (packet.code == obex::rspOk)
+        endOfStream();
+}
+
+void FakePhone::endOfStream()
+{
+    if (!m_dropAfterStream || !m_socket)
+        return;
+    m_dropAfterStream = false;
+    m_socket->disconnectFromHost();
 }
 
 void FakePhone::recordChange(const QString &area, char type, quint32 luid)

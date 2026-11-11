@@ -73,8 +73,9 @@ public:
 
     /**
      * Queues a command without the line end. The future gets the reply, or a
-     * reply with status Timeout when no line arrives for `timeout`; every
-     * received chunk restarts that time, so long lists do not time out.
+     * reply with status Timeout when no line of the reply arrives for
+     * `timeout`; every line of the reply restarts that time, so long lists do
+     * not time out. Lines the client sends on its own do not restart it.
      * Cancelling the future before the command is written drops it from the
      * queue. The command arguments never reach the log.
      */
@@ -101,6 +102,13 @@ public:
 
     /// Writes raw bytes in OBEX mode; ignored in line mode.
     void writeRaw(const QByteArray &bytes);
+
+    /**
+     * Ends the session because the link can no longer be trusted: fatal()
+     * carries `error`, every open command completes with status Closed and
+     * the transport is closed. Does nothing once the session has ended.
+     */
+    void terminate(const qpm::core::Error &error);
 
 Q_SIGNALS:
     void unsolicited(const QString &line);
@@ -132,6 +140,9 @@ private:
     void processLine(const QString &line);
     bool handleConnectionLevelLine(const QString &line);
     bool belongsToCurrent(const QString &lineName) const;
+    /// Judged by the name in front of the colon, like a whole line. A partial
+    /// line too short to show its name does not count yet.
+    bool partialLineBelongsToCurrent() const;
     void complete(AtReply::Status status);
     void startNext();
     void endSession(AtReply::Status statusForCurrent);

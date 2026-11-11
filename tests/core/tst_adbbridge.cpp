@@ -52,6 +52,7 @@ private Q_SLOTS:
     void forwardPassesEachArgumentSeparately();
     void failingAdbIsReported();
     void missingClientIsReported();
+    void floodedErrorOutputStopsAdb();
 };
 
 void TestAdbBridge::deviceListIsParsed()
@@ -191,6 +192,23 @@ void TestAdbBridge::missingClientIsReported()
     const QFuture<Result<void>> started = bridge.startClient(QStringLiteral("emulator-5554"));
     QVERIFY(waitFor(started));
     QCOMPARE(started.result().error().code(), ErrorCode::NotFound);
+}
+
+// The error output of adb was cut per read but not in total, so a program
+// that kept writing errors could fill the memory.
+void TestAdbBridge::floodedErrorOutputStopsAdb()
+{
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    const QString adb =
+        writeFakeAdb(directory, "head -c 3000000 /dev/zero | tr '\\000' 'e' >&2\nexit 0\n");
+    AdbBridge bridge(adb);
+
+    const QFuture<Result<void>> started = bridge.startServer();
+    QVERIFY(waitFor(started));
+
+    QVERIFY(!started.result().hasValue());
+    QCOMPARE(started.result().error().code(), ErrorCode::LimitExceeded);
 }
 
 QTEST_GUILESS_MAIN(TestAdbBridge)

@@ -29,9 +29,11 @@ struct AdbDevice
  *
  * adb is only ever started from the absolute path given to the constructor,
  * never through PATH, and with program and arguments kept apart. Each call
- * gives up after 15 seconds with ErrorCode::Timeout. A path that is not
- * absolute or not executable makes every call fail with
- * ErrorCode::InvalidInput; a serial outside [A-Za-z0-9._:-] as well.
+ * gives up after 15 seconds with ErrorCode::Timeout, and with
+ * ErrorCode::LimitExceeded when adb prints more than 1 MiB on its output or
+ * on its error output. A path that is not absolute or not executable makes
+ * every call fail with ErrorCode::InvalidInput; a serial outside
+ * [A-Za-z0-9._:-] as well.
  */
 class AdbBridge : public QObject
 {

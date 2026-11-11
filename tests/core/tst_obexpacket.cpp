@@ -7,8 +7,7 @@ using namespace qpm::core::protocol;
 
 namespace {
 
-// Byte sequences as the original desktop program sent and received them,
-// taken from the protocol reference.
+// Byte sequences as the original desktop program sent and received them.
 QByteArray hex(const char *text)
 {
     return QByteArray::fromHex(text);

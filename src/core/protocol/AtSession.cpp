@@ -145,6 +145,16 @@ void AtSession::writeRaw(const QByteArray &bytes)
         m_transport->write(bytes);
 }
 
+void AtSession::terminate(const Error &error)
+{
+    if (m_ended)
+        return;
+    qCWarning(lcProtocol) << "AT session ended:" << error.message();
+    Q_EMIT fatal(error);
+    endSession(AtReply::Status::Closed);
+    m_transport->close();
+}
+
 void AtSession::onData(const QByteArray &chunk)
 {
     if (m_ended)
@@ -153,10 +163,12 @@ void AtSession::onData(const QByteArray &chunk)
         Q_EMIT rawData(chunk);
         return;
     }
-    if (m_current)
-        m_timer->start(m_current->timeout);
     m_buffer += chunk;
     processBuffer();
+    // A reply line that is still arriving shows as well that the phone works
+    // on the command.
+    if (m_current && !m_ended && !m_obexMode && partialLineBelongsToCurrent())
+        m_timer->start(m_current->timeout);
 }
 
 void AtSession::processBuffer()
@@ -221,10 +233,12 @@ void AtSession::processLine(const QString &line)
         return;
     }
     if (!current->echoSeen) {
-        if (current->echoes.contains(trimmed))
+        if (current->echoes.contains(trimmed)) {
             current->echoSeen = true;
-        else
+            m_timer->start(current->timeout);
+        } else {
             qCDebug(lcProtocol) << "AT line before the echo of" << current->name << "discarded";
+        }
         return;
     }
 
@@ -283,6 +297,7 @@ void AtSession::processLine(const QString &line)
         return;
     }
     current->reply.lines.append(line);
+    m_timer->start(current->timeout);
 }
 
 bool AtSession::handleConnectionLevelLine(const QString &line)
@@ -313,6 +328,22 @@ bool AtSession::belongsToCurrent(const QString &lineName) const
 {
     return m_current && m_current->echoSeen && !m_current->name.isEmpty() &&
            lineName.startsWith(m_current->name);
+}
+
+bool AtSession::partialLineBelongsToCurrent() const
+{
+    if (!m_current || !m_current->echoSeen)
+        return false;
+    const QByteArrayView partial = QByteArrayView(m_buffer).trimmed();
+    if (partial.isEmpty())
+        return false;
+    if (partial.front() != '*' && partial.front() != '+')
+        return true;
+    const qsizetype colon = partial.indexOf(':');
+    if (colon < 0)
+        return false;
+    const QString name = QString::fromUtf8(partial.first(colon)).trimmed().toUpper();
+    return !isUnsolicitedName(name) || belongsToCurrent(name);
 }
 
 void AtSession::complete(AtReply::Status status)

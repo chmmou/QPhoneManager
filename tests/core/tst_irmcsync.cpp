@@ -1,18 +1,27 @@
 #include "core/protocol/AtSession.h"
 #include "core/protocol/ObexClient.h"
+#include "core/protocol/PhoneConnection.h"
 #include "core/protocol/TcpTransport.h"
 #include "core/sync/IrmcSync.h"
 
 #include "FakePhone.h"
 #include "WaitFor.h"
 
+#include <QCoreApplication>
 #include <QCryptographicHash>
 #include <QHash>
+#include <QLoggingCategory>
 #include <QMap>
+#include <QPointer>
+#include <QScopeGuard>
 #include <QSignalSpy>
 #include <QTest>
+#include <QThread>
+#include <QThreadPool>
 
+#include <atomic>
 #include <memory>
+#include <semaphore>
 
 using namespace qpm::core;
 using namespace qpm::core::protocol;
@@ -93,6 +102,31 @@ public:
     int applied = 0;
 };
 
+QList<FakeSyncObject> manyCards()
+{
+    QList<FakeSyncObject> cards;
+    for (quint32 luid = 1; luid <= 400; ++luid)
+        cards.append({luid, card(luid, "Person" + QByteArray::number(luid))});
+    return cards;
+}
+
+// Where the sync logged that it splits a dump: 0 not seen, 1 on the main
+// thread, 2 on another thread. Written by the message handler below, which
+// may run on any thread.
+std::atomic<int> splitThread{0};
+QtMessageHandler previousHandler = nullptr;
+
+void recordSplitThread(QtMsgType type, const QMessageLogContext &context, const QString &message)
+{
+    if (qstrcmp(context.category, "qpm.core.sync") == 0 &&
+        message.startsWith(QLatin1StringView("Splitting"))) {
+        const bool mainThread = QThread::currentThread() == QCoreApplication::instance()->thread();
+        splitThread = mainThread ? 1 : 2;
+    }
+    if (previousHandler)
+        previousHandler(type, context, message);
+}
+
 QStringList obexRequests(const QStringList &commands)
 {
     QStringList requests;
@@ -124,6 +158,7 @@ private Q_SLOTS:
     void objectGoneBeforeTheFetchCountsAsDeleted();
     void messagesSwitchOnScheduledMessagesFirst();
     void largeDumpIsSplitOffTheMainThread();
+    void linkLostDuringTheSplitFailsTheSyncWithoutTheClient();
     void storeFailureLeavesTheCounterAlone();
     void changeLogLinesAreParsed();
     void changeLogAskingForAFullReloadIsRecognised();
@@ -317,10 +352,15 @@ void TestIrmcSync::messagesSwitchOnScheduledMessagesFirst()
 
 void TestIrmcSync::largeDumpIsSplitOffTheMainThread()
 {
-    QList<FakeSyncObject> cards;
-    for (quint32 luid = 1; luid <= 400; ++luid)
-        cards.append({luid, card(luid, "Person" + QByteArray::number(luid))});
+    const QList<FakeSyncObject> cards = manyCards();
     m_phone->setObjects(QStringLiteral("pb"), cards);
+    splitThread = 0;
+    QLoggingCategory::setFilterRules(QStringLiteral("qpm.core.sync.debug=true"));
+    previousHandler = qInstallMessageHandler(recordSplitThread);
+    const auto restoreLogging = qScopeGuard([]() {
+        qInstallMessageHandler(previousHandler);
+        QLoggingCategory::setFilterRules(QString());
+    });
 
     const Result<SyncDelta> delta = pull(IrmcDomain::Contacts);
 
@@ -328,6 +368,69 @@ void TestIrmcSync::largeDumpIsSplitOffTheMainThread()
     QCOMPARE(delta.value().upserts.size(), 400);
     QCOMPARE(delta.value().upserts.at(399).luid, 400u);
     QCOMPARE(delta.value().upserts.at(399).data, cards.at(399).data);
+    QCOMPARE(splitThread.load(), 2);
+}
+
+// A full dump above 64 KiB is split on a worker thread. When the link went
+// down meanwhile, the connection deleted its OBEX client, and once the split
+// was done the sync sent its next request through the deleted client.
+void TestIrmcSync::linkLostDuringTheSplitFailsTheSyncWithoutTheClient()
+{
+    // This test brings its own connection to the phone.
+    m_obex.reset();
+    m_session.reset();
+    m_transport.reset();
+    m_phone->setObjects(QStringLiteral("pb"), manyCards());
+    m_phone->config().dropAfterGet = QStringLiteral("telecom/pb.vcf");
+
+    // The only worker thread of the pool is held, so that the split waits
+    // until the client is gone. The semaphores come from the standard library:
+    // their synchronisation is compiled into this test, where ThreadSanitizer
+    // can see it. QSemaphore synchronises inside the Qt library, which it
+    // cannot see.
+    QThreadPool *pool = QThreadPool::globalInstance();
+    const int previousMaxThreads = pool->maxThreadCount();
+    pool->setMaxThreadCount(1);
+    std::binary_semaphore holding(0);
+    std::binary_semaphore gate(0);
+    bool released = false;
+    pool->start([&holding, &gate]() {
+        holding.release();
+        gate.acquire();
+    });
+    const auto restorePool = qScopeGuard([&]() {
+        if (!released)
+            gate.release();
+        pool->waitForDone();
+        pool->setMaxThreadCount(previousMaxThreads);
+    });
+    holding.acquire();
+
+    PhoneConnection connection;
+    connection.connectTcp(QStringLiteral("127.0.0.1"), m_phone->port());
+    QTRY_COMPARE_WITH_TIMEOUT(connection.state(), PhoneConnection::State::Ready, 10000);
+    IrmcSync sync(IrmcDomain::Contacts, m_store.get());
+    QFuture<Result<SyncDelta>> pulled;
+    QPointer<ObexClient> client;
+    bool handedOut = false;
+    const QFuture<Result<SyncDelta>> work = connection.withObex<SyncDelta>(
+        ObexClient::Target::IrmcSync, [&](ObexClient &obex) {
+            client = &obex;
+            handedOut = true;
+            pulled = sync.pull(obex);
+            return pulled;
+        });
+
+    QTRY_COMPARE_WITH_TIMEOUT(connection.state(), PhoneConnection::State::Lost, 10000);
+    QTRY_VERIFY(handedOut && client.isNull());
+    gate.release();
+    released = true;
+
+    QVERIFY(waitFor(pulled, 20000));
+    QCOMPARE(pulled.result().error().code(), ErrorCode::ConnectionClosed);
+    QVERIFY(work.isFinished());
+    QCOMPARE(work.result().error().code(), ErrorCode::ConnectionClosed);
+    QCOMPARE(m_store->applied, 0);
 }
 
 void TestIrmcSync::storeFailureLeavesTheCounterAlone()

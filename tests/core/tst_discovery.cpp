@@ -10,7 +10,7 @@ using namespace qpm::core::protocol;
 
 namespace {
 
-// The worked example of the protocol reference, computed with dummy data.
+// A fixed datagram with dummy data and its expected encoding.
 constexpr char examplePlain[] = "MyPhoneExplorer_Client|192.168.1.2|ABC|Model X";
 constexpr char exampleWire[] =
     "002915373C17162E1D095E5F42533F0F06333A1C1D1F19480B021E077B686B6E7D4B"
