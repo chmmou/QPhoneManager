@@ -10,7 +10,7 @@ ApplicationWindow {
 
     readonly property bool connected: AppController.connected
     readonly property string currentKey: sectionCatalog.all[root.currentSection].key
-    readonly property bool hasData: root.currentKey === "contacts" && AppController.contacts.hasPhone
+    readonly property bool hasData: (root.currentKey === "contacts" && AppController.contacts.hasPhone) || (root.currentKey === "calls" && AppController.calls.hasPhone)
     property int currentSection: 0
     /// Number a new message should go to, handed over from another area.
     property string messageRecipient: ""
@@ -68,6 +68,34 @@ ApplicationWindow {
         function onMessageRequested(number: string): void {
             root.messageRecipient = number;
             root.showSection("messages");
+        }
+    }
+
+    Binding {
+        target: AppController.calls
+        property: "searchText"
+        value: root.currentKey === "calls" ? appHeader.searchText : ""
+    }
+
+    Connections {
+        target: AppController.calls
+
+        function onErrorOccurred(message: string): void {
+            messageBar.show(message, true);
+        }
+
+        function onInfoMessage(message: string): void {
+            messageBar.show(message, false);
+        }
+
+        function onMessageRequested(number: string): void {
+            root.messageRecipient = number;
+            root.showSection("messages");
+        }
+
+        function onNewContactRequested(name: string, number: string): void {
+            if (AppController.contacts.startNewContact(name, number))
+                root.showSection("contacts");
         }
     }
 

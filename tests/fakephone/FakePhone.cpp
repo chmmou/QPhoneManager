@@ -1,5 +1,6 @@
 #include "FakePhone.h"
 
+#include "core/codec/AtText.h"
 #include "core/codec/PhoneTime.h"
 #include "core/codec/PhoneVCard.h"
 #include "core/protocol/ObexPacket.h"
@@ -328,6 +329,11 @@ quint64 FakePhone::changeCounter(const QString &area) const
     return data.changes.isEmpty() ? 0 : data.changes.last().id;
 }
 
+void FakePhone::setCalls(const QList<FakeCall> &calls)
+{
+    m_calls = calls;
+}
+
 void FakePhone::addFolder(const QString &path)
 {
     QString folder = path;
@@ -467,6 +473,9 @@ void FakePhone::handleAt(const QString &command)
         return;
     }
 
+    if (handleCallLog(command, name))
+        return;
+
     if (command == QLatin1StringView("AT+CPROT=0")) {
         writeAt("AT+CPROT=0\r\nCONNECT\r\n");
         m_obexMode = true;
@@ -553,6 +562,131 @@ void FakePhone::handleAt(const QString &command)
         reply += line.toUtf8() + "\r\n";
     reply += ok ? "OK\r\n" : "ERROR\r\n";
     writeAt(reply);
+}
+
+bool FakePhone::handleCallLog(const QString &command, const QString &name)
+{
+    const bool callLog =
+        name == QLatin1StringView("AT+CPBS") || name == QLatin1StringView("AT+CPBR") ||
+        name == QLatin1StringView("AT+CPBW") || name == QLatin1StringView("AT+CPBD");
+    if (!callLog)
+        return false;
+
+    QByteArray reply = command.toUtf8() + "\r\n";
+    const auto finish = [this, &reply](const QByteArray &finalLine) {
+        writeAt(reply + finalLine + "\r\n");
+    };
+    const auto line = [](const FakeCall &call) {
+        return QStringLiteral("+CPBR: %1,\"%2\",%3,\"%4\",\"%5\",%6\r\n")
+            .arg(QString::number(call.id), call.number, call.addressType, call.name, call.time,
+                 QString::number(call.duration))
+            .toUtf8();
+    };
+    const auto unquote = [](const QString &field) {
+        const QString trimmed = field.trimmed();
+        if (trimmed.size() >= 2 && trimmed.startsWith(u'"') && trimmed.endsWith(u'"'))
+            return trimmed.mid(1, trimmed.size() - 2);
+        return trimmed;
+    };
+    if (m_config.callLogDenied) {
+        finish("ERROR");
+        return true;
+    }
+    const QString argument = command.section(u'=', 1);
+    const bool changes =
+        name == QLatin1StringView("AT+CPBW") || name == QLatin1StringView("AT+CPBD");
+    if (m_config.callLogReadOnly && changes) {
+        reply += "DUMP: java.lang.SecurityException: Permission Denial: writing "
+                 "com.android.providers.contacts.CallLogProvider uri content://call_log/calls "
+                 "requires android.permission.WRITE_CALL_LOG, or grantUriPermission()\r\n";
+        finish("ERROR");
+        return true;
+    }
+
+    if (name == QLatin1StringView("AT+CPBS")) {
+        static const QStringList storages = {QStringLiteral("DC"), QStringLiteral("RC"),
+                                             QStringLiteral("MC"), QStringLiteral("ALL")};
+        const QString storage = unquote(argument);
+        if (!command.contains(u'=') || !storages.contains(storage)) {
+            finish("ERROR");
+            return true;
+        }
+        m_callStorage = storage;
+        finish("OK");
+        return true;
+    }
+
+    if (name == QLatin1StringView("AT+CPBR")) {
+        if (argument.isEmpty() || argument.startsWith(u',')) {
+            const int limit = argument.size() > 1 ? argument.mid(1).toInt() : -1;
+            QList<FakeCall> shown;
+            for (const FakeCall &call : std::as_const(m_calls)) {
+                if (m_callStorage == QLatin1StringView("ALL") || call.storage == m_callStorage)
+                    shown.append(call);
+            }
+            // The two-digit years of this century sort like the dates.
+            std::stable_sort(shown.begin(), shown.end(),
+                             [](const FakeCall &a, const FakeCall &b) { return a.time > b.time; });
+            for (qsizetype i = 0; i < shown.size() && (limit < 0 || i < limit); ++i)
+                reply += line(shown.at(i));
+            finish("OK");
+            return true;
+        }
+        bool ok = false;
+        const quint32 id = argument.toUInt(&ok);
+        for (const FakeCall &call : std::as_const(m_calls)) {
+            if (ok && call.id == id) {
+                reply += line(call);
+                finish("OK");
+                return true;
+            }
+        }
+        finish("+CMS ERROR: 321");
+        return true;
+    }
+
+    if (name == QLatin1StringView("AT+CPBD")) {
+        bool ok = false;
+        const quint32 id = argument.toUInt(&ok);
+        if (!ok) {
+            finish("ERROR");
+            return true;
+        }
+        const qsizetype removed =
+            m_calls.removeIf([id](const FakeCall &call) { return call.id == id; });
+        finish(removed > 0 ? "OK" : "+CMS ERROR: 500");
+        return true;
+    }
+
+    const QStringList fields = core::codec::splitFields(argument);
+    if (fields.size() < 6 || !core::codec::parseCallLogTime(unquote(fields.at(4)))) {
+        finish("ERROR");
+        return true;
+    }
+    FakeCall call;
+    call.number = unquote(fields.at(1));
+    call.name = unquote(fields.at(3));
+    call.time = unquote(fields.at(4));
+    call.duration = fields.at(5).trimmed().toLongLong();
+    const QString storage = fields.size() > 6 ? unquote(fields.at(6)) : QString();
+    call.storage = storage == QLatin1StringView("RC") || storage == QLatin1StringView("MC")
+                       ? storage
+                       : QStringLiteral("DC");
+    bool ok = false;
+    const quint32 id = fields.at(0).trimmed().toUInt(&ok);
+    if (!ok || id == 0) {
+        call.id = m_nextCallId++;
+        m_calls.append(call);
+    } else {
+        for (FakeCall &stored : m_calls) {
+            if (stored.id == id) {
+                call.id = id;
+                stored = call;
+            }
+        }
+    }
+    finish("OK");
+    return true;
 }
 
 void FakePhone::processObex()

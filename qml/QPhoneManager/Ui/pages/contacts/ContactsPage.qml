@@ -250,6 +250,11 @@ Item {
         function onHasPhoneChanged(): void {
             root.editing = false;
         }
+
+        function onNewContactStarted(): void {
+            root.editing = true;
+            listDetail.detailOpen = true;
+        }
     }
 
     Dialog {

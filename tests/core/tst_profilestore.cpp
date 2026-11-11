@@ -119,6 +119,7 @@ private Q_SLOTS:
     void olderDatabaseIsCopiedBeforeTheMigration();
     void newerDatabaseIsLeftUntouched();
     void versionOneDatabaseGetsTheContactTablesAndLoadsThePhonebookAgain();
+    void versionTwoDatabaseGetsTheCallTableAndKeepsTheContacts();
     void profileFieldsSurviveAReopen();
     void profileValuesAreBoundNotInterpolated();
     void invalidDisplayNameIsRejected_data();
@@ -128,6 +129,7 @@ private Q_SLOTS:
     void blobNameOutsideTheHashFormIsRejected_data();
     void blobNameOutsideTheHashFormIsRejected();
     void missingBlobIsReported();
+    void removedBlobIsGoneAndOnlyBlobNamesAreTaken();
     void appliedDeltaKeepsCounterHashesAndTime();
     void fullDeltaReplacesTheArea();
     void callsBeforeOpenFail();
@@ -217,6 +219,7 @@ void TestProfileStore::openCreatesTheProfileAtTheCurrentVersion()
     QCOMPARE(userVersion(databasePath(QStringLiteral("358240051111110"))),
              ProfileStore::schemaVersion);
     QVERIFY(hasTable(databasePath(QStringLiteral("358240051111110")), QStringLiteral("meta")));
+    QVERIFY(hasTable(databasePath(QStringLiteral("358240051111110")), QStringLiteral("calls")));
     QVERIFY(!QFile::exists(store->directory() + QStringLiteral("/data.sqlite.bak")));
 }
 
@@ -297,7 +300,7 @@ void TestProfileStore::versionOneDatabaseGetsTheContactTablesAndLoadsThePhoneboo
     const std::unique_ptr<ProfileStore> store = openStore(QStringLiteral("dev-1"));
 
     QVERIFY(store);
-    QCOMPARE(userVersion(path), 2);
+    QCOMPARE(userVersion(path), ProfileStore::schemaVersion);
     QCOMPARE(userVersion(path + QStringLiteral(".bak")), 1);
     for (const QString &table : {QStringLiteral("contacts"), QStringLiteral("contact_values"),
                                  QStringLiteral("accounts"), QStringLiteral("groups")}) {
@@ -307,6 +310,40 @@ void TestProfileStore::versionOneDatabaseGetsTheContactTablesAndLoadsThePhoneboo
     QVERIFY(!store->objectHash(IrmcDomain::Contacts, 1));
     QCOMPARE(store->changeCounter(IrmcDomain::Notes), std::optional<quint64>(7));
     QVERIFY(store->objectHash(IrmcDomain::Notes, 2));
+}
+
+// A database of the contacts version keeps everything it holds; only the
+// call log table is added, and the copy beside it is the old version.
+void TestProfileStore::versionTwoDatabaseGetsTheCallTableAndKeepsTheContacts()
+{
+    const QString path = databasePath(QStringLiteral("dev-1"));
+    QVERIFY(QDir().mkpath(QFileInfo(path).path()));
+    QVERIFY(runSql(
+        path,
+        {QStringLiteral("CREATE TABLE meta (key TEXT PRIMARY KEY NOT NULL, value TEXT)"),
+         QStringLiteral("CREATE TABLE sync_objects (domain TEXT NOT NULL, luid INTEGER NOT NULL, "
+                        "hash BLOB NOT NULL, raw BLOB NOT NULL, PRIMARY KEY (domain, luid))"),
+         QStringLiteral("CREATE TABLE contacts (luid INTEGER PRIMARY KEY NOT NULL, "
+                        "display_name TEXT NOT NULL)"),
+         QStringLiteral("INSERT INTO meta VALUES ('counter.pb', '95')"),
+         QStringLiteral("INSERT INTO sync_objects VALUES ('pb', 1, x'00', x'00')"),
+         QStringLiteral("INSERT INTO contacts VALUES (1, 'Erika Mustermann')"),
+         QStringLiteral("PRAGMA user_version = 2")}));
+
+    const std::unique_ptr<ProfileStore> store = openStore(QStringLiteral("dev-1"));
+
+    QVERIFY(store);
+    QCOMPARE(userVersion(path), 3);
+    QVERIFY(hasTable(path, QStringLiteral("calls")));
+    QCOMPARE(userVersion(path + QStringLiteral(".bak")), 2);
+    QVERIFY(!hasTable(path + QStringLiteral(".bak"), QStringLiteral("calls")));
+    QVERIFY(hasTable(path + QStringLiteral(".bak"), QStringLiteral("contacts")));
+    QCOMPARE(store->changeCounter(IrmcDomain::Contacts), std::optional<quint64>(95));
+    QVERIFY(store->objectHash(IrmcDomain::Contacts, 1));
+    QSqlQuery query(QSqlDatabase::database(store->connectionName(), false));
+    QVERIFY(query.exec(QStringLiteral("SELECT display_name FROM contacts")));
+    QVERIFY(query.next());
+    QCOMPARE(query.value(0).toString(), QStringLiteral("Erika Mustermann"));
 }
 
 void TestProfileStore::profileFieldsSurviveAReopen()
@@ -424,6 +461,23 @@ void TestProfileStore::blobIsStoredUnderItsHash()
     QCOMPARE(again.value(), name.value());
     QVERIFY(QFile::exists(store->directory() + QStringLiteral("/blobs/") + name.value()));
     QCOMPARE(store->blob(name.value()).value(), data);
+}
+
+void TestProfileStore::removedBlobIsGoneAndOnlyBlobNamesAreTaken()
+{
+    const std::unique_ptr<ProfileStore> store = openStore(QStringLiteral("dev-1"));
+    QVERIFY(store);
+    const Result<QString> name = store->putBlob("photo");
+    QVERIFY(name.hasValue());
+
+    QVERIFY(store->removeBlob(name.value()).hasValue());
+
+    QVERIFY(!QFile::exists(store->directory() + QStringLiteral("/blobs/") + name.value()));
+    QCOMPARE(store->blob(name.value()).error().code(), ErrorCode::NotFound);
+    QVERIFY(store->removeBlob(name.value()).hasValue());
+    QCOMPARE(store->removeBlob(QStringLiteral("../data.sqlite")).error().code(),
+             ErrorCode::InvalidInput);
+    QVERIFY(QFile::exists(databasePath(QStringLiteral("dev-1"))));
 }
 
 void TestProfileStore::blobNameOutsideTheHashFormIsRejected_data()

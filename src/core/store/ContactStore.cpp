@@ -9,6 +9,8 @@
 #include <QSqlError>
 #include <QSqlQuery>
 
+#include <utility>
+
 namespace qpm::core::store {
 
 namespace {
@@ -18,6 +20,8 @@ using codec::ContactValue;
 using codec::ContactValueKind;
 
 constexpr qsizetype minimumDigitsForNumberSearch = 3;
+constexpr qsizetype numberKeyDigits = 9;
+constexpr qsizetype minimumNumberKeyDigits = 5;
 
 QString kindText(ContactValueKind kind)
 {
@@ -158,6 +162,30 @@ Result<void> deleteContact(const QSqlDatabase &db, quint32 luid)
     return {};
 }
 
+// The photo blobs of the contacts `luids`, or of every contact with `all`.
+Result<QSet<QString>> photoBlobs(const QSqlDatabase &db, const QList<quint32> &luids, bool all)
+{
+    QSet<QString> blobs;
+    QSqlQuery query(db);
+    if (all) {
+        if (!query.exec(QStringLiteral("SELECT photo_blob FROM contacts WHERE photo_blob <> ''")))
+            return queryError(QStringLiteral("Cannot read the photos"), query);
+        while (query.next())
+            blobs.insert(query.value(0).toString());
+        return blobs;
+    }
+    query.prepare(
+        QStringLiteral("SELECT photo_blob FROM contacts WHERE luid = :luid AND photo_blob <> ''"));
+    for (const quint32 luid : luids) {
+        query.bindValue(QStringLiteral(":luid"), static_cast<qint64>(luid));
+        if (!query.exec())
+            return queryError(QStringLiteral("Cannot read a photo"), query);
+        while (query.next())
+            blobs.insert(query.value(0).toString());
+    }
+    return blobs;
+}
+
 Result<void> writeMetadata(const QSqlDatabase &db, const codec::PbMetadata &metadata)
 {
     QSqlQuery query(db);
@@ -237,6 +265,7 @@ Result<void> ContactStore::apply(sync::IrmcDomain domain, const sync::SyncDelta 
         }
     }
 
+    m_releasedBlobs.clear();
     const Result<void> applied = m_profile->applyWith(
         domain, delta, [this, &delta](const QString &connectionName) -> Result<void> {
             if (const Result<void> rows = writeRows(connectionName, delta); !rows.hasValue())
@@ -252,14 +281,27 @@ Result<void> ContactStore::apply(sync::IrmcDomain domain, const sync::SyncDelta 
             }
             return writeMetadata(QSqlDatabase::database(connectionName, false), metadata.value());
         });
-    if (applied.hasValue())
+    if (applied.hasValue()) {
         m_lastChanges = changes;
+        pruneReleasedBlobs();
+    }
+    m_releasedBlobs.clear();
     return applied;
 }
 
 Result<void> ContactStore::writeRows(const QString &connectionName, const sync::SyncDelta &delta)
 {
     const QSqlDatabase db = QSqlDatabase::database(connectionName, false);
+    QList<quint32> replaced = delta.deletes;
+    if (!delta.full) {
+        for (const sync::RawObject &object : delta.upserts)
+            replaced.append(object.luid);
+    }
+    const Result<QSet<QString>> released = photoBlobs(db, replaced, delta.full);
+    if (!released.hasValue())
+        return released.error();
+    m_releasedBlobs.unite(released.value());
+
     QSqlQuery query(db);
     if (delta.full) {
         if (!query.exec(QStringLiteral("DELETE FROM contacts")) ||
@@ -446,6 +488,35 @@ Result<QSet<quint32>> ContactStore::search(const QString &text) const
     return found;
 }
 
+QString ContactStore::numberKey(const QString &number)
+{
+    QString digits = digitsOf(number);
+    qsizetype zeros = 0;
+    while (zeros < digits.size() && digits.at(zeros) == u'0')
+        ++zeros;
+    digits.remove(0, zeros);
+    if (digits.size() < minimumNumberKeyDigits)
+        return {};
+    return digits.right(numberKeyDigits);
+}
+
+Result<QHash<QString, QString>> ContactStore::namesByNumber() const
+{
+    QSqlQuery query(QSqlDatabase::database(m_profile->connectionName(), false));
+    if (!query.exec(QStringLiteral("SELECT c.display_name, v.value FROM contact_values v "
+                                   "JOIN contacts c ON c.luid = v.luid WHERE v.kind = 'digits' "
+                                   "ORDER BY c.sort_key, c.luid"))) {
+        return queryError(QStringLiteral("Cannot read the contact numbers"), query);
+    }
+    QHash<QString, QString> names;
+    while (query.next()) {
+        const QString key = numberKey(query.value(1).toString());
+        if (!key.isEmpty() && !names.contains(key))
+            names.insert(key, query.value(0).toString());
+    }
+    return names;
+}
+
 Result<codec::PbMetadata> ContactStore::metadata() const
 {
     QSqlQuery query(QSqlDatabase::database(m_profile->connectionName(), false));
@@ -480,9 +551,14 @@ Result<void> ContactStore::storeObject(const sync::RawObject &object)
     sync::SyncDelta delta;
     delta.upserts.append(object);
     delta.newCounter = *counter;
-    return m_profile->applyWith(
+    m_releasedBlobs.clear();
+    const Result<void> applied = m_profile->applyWith(
         sync::IrmcDomain::Contacts, delta,
         [this, &delta](const QString &connectionName) { return writeRows(connectionName, delta); });
+    if (applied.hasValue())
+        pruneReleasedBlobs();
+    m_releasedBlobs.clear();
+    return applied;
 }
 
 Result<void> ContactStore::removeObject(quint32 luid)
@@ -495,9 +571,40 @@ Result<void> ContactStore::removeObject(quint32 luid)
     sync::SyncDelta delta;
     delta.deletes.append(luid);
     delta.newCounter = *counter;
-    return m_profile->applyWith(
+    m_releasedBlobs.clear();
+    const Result<void> applied = m_profile->applyWith(
         sync::IrmcDomain::Contacts, delta,
         [this, &delta](const QString &connectionName) { return writeRows(connectionName, delta); });
+    if (applied.hasValue())
+        pruneReleasedBlobs();
+    m_releasedBlobs.clear();
+    return applied;
+}
+
+void ContactStore::pruneReleasedBlobs()
+{
+    const QSet<QString> released = std::exchange(m_releasedBlobs, {});
+    if (released.isEmpty())
+        return;
+    QSqlQuery query(QSqlDatabase::database(m_profile->connectionName(), false));
+    query.prepare(QStringLiteral("SELECT 1 FROM contacts WHERE photo_blob = :blob LIMIT 1"));
+    for (const QString &blob : released) {
+        query.bindValue(QStringLiteral(":blob"), blob);
+        if (!query.exec()) {
+            // A photo kept by mistake only takes space; the next change that
+            // releases it tries again.
+            qCWarning(lcStore) << "Cannot check whether a photo is still used:"
+                               << query.lastError().text();
+            continue;
+        }
+        if (query.next())
+            continue;
+        const Result<void> removed = m_profile->removeBlob(blob);
+        if (!removed.hasValue()) {
+            // Same as above: the file stays and costs only space.
+            qCWarning(lcStore) << "Unused photo not deleted:" << removed.error().message();
+        }
+    }
 }
 
 } // namespace qpm::core::store

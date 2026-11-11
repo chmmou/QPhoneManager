@@ -101,12 +101,21 @@ report themselves as skipped. They read these environment variables:
 | `QPM_TEST_SERIAL` | Serial number of the phone as `adb devices` shows it. Required. |
 | `QPM_TEST_SMS_TO` | The only number a test may send a text message to. Optional. |
 | `QPM_TEST_CALL_TO` | The only number a test may call. Optional. |
+| `QPM_TEST_READ_ONLY` | When set, the call log test writes nothing to a phone that is not an emulator. Optional. |
 
 The contacts test writes freely only to an emulator, that is a serial that
 starts with `emulator-`. On any other phone it only reads the contacts and
 checks their form, and it writes nothing but one contact named
 `QPM Testkontakt` with six digits, which it deletes again. It never prints or
 keeps the contents of a phone's contacts.
+
+The call log test works the same way. On an emulator it writes, reads, filters
+and deletes entries of its own; where the app on the phone may not change the
+call log, it writes and deletes them through adb instead. On any other phone it
+reads the three call lists and checks their form and count. It writes nothing
+there but one entry named `QPM Testanruf` with six digits and a made-up number,
+which it deletes again, and only when the app on the phone may change the call
+log. It never prints or keeps the contents of a phone's call log.
 
 All traffic of these tests goes through a guard. It lets a text message
 through only to the number in `QPM_TEST_SMS_TO` and a call only to the number

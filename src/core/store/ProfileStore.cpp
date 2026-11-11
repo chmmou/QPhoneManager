@@ -77,6 +77,13 @@ const QList<QStringList> &migrations()
             QStringLiteral("DELETE FROM sync_objects WHERE domain = 'pb'"),
             QStringLiteral("DELETE FROM meta WHERE key = 'counter.pb'"),
         },
+        {
+            QStringLiteral("CREATE TABLE calls (id INTEGER PRIMARY KEY NOT NULL, "
+                           "number TEXT NOT NULL, name TEXT NOT NULL, direction TEXT NOT NULL, "
+                           "start_utc TEXT NOT NULL, duration INTEGER NOT NULL, "
+                           "sim INTEGER NOT NULL)"),
+            QStringLiteral("CREATE INDEX calls_start ON calls (start_utc)"),
+        },
     };
     return steps;
 }
@@ -475,6 +482,21 @@ Result<QByteArray> ProfileStore::blob(const QString &name) const
     if (!file.open(QIODevice::ReadOnly))
         return Error(ErrorCode::IoFailure, QStringLiteral("Cannot read blob %1").arg(name));
     return file.readAll();
+}
+
+Result<void> ProfileStore::removeBlob(const QString &name)
+{
+    if (!m_open)
+        return Error(ErrorCode::IoFailure, QStringLiteral("The profile store is not open"));
+    if (!isSha1Hex(name)) {
+        return Error(ErrorCode::InvalidInput,
+                     QStringLiteral("Not a blob name: %1").arg(name.left(64)));
+    }
+
+    QFile file(QDir(directory()).filePath(blobsFolder() + u'/' + name));
+    if (file.exists() && !file.remove())
+        return Error(ErrorCode::IoFailure, QStringLiteral("Cannot delete blob %1").arg(name));
+    return {};
 }
 
 std::optional<QDateTime> ProfileStore::lastSync(sync::IrmcDomain domain) const

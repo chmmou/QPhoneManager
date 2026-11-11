@@ -5,6 +5,7 @@
 #include "core/codec/PhoneVCard.h"
 #include "core/sync/SyncStoreAdapter.h"
 
+#include <QHash>
 #include <QList>
 #include <QSet>
 #include <QString>
@@ -45,7 +46,9 @@ struct ContactChanges
 /**
  * The contacts of one phone on this computer: the tables contacts,
  * contact_values, accounts and groups of the profile database, filled from
- * every pull of the phonebook. Photos go to the blobs of the profile.
+ * every pull of the phonebook. Photos go to the blobs of the profile; a photo
+ * blob that no stored contact refers to any more after a change is deleted
+ * once the change is committed.
  *
  * As a SyncStoreAdapter it stands in front of the profile store: the sync
  * state of every area stays there, and a pull of the phonebook also rewrites
@@ -86,6 +89,19 @@ public:
      */
     [[nodiscard]] Result<QSet<quint32>> search(const QString &text) const;
 
+    /**
+     * The key under which namesByNumber() files a phone number: its last nine
+     * digits once leading zeros are gone, so that a country code or a leading
+     * zero makes no difference. Empty for fewer than five digits.
+     */
+    [[nodiscard]] static QString numberKey(const QString &number);
+
+    /**
+     * The shown name of a stored contact for the numberKey() of each of its
+     * numbers. Where contacts share a number, the first in name order wins.
+     */
+    [[nodiscard]] Result<QHash<QString, QString>> namesByNumber() const;
+
     /// Accounts and groups from the last pull; empty before the first.
     [[nodiscard]] Result<codec::PbMetadata> metadata() const;
 
@@ -101,9 +117,13 @@ public:
 private:
     [[nodiscard]] Result<void> writeRows(const QString &connectionName,
                                          const sync::SyncDelta &delta);
+    /// Deletes the blobs in m_releasedBlobs that no contact refers to.
+    void pruneReleasedBlobs();
 
     ProfileStore *m_profile = nullptr;
     ContactChanges m_lastChanges;
+    /// Photo blobs of rows that the running change replaces or deletes.
+    QSet<QString> m_releasedBlobs;
 };
 
 } // namespace qpm::core::store

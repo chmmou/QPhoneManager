@@ -392,6 +392,17 @@ bool ContactsArea::writeMessage(const QString &number)
     return true;
 }
 
+bool ContactsArea::startNewContact(const QString &name, const QString &number)
+{
+    if (!canEdit()) {
+        report(Error(ErrorCode::ConnectionClosed, QStringLiteral("Not connected")));
+        return false;
+    }
+    m_editor->newContactWith(name, number);
+    Q_EMIT newContactStarted();
+    return true;
+}
+
 bool ContactsArea::findDuplicates()
 {
     if (!m_store) {

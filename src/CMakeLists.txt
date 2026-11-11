@@ -6,6 +6,8 @@ qt_add_library(qpm_core STATIC
     core/Version.cpp
     core/codec/AtText.h
     core/codec/AtText.cpp
+    core/codec/CallLogCodec.h
+    core/codec/CallLogCodec.cpp
     core/codec/CsvTable.h
     core/codec/CsvTable.cpp
     core/codec/Limits.h
@@ -37,12 +39,16 @@ qt_add_library(qpm_core STATIC
     core/protocol/TcpTransport.h
     core/protocol/TcpTransport.cpp
     core/protocol/Transport.h
+    core/service/CallLogService.h
+    core/service/CallLogService.cpp
     core/service/ContactsService.h
     core/service/ContactsService.cpp
     core/service/DeviceStatusService.h
     core/service/DeviceStatusService.cpp
     core/sync/IrmcSync.h
     core/sync/IrmcSync.cpp
+    core/store/CallStore.h
+    core/store/CallStore.cpp
     core/store/ContactStore.h
     core/store/ContactStore.cpp
     core/store/ProfileStore.h
@@ -129,6 +135,9 @@ set(qpm_ui_qml_files
     dialogs/QrConnectDialog.qml
     dialogs/SettingsDialog.qml
     pages/OverviewPage.qml
+    pages/calls/CallDetail.qml
+    pages/calls/CallList.qml
+    pages/calls/CallsPage.qml
     pages/contacts/ContactDetail.qml
     pages/contacts/ContactForm.qml
     pages/contacts/ContactList.qml
@@ -171,6 +180,10 @@ qt_add_qml_module(qpm_ui
         ui/Settings.cpp
         ui/TintedIcon.h
         ui/TintedIcon.cpp
+        ui/calls/CallListModel.h
+        ui/calls/CallListModel.cpp
+        ui/calls/CallsArea.h
+        ui/calls/CallsArea.cpp
         ui/contacts/ContactDetailModel.h
         ui/contacts/ContactDetailModel.cpp
         ui/contacts/ContactEditor.h
@@ -215,6 +228,9 @@ set(qpm_ui_icons
     tabler/message.svg
     tabler/messages.svg
     tabler/notes.svg
+    tabler/phone-incoming.svg
+    tabler/phone-outgoing.svg
+    tabler/phone-x.svg
     tabler/phone.svg
     tabler/photo.svg
     tabler/plug-connected-x.svg
@@ -243,6 +259,7 @@ target_include_directories(qpm_ui
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/ui
+        ${CMAKE_CURRENT_SOURCE_DIR}/ui/calls
         ${CMAKE_CURRENT_SOURCE_DIR}/ui/contacts
 )
 target_link_libraries(qpm_ui
