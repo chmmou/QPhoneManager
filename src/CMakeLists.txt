@@ -29,6 +29,8 @@ qt_add_library(qpm_core STATIC
     core/protocol/TcpTransport.h
     core/protocol/TcpTransport.cpp
     core/protocol/Transport.h
+    core/service/DeviceStatusService.h
+    core/service/DeviceStatusService.cpp
     core/sync/IrmcSync.h
     core/sync/IrmcSync.cpp
     core/store/ProfileStore.h
@@ -48,6 +50,10 @@ target_link_libraries(qpm_core
 qpm_set_project_warnings(qpm_core)
 
 qt_add_library(qpm_bluetooth STATIC
+    bluetooth/BluetoothDeviceFinder.h
+    bluetooth/BluetoothDeviceFinder.cpp
+    bluetooth/RfcommTransport.h
+    bluetooth/RfcommTransport.cpp
     bluetooth/SerialPortProfile.h
     bluetooth/SerialPortProfile.cpp
 )
@@ -89,13 +95,24 @@ set(qpm_ui_qml_files
     components/DisconnectedBanner.qml
     components/EmptyState.qml
     components/FocusRing.qml
+    components/FoundPhoneList.qml
+    components/InfoRow.qml
     components/ListDetailView.qml
+    components/MessageBar.qml
+    components/OverviewCard.qml
     components/SectionEntry.qml
     components/SectionPage.qml
     components/Sections.qml
+    components/SignalBars.qml
     components/Sidebar.qml
     components/SidebarButton.qml
     components/StatusBar.qml
+    dialogs/ConnectDialog.qml
+    dialogs/PinDialog.qml
+    dialogs/ProfilesDialog.qml
+    dialogs/QrConnectDialog.qml
+    dialogs/SettingsDialog.qml
+    pages/OverviewPage.qml
 )
 set(qpm_ui_qml_sources "")
 foreach(file IN LISTS qpm_ui_qml_files)
@@ -117,28 +134,56 @@ qt_add_qml_module(qpm_ui
     QML_FILES
         ${qpm_ui_qml_sources}
     SOURCES
+        ui/AppController.h
+        ui/AppController.cpp
+        ui/DeviceStatusModel.h
+        ui/DeviceStatusModel.cpp
+        ui/FoundPhoneModel.h
+        ui/FoundPhoneModel.cpp
+        ui/ProfileListModel.h
+        ui/ProfileListModel.cpp
+        ui/QrCodeImage.h
+        ui/QrCodeImage.cpp
+        ui/QrCodeProvider.h
+        ui/QrCodeProvider.cpp
         ui/Settings.h
         ui/Settings.cpp
+        ui/TintedIcon.h
+        ui/TintedIcon.cpp
 )
 
 set(qpm_ui_icons
     app/qphonemanager.svg
     tabler/address-book.svg
+    tabler/alert-triangle.svg
+    tabler/antenna-bars-5.svg
     tabler/apps.svg
+    tabler/battery.svg
     tabler/bell.svg
+    tabler/bluetooth.svg
     tabler/calendar.svg
     tabler/checklist.svg
     tabler/chevron-left.svg
+    tabler/cpu.svg
+    tabler/database.svg
+    tabler/device-mobile.svg
     tabler/folder.svg
     tabler/help.svg
     tabler/home.svg
+    tabler/info-circle.svg
     tabler/messages.svg
     tabler/notes.svg
     tabler/phone.svg
+    tabler/plug-connected-x.svg
     tabler/plug-connected.svg
+    tabler/qrcode.svg
     tabler/refresh.svg
     tabler/screen-share.svg
     tabler/settings.svg
+    tabler/usb.svg
+    tabler/users.svg
+    tabler/wifi.svg
+    tabler/x.svg
 )
 list(TRANSFORM qpm_ui_icons PREPEND "${PROJECT_SOURCE_DIR}/res/icons/")
 qt_add_resources(qpm_ui "qpm_ui_icons"
@@ -153,8 +198,14 @@ target_include_directories(qpm_ui
 )
 target_link_libraries(qpm_ui
     PUBLIC
+        qpm_core
+        qpm_bluetooth
+        qpm_platform
         Qt6::Qml
         Qt6::Quick
+    PRIVATE
+        qrcodegen
+        Qt6::Svg
 )
 qpm_set_project_warnings(qpm_ui)
 qpm_set_project_warnings(qpm_uiplugin)

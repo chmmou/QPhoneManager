@@ -8,7 +8,7 @@ import QtQuick.Layouts
 ApplicationWindow {
     id: root
 
-    readonly property bool connected: false
+    readonly property bool connected: AppController.connected
     readonly property bool hasData: false
     property int currentSection: 0
 
@@ -33,10 +33,39 @@ ApplicationWindow {
         title: sectionCatalog.all[root.currentSection].title
         connected: root.connected
         canSearch: root.hasData
+        onSyncRequested: AppController.syncAll()
+        onConnectRequested: root.connectRequested()
+        onPhonesRequested: profilesDialog.open()
     }
 
-    footer: StatusBar {
-        connected: root.connected
+    footer: StatusBar {}
+
+    onConnectRequested: connectDialog.open()
+    Component.onCompleted: AppController.start()
+
+    Connections {
+        target: AppController
+
+        function onErrorOccurred(message: string): void {
+            messageBar.show(message, true);
+        }
+
+        function onSyncFinished(summary: string): void {
+            messageBar.show(summary, false);
+        }
+
+        function onPinRequested(remainingTries: int, wrongPin: bool): void {
+            pinDialog.remainingTries = remainingTries;
+            pinDialog.wrongPin = wrongPin;
+            pinDialog.open();
+        }
+
+        function onConnectionStateChanged(): void {
+            if (pinDialog.opened && !AppController.connecting)
+                pinDialog.close();
+            if (AppController.connected && messageBar.isError)
+                messageBar.text = "";
+        }
     }
 
     Sections {
@@ -51,6 +80,7 @@ ApplicationWindow {
         onSearchRequested: appHeader.focusSearch()
         onSyncRequested: appHeader.syncRequested()
         onQuitRequested: Qt.quit()
+        onSettingsRequested: settingsDialog.open()
     }
 
     RowLayout {
@@ -67,6 +97,7 @@ ApplicationWindow {
             currentIndex: root.currentSection
             compact: root.width < Theme.compactWindowWidth
             onSectionSelected: index => root.currentSection = index
+            onSettingsRequested: settingsDialog.open()
         }
 
         Rectangle {
@@ -82,8 +113,16 @@ ApplicationWindow {
 
             DisconnectedBanner {
                 Layout.fillWidth: true
-                visible: !root.connected
+                visible: !root.connected && !AppController.connecting
+                dataDate: AppController.lastConnectionText
                 onConnectRequested: root.connectRequested()
+            }
+
+            MessageBar {
+                id: messageBar
+
+                objectName: "messageBar"
+                Layout.fillWidth: true
             }
 
             StackLayout {
@@ -103,5 +142,42 @@ ApplicationWindow {
                 }
             }
         }
+    }
+
+    ConnectDialog {
+        id: connectDialog
+
+        objectName: "connectDialog"
+        onQrCodeRequested: {
+            connectDialog.close();
+            qrDialog.open();
+        }
+    }
+
+    QrConnectDialog {
+        id: qrDialog
+
+        objectName: "qrDialog"
+    }
+
+    PinDialog {
+        id: pinDialog
+
+        objectName: "pinDialog"
+        canRemember: AppController.canRememberPin
+        onPinEntered: (pin, remember) => AppController.submitPin(pin, remember)
+        onCancelled: AppController.cancelPin()
+    }
+
+    SettingsDialog {
+        id: settingsDialog
+
+        objectName: "settingsDialog"
+    }
+
+    ProfilesDialog {
+        id: profilesDialog
+
+        objectName: "profilesDialog"
     }
 }

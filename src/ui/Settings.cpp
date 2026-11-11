@@ -52,6 +52,16 @@ QString clipboardSyncKey()
     return QStringLiteral("clipboard/sync");
 }
 
+QString dataDirectoryKey()
+{
+    return QStringLiteral("storage/dataDirectory");
+}
+
+QString lastDeviceKey()
+{
+    return QStringLiteral("connection/lastDevice");
+}
+
 QStringList defaultConnectionOrder()
 {
     return {QStringLiteral("usb"), QStringLiteral("wifi"), QStringLiteral("bluetooth")};
@@ -211,6 +221,41 @@ bool Settings::clipboardSync() const
 void Settings::setClipboardSync(bool enabled)
 {
     setFlag(clipboardSyncKey(), false, enabled, &Settings::clipboardSyncChanged);
+}
+
+QString Settings::dataDirectory() const
+{
+    const QString path = m_settings->value(dataDirectoryKey()).toString();
+    return QDir::isAbsolutePath(path) ? QDir::cleanPath(path) : QString();
+}
+
+void Settings::setDataDirectory(const QString &path)
+{
+    if (!path.isEmpty() && !QDir::isAbsolutePath(path))
+        return;
+    const QString cleaned = path.isEmpty() ? QString() : QDir::cleanPath(path);
+    if (cleaned == dataDirectory())
+        return;
+    m_settings->setValue(dataDirectoryKey(), cleaned);
+    Q_EMIT dataDirectoryChanged();
+}
+
+QString Settings::lastDevice() const
+{
+    return m_settings->value(lastDeviceKey()).toString();
+}
+
+void Settings::setLastDevice(const QString &deviceId)
+{
+    if (deviceId == lastDevice())
+        return;
+    m_settings->setValue(lastDeviceKey(), deviceId);
+    Q_EMIT lastDeviceChanged();
+}
+
+QString Settings::pathFromUrl(const QUrl &url) const
+{
+    return url.isLocalFile() ? QDir::cleanPath(url.toLocalFile()) : QString();
 }
 
 void Settings::setFlag(const QString &key, bool defaultValue, bool enabled,

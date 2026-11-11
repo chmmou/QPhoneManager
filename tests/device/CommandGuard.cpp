@@ -166,12 +166,10 @@ std::optional<QString> CommandGuard::blockReason(const QString &command)
             return std::nullopt;
         return QStringLiteral("ATD places a call");
     }
+    // Hanging up with ATH or AT+CHUP stays allowed, so that a call test can
+    // end the call it placed.
     if (upper.startsWith(QLatin1StringView("ATA")))
         return QStringLiteral("ATA answers a call");
-    if (upper.startsWith(QLatin1StringView("ATH")))
-        return QStringLiteral("ATH ends a call");
-    if (upper.startsWith(QLatin1StringView("AT+CHUP")))
-        return QStringLiteral("AT+CHUP ends a call");
     static constexpr QLatin1StringView sendPrefix("AT+CMGS=");
     if (upper.startsWith(sendPrefix) && upper != QLatin1StringView("AT+CMGS=?")) {
         if (isAllowedMessage(upper.sliced(sendPrefix.size())))

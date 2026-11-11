@@ -92,10 +92,22 @@ The test presets run without a display (`QT_QPA_PLATFORM=offscreen`). The
 `.clazy`. The test of the PIN storage starts its own `dbus-daemon` and is
 skipped when that program is missing.
 
-Tests that need a phone carry the CTest label `device`. They run only when two
-environment variables are set: `QPM_TEST_ADB` with the absolute path to `adb`,
-and `QPM_TEST_SERIAL` with the serial number that `adb devices` shows. These
-tests never send text messages and never start or answer calls.
+Tests that need a phone carry the CTest label `device`. Without a phone they
+report themselves as skipped. They read these environment variables:
+
+| Variable | Meaning |
+|---|---|
+| `QPM_TEST_ADB` | Absolute path to `adb`. Required. |
+| `QPM_TEST_SERIAL` | Serial number of the phone as `adb devices` shows it. Required. |
+| `QPM_TEST_SMS_TO` | The only number a test may send a text message to. Optional. |
+| `QPM_TEST_CALL_TO` | The only number a test may call. Optional. |
+
+All traffic of these tests goes through a guard. It lets a text message
+through only to the number in `QPM_TEST_SMS_TO` and a call only to the number
+in `QPM_TEST_CALL_TO`. Without these variables, every message and every call
+is refused. Answering a call is always refused; hanging up is allowed, so a
+call test can end its own call. Keep the numbers out of the repository, for
+example in a file outside it that you load before the run.
 
 ```bash
 QPM_TEST_ADB=$HOME/Android/Sdk/platform-tools/adb QPM_TEST_SERIAL=emulator-5554 \

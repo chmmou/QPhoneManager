@@ -11,6 +11,8 @@ ToolBar {
     property bool canSearch: false
 
     signal syncRequested
+    signal connectRequested
+    signal phonesRequested
 
     Material.foreground: Theme.foregroundOnSurface
     background: Rectangle {
@@ -28,13 +30,34 @@ ToolBar {
 
             objectName: "deviceBox"
             Layout.preferredWidth: deviceBox.font.pixelSize * 12
-            model: []
+            model: AppController.devices
+            textRole: "displayName"
+            valueRole: "deviceId"
+            currentIndex: AppController.devices.count > 0 ? AppController.devices.indexOf(AppController.currentDevice) : -1
             enabled: deviceBox.count > 0
-            displayText: deviceBox.count > 0 ? deviceBox.currentText : qsTr("No phone")
+            displayText: deviceBox.currentIndex >= 0 ? deviceBox.currentText : qsTr("No phone")
             Accessible.name: qsTr("Phone")
+            onActivated: AppController.selectDevice(deviceBox.currentValue)
 
             FocusRing {
                 shown: deviceBox.visualFocus
+            }
+        }
+
+        ToolButton {
+            id: phonesButton
+
+            objectName: "phonesButton"
+            text: qsTr("Manage phones")
+            display: AbstractButton.IconOnly
+            icon.source: Theme.icon("users")
+            Accessible.name: phonesButton.text
+            ToolTip.visible: phonesButton.hovered
+            ToolTip.text: phonesButton.text
+            onClicked: root.phonesRequested()
+
+            FocusRing {
+                shown: phonesButton.visualFocus
             }
         }
 
@@ -62,7 +85,7 @@ ToolBar {
             text: qsTr("Sync")
             display: AbstractButton.IconOnly
             icon.source: Theme.icon("refresh")
-            enabled: root.connected
+            enabled: root.connected && !AppController.syncing
             Accessible.name: syncButton.text
             ToolTip.visible: syncButton.hovered
             ToolTip.text: syncButton.text
@@ -70,6 +93,28 @@ ToolBar {
 
             FocusRing {
                 shown: syncButton.visualFocus
+            }
+        }
+
+        ToolButton {
+            id: connectionButton
+
+            objectName: "connectionButton"
+            text: root.connected || AppController.connecting ? qsTr("Disconnect") : qsTr("Connect")
+            display: AbstractButton.IconOnly
+            icon.source: Theme.icon(root.connected || AppController.connecting ? "plug-connected-x" : "plug-connected")
+            Accessible.name: connectionButton.text
+            ToolTip.visible: connectionButton.hovered
+            ToolTip.text: connectionButton.text
+            onClicked: {
+                if (root.connected || AppController.connecting)
+                    AppController.disconnectPhone();
+                else
+                    root.connectRequested();
+            }
+
+            FocusRing {
+                shown: connectionButton.visualFocus
             }
         }
     }

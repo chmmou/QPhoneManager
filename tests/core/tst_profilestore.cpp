@@ -10,6 +10,7 @@
 #include <QCryptographicHash>
 #include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QSignalSpy>
 #include <QSqlDatabase>
 #include <QSqlQuery>
@@ -130,6 +131,9 @@ private Q_SLOTS:
     void fullDeltaReplacesTheArea();
     void callsBeforeOpenFail();
     void syncCounterPersistsAcrossStoreInstances();
+    void removedProfileIsGoneWithItsData();
+    void removingAnUnknownProfileSucceeds();
+    void removeDoesNotFollowALinkOutOfTheFolder();
 
 private:
     [[nodiscard]] std::unique_ptr<ProfileStore> openStore(const QString &deviceId) const;
@@ -525,6 +529,49 @@ void TestProfileStore::syncCounterPersistsAcrossStoreInstances()
     QCOMPARE(store->objectHash(IrmcDomain::Notes, 2).value_or(QByteArray()),
              sha1(note(2, "Second, edited")));
     QVERIFY(phone.protocolErrors().isEmpty());
+}
+
+void TestProfileStore::removedProfileIsGoneWithItsData()
+{
+    for (const QString &id : {QStringLiteral("dev-1"), QStringLiteral("dev-2")}) {
+        const std::unique_ptr<ProfileStore> store = openStore(id);
+        QVERIFY(store);
+        DeviceProfile profile;
+        profile.deviceId = id;
+        profile.displayName = id;
+        QVERIFY(store->saveProfile(profile).hasValue());
+        QVERIFY(store->putBlob("photo").hasValue());
+    }
+
+    QVERIFY(ProfileStore::removeProfile(m_root->path(), QStringLiteral("dev-1")).hasValue());
+
+    QVERIFY(!QFileInfo::exists(m_root->filePath(QStringLiteral("dev-1"))));
+    const Result<QList<DeviceProfile>> profiles = ProfileStore::listProfiles(m_root->path());
+    QVERIFY(profiles.hasValue());
+    QCOMPARE(profiles.value().size(), 1);
+    QCOMPARE(profiles.value().first().deviceId, QStringLiteral("dev-2"));
+}
+
+void TestProfileStore::removingAnUnknownProfileSucceeds()
+{
+    QVERIFY(ProfileStore::removeProfile(m_root->path(), QStringLiteral("nobody")).hasValue());
+    QCOMPARE(ProfileStore::removeProfile(m_root->path(), QString()).error().code(),
+             ErrorCode::InvalidInput);
+}
+
+void TestProfileStore::removeDoesNotFollowALinkOutOfTheFolder()
+{
+    QTemporaryDir outside;
+    QVERIFY(outside.isValid());
+    QFile keep(outside.filePath(QStringLiteral("keep.txt")));
+    QVERIFY(keep.open(QIODevice::WriteOnly));
+    keep.close();
+    QVERIFY(QFile::link(outside.path(), m_root->filePath(QStringLiteral("dev-1"))));
+
+    const Result<void> removed = ProfileStore::removeProfile(m_root->path(), QStringLiteral("dev-1"));
+
+    QCOMPARE(removed.error().code(), ErrorCode::InvalidInput);
+    QVERIFY(QFileInfo::exists(keep.fileName()));
 }
 
 QTEST_GUILESS_MAIN(TestProfileStore)

@@ -13,12 +13,12 @@ namespace qpm::test {
 
 /**
  * A transport for tests against a real phone that refuses to pass on anything
- * that sends a text message or places, answers or ends a call: ATD, ATA, ATH,
- * AT+CHUP, every AT+CMGS= except the probe AT+CMGS=?, AT*NOTIACTION, an OBEX
+ * that sends a text message or places or answers a call: ATD, ATA, every
+ * AT+CMGS= except the probe AT+CMGS=?, AT*NOTIACTION, an OBEX
  * PUT whose name contains "/msg" other than telecom/msg/setflags, since the
  * phone hands such a PUT to its message handler, and an OBEX PUT it cannot
  * decode. Each line of a frame is checked after trimming it the way the phone
- * does, without regard to case.
+ * does, without regard to case. Hanging up with ATH or AT+CHUP passes.
  *
  * Two exceptions come from the environment. AT+CMGS=<number>,<text>,... and
  * AT+CMGS=<number>,,<flags> pass when <number> is the one in QPM_TEST_SMS_TO,

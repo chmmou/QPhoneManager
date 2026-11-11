@@ -12,6 +12,7 @@ Pane {
     property bool compact: false
 
     signal sectionSelected(int index)
+    signal settingsRequested
 
     padding: 0
 
@@ -56,7 +57,7 @@ Pane {
             text: qsTr("Settings")
             iconName: "settings"
             compact: root.compact
-            enabled: false
+            onClicked: root.settingsRequested()
         }
 
         SidebarButton {

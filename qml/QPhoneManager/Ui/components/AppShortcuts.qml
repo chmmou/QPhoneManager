@@ -14,6 +14,7 @@ Item {
     signal searchRequested
     signal syncRequested
     signal quitRequested
+    signal settingsRequested
 
     Instantiator {
         model: Math.min(root.sectionCount, 9)
@@ -36,6 +37,11 @@ Item {
         sequences: [StandardKey.Refresh]
         enabled: root.canSync
         onActivated: root.syncRequested()
+    }
+
+    Shortcut {
+        sequence: "Ctrl+,"
+        onActivated: root.settingsRequested()
     }
 
     Shortcut {

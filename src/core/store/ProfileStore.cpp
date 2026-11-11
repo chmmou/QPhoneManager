@@ -245,6 +245,30 @@ Result<QList<DeviceProfile>> ProfileStore::listProfiles(const QString &profilesD
     return profiles;
 }
 
+Result<void> ProfileStore::removeProfile(const QString &profilesDirectory,
+                                         const QString &deviceId)
+{
+    if (deviceId.isEmpty())
+        return Error(ErrorCode::InvalidInput, QStringLiteral("Empty device id"));
+    const QFileInfo folder(QDir(profilesDirectory).filePath(directoryName(deviceId)));
+    if (!folder.exists())
+        return {};
+    const QString base = QFileInfo(profilesDirectory).canonicalFilePath();
+    const QString target = folder.canonicalFilePath();
+    // A folder that is a link to somewhere else must not take that place
+    // with it.
+    if (base.isEmpty() || folder.isSymLink() || !target.startsWith(base + u'/')) {
+        return Error(ErrorCode::InvalidInput,
+                     QStringLiteral("The profile folder %1 is not below the profiles folder")
+                         .arg(folder.fileName()));
+    }
+    if (!QDir(target).removeRecursively()) {
+        return Error(ErrorCode::IoFailure,
+                     QStringLiteral("Could not delete the profile folder %1").arg(folder.fileName()));
+    }
+    return {};
+}
+
 Result<void> ProfileStore::open()
 {
     if (m_open)

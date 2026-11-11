@@ -3,6 +3,7 @@
 #include <QObject>
 #include <QString>
 #include <QStringList>
+#include <QUrl>
 #include <QtQmlIntegration/qqmlintegration.h>
 
 class QSettings;
@@ -51,6 +52,15 @@ class Settings : public QObject
                    NOTIFY notificationsEnabledChanged FINAL)
     Q_PROPERTY(bool clipboardSync READ clipboardSync WRITE setClipboardSync NOTIFY
                    clipboardSyncChanged FINAL)
+    /**
+     * Absolute path of the folder that holds the data of the phones; empty
+     * means the default below the application data folder. A relative path
+     * is ignored.
+     */
+    Q_PROPERTY(QString dataDirectory READ dataDirectory WRITE setDataDirectory NOTIFY
+                   dataDirectoryChanged FINAL)
+    /// Device id of the phone shown last; the start-up connects to it.
+    Q_PROPERTY(QString lastDevice READ lastDevice WRITE setLastDevice NOTIFY lastDeviceChanged FINAL)
 
 public:
     enum class ColorScheme { System, Light, Dark };
@@ -79,6 +89,13 @@ public:
     void setNotificationsEnabled(bool enabled);
     [[nodiscard]] bool clipboardSync() const;
     void setClipboardSync(bool enabled);
+    [[nodiscard]] QString dataDirectory() const;
+    void setDataDirectory(const QString &path);
+    [[nodiscard]] QString lastDevice() const;
+    void setLastDevice(const QString &deviceId);
+
+    /// The local path of a file dialog result; empty for anything but a local file.
+    [[nodiscard]] Q_INVOKABLE QString pathFromUrl(const QUrl &url) const;
 
 Q_SIGNALS:
     void adbPathChanged();
@@ -90,6 +107,8 @@ Q_SIGNALS:
     void reduceMotionChanged();
     void notificationsEnabledChanged();
     void clipboardSyncChanged();
+    void dataDirectoryChanged();
+    void lastDeviceChanged();
 
 private:
     void setFlag(const QString &key, bool defaultValue, bool enabled, void (Settings::*changed)());

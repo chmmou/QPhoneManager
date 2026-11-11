@@ -45,6 +45,27 @@ QByteArray dumpOf(const QList<FakeSyncObject> &objects)
     return dump;
 }
 
+// A transport whose write of the three bytes 83 00 03 fails and ends the
+// stream before write() returns, as a socket does when the far end is gone.
+class WriteFailingTransport : public TcpTransport
+{
+    Q_OBJECT
+
+public:
+    using TcpTransport::TcpTransport;
+
+    void write(const QByteArray &frame) override
+    {
+        if (m_failOnContinue && frame == QByteArray::fromHex("830003")) {
+            Q_EMIT closed();
+            return;
+        }
+        TcpTransport::write(frame);
+    }
+
+    bool m_failOnContinue = false;
+};
+
 } // namespace
 
 class TestObexClient : public QObject
@@ -78,6 +99,8 @@ private Q_SLOTS:
     void phoneExceptionKeepsOnlyItsClassName();
     void refusedConnectReportsItsMappedError_data();
     void refusedConnectReportsItsMappedError();
+    void streamEndingWhileAnsweringFailsTheRequestCleanly_data();
+    void streamEndingWhileAnsweringFailsTheRequestCleanly();
 
 private:
     [[nodiscard]] bool connectTo(ObexClient::Target target);
@@ -510,6 +533,47 @@ void TestObexClient::refusedConnectReportsItsMappedError()
 
     QVERIFY(!connected.result().hasValue());
     QCOMPARE(int(connected.result().error().code()), code);
+    QVERIFY(!m_obex->isConnected());
+}
+
+void TestObexClient::streamEndingWhileAnsweringFailsTheRequestCleanly_data()
+{
+    QTest::addColumn<int>("notes");
+    QTest::addColumn<int>("padding");
+
+    QTest::newRow("continue of a long body") << 200 << 0;
+    QTest::newRow("answer to a keep-alive") << 1 << 1;
+}
+
+// Answering a continue or a keep-alive can end the session before the write
+// returns. That failed and freed the running request, which was then still
+// written to and read from.
+void TestObexClient::streamEndingWhileAnsweringFailsTheRequestCleanly()
+{
+    QFETCH(int, notes);
+    QFETCH(int, padding);
+    m_phone->setObjects(QStringLiteral("notes"), manyNotes(notes));
+    m_phone->config().paddingBeforeReply = padding;
+    m_obex.reset();
+    m_session.reset();
+    m_transport.reset();
+    auto failing = std::make_unique<WriteFailingTransport>(QStringLiteral("127.0.0.1"),
+                                                           m_phone->port());
+    WriteFailingTransport *transport = failing.get();
+    m_transport = std::move(failing);
+    m_session = std::make_unique<AtSession>(m_transport.get());
+    m_obex = std::make_unique<ObexClient>(m_session.get());
+    QSignalSpy opened(m_transport.get(), &Transport::opened);
+    m_transport->open();
+    QVERIFY(opened.wait());
+    QVERIFY(connectTo(ObexClient::Target::IrmcSync));
+    transport->m_failOnContinue = true;
+
+    const QFuture<Result<ObexResponse>> dump = m_obex->get(QStringLiteral("telecom/notes.vnt"));
+    QVERIFY(waitFor(dump));
+
+    QCOMPARE(dump.result().error().code(), ErrorCode::ConnectionClosed);
+    QVERIFY(m_session->isEnded());
     QVERIFY(!m_obex->isConnected());
 }
 

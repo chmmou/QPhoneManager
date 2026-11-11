@@ -36,6 +36,7 @@ Item {
         Button {
             id: actionButton
 
+            objectName: root.objectName.length > 0 ? root.objectName + "Action" : ""
             Layout.alignment: Qt.AlignHCenter
             visible: root.actionText.length > 0
             text: root.actionText

@@ -86,6 +86,16 @@ public:
     [[nodiscard]] static Result<QList<DeviceProfile>> listProfiles(const QString &profilesDirectory);
 
     /**
+     * Deletes the folder of the phone `deviceId` below `profilesDirectory`
+     * with all its data. Succeeds when there is no such folder. A store of
+     * that phone must not be open. Fails with ErrorCode::InvalidInput for an
+     * empty device id or a folder that resolves outside `profilesDirectory`,
+     * and with ErrorCode::IoFailure when not everything could be deleted.
+     */
+    [[nodiscard]] static Result<void> removeProfile(const QString &profilesDirectory,
+                                                    const QString &deviceId);
+
+    /**
      * Creates the folders and the database if they are missing and migrates
      * the schema. Fails with ErrorCode::InvalidInput for an empty device id,
      * ErrorCode::NotSupported when the database is newer than this program or
