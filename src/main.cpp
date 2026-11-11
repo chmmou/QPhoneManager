@@ -53,6 +53,10 @@ int main(int argc, char *argv[])
     QApplication::setWindowIcon(QIcon(QStringLiteral(":/icons/app/qphonemanager.svg")));
 
     const QString language = uiLanguage(qpm::ui::Settings().language());
+    // Numbers, dates and sizes follow the language of the texts; the region
+    // of the system stays when it already speaks that language.
+    if (QLocale::system().name().section(u'_', 0, 0) != language)
+        QLocale::setDefault(QLocale(language));
     QTranslator appTranslator;
     QTranslator qtBaseTranslator;
     QTranslator qtQuickTranslator;

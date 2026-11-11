@@ -25,6 +25,8 @@ private Q_SLOTS:
     void changesSurviveANewInstance();
     void setterSignalsOnlyRealChanges();
     void relativeAdbPathIsIgnored();
+    void relativeDataDirectoryIsIgnored();
+    void onlyLocalFilesGiveAPath();
     void connectionOrderIsAlwaysAPermutation_data();
     void connectionOrderIsAlwaysAPermutation();
     void unknownLanguageIsIgnored();
@@ -67,6 +69,8 @@ void TestSettings::freshSettingsHaveTheDefaults()
     QVERIFY(!settings.reduceMotion());
     QVERIFY(settings.notificationsEnabled());
     QVERIFY(!settings.clipboardSync());
+    QVERIFY(settings.dataDirectory().isEmpty());
+    QVERIFY(settings.lastDevice().isEmpty());
 }
 
 void TestSettings::changesSurviveANewInstance()
@@ -83,6 +87,8 @@ void TestSettings::changesSurviveANewInstance()
         settings.setReduceMotion(true);
         settings.setNotificationsEnabled(false);
         settings.setClipboardSync(true);
+        settings.setDataDirectory(QStringLiteral("/data/phones/"));
+        settings.setLastDevice(QStringLiteral("dev-1"));
     }
 
     const Settings settings(fileName());
@@ -97,6 +103,8 @@ void TestSettings::changesSurviveANewInstance()
     QVERIFY(settings.reduceMotion());
     QVERIFY(!settings.notificationsEnabled());
     QVERIFY(settings.clipboardSync());
+    QCOMPARE(settings.dataDirectory(), QStringLiteral("/data/phones"));
+    QCOMPARE(settings.lastDevice(), QStringLiteral("dev-1"));
 }
 
 void TestSettings::setterSignalsOnlyRealChanges()
@@ -130,6 +138,33 @@ void TestSettings::relativeAdbPathIsIgnored()
 
     QCOMPARE(settings.adbPath(), QStringLiteral("/usr/bin/adb"));
     QCOMPARE(spy.count(), 0);
+}
+
+void TestSettings::relativeDataDirectoryIsIgnored()
+{
+    Settings settings(fileName());
+    settings.setDataDirectory(QStringLiteral("/data/phones"));
+    QSignalSpy spy(&settings, &Settings::dataDirectoryChanged);
+
+    settings.setDataDirectory(QStringLiteral("phones"));
+    settings.setDataDirectory(QStringLiteral("/data/phones/."));
+
+    QCOMPARE(settings.dataDirectory(), QStringLiteral("/data/phones"));
+    QCOMPARE(spy.count(), 0);
+    settings.setDataDirectory(QString());
+    QVERIFY(settings.dataDirectory().isEmpty());
+    QCOMPARE(spy.count(), 1);
+}
+
+void TestSettings::onlyLocalFilesGiveAPath()
+{
+    const Settings settings(fileName());
+    QCOMPARE(settings.pathFromUrl(QUrl::fromLocalFile(QStringLiteral("/opt/sdk/adb"))),
+             QStringLiteral("/opt/sdk/adb"));
+    QCOMPARE(settings.pathFromUrl(QUrl(QStringLiteral("file:///home/a%20b/x"))),
+             QStringLiteral("/home/a b/x"));
+    QVERIFY(settings.pathFromUrl(QUrl(QStringLiteral("https://example.org/adb"))).isEmpty());
+    QVERIFY(settings.pathFromUrl(QUrl()).isEmpty());
 }
 
 void TestSettings::connectionOrderIsAlwaysAPermutation_data()

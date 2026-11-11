@@ -36,8 +36,17 @@ Item {
         }
     }
 
+    Component {
+        id: overview
+
+        OverviewPage {
+            onConnectRequested: root.connectRequested()
+        }
+    }
+
     Loader {
         anchors.fill: parent
-        sourceComponent: root.entry.hasList ? listAndDetail : placeholder
+        sourceComponent: root.entry.key === "overview" ? overview
+                                                       : (root.entry.hasList ? listAndDetail : placeholder)
     }
 }

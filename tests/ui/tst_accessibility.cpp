@@ -87,6 +87,9 @@ private Q_SLOTS:
 
     void everyControlHasANameAndARole_data();
     void everyControlHasANameAndARole();
+    void everyDialogControlHasANameAndARole_data();
+    void everyDialogControlHasANameAndARole();
+    void pinFieldKeepsThePinFromAssistiveTools();
     void focusChainReachesEveryControlOnce();
     void sectionShortcutsSwitchTheSection();
     void narrowWindowKeepsTheSidebarLabelsForAssistiveTools();
@@ -94,6 +97,8 @@ private Q_SLOTS:
 
 private:
     [[nodiscard]] QList<QQuickItem *> controls() const;
+    [[nodiscard]] QObject *openDialog(const QString &name);
+    void verifyNamesAndRoles(const QList<QQuickItem *> &found) const;
     [[nodiscard]] Settings *settings() const;
 
     QTemporaryDir m_config;
@@ -183,6 +188,95 @@ void TestAccessibility::everyControlHasANameAndARole()
         QVERIFY2(roles.contains(accessible->role()),
                  qPrintable(describe(item) + QStringLiteral(" role %1").arg(accessible->role())));
     }
+}
+
+QObject *TestAccessibility::openDialog(const QString &name)
+{
+    QObject *dialog = m_window->findChild<QObject *>(name);
+    if (!dialog)
+        return nullptr;
+    if (name == QLatin1StringView("connectDialog"))
+        dialog->setProperty("searchOnOpen", false);
+    QMetaObject::invokeMethod(dialog, "open");
+    if (!QTest::qWaitFor([dialog]() { return dialog->property("opened").toBool(); }))
+        return nullptr;
+    return dialog;
+}
+
+void TestAccessibility::verifyNamesAndRoles(const QList<QQuickItem *> &found) const
+{
+    const QSet<QAccessible::Role> roles = {
+        QAccessible::Button,   QAccessible::PushButton,   QAccessible::CheckBox,
+        QAccessible::ComboBox, QAccessible::EditableText, QAccessible::ListItem,
+        QAccessible::PageTab,  QAccessible::RadioButton,
+    };
+    for (QQuickItem *item : found) {
+        QAccessibleInterface *accessible = QAccessible::queryAccessibleInterface(item);
+        QVERIFY2(accessible, qPrintable(describe(item)));
+        QString name = accessible->text(QAccessible::Name);
+        if (name.isEmpty() && !QAccessible::isActive())
+            name = item->property("text").toString();
+        // Qt Quick 6.9 reports no name for a password field, only a
+        // description, and a screen reader announces that one.
+        if (name.isEmpty() && accessible->state().passwordEdit)
+            name = accessible->text(QAccessible::Description);
+        QVERIFY2(!name.trimmed().isEmpty(), qPrintable(describe(item)));
+        QVERIFY2(roles.contains(accessible->role()),
+                 qPrintable(describe(item) + QStringLiteral(" role %1").arg(accessible->role())));
+    }
+}
+
+void TestAccessibility::everyDialogControlHasANameAndARole_data()
+{
+    QTest::addColumn<QString>("dialog");
+    QTest::addColumn<QString>("tabs");
+
+    QTest::newRow("connect") << QStringLiteral("connectDialog") << QStringLiteral("connectTabs");
+    QTest::newRow("QR code") << QStringLiteral("qrDialog") << QString();
+    QTest::newRow("PIN") << QStringLiteral("pinDialog") << QString();
+    QTest::newRow("settings") << QStringLiteral("settingsDialog") << QStringLiteral("settingsTabs");
+    QTest::newRow("phones") << QStringLiteral("profilesDialog") << QString();
+}
+
+// The dialogs live in the overlay of the window; every page of a dialog with
+// tabs is looked at.
+void TestAccessibility::everyDialogControlHasANameAndARole()
+{
+    QFETCH(QString, dialog);
+    QFETCH(QString, tabs);
+    const QList<QQuickItem *> before = controls();
+    QObject *popup = openDialog(dialog);
+    QVERIFY(popup);
+    QQuickItem *tabBar = tabs.isEmpty() ? nullptr : findItem(m_window->contentItem(), tabs);
+    const int pages = tabBar ? tabBar->property("count").toInt() : 1;
+    QVERIFY(pages >= 1);
+
+    for (int page = 0; page < pages; ++page) {
+        if (tabBar)
+            tabBar->setProperty("currentIndex", page);
+        QList<QQuickItem *> found = controls();
+        found.removeIf([&before](QQuickItem *item) { return before.contains(item); });
+        QVERIFY2(!found.isEmpty(), qPrintable(dialog));
+        verifyNamesAndRoles(found);
+    }
+    QMetaObject::invokeMethod(popup, "close");
+    QTRY_VERIFY(!popup->property("visible").toBool());
+}
+
+void TestAccessibility::pinFieldKeepsThePinFromAssistiveTools()
+{
+    QObject *popup = openDialog(QStringLiteral("pinDialog"));
+    QVERIFY(popup);
+    QQuickItem *field = findItem(m_window->contentItem(), QStringLiteral("pinField"));
+    QVERIFY(field);
+    field->setProperty("text", QStringLiteral("482916"));
+
+    QAccessibleInterface *accessible = QAccessible::queryAccessibleInterface(field);
+    QVERIFY(accessible);
+    QVERIFY(accessible->state().passwordEdit);
+    QVERIFY(!accessible->text(QAccessible::Value).contains(QStringLiteral("482916")));
+    QVERIFY(!accessible->text(QAccessible::Name).contains(QStringLiteral("482916")));
+    QMetaObject::invokeMethod(popup, "close");
 }
 
 void TestAccessibility::focusChainReachesEveryControlOnce()

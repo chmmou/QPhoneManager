@@ -433,6 +433,10 @@ void FakePhone::handleAt(const QString &command)
               << QStringLiteral("/data:64000000000,32000000000");
     } else if (command == QLatin1StringView("AT*ECPU")) {
         lines << QStringLiteral("*ECPU: 12");
+    } else if (command == QLatin1StringView("AT*DISPLAY")) {
+        lines << QStringLiteral("*DISPLAY: 1080,2400,409.432,411.891,420");
+    } else if (command == QLatin1StringView("AT+CGMR")) {
+        lines << QStringLiteral("EX1A.260101.001");
     } else if (command == QLatin1StringView("AT*SIM") ||
                command == QLatin1StringView("AT*ECAM=1") ||
                command == QLatin1StringView("AT*NOTIFY=2") ||

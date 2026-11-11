@@ -11,3 +11,10 @@ target_link_libraries(tst_commandguard PRIVATE qpm_devicetest qpm_fakephone Qt6:
 qpm_set_project_warnings(tst_commandguard)
 add_test(NAME tst_commandguard COMMAND tst_commandguard)
 set_tests_properties(tst_commandguard PROPERTIES TIMEOUT 60)
+
+# Runs only against a phone, see the README; without one it reports itself as skipped.
+qt_add_executable(tst_device_connection tst_device_connection.cpp)
+target_link_libraries(tst_device_connection PRIVATE qpm_devicetest qpm_fakephone Qt6::Test)
+qpm_set_project_warnings(tst_device_connection)
+add_test(NAME tst_device_connection COMMAND tst_device_connection)
+set_tests_properties(tst_device_connection PROPERTIES TIMEOUT 300 LABELS device)

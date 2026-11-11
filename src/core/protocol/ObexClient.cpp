@@ -453,8 +453,11 @@ void ObexClient::handlePacket(const QByteArray &bytes)
                     Q_EMIT progress(counts.at(0).toULongLong(), counts.at(1).toULongLong());
             }
         }
+        const bool cancel = !request.aborting && request.isCanceled && request.isCanceled();
+        // A failing write can end the session before it returns, which fails
+        // and frees the request.
         writePacket(continueBytes());
-        if (!request.aborting && request.isCanceled && request.isCanceled())
+        if (cancel && m_current)
             startAbort(Error(ErrorCode::Cancelled, QStringLiteral("The request was cancelled")));
         return;
     }
@@ -490,8 +493,10 @@ void ObexClient::handlePacket(const QByteArray &bytes)
             startAbort(Error(ErrorCode::Cancelled, QStringLiteral("The request was cancelled")));
             return;
         }
-        writePacket(continueBytes());
+        // Counted before the write, which can end the session and free the
+        // request.
         ++request.outstanding;
+        writePacket(continueBytes());
         return;
     }
 
@@ -518,8 +523,10 @@ void ObexClient::startAbort(const Error &reason)
     request.aborting = true;
     request.abortError = reason;
     qCInfo(lcProtocol) << "OBEX request aborted:" << reason.message();
-    writePacket(QByteArray(1, char(obex::opAbort)) + QByteArray::fromHex("0003"));
+    // Counted before the write, which can end the session and free the
+    // request.
     ++request.outstanding;
+    writePacket(QByteArray(1, char(obex::opAbort)) + QByteArray::fromHex("0003"));
 }
 
 void ObexClient::finishCurrent(const Result<ObexPacket> &result)

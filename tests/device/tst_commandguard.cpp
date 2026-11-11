@@ -92,8 +92,6 @@ void TestCommandGuard::callAndMessageCommandsAreBlocked_data()
     QTest::newRow("dial") << QStringLiteral("ATD+49301234567;");
     QTest::newRow("dial with sim") << QStringLiteral("ATD+49301234567;,1");
     QTest::newRow("answer") << QStringLiteral("ATA");
-    QTest::newRow("hang up") << QStringLiteral("ATH");
-    QTest::newRow("hang up, other form") << QStringLiteral("AT+CHUP");
     QTest::newRow("lower case dial") << QStringLiteral("atd123;");
     QTest::newRow("send text") << QStringLiteral("AT+CMGS=+49301234567,Hello,1,1");
     QTest::newRow("send ping") << QStringLiteral("AT+CMGS=+49301234567,,2");
@@ -119,6 +117,9 @@ void TestCommandGuard::harmlessCommandsPass_data()
     QTest::newRow("version") << QStringLiteral("AT*APPVERSION=2.3.0");
     QTest::newRow("call log") << QStringLiteral("AT+CPBR=,");
     QTest::newRow("obex") << QStringLiteral("AT+CPROT=0");
+    QTest::newRow("hang up") << QStringLiteral("ATH");
+    QTest::newRow("hang up, other form") << QStringLiteral("AT+CHUP");
+    QTest::newRow("hang up, padded and mixed case") << QStringLiteral(" at+Chup\t");
 }
 
 void TestCommandGuard::harmlessCommandsPass()
@@ -126,6 +127,7 @@ void TestCommandGuard::harmlessCommandsPass()
     QFETCH(QString, command);
 
     QVERIFY(!CommandGuard::blockReason(command).has_value());
+    QVERIFY(!CommandGuard::blockReasonForFrame(command.toUtf8() + "\r\n").has_value());
 }
 
 void TestCommandGuard::schedulingAMessageOverObexIsBlocked()
@@ -171,8 +173,8 @@ void TestCommandGuard::paddedOrMixedCaseCommandsAreBlocked_data()
     QTest::newRow("leading space") << QByteArrayLiteral(" ATD+49301234567;\r\n");
     QTest::newRow("leading tab") << QByteArrayLiteral("\tATA\r\n");
     QTest::newRow("leading control character") << QByteArrayLiteral("\x01" "ATD123;\r\n");
-    QTest::newRow("mixed case") << QByteArrayLiteral("At+CHUP\r\n");
-    QTest::newRow("other mixed case") << QByteArrayLiteral("aTH\r\n");
+    QTest::newRow("mixed case") << QByteArrayLiteral("At+CMGS=23\r\n");
+    QTest::newRow("other mixed case") << QByteArrayLiteral("aTa\r\n");
 }
 
 // The phone trims a command before it reads it. The guard looked at the raw
@@ -300,8 +302,6 @@ void TestCommandGuard::everythingElseStaysBlockedWithAllowedNumbers_data()
     QTest::newRow("quoted number") << QStringLiteral("AT+CMGS=\"+491550000001\",Hello,1,1");
     QTest::newRow("pdu") << QStringLiteral("AT+CMGS=23");
     QTest::newRow("answer") << QStringLiteral("ATA");
-    QTest::newRow("hang up") << QStringLiteral("ATH");
-    QTest::newRow("hang up, other form") << QStringLiteral("AT+CHUP");
     QTest::newRow("notification action")
         << QStringLiteral("AT*NOTIACTION=1,tag,com.example,Reply");
 }
