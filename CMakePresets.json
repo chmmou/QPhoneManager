@@ -1,0 +1,139 @@
+{
+    "version": 6,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 28,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "base",
+            "hidden": true,
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_POSITION_INDEPENDENT_CODE": "ON"
+            }
+        },
+        {
+            "name": "base-debug",
+            "hidden": true,
+            "inherits": "base",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_CXX_FLAGS": "-Werror"
+            }
+        },
+        {
+            "name": "base-release",
+            "hidden": true,
+            "inherits": "base",
+            "description": "Release build hardened after the OpenSSF Compiler Options Hardening Guide",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_CXX_FLAGS": "-Werror -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=3 -fstack-protector-strong",
+                "CMAKE_EXE_LINKER_FLAGS": "-Wl,-z,relro,-z,now",
+                "CMAKE_SHARED_LINKER_FLAGS": "-Wl,-z,relro,-z,now",
+                "CMAKE_MODULE_LINKER_FLAGS": "-Wl,-z,relro,-z,now"
+            }
+        },
+        {
+            "name": "base-asan",
+            "hidden": true,
+            "inherits": "base",
+            "description": "AddressSanitizer together with UndefinedBehaviorSanitizer",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_CXX_FLAGS": "-Werror -fsanitize=address,undefined -fno-omit-frame-pointer -fno-sanitize-recover=undefined",
+                "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=address,undefined",
+                "CMAKE_SHARED_LINKER_FLAGS": "-fsanitize=address,undefined",
+                "CMAKE_MODULE_LINKER_FLAGS": "-fsanitize=address,undefined"
+            }
+        },
+        {
+            "name": "base-tsan",
+            "hidden": true,
+            "inherits": "base",
+            "description": "ThreadSanitizer; it cannot be combined with AddressSanitizer",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_CXX_FLAGS": "-Werror -fsanitize=thread -fno-omit-frame-pointer",
+                "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=thread",
+                "CMAKE_SHARED_LINKER_FLAGS": "-fsanitize=thread",
+                "CMAKE_MODULE_LINKER_FLAGS": "-fsanitize=thread"
+            }
+        },
+        {
+            "name": "qt-6.9",
+            "hidden": true,
+            "description": "Qt 6.9 from the directory in the environment variable QPM_QT_6_9",
+            "cacheVariables": {
+                "CMAKE_PREFIX_PATH": "$env{QPM_QT_6_9}"
+            }
+        },
+        {
+            "name": "qt-6.12",
+            "hidden": true,
+            "description": "Qt 6.12 from the directory in the environment variable QPM_QT_6_12",
+            "cacheVariables": {
+                "CMAKE_PREFIX_PATH": "$env{QPM_QT_6_12}"
+            }
+        },
+        {
+            "name": "debug-6.9",
+            "displayName": "Debug, Qt 6.9",
+            "inherits": ["base-debug", "qt-6.9"]
+        },
+        {
+            "name": "release-6.9",
+            "displayName": "Release, Qt 6.9",
+            "inherits": ["base-release", "qt-6.9"]
+        },
+        {
+            "name": "debug-6.12",
+            "displayName": "Debug, Qt 6.12",
+            "inherits": ["base-debug", "qt-6.12"]
+        },
+        {
+            "name": "release-6.12",
+            "displayName": "Release, Qt 6.12",
+            "inherits": ["base-release", "qt-6.12"]
+        },
+        {
+            "name": "asan-6.9",
+            "displayName": "AddressSanitizer and UndefinedBehaviorSanitizer, Qt 6.9",
+            "inherits": ["base-asan", "qt-6.9"]
+        },
+        {
+            "name": "tsan-6.9",
+            "displayName": "ThreadSanitizer, Qt 6.9",
+            "inherits": ["base-tsan", "qt-6.9"]
+        }
+    ],
+    "buildPresets": [
+        { "name": "debug-6.9", "configurePreset": "debug-6.9", "jobs": 4 },
+        { "name": "release-6.9", "configurePreset": "release-6.9", "jobs": 4 },
+        { "name": "debug-6.12", "configurePreset": "debug-6.12", "jobs": 4 },
+        { "name": "release-6.12", "configurePreset": "release-6.12", "jobs": 4 },
+        { "name": "asan-6.9", "configurePreset": "asan-6.9", "jobs": 4 },
+        { "name": "tsan-6.9", "configurePreset": "tsan-6.9", "jobs": 4 }
+    ],
+    "testPresets": [
+        {
+            "name": "base",
+            "hidden": true,
+            "environment": {
+                "QT_QPA_PLATFORM": "offscreen"
+            },
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        { "name": "debug-6.9", "inherits": "base", "configurePreset": "debug-6.9" },
+        { "name": "release-6.9", "inherits": "base", "configurePreset": "release-6.9" },
+        { "name": "debug-6.12", "inherits": "base", "configurePreset": "debug-6.12" },
+        { "name": "release-6.12", "inherits": "base", "configurePreset": "release-6.12" },
+        { "name": "asan-6.9", "inherits": "base", "configurePreset": "asan-6.9" },
+        { "name": "tsan-6.9", "inherits": "base", "configurePreset": "tsan-6.9" }
+    ]
+}

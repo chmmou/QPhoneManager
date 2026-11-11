@@ -1,0 +1,8 @@
+# Checks run by the clazy build target, one per line.
+level1
+old-style-connect
+connect-3arg-lambda
+missing-qobject-macro
+qproperty-without-notify
+tr-non-literal
+ctor-missing-parent-argument
