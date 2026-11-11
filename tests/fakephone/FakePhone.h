@@ -67,6 +67,17 @@ struct FakeCall
     QString addressType = QStringLiteral("128");
 };
 
+/// A text message the fake phone was asked to send; nothing is ever sent.
+struct FakeSentMessage
+{
+    QString number;
+    QString text;
+    /// The third field of AT+CMGS: 0 without, 1 with delivery report, 2 ping.
+    int mode = 0;
+    /// -1 when the command names no SIM card.
+    int simSlot = -1;
+};
+
 /// A file in the fake phone's storage.
 struct FakeFile
 {
@@ -110,6 +121,12 @@ struct FakePhoneConfig
     bool callLogDenied = false;
     /// Refuse AT+CPBW and AT+CPBD like a client that may read the call log but not change it.
     bool callLogReadOnly = false;
+    /// Answer to AT+CMGS=?; without "TXT" the phone cannot send.
+    QString smsCapabilities = QStringLiteral("TXTv2,PING");
+    /// Refuse AT+CMGD, AT+CMGE and AT+CMGW like the client 4.15, which lacks WRITE_SMS.
+    bool smsWriteDenied = true;
+    /// Final line for every AT+CMGS send instead of OK, for example "+CMS ERROR: 38".
+    QByteArray smsSendFailure;
 };
 
 /**
@@ -128,6 +145,13 @@ struct FakePhoneConfig
  * entries it names, and an empty body deletes the contact. The call log
  * answers AT+CPBS, AT+CPBR, AT+CPBW and AT+CPBD like the client, newest entry
  * first. A dial or hang-up command is answered with OK and only recorded.
+ *
+ * Messages live in the area "msg". AT+CMGS in text mode is recorded and
+ * answered like the client, and the message then appears as a sent one;
+ * AT+CMGD, AT+CMGE and AT+CMGW are refused like the client 4.15 unless
+ * FakePhoneConfig::smsWriteDenied is false. A PUT below "telecom/msg" takes
+ * scheduled messages only, gives them a LUID with bit 0x20000000 and keeps
+ * them in the form the client sends them back in.
  *
  * Never sends text messages or places calls: there is nothing behind it.
  */
@@ -173,6 +197,9 @@ public:
     void setCalls(const QList<FakeCall> &calls);
     [[nodiscard]] QList<FakeCall> calls() const { return m_calls; }
 
+    /// Every AT+CMGS send so far, in order.
+    [[nodiscard]] QList<FakeSentMessage> sentMessages() const { return m_sentMessages; }
+
     /// Paths use backslashes and start at a storage root, e.g. "\sdcard\DCIM".
     void addFolder(const QString &path);
     void addFile(const QString &path, const QByteArray &data, const QDateTime &modified);
@@ -207,6 +234,9 @@ private:
     void handleAt(const QString &command);
     /// Answers a call log command; returns false for any other command.
     bool handleCallLog(const QString &command, const QString &name);
+    /// Answers a text message command; returns false for any other command.
+    bool handleMessaging(const QString &command, const QString &name);
+    void handleMessagePut(const QString &rest, const QByteArray &body, bool hasBody);
     void writeAt(const QByteArray &bytes);
     void processObex();
     void handleObex(const QByteArray &bytes);
@@ -240,6 +270,7 @@ private:
     QList<FakeCall> m_calls;
     QString m_callStorage = QStringLiteral("ALL");
     quint32 m_nextCallId = 5000;
+    QList<FakeSentMessage> m_sentMessages;
     QMap<QString, FakeFile> m_files;
     QSet<QString> m_folders;
     std::optional<quint8> m_failNext;

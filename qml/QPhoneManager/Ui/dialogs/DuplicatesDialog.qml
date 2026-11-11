@@ -15,6 +15,7 @@ Dialog {
     width: Math.min(TypeScale.body * 40, parent ? parent.width - Theme.gridUnit * 8 : TypeScale.body * 40)
     height: Math.min(TypeScale.body * 32, parent ? parent.height - Theme.gridUnit * 8 : TypeScale.body * 32)
     modal: true
+    Overlay.modal: Scrim {}
     Material.elevation: 0
     title: qsTr("Duplicate contacts")
 
@@ -32,7 +33,10 @@ Dialog {
         }
     }
 
-    onOpened: closeButton.forceActiveFocus(Qt.PopupFocusReason)
+    // The tab reason makes the button show its focus ring right away; giving the
+    // focus up on closing makes the next opening set that reason again.
+    onOpened: closeButton.forceActiveFocus(Qt.TabFocusReason)
+    onClosed: closeButton.focus = false
 
     ColumnLayout {
         anchors.fill: parent

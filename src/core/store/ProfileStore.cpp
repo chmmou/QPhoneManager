@@ -84,8 +84,37 @@ const QList<QStringList> &migrations()
                            "sim INTEGER NOT NULL)"),
             QStringLiteral("CREATE INDEX calls_start ON calls (start_utc)"),
         },
+        {
+            QStringLiteral("CREATE TABLE messages (luid INTEGER PRIMARY KEY NOT NULL, "
+                           "kind TEXT NOT NULL, box TEXT NOT NULL, read INTEGER NOT NULL, "
+                           "date_utc TEXT NOT NULL, addresses TEXT NOT NULL, "
+                           "subject TEXT NOT NULL, body TEXT NOT NULL, sim INTEGER NOT NULL, "
+                           "archived INTEGER NOT NULL, thread_key TEXT NOT NULL)"),
+            QStringLiteral("CREATE INDEX messages_thread ON messages (thread_key, date_utc)"),
+            QStringLiteral("CREATE INDEX messages_date ON messages (date_utc)"),
+            QStringLiteral("CREATE TABLE attachments (message_luid INTEGER NOT NULL, "
+                           "position INTEGER NOT NULL, name TEXT NOT NULL, mime TEXT NOT NULL, "
+                           "size INTEGER NOT NULL, blob TEXT NOT NULL, "
+                           "PRIMARY KEY (message_luid, position))"),
+            QStringLiteral("CREATE INDEX attachments_blob ON attachments (blob)"),
+            // Messages pulled before these tables existed are only in
+            // sync_objects; forgetting them makes the next pull load all.
+            QStringLiteral("DELETE FROM sync_objects WHERE domain = 'msg'"),
+            QStringLiteral("DELETE FROM meta WHERE key = 'counter.msg'"),
+        },
     };
     return steps;
+}
+
+// Statements of a step that may fail without failing the step, because the
+// SQLite of the system may lack a feature. Index as in migrations().
+QStringList optionalMigrationStatements(int fromVersion)
+{
+    if (fromVersion == 3) {
+        return {QStringLiteral("CREATE VIRTUAL TABLE messages_fts USING fts5(body, subject, "
+                               "addresses, tokenize = 'unicode61 remove_diacritics 2')")};
+    }
+    return {};
 }
 
 QString counterKey(sync::IrmcDomain domain)
@@ -379,6 +408,17 @@ Result<void> ProfileStore::migrate(int fromVersion)
                 break;
             }
         }
+        if (ok) {
+            const QStringList optional = optionalMigrationStatements(version);
+            for (const QString &statement : optional) {
+                // A failed statement leaves the transaction open in SQLite;
+                // the step goes on without the feature.
+                if (!query.exec(statement)) {
+                    qCInfo(lcStore) << "Optional part of the migration left out:"
+                                    << query.lastError().text();
+                }
+            }
+        }
         // SQLite takes no bound value in a PRAGMA, so the version is written
         // into the statement. It is an integer from this file, never input.
         if (ok)
@@ -456,10 +496,14 @@ Result<QString> ProfileStore::putBlob(const QByteArray &data)
 {
     if (!m_open)
         return Error(ErrorCode::IoFailure, QStringLiteral("The profile store is not open"));
+    return putBlobIn(directory(), data);
+}
 
+Result<QString> ProfileStore::putBlobIn(const QString &profileDirectory, const QByteArray &data)
+{
     const QString name =
         QString::fromLatin1(QCryptographicHash::hash(data, QCryptographicHash::Sha1).toHex());
-    const QString path = QDir(directory()).filePath(blobsFolder() + u'/' + name);
+    const QString path = QDir(profileDirectory).filePath(blobsFolder() + u'/' + name);
     if (QFileInfo::exists(path))
         return name;
 

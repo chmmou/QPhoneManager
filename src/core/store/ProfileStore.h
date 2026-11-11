@@ -55,7 +55,7 @@ class ProfileStore : public sync::SyncStoreAdapter
 {
 public:
     /// The version open() migrates to.
-    static constexpr int schemaVersion = 3;
+    static constexpr int schemaVersion = 4;
 
     /// Work that runs inside the transaction of applyWith(), on the store's connection.
     using ExtraStep = std::function<Result<void>(const QString &connectionName)>;
@@ -129,6 +129,14 @@ public:
      * hex SHA-1, which names the blob from then on.
      */
     [[nodiscard]] Result<QString> putBlob(const QByteArray &data);
+
+    /**
+     * Like putBlob() for the profile folder `profileDirectory`, see directory(),
+     * without touching the database, so that a worker thread may call it. Two
+     * calls with the same data at the same time leave one complete file.
+     */
+    [[nodiscard]] static Result<QString> putBlobIn(const QString &profileDirectory,
+                                                   const QByteArray &data);
 
     /**
      * Reads a blob. Fails with ErrorCode::InvalidInput when `name` is not a

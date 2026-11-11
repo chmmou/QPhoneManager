@@ -89,6 +89,8 @@ private Q_SLOTS:
     void contactTableReadsBackInBothLanguages_data();
     void contactTableReadsBackInBothLanguages();
     void tableQuotesSeparatorsQuotesAndLineBreaks();
+    void tableNeutralisesSpreadsheetFormulasAndReadsThemBack_data();
+    void tableNeutralisesSpreadsheetFormulasAndReadsThemBack();
     void tableWithCommasIsRead();
     void tableWithAnOpenQuoteIsRejected();
     void tableWithoutKnownColumnIsRejected();
@@ -325,6 +327,44 @@ void TestVCardInterchange::tableQuotesSeparatorsQuotesAndLineBreaks()
                         "plain\r\n"));
     QVERIFY(read.hasValue());
     QCOMPARE(read.value(), rows);
+}
+
+void TestVCardInterchange::tableNeutralisesSpreadsheetFormulasAndReadsThemBack_data()
+{
+    QTest::addColumn<QString>("field");
+    QTest::addColumn<QByteArray>("written");
+
+    QTest::newRow("formula") << QStringLiteral("=HYPERLINK(\"x\")")
+                             << QByteArray("\"'=HYPERLINK(\"\"x\"\")\"");
+    QTest::newRow("phone number") << QStringLiteral("+49 30 1234567")
+                                  << QByteArray("\"'+49 30 1234567\"");
+    QTest::newRow("minus") << QStringLiteral("-2+3") << QByteArray("\"'-2+3\"");
+    QTest::newRow("at sign") << QStringLiteral("@SUM(A1)") << QByteArray("\"'@SUM(A1)\"");
+    QTest::newRow("tab") << QStringLiteral("\t=1") << QByteArray("\"'\t=1\"");
+    QTest::newRow("carriage return") << QStringLiteral("\r=1") << QByteArray("\"'\r=1\"");
+    // An apostrophe the field already starts with survives the round trip.
+    QTest::newRow("apostrophe before formula") << QStringLiteral("'=1")
+                                               << QByteArray("\"''=1\"");
+    QTest::newRow("apostrophe before text") << QStringLiteral("'Hallo") << QByteArray("'Hallo");
+    QTest::newRow("plain") << QStringLiteral("Hallo") << QByteArray("Hallo");
+    QTest::newRow("minus inside") << QStringLiteral("Müller-Lüdenscheidt")
+                                  << QStringLiteral("Müller-Lüdenscheidt").toUtf8();
+}
+
+// A spreadsheet runs a cell that starts with one of = + - @ tab or carriage
+// return as a formula. Following OWASP "CSV Injection", such a cell gets a
+// leading apostrophe and quotes, and readCsv() takes the apostrophe off again.
+void TestVCardInterchange::tableNeutralisesSpreadsheetFormulasAndReadsThemBack()
+{
+    QFETCH(QString, field);
+    QFETCH(QByteArray, written);
+
+    const QByteArray table = writeCsv({{field, QStringLiteral("x")}});
+    const Result<CsvRows> read = readCsv(table);
+
+    QCOMPARE(table, QByteArray("\xEF\xBB\xBF") + written + QByteArray(";x\r\n"));
+    QVERIFY(read.hasValue());
+    QCOMPARE(read.value(), CsvRows({{field, QStringLiteral("x")}}));
 }
 
 void TestVCardInterchange::tableWithCommasIsRead()

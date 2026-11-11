@@ -59,9 +59,10 @@ private:
 
 /**
  * Hands out the program's pictures under "image://qpm/": "photo/<luid>/<blob>"
- * for a stored contact photo, "draft/<n>" for the photo being edited and
- * "candidate/<n>" for the picture being cropped. Stored photos are read with
- * readImageSafely(). An unknown or malformed id yields an empty image.
+ * for a stored contact photo, "part/<blob>" for a picture sent in a message,
+ * "draft/<n>" for the photo being edited and "candidate/<n>" for the picture
+ * being cropped. Stored pictures are read with readImageSafely(). An unknown
+ * or malformed id, and a blob that is no picture, yield an empty image.
  * requestImage() may run on a loader thread of the engine.
  */
 class PhoneImageProvider : public QQuickImageProvider

@@ -5,6 +5,7 @@
 #include "ui/Settings.h"
 #include "ui/calls/CallsArea.h"
 #include "ui/contacts/ContactsArea.h"
+#include "ui/messages/MessagesArea.h"
 
 #include "FakePhone.h"
 
@@ -148,6 +149,67 @@ QList<qpm::test::FakeCall> exampleCalls()
     return result;
 }
 
+// Made-up messages with the made-up people above, a sender name and a
+// scheduled greeting.
+QList<qpm::test::FakeSyncObject> exampleMessages()
+{
+    const auto stamp = [](int daysAgo, QTime time) {
+        return QDateTime(QDate::currentDate().addDays(-daysAgo), time)
+            .toUTC()
+            .toString(QStringLiteral("yyyyMMddTHHmmssZ"))
+            .toLatin1();
+    };
+    const auto sms = [&stamp](quint32 luid, bool incoming, const char *number, const char *text,
+                              int daysAgo, QTime time, bool read) {
+        QByteArray data = "BEGIN:VMESSAGE\r\nTYP:SMS;" + QByteArray(incoming ? "IN" : "OUT") +
+                          "\r\n";
+        data += incoming ? "BOX:INBOX\r\nREAD:" + QByteArray(read ? "1" : "0") + "\r\n"
+                         : QByteArray("BOX:SENT\r\n");
+        data += "DATE:" + stamp(daysAgo, time) + "\r\nNUMBER:" + QByteArray(number) + "\r\n";
+        data += "BODY;CHARSET=UTF-8:" + QByteArray(text) + "\r\n";
+        data += "X-IRMC-LUID:" + QByteArray::number(luid, 16).rightJustified(12, '0').toUpper() +
+                "\r\nEND:VMESSAGE\r\n";
+        return qpm::test::FakeSyncObject{luid, data};
+    };
+    QImage picture(320, 200, QImage::Format_RGB32);
+    picture.fill(QColor(0, 106, 106));
+    for (int y = 120; y < 200; ++y) {
+        for (int x = 0; x < 320; ++x)
+            picture.setPixelColor(x, y, QColor(90, 160, 60));
+    }
+    QByteArray png;
+    QBuffer buffer(&png);
+    buffer.open(QIODevice::WriteOnly);
+    picture.save(&buffer, "PNG");
+    const QByteArray photoMessage =
+        "BEGIN:VMESSAGE\r\nTYP:MMS;IN\r\nBOX:INBOX\r\nREAD:1\r\nDATE:" +
+        stamp(0, QTime(8, 5)) +
+        "\r\nNUMBER:+49 170 2000003\r\nSUBJECT;CHARSET=UTF-8:Ausflug zum See\r\n"
+        "ATT;NAME=text_0.txt;TYPE=text/plain;CHARSET=UTF-8:Schöne Grüße vom See!\r\n"
+        "ATT;NAME=See.png;TYPE=image/png;SIZE=" +
+        QByteArray::number(png.size()) + ";ENCODING=BASE64:" + png.toBase64() +
+        "\r\n\r\nX-IRMC-LUID:000010000020\r\nEND:VMESSAGE\r\n";
+    return {
+        sms(21, true, "+49 151 2000001", "Hast du am Samstag Zeit? Wir wollen grillen.", 1,
+            QTime(18, 2), true),
+        sms(22, false, "+49 151 2000001", "Ja, gerne! Was soll ich mitbringen?", 1, QTime(18, 10),
+            true),
+        sms(23, true, "+49 151 2000001", "Einen Salat wäre super.", 1, QTime(18, 12), true),
+        sms(24, true, "+49 151 2000001", "Treffpunkt 15 Uhr bei uns, Gartentor ist offen.", 0,
+            QTime(9, 30), false),
+        sms(25, true, "Paketdienst", "Ihr Paket kommt heute zwischen 10 und 14 Uhr.", 2,
+            QTime(7, 45), true),
+        sms(26, false, "+49 30 2000002", "Danke für die Unterlagen, ich melde mich morgen.", 3,
+            QTime(16, 20), true),
+        {0x10000020, photoMessage},
+        {0x20000001, "BEGIN:VMESSAGE\r\nTYP:SMS;OUT\r\nBOX:SHEDULED\r\n"
+                     "RECIPIENT;CHARSET=UTF-8:Erika Mustermann;+49 151 2000004;SHEDULED;;\r\n"
+                     "DATE:" + stamp(-5, QTime(8, 0)) +
+                         "\r\nBODY;CHARSET=UTF-8:Alles Gute zum Geburtstag, Erika!\r\n"
+                         "X-IRMC-LUID:000020000001\r\nEND:VMESSAGE\r\n"},
+    };
+}
+
 QByteArray exampleMetadata()
 {
     return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<metadata version=\"1.0\">\r\n"
@@ -180,6 +242,8 @@ private Q_SLOTS:
     void contactViewsAreGermanAndRenderInBothSchemes();
     void callViewsAreGermanAndRenderInBothSchemes_data();
     void callViewsAreGermanAndRenderInBothSchemes();
+    void messageViewsAreGermanAndRenderInBothSchemes_data();
+    void messageViewsAreGermanAndRenderInBothSchemes();
 
 private:
     [[nodiscard]] QObject *dialog(const QString &name) const;
@@ -226,6 +290,7 @@ void TestScreens::initTestCase()
     m_phone->setObjects(QStringLiteral("pb"), exampleContacts());
     m_phone->setMetadata(QStringLiteral("pb"), exampleMetadata());
     m_phone->setCalls(exampleCalls());
+    m_phone->setObjects(QStringLiteral("msg"), exampleMessages());
 
     m_engine = std::make_unique<QQmlApplicationEngine>();
     m_engine->loadFromModule("QPhoneManager.Ui", "Main");
@@ -278,7 +343,8 @@ QObject *TestScreens::dialog(const QString &name) const
 {
     if (QObject *found = m_window->findChild<QObject *>(name))
         return found;
-    for (const QString &pageName : {QStringLiteral("contactsPage"), QStringLiteral("callsPage")}) {
+    for (const QString &pageName : {QStringLiteral("contactsPage"), QStringLiteral("callsPage"),
+                                    QStringLiteral("messagesPage")}) {
         QQuickItem *page = item(pageName);
         if (QObject *found = page ? page->findChild<QObject *>(name) : nullptr)
             return found;
@@ -527,6 +593,15 @@ void TestScreens::callViewsAreGermanAndRenderInBothSchemes()
         QTRY_VERIFY(popup->property(hasOpened ? "opened" : "visible").toBool());
         QCOMPARE(popup->property("title").toString(), germanTitle);
     }
+    // The client refuses to change the call log, and the list then stays as
+    // it is; the question must not promise more.
+    if (view == QLatin1StringView("deleteCall")) {
+        const QQuickItem *text = item(QStringLiteral("deleteCallsText"));
+        QVERIFY(text);
+        QCOMPARE(text->property("text").toString(),
+                 QStringLiteral("Das Handy löscht den Anruf nur, wenn die App es erlaubt. Sonst "
+                                "bleibt er auf dem Handy und in dieser Liste."));
+    }
 
     QVERIFY(saveBothSchemes(view));
 
@@ -535,6 +610,118 @@ void TestScreens::callViewsAreGermanAndRenderInBothSchemes()
         QTRY_VERIFY(!popup->property("visible").toBool());
     }
     area->list()->setKindFilter(qpm::ui::CallListModel::Kind::All);
+    QVERIFY(m_controller->isConnected());
+}
+
+void TestScreens::messageViewsAreGermanAndRenderInBothSchemes_data()
+{
+    QTest::addColumn<QString>("view");
+    QTest::addColumn<QString>("germanTitle");
+
+    QTest::newRow("conversation") << QStringLiteral("messages") << QStringLiteral("Anna Becker");
+    QTest::newRow("picture") << QStringLiteral("messagesPicture")
+                             << QStringLiteral("Clara Schmitz");
+    QTest::newRow("compose") << QStringLiteral("compose") << QStringLiteral("Neue Nachricht");
+    QTest::newRow("compose later") << QStringLiteral("composeScheduled")
+                                   << QStringLiteral("Neue Nachricht");
+    QTest::newRow("scheduled") << QStringLiteral("scheduled")
+                               << QStringLiteral("Geplante Nachricht ändern");
+    QTest::newRow("delete") << QStringLiteral("deleteMessagesDialog")
+                            << QStringLiteral("Gespräch mit Anna Becker löschen?");
+    QTest::newRow("export") << QStringLiteral("exportMessagesDialog")
+                            << QStringLiteral("Gespräch exportieren");
+}
+
+void TestScreens::messageViewsAreGermanAndRenderInBothSchemes()
+{
+    QFETCH(QString, view);
+    QFETCH(QString, germanTitle);
+    if (m_controller->contacts()->list()->totalCount() == 0) {
+        const QFuture<qpm::core::Result<qpm::core::store::ContactChanges>> contacts =
+            m_controller->contacts()->sync();
+        QTRY_VERIFY_WITH_TIMEOUT(contacts.isFinished(), connectTimeoutMs);
+        QVERIFY(contacts.result().hasValue());
+    }
+    qpm::ui::MessagesArea *area = m_controller->messages();
+    if (area->conversations()->totalCount() == 0) {
+        const QFuture<qpm::core::Result<qpm::core::store::MessageChanges>> messages = area->sync();
+        QTRY_VERIFY_WITH_TIMEOUT(messages.isFinished(), connectTimeoutMs);
+        QVERIFY(messages.result().hasValue());
+    }
+    m_window->setProperty("currentSection", 3);
+    QQuickItem *header = m_window->property("header").value<QQuickItem *>();
+    QCOMPARE(header->property("title").toString(), QStringLiteral("Nachrichten"));
+    QQuickItem *page = item(QStringLiteral("messagesPage"));
+    QVERIFY(page);
+    QQuickItem *tabs = item(QStringLiteral("messageViewTabs"));
+    QVERIFY(tabs);
+    tabs->setProperty("currentIndex", view == QLatin1StringView("scheduled") ? 1 : 0);
+    const int row = view == QLatin1StringView("messagesPicture") ? 1 : 0;
+    area->setCurrentThread(area->conversations()->threadKeyAt(row));
+
+    QObject *popup = nullptr;
+    if (view == QLatin1StringView("compose") || view == QLatin1StringView("composeScheduled")) {
+        QVERIFY(area->composeTo(QStringLiteral("+49 30 2000002")));
+        area->composer()->setText(QStringLiteral("Ich bin in zehn Minuten da. Bis gleich!"));
+        area->composer()->setScheduled(view == QLatin1StringView("composeScheduled"));
+        QTRY_VERIFY(item(QStringLiteral("composeTitle")) &&
+                    item(QStringLiteral("composeTitle"))->property("text").toString() ==
+                        germanTitle);
+        QCOMPARE(item(QStringLiteral("partsText"))->property("text").toString(),
+                 QStringLiteral("1 SMS"));
+    } else if (view == QLatin1StringView("scheduled")) {
+        QVERIFY(area->editScheduled(area->scheduled()->luidAt(0)));
+        QTRY_VERIFY(item(QStringLiteral("composeTitle")) &&
+                    item(QStringLiteral("composeTitle"))->property("text").toString() ==
+                        germanTitle);
+        QQuickItem *list = item(QStringLiteral("scheduledList"));
+        QVERIFY(list);
+    } else if (view == QLatin1StringView("messages") ||
+               view == QLatin1StringView("messagesPicture")) {
+        QTRY_VERIFY(item(QStringLiteral("conversationTitle")) &&
+                    item(QStringLiteral("conversationTitle"))->property("text").toString() ==
+                        germanTitle);
+        m_window->requestActivate();
+        QVERIFY(QTest::qWaitForWindowActive(m_window));
+        QQuickItem *list = item(QStringLiteral("conversationList"));
+        QVERIFY(list);
+        list->forceActiveFocus(Qt::TabFocusReason);
+        QTRY_VERIFY(list->hasActiveFocus());
+    } else {
+        QTRY_VERIFY(item(QStringLiteral("conversationTitle")));
+        popup = dialog(view);
+        QVERIFY(popup);
+        if (view == QLatin1StringView("deleteMessagesDialog"))
+            QVERIFY(QMetaObject::invokeMethod(page, "confirmDeleteConversation"));
+        else
+            QVERIFY(QMetaObject::invokeMethod(page, "startExport", Q_ARG(bool, false)));
+        const bool hasOpened = popup->metaObject()->indexOfProperty("opened") >= 0;
+        QTRY_VERIFY(popup->property(hasOpened ? "opened" : "visible").toBool());
+        QCOMPARE(popup->property("title").toString(), germanTitle);
+    }
+    // A picture in a message is drawn once it is loaded.
+    QTRY_VERIFY([this]() {
+        QQuickItem *list = item(QStringLiteral("messageList"));
+        QList<QQuickItem *> pending = list ? QList<QQuickItem *>{list} : QList<QQuickItem *>();
+        while (!pending.isEmpty()) {
+            QQuickItem *next = pending.takeLast();
+            if (next->inherits("QQuickImage") && next->isVisible() &&
+                !next->property("source").toUrl().isEmpty() &&
+                next->property("status").toInt() != 1) {
+                return false;
+            }
+            pending.append(next->childItems());
+        }
+        return true;
+    }());
+
+    QVERIFY(saveBothSchemes(view));
+
+    if (popup) {
+        QMetaObject::invokeMethod(popup, "close");
+        QTRY_VERIFY(!popup->property("visible").toBool());
+    }
+    area->setComposing(false);
     QVERIFY(m_controller->isConnected());
 }
 

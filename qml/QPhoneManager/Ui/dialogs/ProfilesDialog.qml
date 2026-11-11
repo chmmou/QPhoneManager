@@ -16,6 +16,7 @@ Dialog {
     width: Math.min(TypeScale.body * 36, parent ? parent.width - Theme.gridUnit * 8 : TypeScale.body * 36)
     height: Math.min(TypeScale.body * 30, parent ? parent.height - Theme.gridUnit * 8 : TypeScale.body * 30)
     modal: true
+    Overlay.modal: Scrim {}
     // The raised look of Material draws its dialog through a shader effect,
     // which the software renderer leaves out together with the background.
     Material.elevation: 0
@@ -150,6 +151,7 @@ Dialog {
         anchors.centerIn: parent
         width: TypeScale.body * 26
         modal: true
+        Overlay.modal: Scrim {}
         Material.elevation: 0
         title: qsTr("Rename %1").arg(root.pendingName)
 
@@ -194,6 +196,7 @@ Dialog {
         anchors.centerIn: parent
         width: TypeScale.body * 28
         modal: true
+        Overlay.modal: Scrim {}
         Material.elevation: 0
         title: qsTr("Remove %1 from this computer?").arg(root.pendingName)
 

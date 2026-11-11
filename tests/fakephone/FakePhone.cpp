@@ -210,6 +210,91 @@ QString opName(quint8 code)
     return QStringLiteral("0x%1").arg(uint(code), 2, 16, QLatin1Char('0'));
 }
 
+// A vMessage property line as the client writes it: bytes below 0x20 and "="
+// as =XX, everything else as it is.
+QByteArray messageLine(const QByteArray &name, const QString &value)
+{
+    QByteArray out;
+    bool escaped = false;
+    bool high = false;
+    const QByteArray bytes = value.toUtf8();
+    for (const char c : bytes) {
+        const auto byte = static_cast<unsigned char>(c);
+        if (byte < 0x20 || c == '=') {
+            out += '=' + QByteArray::number(byte, 16).rightJustified(2, '0').toUpper();
+            escaped = true;
+        } else {
+            out += c;
+        }
+        high = high || byte >= 0x80;
+    }
+    QByteArray line = name;
+    if (escaped)
+        line += ";ENCODING=QUOTED-PRINTABLE";
+    if (high)
+        line += ";CHARSET=UTF-8";
+    return line + ':' + out + "\r\n";
+}
+
+QList<QByteArray> messageLines(const QByteArray &body)
+{
+    QList<QByteArray> lines = body.split('\n');
+    for (QByteArray &line : lines) {
+        if (line.endsWith('\r'))
+            line.chop(1);
+    }
+    return lines;
+}
+
+// The client reads "<name>;<number>;<sent>;<state digit>" and sends back
+// "<name>;<number>;<SHEDULED|SENT|FAILED>;<sent>;<error>", with SIM first.
+QByteArray scheduledAsPhoneSendsIt(const QByteArray &body, quint32 luid)
+{
+    QByteArray sim;
+    QByteArray date;
+    QByteArray text;
+    QList<QByteArray> recipients;
+    const QList<QByteArray> lines = messageLines(body);
+    for (const QByteArray &line : lines) {
+        if (line.startsWith("SIM:")) {
+            sim = line;
+        } else if (line.startsWith("DATE:")) {
+            date = line;
+        } else if (line.startsWith("BODY")) {
+            text = line;
+        } else if (line.startsWith("RECIPIENT")) {
+            const qsizetype colon = line.indexOf(':');
+            const QList<QByteArray> fields = line.mid(colon + 1).split(';');
+            const QByteArray state = fields.value(3) == "1"   ? QByteArray("SENT")
+                                     : fields.value(3) == "2" ? QByteArray("FAILED")
+                                                              : QByteArray("SHEDULED");
+            recipients.append(line.left(colon) + ':' + fields.value(0) + ';' + fields.value(1) +
+                              ';' + state + ';' + fields.value(2) + ';');
+        }
+    }
+    QByteArray out = "BEGIN:VMESSAGE\r\n";
+    if (!sim.isEmpty())
+        out += sim + "\r\n";
+    out += "TYP:SMS;OUT\r\nBOX:SHEDULED\r\n";
+    for (const QByteArray &recipient : std::as_const(recipients))
+        out += recipient + "\r\n";
+    if (!date.isEmpty())
+        out += date + "\r\n";
+    if (!text.isEmpty())
+        out += text + "\r\n";
+    return out + "X-IRMC-LUID:" + luidText(luid).toLatin1() + "\r\nEND:VMESSAGE\r\n";
+}
+
+bool hasMessageLine(const QByteArray &body, QByteArrayView expected)
+{
+    const QList<QByteArray> lines = messageLines(body);
+    return std::any_of(lines.cbegin(), lines.cend(),
+                       [expected](const QByteArray &line) { return line == expected; });
+}
+
+constexpr quint32 messageKindMask = 0x30000000;
+constexpr quint32 scheduledBit = 0x20000000;
+
 } // namespace
 
 struct FakePhone::Transfer
@@ -475,6 +560,8 @@ void FakePhone::handleAt(const QString &command)
 
     if (handleCallLog(command, name))
         return;
+    if (handleMessaging(command, name))
+        return;
 
     if (command == QLatin1StringView("AT+CPROT=0")) {
         writeAt("AT+CPROT=0\r\nCONNECT\r\n");
@@ -527,7 +614,7 @@ void FakePhone::handleAt(const QString &command)
     } else if (command == QLatin1StringView("AT*SOPS")) {
         lines << QStringLiteral("*SOPS: ,,");
     } else if (command == QLatin1StringView("AT+CMGS=?")) {
-        lines << QStringLiteral("+CMGS: TXTv2,PING");
+        lines << QStringLiteral("+CMGS: ") + m_config.smsCapabilities;
     } else if (command == QLatin1StringView("AT*ANDROIDVERSION")) {
         lines << QStringLiteral("*ANDROIDVERSION: Android 14,Upside Down Cake");
     } else if (command == QLatin1StringView("AT*STATFS")) {
@@ -686,6 +773,84 @@ bool FakePhone::handleCallLog(const QString &command, const QString &name)
         }
     }
     finish("OK");
+    return true;
+}
+
+bool FakePhone::handleMessaging(const QString &command, const QString &name)
+{
+    const bool send = name == QLatin1StringView("AT+CMGS") && command.contains(u'=') &&
+                      !command.endsWith(QLatin1StringView("=?"));
+    const bool write = name == QLatin1StringView("AT+CMGD") ||
+                       name == QLatin1StringView("AT+CMGE") || name == QLatin1StringView("AT+CMGW");
+    if (!send && !write)
+        return false;
+
+    const QByteArray echo = command.toUtf8() + "\r\n";
+    const QString argument = command.section(u'=', 1);
+    const QStringList fields = core::codec::splitFields(argument);
+    QList<FakeSyncObject> &objects = m_areas[QStringLiteral("msg")].objects;
+    if (write) {
+        if (m_config.smsWriteDenied) {
+            writeAt(echo + name.mid(2).toUtf8() + ": PERMISSION DENIED\r\nERROR\r\n");
+            return true;
+        }
+        bool ok = false;
+        const quint32 id = fields.value(0).trimmed().toUInt(&ok);
+        const auto found =
+            std::find_if(objects.begin(), objects.end(),
+                         [ok, id](const auto &object) { return ok && object.luid == id; });
+        if (name == QLatin1StringView("AT+CMGD")) {
+            if (found == objects.end()) {
+                writeAt(echo + "+CMS ERROR: 500\r\n");
+                return true;
+            }
+            removeObject(QStringLiteral("msg"), id);
+            writeAt(echo + "OK\r\n");
+            return true;
+        }
+        if (name == QLatin1StringView("AT+CMGE") && found != objects.end()) {
+            QByteArray data = found->data;
+            const QByteArray read =
+                fields.value(1).trimmed() == QLatin1StringView("1") ? "READ:1" : "READ:0";
+            data.replace("READ:0", read);
+            data.replace("READ:1", read);
+            editObject(QStringLiteral("msg"), id, data);
+            writeAt(echo + "OK\r\n");
+            return true;
+        }
+        writeAt(echo + "+CMS ERROR: 401\r\n");
+        return true;
+    }
+
+    if (fields.size() < 3) {
+        writeAt(echo + "ERROR\r\n");
+        return true;
+    }
+    FakeSentMessage sent;
+    sent.number = core::codec::decodeQp(fields.at(0));
+    sent.text = core::codec::decodeQp(fields.at(1));
+    sent.mode = fields.at(2).trimmed().toInt();
+    sent.simSlot = fields.size() > 4 ? fields.at(4).trimmed().toInt() : -1;
+    m_sentMessages.append(sent);
+    if (!m_config.smsSendFailure.isEmpty()) {
+        writeAt(echo + m_config.smsSendFailure + "\r\n");
+        return true;
+    }
+    // Android files a message an app sent as a sent message of its own.
+    quint32 id = 1;
+    for (const FakeSyncObject &object : std::as_const(objects)) {
+        if ((object.luid & messageKindMask) == 0)
+            id = std::max(id, object.luid + 1);
+    }
+    QByteArray message = "BEGIN:VMESSAGE\r\nTYP:SMS;OUT\r\nBOX:SENT\r\n";
+    if (sent.simSlot >= 0)
+        message += "SIM:" + QByteArray::number(sent.simSlot) + "\r\n";
+    message +=
+        "DATE:" + core::codec::formatUtcStamp(QDateTime::currentDateTimeUtc()).toLatin1() + "\r\n";
+    message += messageLine("NUMBER", sent.number) + messageLine("BODY", sent.text);
+    message += "X-IRMC-LUID:" + luidText(id).toLatin1() + "\r\nEND:VMESSAGE\r\n";
+    addObject(QStringLiteral("msg"), id, message);
+    writeAt(echo + "+CMGS: 0\r\n+CMGW: " + QByteArray::number(id) + "\r\nOK\r\n");
     return true;
 }
 
@@ -934,6 +1099,10 @@ void FakePhone::handleSyncPut(const QString &name, const QByteArray &body, bool 
     const QString extension = extensionOf(areaName);
     m_syncPuts.append({name, hasBody ? body : QByteArray()});
 
+    if (areaName == QLatin1StringView("msg")) {
+        handleMessagePut(rest, body, hasBody);
+        return;
+    }
     if (rest == QLatin1StringView("/metadata.xml")) {
         data.metadata = body;
         sendFirst(codeOnly(obex::rspOk));
@@ -976,6 +1145,57 @@ void FakePhone::handleSyncPut(const QString &name, const QByteArray &body, bool 
         }
     }
     sendFirst(codeOnly(obex::rspNotFound));
+}
+
+void FakePhone::handleMessagePut(const QString &rest, const QByteArray &body, bool hasBody)
+{
+    const QString area = QStringLiteral("msg");
+    const bool scheduled =
+        hasMessageLine(body, "BEGIN:VMESSAGE") && hasMessageLine(body, "BOX:SHEDULED");
+    if (rest == QLatin1StringView("/luid/.vmg")) {
+        if (!hasBody || !scheduled) {
+            sendFirst(codeOnly(obex::rspBadRequest));
+            return;
+        }
+        quint32 luid = scheduledBit | 1;
+        for (const FakeSyncObject &object : std::as_const(m_areas[area].objects)) {
+            if ((object.luid & messageKindMask) == scheduledBit)
+                luid = std::max(luid, object.luid + 1);
+        }
+        addObject(area, luid, scheduledAsPhoneSendsIt(body, luid));
+        ObexPacket response;
+        response.code = obex::rspOk;
+        response.appParameters = "  " + luidText(luid).toLatin1() + " ";
+        sendFirst(encoded(response));
+        return;
+    }
+    bool ok = rest.startsWith(QLatin1StringView("/luid/")) &&
+              rest.endsWith(QLatin1StringView(".vmg")) && rest.size() == 6 + luidDigits + 4;
+    const quint32 luid = ok ? rest.mid(6, luidDigits).toUInt(&ok, 16) : 0;
+    if (!ok) {
+        sendFirst(codeOnly(obex::rspNotFound));
+        return;
+    }
+    const QList<FakeSyncObject> &objects = m_areas[area].objects;
+    const bool known =
+        std::any_of(objects.cbegin(), objects.cend(),
+                    [luid](const FakeSyncObject &object) { return object.luid == luid; });
+    // The client answers OK for a message it does not keep itself and changes nothing.
+    if ((luid & messageKindMask) != scheduledBit || !known) {
+        sendFirst(codeOnly(obex::rspOk));
+        return;
+    }
+    if (!hasBody || body.isEmpty()) {
+        removeObject(area, luid);
+        sendFirst(codeOnly(obex::rspOk));
+        return;
+    }
+    if (!scheduled) {
+        sendFirst(codeOnly(obex::rspBadRequest));
+        return;
+    }
+    editObject(area, luid, scheduledAsPhoneSendsIt(body, luid));
+    sendFirst(codeOnly(obex::rspOk));
 }
 
 void FakePhone::handleContactPut(const QString &rest, const QByteArray &body)

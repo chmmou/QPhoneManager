@@ -15,6 +15,7 @@ Dialog {
     width: Math.min(TypeScale.body * 36, parent ? parent.width - Theme.gridUnit * 8 : TypeScale.body * 36)
     height: Math.min(TypeScale.body * 34, parent ? parent.height - Theme.gridUnit * 8 : TypeScale.body * 34)
     modal: true
+    Overlay.modal: Scrim {}
     // The raised look of Material draws its dialog through a shader effect,
     // which the software renderer leaves out together with the background.
     Material.elevation: 0

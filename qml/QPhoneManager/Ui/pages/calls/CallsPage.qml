@@ -183,6 +183,7 @@ Item {
         anchors.centerIn: parent
         width: TypeScale.body * 28
         modal: true
+        Overlay.modal: Scrim {}
         Material.elevation: 0
         title: root.pendingDelete.length === 1 && root.pendingDeleteTitle.length > 0 ? qsTr("Delete the call with %1?").arg(root.pendingDeleteTitle) : qsTr("Delete %n call(s)?", "", root.pendingDelete.length)
 
@@ -218,9 +219,10 @@ Item {
         onAccepted: root.area.removeCalls(root.pendingDelete)
 
         Label {
+            objectName: "deleteCallsText"
             anchors.left: parent.left
             anchors.right: parent.right
-            text: qsTr("The call(s) are deleted on the phone and on this computer.", "", root.pendingDelete.length)
+            text: qsTr("The phone deletes the call(s) only if its app allows it. Otherwise they stay on the phone and in this list.", "", root.pendingDelete.length)
             wrapMode: Text.Wrap
         }
     }

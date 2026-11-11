@@ -122,17 +122,19 @@ QImage PhoneImageProvider::requestImage(const QString &id, QSize *size, const QS
         image = fitted(m_source->draft(), requestedSize);
     } else if (parts.value(0) == QLatin1StringView("candidate")) {
         image = fitted(m_source->candidate(), requestedSize);
-    } else if (parts.size() == 3 && parts.at(0) == QLatin1StringView("photo") &&
-               isBlobName(parts.at(2))) {
+    } else if ((parts.size() == 3 && parts.at(0) == QLatin1StringView("photo") &&
+                isBlobName(parts.at(2))) ||
+               (parts.size() == 2 && parts.at(0) == QLatin1StringView("part") &&
+                isBlobName(parts.at(1)))) {
         const QString directory = m_source->blobDirectory();
         if (!directory.isEmpty()) {
-            QFile file(QDir(directory).filePath(parts.at(2)));
+            QFile file(QDir(directory).filePath(parts.constLast()));
             if (file.open(QIODevice::ReadOnly)) {
                 const core::Result<QImage> read = readImageSafely(&file, requestedSize);
                 if (read.hasValue())
                     image = read.value();
                 else
-                    qCInfo(core::lcUi) << "Contact photo not shown:" << read.error().message();
+                    qCInfo(core::lcUi) << "Picture not shown:" << read.error().message();
             }
         }
     }

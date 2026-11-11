@@ -19,6 +19,7 @@ Dialog {
     width: Math.min(TypeScale.body * 36, parent ? parent.width - Theme.gridUnit * 8 : TypeScale.body * 36)
     height: Math.min(TypeScale.body * 38, parent ? parent.height - Theme.gridUnit * 8 : TypeScale.body * 38)
     modal: true
+    Overlay.modal: Scrim {}
     Material.elevation: 0
     title: qsTr("Choose the part of the picture")
 

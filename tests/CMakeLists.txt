@@ -32,6 +32,10 @@ qpm_add_core_test(tst_pbmetadata)
 qpm_add_core_test(tst_contactsservice)
 qpm_add_core_test(tst_calllogcodec)
 qpm_add_core_test(tst_calllogservice)
+qpm_add_core_test(tst_vmessage)
+qpm_add_core_test(tst_messages)
+target_link_libraries(tst_messages PRIVATE Qt6::Sql)
+qpm_add_core_test(tst_messageexport)
 qpm_add_core_test(tst_nothirdpartyservices)
 target_compile_definitions(tst_nothirdpartyservices PRIVATE
     "QPM_SOURCE_DIR=\"${PROJECT_SOURCE_DIR}\""
@@ -72,6 +76,18 @@ target_link_libraries(tst_calls PRIVATE qpm_ui qpm_fakephone Qt6::Test)
 qpm_set_project_warnings(tst_calls)
 add_test(NAME tst_calls COMMAND tst_calls)
 set_tests_properties(tst_calls PROPERTIES TIMEOUT 120)
+
+# The core test of the message service has the name tst_messages already.
+qt_add_executable(tst_messagearea ui/tst_messages.cpp)
+target_link_libraries(tst_messagearea PRIVATE qpm_ui qpm_fakephone Qt6::Test)
+# The English catalogue is built along with the program.
+add_dependencies(tst_messagearea qphonemanager)
+target_compile_definitions(tst_messagearea PRIVATE
+    "QPM_TRANSLATIONS_DIR=\"${PROJECT_BINARY_DIR}/src\""
+)
+qpm_set_project_warnings(tst_messagearea)
+add_test(NAME tst_messagearea COMMAND tst_messagearea)
+set_tests_properties(tst_messagearea PROPERTIES TIMEOUT 120)
 
 qt_add_executable(tst_accessibility ui/tst_accessibility.cpp)
 target_link_libraries(tst_accessibility PRIVATE qpm_ui qpm_uiplugin qpm_fakephone Qt6::Quick Qt6::Test)

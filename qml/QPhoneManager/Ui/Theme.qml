@@ -21,6 +21,8 @@ QtObject {
     readonly property color foregroundOnError: root.dark ? "#690005" : "#FFFFFF"
     readonly property color success: root.dark ? "#8DD79D" : "#1E6B32"
     readonly property color warning: root.dark ? "#F2BF48" : "#7A5900"
+    // The same in both schemes: half-transparent black steps the window back.
+    readonly property color scrim: "#80000000"
 
     readonly property int gridUnit: 4
     readonly property int cardRadius: 12
