@@ -15,6 +15,10 @@ namespace qpm::core::protocol {
  *
  * Connecting gives up after five seconds with ErrorCode::Timeout. The socket
  * runs with TCP_NODELAY and keep-alive.
+ *
+ * The connection is not encrypted, although network connections are meant to
+ * use TLS. The phone app speaks its protocol in plain text only and offers no
+ * TLS, and QPhoneManager has to stay compatible with that app.
  */
 class TcpTransport : public Transport
 {

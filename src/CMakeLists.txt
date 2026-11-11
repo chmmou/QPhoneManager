@@ -31,6 +31,8 @@ qt_add_library(qpm_core STATIC
     core/protocol/Transport.h
     core/sync/IrmcSync.h
     core/sync/IrmcSync.cpp
+    core/store/ProfileStore.h
+    core/store/ProfileStore.cpp
     core/sync/SyncStoreAdapter.h
 )
 target_include_directories(qpm_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
@@ -58,31 +60,91 @@ target_link_libraries(qpm_bluetooth
 qpm_set_project_warnings(qpm_bluetooth)
 
 qt_add_library(qpm_platform STATIC
+    platform/SecretServiceTypes.h
+    platform/SecretServiceTypes.cpp
+    platform/SecretStore.h
+    platform/SecretStore.cpp
     platform/SessionBus.h
     platform/SessionBus.cpp
 )
 target_include_directories(qpm_platform PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(qpm_platform
     PUBLIC
+        qpm_core
         Qt6::Core
-    PRIVATE
         Qt6::DBus
+    PRIVATE
         Qt6::Widgets
 )
 qpm_set_project_warnings(qpm_platform)
 
 qt_add_library(qpm_ui STATIC)
 set(qpm_ui_qml_dir "${PROJECT_SOURCE_DIR}/qml/QPhoneManager/Ui")
-# The QML sources live outside this directory; the alias keeps their path
-# inside the module the same as below qml/QPhoneManager/Ui.
-set_source_files_properties("${qpm_ui_qml_dir}/Main.qml"
-    PROPERTIES QT_RESOURCE_ALIAS Main.qml
+set(qpm_ui_qml_files
+    Main.qml
+    Theme.qml
+    TypeScale.qml
+    components/AppHeader.qml
+    components/AppShortcuts.qml
+    components/DisconnectedBanner.qml
+    components/EmptyState.qml
+    components/FocusRing.qml
+    components/ListDetailView.qml
+    components/SectionEntry.qml
+    components/SectionPage.qml
+    components/Sections.qml
+    components/Sidebar.qml
+    components/SidebarButton.qml
+    components/StatusBar.qml
+)
+set(qpm_ui_qml_sources "")
+foreach(file IN LISTS qpm_ui_qml_files)
+    # The QML sources live outside this directory; the alias keeps their path
+    # inside the module the same as below qml/QPhoneManager/Ui.
+    set_source_files_properties("${qpm_ui_qml_dir}/${file}"
+        PROPERTIES QT_RESOURCE_ALIAS "${file}"
+    )
+    list(APPEND qpm_ui_qml_sources "${qpm_ui_qml_dir}/${file}")
+endforeach()
+set_source_files_properties(
+    "${qpm_ui_qml_dir}/Theme.qml"
+    "${qpm_ui_qml_dir}/TypeScale.qml"
+    PROPERTIES QT_QML_SINGLETON_TYPE TRUE
 )
 qt_add_qml_module(qpm_ui
     URI QPhoneManager.Ui
     VERSION 1.0
     QML_FILES
-        "${qpm_ui_qml_dir}/Main.qml"
+        ${qpm_ui_qml_sources}
+    SOURCES
+        ui/Settings.h
+        ui/Settings.cpp
+)
+
+set(qpm_ui_icons
+    app/qphonemanager.svg
+    tabler/address-book.svg
+    tabler/apps.svg
+    tabler/bell.svg
+    tabler/calendar.svg
+    tabler/checklist.svg
+    tabler/chevron-left.svg
+    tabler/folder.svg
+    tabler/help.svg
+    tabler/home.svg
+    tabler/messages.svg
+    tabler/notes.svg
+    tabler/phone.svg
+    tabler/plug-connected.svg
+    tabler/refresh.svg
+    tabler/screen-share.svg
+    tabler/settings.svg
+)
+list(TRANSFORM qpm_ui_icons PREPEND "${PROJECT_SOURCE_DIR}/res/icons/")
+qt_add_resources(qpm_ui "qpm_ui_icons"
+    PREFIX "/icons"
+    BASE "${PROJECT_SOURCE_DIR}/res/icons"
+    FILES ${qpm_ui_icons}
 )
 # The generated QML type registration includes headers by their base name only.
 target_include_directories(qpm_ui
@@ -105,6 +167,7 @@ target_link_libraries(qphonemanager
         qpm_core
         qpm_bluetooth
         qpm_platform
+        qpm_ui
         qpm_uiplugin
         Qt6::Widgets
         Qt6::Qml

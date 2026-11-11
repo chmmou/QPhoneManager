@@ -89,7 +89,8 @@ cmake --build build/debug-6.9 --target clazy
 
 The test presets run without a display (`QT_QPA_PLATFORM=offscreen`). The
 `clazy` target needs `clazy-standalone`; the checks it runs are listed in
-`.clazy`.
+`.clazy`. The test of the PIN storage starts its own `dbus-daemon` and is
+skipped when that program is missing.
 
 Tests that need a phone carry the CTest label `device`. They run only when two
 environment variables are set: `QPM_TEST_ADB` with the absolute path to `adb`,
