@@ -1,6 +1,7 @@
 #include "FakePhone.h"
 
 #include "core/codec/PhoneTime.h"
+#include "core/codec/PhoneVCard.h"
 #include "core/protocol/ObexPacket.h"
 
 #include <QCryptographicHash>
@@ -66,6 +67,97 @@ bool isKnownArea(const QString &area)
 {
     return area == QLatin1StringView("pb") || area == QLatin1StringView("cal") ||
            area == QLatin1StringView("notes") || area == QLatin1StringView("msg");
+}
+
+// True when `body` holds a line of the property `name`.
+bool hasProperty(const QByteArray &body, const QByteArray &name)
+{
+    const QList<QByteArray> lines = body.split('\n');
+    for (const QByteArray &line : lines) {
+        if (line.startsWith(name + ':') || line.startsWith(name + ';'))
+            return true;
+    }
+    return false;
+}
+
+void assignDataIds(core::codec::Contact &contact, quint64 &nextDataId)
+{
+    for (const core::codec::ContactValueKind kind : core::codec::allContactValueKinds) {
+        for (core::codec::ContactValue &entry : contact.values(kind))
+            entry.dataId = nextDataId++;
+    }
+    if (!contact.nickname.isEmpty())
+        contact.nicknameId = nextDataId++;
+}
+
+void dropEmptyEntries(core::codec::Contact &contact)
+{
+    for (const core::codec::ContactValueKind kind : core::codec::allContactValueKinds) {
+        contact.values(kind).removeIf(
+            [](const core::codec::ContactValue &entry) { return entry.isEmpty(); });
+    }
+}
+
+// Applies a change the way the client does: name lines always, other entries
+// only where the body names them, by their key.
+core::codec::Contact appliedChange(core::codec::Contact current, const core::codec::Contact &change,
+                                   const QByteArray &body, quint64 &nextDataId)
+{
+    current.familyName = change.familyName;
+    current.givenName = change.givenName;
+    current.middleName = change.middleName;
+    current.prefix = change.prefix;
+    current.suffix = change.suffix;
+    current.displayName = change.displayName;
+    if (hasProperty(body, "NICKNAME")) {
+        current.nickname = change.nickname;
+        current.nicknameId = change.nickname.isEmpty() ? 0 : nextDataId++;
+    }
+    if (hasProperty(body, "ORG")) {
+        current.organization = change.organization;
+        current.department = change.department;
+    }
+    if (hasProperty(body, "TITLE"))
+        current.title = change.title;
+    if (hasProperty(body, "NOTE"))
+        current.note = change.note;
+    if (change.birthday.isValid())
+        current.birthday = change.birthday;
+    if (change.anniversary.isValid())
+        current.anniversary = change.anniversary;
+    if (hasProperty(body, "CATEGORIES"))
+        current.groups = change.groups;
+    if (hasProperty(body, "X-RINGTONE"))
+        current.ringtone = change.ringtone;
+    if (body.contains("PHOTO;ACTION=DELETE"))
+        current.photo.clear();
+    else if (hasProperty(body, "PHOTO"))
+        current.photo = change.photo;
+
+    for (const core::codec::ContactValueKind kind : core::codec::allContactValueKinds) {
+        QList<core::codec::ContactValue> &own = current.values(kind);
+        for (const core::codec::ContactValue &entry : change.values(kind)) {
+            if (entry.dataId == 0) {
+                if (entry.isEmpty())
+                    continue;
+                core::codec::ContactValue added = entry;
+                added.dataId = nextDataId++;
+                own.append(added);
+                continue;
+            }
+            for (qsizetype i = 0; i < own.size(); ++i) {
+                if (own.at(i).dataId != entry.dataId)
+                    continue;
+                if (entry.isEmpty()) {
+                    own.removeAt(i);
+                } else {
+                    own[i] = entry;
+                }
+                break;
+            }
+        }
+    }
+    return current;
 }
 
 QString parentOf(const QString &path)
@@ -183,6 +275,7 @@ void FakePhone::clearLog()
 {
     m_received.clear();
     m_protocolErrors.clear();
+    m_syncPuts.clear();
 }
 
 void FakePhone::setObjects(const QString &area, const QList<FakeSyncObject> &objects)
@@ -437,6 +530,9 @@ void FakePhone::handleAt(const QString &command)
         lines << QStringLiteral("*DISPLAY: 1080,2400,409.432,411.891,420");
     } else if (command == QLatin1StringView("AT+CGMR")) {
         lines << QStringLiteral("EX1A.260101.001");
+    } else if ((name.startsWith(QLatin1StringView("ATD")) && command.endsWith(u';')) ||
+               name == QLatin1StringView("ATH") || name == QLatin1StringView("AT+CHUP")) {
+        // Recorded above; there is no phone line behind the fake.
     } else if (command == QLatin1StringView("AT*SIM") ||
                command == QLatin1StringView("AT*ECAM=1") ||
                command == QLatin1StringView("AT*NOTIFY=2") ||
@@ -702,10 +798,15 @@ void FakePhone::handleSyncPut(const QString &name, const QByteArray &body, bool 
     FakeSyncArea &data = m_areas[areaName];
     const QString rest = lower.mid(slash);
     const QString extension = extensionOf(areaName);
+    m_syncPuts.append({name, hasBody ? body : QByteArray()});
 
     if (rest == QLatin1StringView("/metadata.xml")) {
         data.metadata = body;
         sendFirst(codeOnly(obex::rspOk));
+        return;
+    }
+    if (areaName == QLatin1StringView("pb")) {
+        handleContactPut(rest, hasBody ? body : QByteArray());
         return;
     }
     if (rest == QLatin1StringView("/luid/.") + extension) {
@@ -739,6 +840,60 @@ void FakePhone::handleSyncPut(const QString &name, const QByteArray &body, bool 
             sendFirst(codeOnly(obex::rspOk));
             return;
         }
+    }
+    sendFirst(codeOnly(obex::rspNotFound));
+}
+
+void FakePhone::handleContactPut(const QString &rest, const QByteArray &body)
+{
+    FakeSyncArea &data = m_areas[QStringLiteral("pb")];
+    if (rest == QLatin1StringView("/luid/.vcf")) {
+        const auto parsed = core::codec::parsePhoneVCard(body);
+        if (!parsed.hasValue()) {
+            sendFirst(codeOnly(obex::rspBadRequest));
+            return;
+        }
+        quint32 luid = 1;
+        for (const FakeSyncObject &object : std::as_const(data.objects))
+            luid = std::max(luid, object.luid + 1);
+        core::codec::Contact contact = parsed.value();
+        dropEmptyEntries(contact);
+        assignDataIds(contact, m_nextDataId);
+        contact.luid = luid;
+        if (contact.displayName.isEmpty())
+            contact.displayName = core::codec::displayNameOf(contact);
+        data.objects.append({luid, core::codec::encodeAsPhoneSendsIt(contact)});
+        recordChange(QStringLiteral("pb"), 'N', luid);
+        ObexPacket response;
+        response.code = obex::rspOk;
+        response.appParameters = "  " + luidText(luid).toLatin1() + " ";
+        sendFirst(encoded(response));
+        return;
+    }
+    bool ok = rest.startsWith(QLatin1StringView("/luid/")) &&
+              rest.endsWith(QLatin1StringView(".vcf")) && rest.size() == 6 + luidDigits + 4;
+    const quint32 luid = ok ? rest.mid(6, luidDigits).toUInt(&ok, 16) : 0;
+    for (FakeSyncObject &object : data.objects) {
+        if (!ok || object.luid != luid)
+            continue;
+        if (body.isEmpty()) {
+            removeObject(QStringLiteral("pb"), luid);
+            sendFirst(codeOnly(obex::rspOk));
+            return;
+        }
+        const auto current = core::codec::parsePhoneVCard(object.data);
+        const auto change = core::codec::parsePhoneVCard(body);
+        if (!current.hasValue() || !change.hasValue()) {
+            sendFirst(codeOnly(obex::rspBadRequest));
+            return;
+        }
+        core::codec::Contact updated =
+            appliedChange(current.value(), change.value(), body, m_nextDataId);
+        updated.luid = luid;
+        object.data = core::codec::encodeAsPhoneSendsIt(updated);
+        recordChange(QStringLiteral("pb"), 'E', luid);
+        sendFirst(codeOnly(obex::rspOk));
+        return;
     }
     sendFirst(codeOnly(obex::rspNotFound));
 }

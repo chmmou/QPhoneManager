@@ -56,6 +56,27 @@ const QList<QStringList> &migrations()
             QStringLiteral("CREATE TABLE sync_objects (domain TEXT NOT NULL, luid INTEGER NOT NULL, "
                            "hash BLOB NOT NULL, raw BLOB NOT NULL, PRIMARY KEY (domain, luid))"),
         },
+        {
+            QStringLiteral("CREATE TABLE contacts (luid INTEGER PRIMARY KEY NOT NULL, "
+                           "account_type TEXT NOT NULL, account_name TEXT NOT NULL, "
+                           "display_name TEXT NOT NULL, sort_key TEXT NOT NULL, "
+                           "vcard BLOB NOT NULL, hash BLOB NOT NULL, photo_blob TEXT NOT NULL)"),
+            QStringLiteral("CREATE INDEX contacts_sort_key ON contacts (sort_key)"),
+            QStringLiteral("CREATE TABLE contact_values (luid INTEGER NOT NULL, kind TEXT NOT NULL, "
+                           "data_id INTEGER NOT NULL, type INTEGER NOT NULL, label TEXT NOT NULL, "
+                           "value TEXT NOT NULL, is_primary INTEGER NOT NULL)"),
+            QStringLiteral("CREATE INDEX contact_values_luid ON contact_values (luid)"),
+            QStringLiteral("CREATE INDEX contact_values_value ON contact_values (value)"),
+            QStringLiteral("CREATE TABLE accounts (type TEXT NOT NULL, name TEXT NOT NULL, "
+                           "title TEXT NOT NULL, selected INTEGER NOT NULL, "
+                           "is_default INTEGER NOT NULL, PRIMARY KEY (type, name))"),
+            QStringLiteral("CREATE TABLE \"groups\" (title TEXT NOT NULL, source_id TEXT NOT NULL, "
+                           "account_type TEXT NOT NULL, account_name TEXT NOT NULL)"),
+            // Contacts pulled before these tables existed are only in
+            // sync_objects; forgetting them makes the next pull load all.
+            QStringLiteral("DELETE FROM sync_objects WHERE domain = 'pb'"),
+            QStringLiteral("DELETE FROM meta WHERE key = 'counter.pb'"),
+        },
     };
     return steps;
 }
@@ -497,6 +518,12 @@ std::optional<QByteArray> ProfileStore::objectHash(sync::IrmcDomain domain, quin
 
 Result<void> ProfileStore::apply(sync::IrmcDomain domain, const sync::SyncDelta &delta)
 {
+    return applyWith(domain, delta, {});
+}
+
+Result<void> ProfileStore::applyWith(sync::IrmcDomain domain, const sync::SyncDelta &delta,
+                                     const ExtraStep &extra)
+{
     if (!m_open)
         return Error(ErrorCode::IoFailure, QStringLiteral("The profile store is not open"));
 
@@ -550,6 +577,12 @@ Result<void> ProfileStore::apply(sync::IrmcDomain domain, const sync::SyncDelta 
         query.bindValue(QStringLiteral(":value"), value);
         if (!query.exec())
             return fail(queryError(QStringLiteral("Cannot store the change counter"), query));
+    }
+
+    if (extra) {
+        const Result<void> done = extra(m_connectionName);
+        if (!done.hasValue())
+            return fail(done.error());
     }
 
     if (!db.commit())

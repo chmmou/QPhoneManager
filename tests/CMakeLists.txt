@@ -26,6 +26,10 @@ qpm_add_core_test(tst_irmcsync)
 qpm_add_core_test(tst_profilestore)
 target_link_libraries(tst_profilestore PRIVATE Qt6::Sql)
 qpm_add_core_test(tst_devicestatus)
+qpm_add_core_test(tst_phonevcard)
+qpm_add_core_test(tst_vcardinterchange)
+qpm_add_core_test(tst_pbmetadata)
+qpm_add_core_test(tst_contactsservice)
 qpm_add_core_test(tst_nothirdpartyservices)
 target_compile_definitions(tst_nothirdpartyservices PRIVATE
     "QPM_SOURCE_DIR=\"${PROJECT_SOURCE_DIR}\""
@@ -55,8 +59,14 @@ qpm_set_project_warnings(tst_appcontroller)
 add_test(NAME tst_appcontroller COMMAND tst_appcontroller)
 set_tests_properties(tst_appcontroller PROPERTIES TIMEOUT 120)
 
+qt_add_executable(tst_contacts ui/tst_contacts.cpp)
+target_link_libraries(tst_contacts PRIVATE qpm_ui qpm_fakephone Qt6::Gui Qt6::Test)
+qpm_set_project_warnings(tst_contacts)
+add_test(NAME tst_contacts COMMAND tst_contacts)
+set_tests_properties(tst_contacts PROPERTIES TIMEOUT 120)
+
 qt_add_executable(tst_accessibility ui/tst_accessibility.cpp)
-target_link_libraries(tst_accessibility PRIVATE qpm_ui qpm_uiplugin Qt6::Quick Qt6::Test)
+target_link_libraries(tst_accessibility PRIVATE qpm_ui qpm_uiplugin qpm_fakephone Qt6::Quick Qt6::Test)
 qt_add_resources(tst_accessibility "tst_accessibility_config"
     PREFIX "/"
     BASE "${PROJECT_SOURCE_DIR}/res"

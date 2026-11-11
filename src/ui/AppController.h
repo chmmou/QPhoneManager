@@ -6,6 +6,7 @@
 #include "ui/FoundPhoneModel.h"
 #include "ui/ProfileListModel.h"
 #include "ui/QrCodeProvider.h"
+#include "ui/contacts/ContactsArea.h"
 
 #include <QFuture>
 #include <QHostAddress>
@@ -52,8 +53,8 @@ class Settings;
  * that says what went wrong and what to do. While reconnecting after a lost
  * connection, failed attempts stay quiet.
  *
- * The object owns the connection, the models and the profile store of the
- * current phone. `settings` must outlive it or be destroyed with the engine
+ * The object owns the connection, the models, the areas and the profile
+ * store of the current phone. The contacts area is part of syncAll(). `settings` must outlive it or be destroyed with the engine
  * first; the object never uses it after that.
  */
 class AppController : public QObject
@@ -93,6 +94,7 @@ class AppController : public QObject
     Q_PROPERTY(bool syncing READ isSyncing NOTIFY syncingChanged FINAL)
     /// A PIN can be kept in the keyring of the system.
     Q_PROPERTY(bool canRememberPin READ canRememberPin CONSTANT FINAL)
+    Q_PROPERTY(qpm::ui::ContactsArea *contacts READ contacts CONSTANT FINAL)
 
 public:
     enum class ConnectionState {
@@ -162,6 +164,9 @@ public:
     [[nodiscard]] QString profilesDirectory() const { return m_profilesDirectory; }
     [[nodiscard]] bool isSyncing() const { return m_syncing; }
     [[nodiscard]] bool canRememberPin() const { return m_secrets != nullptr; }
+    [[nodiscard]] ContactsArea *contacts() const { return m_contacts; }
+    /// The pictures behind "image://qpm/", for the image provider of the engine.
+    [[nodiscard]] std::shared_ptr<PhotoSource> photoSource() const { return m_photos; }
 
     /// The connection, for the areas that later talk to the phone.
     [[nodiscard]] core::protocol::PhoneConnection *connection() const { return m_connection; }
@@ -259,6 +264,7 @@ private:
     void updateListening();
     void reloadProfiles();
     [[nodiscard]] bool openStore(const QString &deviceId);
+    void closeStore();
     void setCurrentDevice(const QString &deviceId);
     void rememberPin(const QString &deviceId);
     void runNextSyncArea(int index, QStringList lines);
@@ -277,6 +283,8 @@ private:
     FoundPhoneModel *m_usbPhones = nullptr;
     FoundPhoneModel *m_bluetoothPhones = nullptr;
     QrCodeProvider *m_qrCode = nullptr;
+    std::shared_ptr<PhotoSource> m_photos;
+    ContactsArea *m_contacts = nullptr;
     core::protocol::Discovery *m_discovery = nullptr;
     BluetoothDeviceFinder *m_bluetoothFinder = nullptr;
     std::unique_ptr<core::protocol::AdbBridge> m_listAdb;

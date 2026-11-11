@@ -7,6 +7,7 @@
 #include <QList>
 #include <QString>
 
+#include <functional>
 #include <optional>
 #include <utility>
 
@@ -54,7 +55,10 @@ class ProfileStore : public sync::SyncStoreAdapter
 {
 public:
     /// The version open() migrates to.
-    static constexpr int schemaVersion = 1;
+    static constexpr int schemaVersion = 2;
+
+    /// Work that runs inside the transaction of applyWith(), on the store's connection.
+    using ExtraStep = std::function<Result<void>(const QString &connectionName)>;
 
     /**
      * `profilesDirectory` is the folder that holds one subfolder per phone,
@@ -142,6 +146,20 @@ public:
                                                        quint32 luid) const override;
     /// Also records the time of the pull, see lastSync().
     [[nodiscard]] Result<void> apply(sync::IrmcDomain domain, const sync::SyncDelta &delta) override;
+
+    /**
+     * Like apply(), and runs `extra` in the same transaction before it is
+     * committed; when `extra` fails, nothing of the delta is kept.
+     */
+    [[nodiscard]] Result<void> applyWith(sync::IrmcDomain domain, const sync::SyncDelta &delta,
+                                         const ExtraStep &extra);
+
+    /**
+     * Name of the database connection, for tables of the areas that keep their
+     * own rows next to the sync state. Empty before open(). Use from the main
+     * thread only, like the store.
+     */
+    [[nodiscard]] QString connectionName() const { return m_open ? m_connectionName : QString(); }
 
 private:
     [[nodiscard]] Result<void> migrate(int fromVersion);

@@ -6,12 +6,20 @@ qt_add_library(qpm_core STATIC
     core/Version.cpp
     core/codec/AtText.h
     core/codec/AtText.cpp
+    core/codec/CsvTable.h
+    core/codec/CsvTable.cpp
     core/codec/Limits.h
     core/codec/Limits.cpp
+    core/codec/PbMetadata.h
+    core/codec/PbMetadata.cpp
     core/codec/PhoneTime.h
     core/codec/PhoneTime.cpp
+    core/codec/PhoneVCard.h
+    core/codec/PhoneVCard.cpp
     core/codec/SafeXml.h
     core/codec/SafeXml.cpp
+    core/codec/VCardInterchange.h
+    core/codec/VCardInterchange.cpp
     core/protocol/AdbBridge.h
     core/protocol/AdbBridge.cpp
     core/protocol/AtSession.h
@@ -29,10 +37,14 @@ qt_add_library(qpm_core STATIC
     core/protocol/TcpTransport.h
     core/protocol/TcpTransport.cpp
     core/protocol/Transport.h
+    core/service/ContactsService.h
+    core/service/ContactsService.cpp
     core/service/DeviceStatusService.h
     core/service/DeviceStatusService.cpp
     core/sync/IrmcSync.h
     core/sync/IrmcSync.cpp
+    core/store/ContactStore.h
+    core/store/ContactStore.cpp
     core/store/ProfileStore.h
     core/store/ProfileStore.cpp
     core/sync/SyncStoreAdapter.h
@@ -92,6 +104,7 @@ set(qpm_ui_qml_files
     TypeScale.qml
     components/AppHeader.qml
     components/AppShortcuts.qml
+    components/ContactAvatar.qml
     components/DisconnectedBanner.qml
     components/EmptyState.qml
     components/FocusRing.qml
@@ -107,12 +120,20 @@ set(qpm_ui_qml_files
     components/Sidebar.qml
     components/SidebarButton.qml
     components/StatusBar.qml
+    dialogs/ConflictDialog.qml
     dialogs/ConnectDialog.qml
+    dialogs/DuplicatesDialog.qml
+    dialogs/PhotoCropDialog.qml
     dialogs/PinDialog.qml
     dialogs/ProfilesDialog.qml
     dialogs/QrConnectDialog.qml
     dialogs/SettingsDialog.qml
     pages/OverviewPage.qml
+    pages/contacts/ContactDetail.qml
+    pages/contacts/ContactForm.qml
+    pages/contacts/ContactList.qml
+    pages/contacts/ContactValueSection.qml
+    pages/contacts/ContactsPage.qml
 )
 set(qpm_ui_qml_sources "")
 foreach(file IN LISTS qpm_ui_qml_files)
@@ -150,6 +171,22 @@ qt_add_qml_module(qpm_ui
         ui/Settings.cpp
         ui/TintedIcon.h
         ui/TintedIcon.cpp
+        ui/contacts/ContactDetailModel.h
+        ui/contacts/ContactDetailModel.cpp
+        ui/contacts/ContactEditor.h
+        ui/contacts/ContactEditor.cpp
+        ui/contacts/ContactListModel.h
+        ui/contacts/ContactListModel.cpp
+        ui/contacts/ContactsArea.h
+        ui/contacts/ContactsArea.cpp
+        ui/contacts/ContactTypes.h
+        ui/contacts/ContactTypes.cpp
+        ui/contacts/ContactValueModel.h
+        ui/contacts/ContactValueModel.cpp
+        ui/contacts/DuplicateListModel.h
+        ui/contacts/DuplicateListModel.cpp
+        ui/contacts/PhoneImageProvider.h
+        ui/contacts/PhoneImageProvider.cpp
 )
 
 set(qpm_ui_icons
@@ -162,25 +199,35 @@ set(qpm_ui_icons
     tabler/bell.svg
     tabler/bluetooth.svg
     tabler/calendar.svg
+    tabler/check.svg
     tabler/checklist.svg
     tabler/chevron-left.svg
+    tabler/copy.svg
     tabler/cpu.svg
     tabler/database.svg
     tabler/device-mobile.svg
+    tabler/download.svg
+    tabler/edit.svg
     tabler/folder.svg
     tabler/help.svg
     tabler/home.svg
     tabler/info-circle.svg
+    tabler/message.svg
     tabler/messages.svg
     tabler/notes.svg
     tabler/phone.svg
+    tabler/photo.svg
     tabler/plug-connected-x.svg
     tabler/plug-connected.svg
+    tabler/plus.svg
     tabler/qrcode.svg
     tabler/refresh.svg
     tabler/screen-share.svg
     tabler/settings.svg
+    tabler/trash.svg
+    tabler/upload.svg
     tabler/usb.svg
+    tabler/user.svg
     tabler/users.svg
     tabler/wifi.svg
     tabler/x.svg
@@ -194,7 +241,9 @@ qt_add_resources(qpm_ui "qpm_ui_icons"
 # The generated QML type registration includes headers by their base name only.
 target_include_directories(qpm_ui
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
-    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/ui
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/ui
+        ${CMAKE_CURRENT_SOURCE_DIR}/ui/contacts
 )
 target_link_libraries(qpm_ui
     PUBLIC
@@ -205,6 +254,7 @@ target_link_libraries(qpm_ui
         Qt6::Quick
     PRIVATE
         qrcodegen
+        Qt6::Concurrent
         Qt6::Svg
 )
 qpm_set_project_warnings(qpm_ui)

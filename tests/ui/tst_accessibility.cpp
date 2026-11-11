@@ -1,4 +1,10 @@
+#include "core/codec/PhoneVCard.h"
+#include "platform/SecretStore.h"
+#include "ui/AppController.h"
 #include "ui/Settings.h"
+#include "ui/contacts/ContactsArea.h"
+
+#include "FakePhone.h"
 
 #include <QAccessible>
 #include <QFile>
@@ -8,6 +14,8 @@
 #include <QQuickItem>
 #include <QQuickWindow>
 #include <QSet>
+#include <QSignalSpy>
+#include <QUrl>
 #include <QTemporaryDir>
 #include <QTest>
 
@@ -16,9 +24,41 @@
 
 Q_IMPORT_QML_PLUGIN(QPhoneManager_UiPlugin)
 
+using qpm::ui::AppController;
 using qpm::ui::Settings;
 
 namespace {
+
+constexpr int phoneTimeoutMs = 15000;
+
+qpm::core::codec::ContactValue number(quint64 dataId, const QString &value)
+{
+    qpm::core::codec::ContactValue entry;
+    entry.dataId = dataId;
+    entry.type = qpm::core::codec::phoneType::mobile;
+    entry.value = value;
+    return entry;
+}
+
+QByteArray contactCard(quint32 luid, const QString &given, const QString &family,
+                       const QString &phone)
+{
+    qpm::core::codec::Contact contact;
+    contact.luid = luid;
+    contact.givenName = given;
+    contact.familyName = family;
+    contact.displayName = given + u' ' + family;
+    contact.phones = {number(luid * 10, phone)};
+    contact.addresses = {[]() {
+        qpm::core::codec::ContactValue address;
+        address.dataId = 99;
+        address.type = qpm::core::codec::addressType::home;
+        address.address = {QString(), QString(), QStringLiteral("Weg 1"), QStringLiteral("Bonn"),
+                           QString(), QStringLiteral("53111"), QString()};
+        return address;
+    }()};
+    return qpm::core::codec::encodeAsPhoneSendsIt(contact);
+}
 
 bool isControl(const QQuickItem *item)
 {
@@ -93,15 +133,26 @@ private Q_SLOTS:
     void focusChainReachesEveryControlOnce();
     void sectionShortcutsSwitchTheSection();
     void narrowWindowKeepsTheSidebarLabelsForAssistiveTools();
+    void sidebarIsWideEnoughForItsLongestLabel();
+    void headerIconFollowsTheSection();
     void darkSchemeDarkensTheWindow();
+    void contactViewControlsHaveANameAndARole_data();
+    void contactViewControlsHaveANameAndARole();
+    void contactDialogControlsHaveANameAndARole_data();
+    void contactDialogControlsHaveANameAndARole();
+    void contactsFocusChainReachesEveryControlOnce();
 
 private:
     [[nodiscard]] QList<QQuickItem *> controls() const;
     [[nodiscard]] QObject *openDialog(const QString &name);
-    void verifyNamesAndRoles(const QList<QQuickItem *> &found) const;
+    void verifyNamesAndRoles(const QList<QQuickItem *> &found,
+                             const QSet<QAccessible::Role> &extraRoles = {}) const;
     [[nodiscard]] Settings *settings() const;
+    [[nodiscard]] bool showContacts();
+    static void announceAccessibility();
 
     QTemporaryDir m_config;
+    std::unique_ptr<qpm::test::FakePhone> m_phone;
     std::unique_ptr<QQmlApplicationEngine> m_engine;
     QQuickWindow *m_window = nullptr;
 };
@@ -111,7 +162,9 @@ void TestAccessibility::initTestCase()
     QVERIFY(m_config.isValid());
     // QSettings reads this once; the shell must not touch the real settings
     // of the user running the test.
-    qputenv("XDG_CONFIG_HOME", QFile::encodeName(m_config.path()));
+    qputenv("XDG_CONFIG_HOME", QFile::encodeName(m_config.filePath(QStringLiteral("config"))));
+    // Phone data stored by the contacts views stays in the temporary folder.
+    qputenv("XDG_DATA_HOME", QFile::encodeName(m_config.filePath(QStringLiteral("data"))));
     QCoreApplication::setOrganizationName(QStringLiteral("QPhoneManagerTest"));
     QCoreApplication::setApplicationName(QStringLiteral("tst_accessibility"));
     // The offscreen platform offers no GPU, and the software renderer can
@@ -139,6 +192,7 @@ void TestAccessibility::cleanup()
         shared->setColorScheme(Settings::ColorScheme::System);
     m_window = nullptr;
     m_engine.reset();
+    m_phone.reset();
 }
 
 QList<QQuickItem *> TestAccessibility::controls() const
@@ -193,6 +247,11 @@ void TestAccessibility::everyControlHasANameAndARole()
 QObject *TestAccessibility::openDialog(const QString &name)
 {
     QObject *dialog = m_window->findChild<QObject *>(name);
+    // Dialogs of a page live with the page, which a Loader created.
+    if (QQuickItem *page = findItem(m_window->contentItem(), QStringLiteral("contactsPage"));
+        !dialog && page) {
+        dialog = page->findChild<QObject *>(name);
+    }
     if (!dialog)
         return nullptr;
     if (name == QLatin1StringView("connectDialog"))
@@ -203,13 +262,15 @@ QObject *TestAccessibility::openDialog(const QString &name)
     return dialog;
 }
 
-void TestAccessibility::verifyNamesAndRoles(const QList<QQuickItem *> &found) const
+void TestAccessibility::verifyNamesAndRoles(const QList<QQuickItem *> &found,
+                                            const QSet<QAccessible::Role> &extraRoles) const
 {
-    const QSet<QAccessible::Role> roles = {
+    QSet<QAccessible::Role> roles = {
         QAccessible::Button,   QAccessible::PushButton,   QAccessible::CheckBox,
         QAccessible::ComboBox, QAccessible::EditableText, QAccessible::ListItem,
         QAccessible::PageTab,  QAccessible::RadioButton,
     };
+    roles.unite(extraRoles);
     for (QQuickItem *item : found) {
         QAccessibleInterface *accessible = QAccessible::queryAccessibleInterface(item);
         QVERIFY2(accessible, qPrintable(describe(item)));
@@ -327,6 +388,185 @@ void TestAccessibility::narrowWindowKeepsTheSidebarLabelsForAssistiveTools()
     QVERIFY(accessible);
     QVERIFY(!accessible->text(QAccessible::Name).isEmpty());
     QVERIFY(sidebar->width() < 100);
+}
+
+void TestAccessibility::sidebarIsWideEnoughForItsLongestLabel()
+{
+    QQuickItem *sidebar = findItem(m_window->contentItem(), QStringLiteral("sidebar"));
+    QQuickItem *longest = findItem(m_window->contentItem(), QStringLiteral("section-notifications"));
+    QVERIFY(sidebar);
+    QVERIFY(longest);
+
+    const QQuickItem *label = longest->property("contentItem").value<QQuickItem *>();
+    QVERIFY(label);
+    QVERIFY2(label->implicitWidth() <= label->width() + 0.5,
+             qPrintable(QStringLiteral("label needs %1, gets %2")
+                            .arg(label->implicitWidth())
+                            .arg(label->width())));
+    QVERIFY(sidebar->width() >= sidebar->property("fittingWidth").toInt());
+}
+
+void TestAccessibility::headerIconFollowsTheSection()
+{
+    QQuickItem *icon = findItem(m_window->contentItem(), QStringLiteral("sectionIcon"));
+    QVERIFY(icon);
+    QCOMPARE(icon->property("name").toString(), QStringLiteral("home"));
+
+    m_window->setProperty("currentSection", 1);
+
+    QCOMPARE(icon->property("name").toString(), QStringLiteral("address-book"));
+}
+
+bool TestAccessibility::showContacts()
+{
+    m_phone = std::make_unique<qpm::test::FakePhone>();
+    if (!m_phone->listen())
+        return false;
+    m_phone->setObjects(QStringLiteral("pb"),
+                        {{1, contactCard(1, QStringLiteral("Erika"), QStringLiteral("Mustermann"),
+                                         QStringLiteral("+491511234567"))},
+                         {2, contactCard(2, QStringLiteral("Erika"), QStringLiteral("Musterman"),
+                                         QStringLiteral("01511234567"))}});
+    auto *controller =
+        m_engine->singletonInstance<AppController *>("QPhoneManager.Ui", "AppController");
+    if (!controller ||
+        !controller->connectAddress(QStringLiteral("127.0.0.1:%1").arg(m_phone->port()))) {
+        return false;
+    }
+    if (!QTest::qWaitFor([controller]() { return controller->isConnected(); }, phoneTimeoutMs))
+        return false;
+    const QFuture<qpm::core::Result<qpm::core::store::ContactChanges>> pulled =
+        controller->contacts()->sync();
+    if (!QTest::qWaitFor([&pulled]() { return pulled.isFinished(); }, phoneTimeoutMs) ||
+        !pulled.result().hasValue()) {
+        return false;
+    }
+    m_window->setProperty("currentSection", 1);
+    controller->contacts()->setCurrentLuid(1);
+    const bool shown = QTest::qWaitFor(
+        [this]() {
+            const QQuickItem *detail = findItem(m_window->contentItem(), QStringLiteral("contactDetail"));
+            return detail && detail->isVisible();
+        },
+        phoneTimeoutMs);
+    announceAccessibility();
+    return shown;
+}
+
+// Controls made after accessibility was switched on only fill in name and
+// role when they hear of it, as they do when an assistive tool starts.
+void TestAccessibility::announceAccessibility()
+{
+    QAccessible::setActive(true);
+}
+
+void TestAccessibility::contactViewControlsHaveANameAndARole_data()
+{
+    QTest::addColumn<bool>("form");
+
+    QTest::newRow("list and detail") << false;
+    QTest::newRow("form") << true;
+}
+
+void TestAccessibility::contactViewControlsHaveANameAndARole()
+{
+    QFETCH(bool, form);
+    QVERIFY(showContacts());
+    QQuickItem *page = findItem(m_window->contentItem(), QStringLiteral("contactsPage"));
+    QVERIFY(page);
+    if (form) {
+        QVERIFY(QMetaObject::invokeMethod(page, "startEdit"));
+        QTRY_VERIFY(findItem(m_window->contentItem(), QStringLiteral("contactForm")));
+        announceAccessibility();
+    }
+
+    const QList<QQuickItem *> found = controls();
+
+    // The contact list takes the focus as a whole and moves through its
+    // entries with the arrow keys, so it reports itself as a list.
+    verifyNamesAndRoles(found, {QAccessible::List});
+    QQuickItem *list = findItem(m_window->contentItem(), QStringLiteral("contactList"));
+    QVERIFY(list && found.contains(list));
+    QCOMPARE(QAccessible::queryAccessibleInterface(list)->role(), QAccessible::List);
+    const QStringList required = form ? QStringList{QStringLiteral("givenNameField"),
+                                                    QStringLiteral("saveContactButton"),
+                                                    QStringLiteral("choosePhotoButton")}
+                                      : QStringList{QStringLiteral("newContactButton"),
+                                                    QStringLiteral("importContactsButton"),
+                                                    QStringLiteral("editContactButton")};
+    for (const QString &name : required) {
+        QQuickItem *item = findItem(m_window->contentItem(), name);
+        QVERIFY2(item && found.contains(item), qPrintable(name));
+    }
+}
+
+void TestAccessibility::contactDialogControlsHaveANameAndARole_data()
+{
+    QTest::addColumn<QString>("dialog");
+
+    QTest::newRow("delete") << QStringLiteral("deleteContactDialog");
+    QTest::newRow("duplicates") << QStringLiteral("duplicatesDialog");
+    QTest::newRow("conflict") << QStringLiteral("conflictDialog");
+    QTest::newRow("crop") << QStringLiteral("cropDialog");
+}
+
+void TestAccessibility::contactDialogControlsHaveANameAndARole()
+{
+    QFETCH(QString, dialog);
+    QVERIFY(showContacts());
+    auto *controller =
+        m_engine->singletonInstance<AppController *>("QPhoneManager.Ui", "AppController");
+    qpm::ui::ContactsArea *area = controller->contacts();
+    if (dialog == QLatin1StringView("duplicatesDialog")) {
+        QSignalSpy found(area, &qpm::ui::ContactsArea::duplicatesFound);
+        QVERIFY(area->findDuplicates());
+        QTRY_COMPARE(found.count(), 1);
+        QCOMPARE(area->duplicates()->count(), 1);
+    } else if (dialog == QLatin1StringView("cropDialog")) {
+        QImage picture(400, 300, QImage::Format_RGB32);
+        picture.fill(Qt::darkCyan);
+        const QString path = m_config.filePath(QStringLiteral("picture.png"));
+        QVERIFY(picture.save(path));
+        QVERIFY(area->editor()->load(1));
+        QVERIFY(area->editor()->loadPhotoCandidate(QUrl::fromLocalFile(path)));
+    } else if (dialog == QLatin1StringView("deleteContactDialog")) {
+        QQuickItem *page = findItem(m_window->contentItem(), QStringLiteral("contactsPage"));
+        QVERIFY(page);
+        page->setProperty("pendingDelete", 1);
+    }
+    const QList<QQuickItem *> before = controls();
+    QObject *popup = openDialog(dialog);
+    QVERIFY(popup);
+    announceAccessibility();
+
+    QList<QQuickItem *> found = controls();
+    found.removeIf([&before](QQuickItem *item) { return before.contains(item); });
+
+    QVERIFY2(!found.isEmpty(), qPrintable(dialog));
+    // The crop frame is moved with the arrow keys and sized with a slider.
+    verifyNamesAndRoles(found, {QAccessible::List, QAccessible::Slider, QAccessible::Graphic});
+    QMetaObject::invokeMethod(popup, "close");
+    QTRY_VERIFY(!popup->property("visible").toBool());
+}
+
+void TestAccessibility::contactsFocusChainReachesEveryControlOnce()
+{
+    QVERIFY(showContacts());
+    QList<QQuickItem *> chain;
+    QQuickItem *item = m_window->contentItem()->nextItemInFocusChain(true);
+    while (item && !chain.contains(item) && chain.size() < 500) {
+        chain.append(item);
+        item = item->nextItemInFocusChain(true);
+    }
+
+    QVERIFY(item);
+    QCOMPARE(item, chain.constFirst());
+    const QList<QQuickItem *> found = controls();
+    for (QQuickItem *control : found) {
+        if (control->isEnabled() && control->activeFocusOnTab())
+            QVERIFY2(chain.contains(control), qPrintable(describe(control)));
+    }
+    QVERIFY(chain.contains(findItem(m_window->contentItem(), QStringLiteral("contactList"))));
 }
 
 void TestAccessibility::darkSchemeDarkensTheWindow()

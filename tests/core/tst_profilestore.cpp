@@ -118,6 +118,7 @@ private Q_SLOTS:
     void reopeningTheCurrentVersionMakesNoBackup();
     void olderDatabaseIsCopiedBeforeTheMigration();
     void newerDatabaseIsLeftUntouched();
+    void versionOneDatabaseGetsTheContactTablesAndLoadsThePhonebookAgain();
     void profileFieldsSurviveAReopen();
     void profileValuesAreBoundNotInterpolated();
     void invalidDisplayNameIsRejected_data();
@@ -274,6 +275,38 @@ void TestProfileStore::newerDatabaseIsLeftUntouched()
     QCOMPARE(userVersion(path), 7);
     QVERIFY(!hasTable(path, QStringLiteral("meta")));
     QVERIFY(!QFile::exists(path + QStringLiteral(".bak")));
+}
+
+// A phonebook pulled before the contact tables existed lives only in the
+// sync state; the next pull has to load it in full to fill the tables.
+void TestProfileStore::versionOneDatabaseGetsTheContactTablesAndLoadsThePhonebookAgain()
+{
+    const QString path = databasePath(QStringLiteral("dev-1"));
+    QVERIFY(QDir().mkpath(QFileInfo(path).path()));
+    QVERIFY(runSql(
+        path,
+        {QStringLiteral("CREATE TABLE meta (key TEXT PRIMARY KEY NOT NULL, value TEXT)"),
+         QStringLiteral("CREATE TABLE sync_objects (domain TEXT NOT NULL, luid INTEGER NOT NULL, "
+                        "hash BLOB NOT NULL, raw BLOB NOT NULL, PRIMARY KEY (domain, luid))"),
+         QStringLiteral("INSERT INTO meta VALUES ('counter.pb', '95')"),
+         QStringLiteral("INSERT INTO meta VALUES ('counter.notes', '7')"),
+         QStringLiteral("INSERT INTO sync_objects VALUES ('pb', 1, x'00', x'00')"),
+         QStringLiteral("INSERT INTO sync_objects VALUES ('notes', 2, x'00', x'00')"),
+         QStringLiteral("PRAGMA user_version = 1")}));
+
+    const std::unique_ptr<ProfileStore> store = openStore(QStringLiteral("dev-1"));
+
+    QVERIFY(store);
+    QCOMPARE(userVersion(path), 2);
+    QCOMPARE(userVersion(path + QStringLiteral(".bak")), 1);
+    for (const QString &table : {QStringLiteral("contacts"), QStringLiteral("contact_values"),
+                                 QStringLiteral("accounts"), QStringLiteral("groups")}) {
+        QVERIFY2(hasTable(path, table), qPrintable(table));
+    }
+    QVERIFY(!store->changeCounter(IrmcDomain::Contacts));
+    QVERIFY(!store->objectHash(IrmcDomain::Contacts, 1));
+    QCOMPARE(store->changeCounter(IrmcDomain::Notes), std::optional<quint64>(7));
+    QVERIFY(store->objectHash(IrmcDomain::Notes, 2));
 }
 
 void TestProfileStore::profileFieldsSurviveAReopen()
