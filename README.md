@@ -102,6 +102,7 @@ report themselves as skipped. They read these environment variables:
 | `QPM_TEST_SMS_TO` | The only number a test may send a text message to. Optional. |
 | `QPM_TEST_CALL_TO` | The only number a test may call. Optional. |
 | `QPM_TEST_READ_ONLY` | When set, the call log test writes nothing to a phone that is not an emulator. Optional. |
+| `QPM_TEST_SEND_SMS` | When `1`, the messages test sends one real text message to `QPM_TEST_SMS_TO`. Optional. |
 
 The contacts test writes freely only to an emulator, that is a serial that
 starts with `emulator-`. On any other phone it only reads the contacts and
@@ -116,6 +117,19 @@ reads the three call lists and checks their form and count. It writes nothing
 there but one entry named `QPM Testanruf` with six digits and a made-up number,
 which it deletes again, and only when the app on the phone may change the call
 log. It never prints or keeps the contents of a phone's call log.
+
+The messages test lets the emulator receive text messages of its own through
+the emulator console (`adb emu sms send`), which sends nothing. It then reads,
+searches, archives and exports them, asks the app on the phone to delete them
+and to change their read state, and removes them again through adb. To do
+that it allows the Android shell of the emulator to write messages. On any
+other phone it only reads the messages and checks their count and form, in a
+temporary store that is gone after the test. Only with `QPM_TEST_SEND_SMS=1`
+and on a phone that is not an emulator does it send one text message,
+`QPM Test` with six digits, to the number in `QPM_TEST_SMS_TO` and check that
+it shows among the sent messages. The app on the phone cannot delete text
+messages, so that message stays on the phone. Scheduled messages are written
+only to the fake phone of the other tests.
 
 All traffic of these tests goes through a guard. It lets a text message
 through only to the number in `QPM_TEST_SMS_TO` and a call only to the number

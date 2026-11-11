@@ -454,7 +454,8 @@ void TestCalls::syncAllReportsContactsAndCalls()
     QTRY_COMPARE_WITH_TIMEOUT(finished.count(), 1, timeoutMs);
     QCOMPARE(finished.first().first().toString(),
              QStringLiteral("Contacts: 0 new, 0 changed, 0 deleted\n"
-                            "Calls: 1 new, 0 changed, 1 deleted"));
+                            "Calls: 1 new, 0 changed, 1 deleted\n"
+                            "Messages: 0 new, 0 changed, 0 deleted"));
     QCOMPARE(area()->list()->totalCount(), 4);
     QCOMPARE(role(area()->list(), 0, "title"), QStringLiteral("0170 2000003"));
 }

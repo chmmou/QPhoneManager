@@ -120,6 +120,7 @@ private Q_SLOTS:
     void newerDatabaseIsLeftUntouched();
     void versionOneDatabaseGetsTheContactTablesAndLoadsThePhonebookAgain();
     void versionTwoDatabaseGetsTheCallTableAndKeepsTheContacts();
+    void versionThreeDatabaseGetsTheMessageTablesAndLoadsTheMessagesAgain();
     void profileFieldsSurviveAReopen();
     void profileValuesAreBoundNotInterpolated();
     void invalidDisplayNameIsRejected_data();
@@ -333,7 +334,7 @@ void TestProfileStore::versionTwoDatabaseGetsTheCallTableAndKeepsTheContacts()
     const std::unique_ptr<ProfileStore> store = openStore(QStringLiteral("dev-1"));
 
     QVERIFY(store);
-    QCOMPARE(userVersion(path), 3);
+    QCOMPARE(userVersion(path), ProfileStore::schemaVersion);
     QVERIFY(hasTable(path, QStringLiteral("calls")));
     QCOMPARE(userVersion(path + QStringLiteral(".bak")), 2);
     QVERIFY(!hasTable(path + QStringLiteral(".bak"), QStringLiteral("calls")));
@@ -344,6 +345,46 @@ void TestProfileStore::versionTwoDatabaseGetsTheCallTableAndKeepsTheContacts()
     QVERIFY(query.exec(QStringLiteral("SELECT display_name FROM contacts")));
     QVERIFY(query.next());
     QCOMPARE(query.value(0).toString(), QStringLiteral("Erika Mustermann"));
+}
+
+// Messages pulled before the message tables existed are only in the sync
+// state; the next pull has to load them in full. The call log stays.
+void TestProfileStore::versionThreeDatabaseGetsTheMessageTablesAndLoadsTheMessagesAgain()
+{
+    const QString path = databasePath(QStringLiteral("dev-1"));
+    QVERIFY(QDir().mkpath(QFileInfo(path).path()));
+    QVERIFY(runSql(
+        path,
+        {QStringLiteral("CREATE TABLE meta (key TEXT PRIMARY KEY NOT NULL, value TEXT)"),
+         QStringLiteral("CREATE TABLE sync_objects (domain TEXT NOT NULL, luid INTEGER NOT NULL, "
+                        "hash BLOB NOT NULL, raw BLOB NOT NULL, PRIMARY KEY (domain, luid))"),
+         QStringLiteral(
+             "CREATE TABLE contacts (luid INTEGER PRIMARY KEY NOT NULL, photo_blob TEXT)"),
+         QStringLiteral("CREATE TABLE calls (id INTEGER PRIMARY KEY NOT NULL, number TEXT)"),
+         QStringLiteral("INSERT INTO calls VALUES (5, '0301234')"),
+         QStringLiteral("INSERT INTO meta VALUES ('counter.msg', '12')"),
+         QStringLiteral("INSERT INTO meta VALUES ('counter.pb', '95')"),
+         QStringLiteral("INSERT INTO sync_objects VALUES ('msg', 1, x'00', x'00')"),
+         QStringLiteral("INSERT INTO sync_objects VALUES ('pb', 1, x'00', x'00')"),
+         QStringLiteral("PRAGMA user_version = 3")}));
+
+    const std::unique_ptr<ProfileStore> store = openStore(QStringLiteral("dev-1"));
+
+    QVERIFY(store);
+    QCOMPARE(userVersion(path), 4);
+    QCOMPARE(userVersion(path + QStringLiteral(".bak")), 3);
+    for (const QString &table : {QStringLiteral("messages"), QStringLiteral("attachments"),
+                                 QStringLiteral("messages_fts")}) {
+        QVERIFY2(hasTable(path, table), qPrintable(table));
+        QVERIFY2(!hasTable(path + QStringLiteral(".bak"), table), qPrintable(table));
+    }
+    QVERIFY(!store->changeCounter(IrmcDomain::Messages));
+    QVERIFY(!store->objectHash(IrmcDomain::Messages, 1));
+    QCOMPARE(store->changeCounter(IrmcDomain::Contacts), std::optional<quint64>(95));
+    QSqlQuery query(QSqlDatabase::database(store->connectionName(), false));
+    QVERIFY(query.exec(QStringLiteral("SELECT number FROM calls WHERE id = 5")));
+    QVERIFY(query.next());
+    QCOMPARE(query.value(0).toString(), QStringLiteral("0301234"));
 }
 
 void TestProfileStore::profileFieldsSurviveAReopen()

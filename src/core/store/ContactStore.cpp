@@ -587,9 +587,12 @@ void ContactStore::pruneReleasedBlobs()
     if (released.isEmpty())
         return;
     QSqlQuery query(QSqlDatabase::database(m_profile->connectionName(), false));
-    query.prepare(QStringLiteral("SELECT 1 FROM contacts WHERE photo_blob = :blob LIMIT 1"));
+    // A message part with the same content as a photo shares its blob.
+    query.prepare(QStringLiteral("SELECT 1 FROM contacts WHERE photo_blob = :photo UNION ALL "
+                                 "SELECT 1 FROM attachments WHERE blob = :part LIMIT 1"));
     for (const QString &blob : released) {
-        query.bindValue(QStringLiteral(":blob"), blob);
+        query.bindValue(QStringLiteral(":photo"), blob);
+        query.bindValue(QStringLiteral(":part"), blob);
         if (!query.exec()) {
             // A photo kept by mistake only takes space; the next change that
             // releases it tries again.

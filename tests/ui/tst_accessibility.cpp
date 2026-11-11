@@ -5,10 +5,12 @@
 #include "ui/Settings.h"
 #include "ui/calls/CallsArea.h"
 #include "ui/contacts/ContactsArea.h"
+#include "ui/messages/MessagesArea.h"
 
 #include "FakePhone.h"
 
 #include <QAccessible>
+#include <QColor>
 #include <QFile>
 #include <QImage>
 #include <QQmlApplicationEngine>
@@ -109,6 +111,50 @@ QQuickItem *findItem(QQuickItem *item, const QString &name)
     return nullptr;
 }
 
+QQuickItem *findItemOfClass(QQuickItem *item, const char *className)
+{
+    if (item->inherits(className))
+        return item;
+    const QList<QQuickItem *> children = item->childItems();
+    for (QQuickItem *child : children) {
+        if (QQuickItem *found = findItemOfClass(child, className))
+            return found;
+    }
+    return nullptr;
+}
+
+// The colour of the dimming the overlay shows behind a modal dialog, or an
+// invalid colour while there is none.
+QColor scrimColor(QQuickItem *root)
+{
+    QQuickItem *overlay = findItemOfClass(root, "QQuickOverlay");
+    if (!overlay)
+        return {};
+    const QList<QQuickItem *> children = overlay->childItems();
+    for (const QQuickItem *child : children) {
+        if (child->isVisible() && child->inherits("QQuickRectangle"))
+            return child->property("color").value<QColor>();
+    }
+    return {};
+}
+
+// A control shows its focus ring while its focus came from the keyboard; any
+// other item shows the ring placed in it while it has the focus.
+bool focusIsShown(const QQuickItem *item)
+{
+    if (!item)
+        return false;
+    if (item->metaObject()->indexOfProperty("visualFocus") >= 0)
+        return item->property("visualFocus").toBool();
+    const QList<QQuickItem *> children = item->childItems();
+    for (const QQuickItem *child : children) {
+        const QString type = QString::fromLatin1(child->metaObject()->className());
+        if (type.startsWith(QLatin1StringView("FocusRing")) && child->isVisible())
+            return true;
+    }
+    return false;
+}
+
 QString describe(const QQuickItem *item)
 {
     return QStringLiteral("%1 \"%2\"")
@@ -155,9 +201,17 @@ private Q_SLOTS:
     void contactViewControlsHaveANameAndARole();
     void contactDialogControlsHaveANameAndARole_data();
     void contactDialogControlsHaveANameAndARole();
+    void contactDialogsShowTheFocusOnOpening_data();
+    void contactDialogsShowTheFocusOnOpening();
     void contactsFocusChainReachesEveryControlOnce();
+    void dialogScrimIsDarkInBothSchemes_data();
+    void dialogScrimIsDarkInBothSchemes();
     void callViewControlsHaveANameAndARole();
     void callDialogControlsHaveANameAndARole();
+    void messageViewControlsHaveANameAndARole_data();
+    void messageViewControlsHaveANameAndARole();
+    void messageDialogShowsItsFocusAndNamesItsControls();
+    void messagesFocusChainReachesEveryControlOnce();
     void callsFocusChainReachesEveryControlOnce();
 
 private:
@@ -168,6 +222,9 @@ private:
     [[nodiscard]] Settings *settings() const;
     [[nodiscard]] bool showContacts();
     [[nodiscard]] bool showCalls();
+    [[nodiscard]] bool showMessages();
+    /// Brings the contacts area into the state in which `dialog` has something to show.
+    [[nodiscard]] bool prepareContactDialog(const QString &dialog);
     static void announceAccessibility();
 
     QTemporaryDir m_config;
@@ -267,7 +324,8 @@ QObject *TestAccessibility::openDialog(const QString &name)
 {
     QObject *dialog = m_window->findChild<QObject *>(name);
     // Dialogs of a page live with the page, which a Loader created.
-    for (const QString &pageName : {QStringLiteral("contactsPage"), QStringLiteral("callsPage")}) {
+    for (const QString &pageName : {QStringLiteral("contactsPage"), QStringLiteral("callsPage"),
+                                    QStringLiteral("messagesPage")}) {
         QQuickItem *page = findItem(m_window->contentItem(), pageName);
         if (!dialog && page)
             dialog = page->findChild<QObject *>(name);
@@ -534,26 +592,7 @@ void TestAccessibility::contactDialogControlsHaveANameAndARole()
 {
     QFETCH(QString, dialog);
     QVERIFY(showContacts());
-    auto *controller =
-        m_engine->singletonInstance<AppController *>("QPhoneManager.Ui", "AppController");
-    qpm::ui::ContactsArea *area = controller->contacts();
-    if (dialog == QLatin1StringView("duplicatesDialog")) {
-        QSignalSpy found(area, &qpm::ui::ContactsArea::duplicatesFound);
-        QVERIFY(area->findDuplicates());
-        QTRY_COMPARE(found.count(), 1);
-        QCOMPARE(area->duplicates()->count(), 1);
-    } else if (dialog == QLatin1StringView("cropDialog")) {
-        QImage picture(400, 300, QImage::Format_RGB32);
-        picture.fill(Qt::darkCyan);
-        const QString path = m_config.filePath(QStringLiteral("picture.png"));
-        QVERIFY(picture.save(path));
-        QVERIFY(area->editor()->load(1));
-        QVERIFY(area->editor()->loadPhotoCandidate(QUrl::fromLocalFile(path)));
-    } else if (dialog == QLatin1StringView("deleteContactDialog")) {
-        QQuickItem *page = findItem(m_window->contentItem(), QStringLiteral("contactsPage"));
-        QVERIFY(page);
-        page->setProperty("pendingDelete", 1);
-    }
+    QVERIFY(prepareContactDialog(dialog));
     const QList<QQuickItem *> before = controls();
     QObject *popup = openDialog(dialog);
     QVERIFY(popup);
@@ -565,6 +604,103 @@ void TestAccessibility::contactDialogControlsHaveANameAndARole()
     QVERIFY2(!found.isEmpty(), qPrintable(dialog));
     // The crop frame is moved with the arrow keys and sized with a slider.
     verifyNamesAndRoles(found, {QAccessible::List, QAccessible::Slider, QAccessible::Graphic});
+    QMetaObject::invokeMethod(popup, "close");
+    QTRY_VERIFY(!popup->property("visible").toBool());
+}
+
+bool TestAccessibility::prepareContactDialog(const QString &dialog)
+{
+    auto *controller =
+        m_engine->singletonInstance<AppController *>("QPhoneManager.Ui", "AppController");
+    qpm::ui::ContactsArea *area = controller->contacts();
+    if (dialog == QLatin1StringView("duplicatesDialog")) {
+        QSignalSpy found(area, &qpm::ui::ContactsArea::duplicatesFound);
+        if (!area->findDuplicates())
+            return false;
+        return QTest::qWaitFor([&found]() { return found.count() == 1; }) &&
+               area->duplicates()->count() == 1;
+    }
+    if (dialog == QLatin1StringView("cropDialog")) {
+        QImage picture(400, 300, QImage::Format_RGB32);
+        picture.fill(Qt::darkCyan);
+        const QString path = m_config.filePath(QStringLiteral("picture.png"));
+        return picture.save(path) && area->editor()->load(1) &&
+               area->editor()->loadPhotoCandidate(QUrl::fromLocalFile(path));
+    }
+    if (dialog == QLatin1StringView("deleteContactDialog")) {
+        QQuickItem *page = findItem(m_window->contentItem(), QStringLiteral("contactsPage"));
+        return page && page->setProperty("pendingDelete", 1);
+    }
+    return true;
+}
+
+void TestAccessibility::contactDialogsShowTheFocusOnOpening_data()
+{
+    contactDialogControlsHaveANameAndARole_data();
+}
+
+// A dialog that opens without a visible focus leaves a keyboard user guessing
+// where a key press goes; the second opening has to show it as well.
+void TestAccessibility::contactDialogsShowTheFocusOnOpening()
+{
+    QFETCH(QString, dialog);
+    QVERIFY(showContacts());
+    QVERIFY(prepareContactDialog(dialog));
+    const QList<QQuickItem *> before = controls();
+
+    for (int opening = 1; opening <= 2; ++opening) {
+        if (opening == 2)
+            QVERIFY(prepareContactDialog(dialog));
+        QObject *popup = openDialog(dialog);
+        QVERIFY(popup);
+        QQuickItem *focused = m_window->activeFocusItem();
+        QVERIFY2(focused, qPrintable(dialog));
+        QVERIFY2(!before.contains(focused), qPrintable(describe(focused)));
+        QVERIFY2(focusIsShown(focused),
+                 qPrintable(QStringLiteral("opening %1: %2").arg(opening).arg(describe(focused))));
+        QMetaObject::invokeMethod(popup, "close");
+        QTRY_VERIFY(!popup->property("visible").toBool());
+    }
+}
+
+void TestAccessibility::dialogScrimIsDarkInBothSchemes_data()
+{
+    QTest::addColumn<bool>("dark");
+    QTest::addColumn<QString>("dialog");
+
+    QTest::newRow("settings, light") << false << QStringLiteral("settingsDialog");
+    QTest::newRow("settings, dark") << true << QStringLiteral("settingsDialog");
+    QTest::newRow("delete calls, dark") << true << QStringLiteral("deleteCallsDialog");
+}
+
+// A light dimming over a dark window washes the window out instead of
+// stepping it back behind the dialog.
+void TestAccessibility::dialogScrimIsDarkInBothSchemes()
+{
+    QFETCH(bool, dark);
+    QFETCH(QString, dialog);
+    Settings *shared = settings();
+    QVERIFY(shared);
+    shared->setColorScheme(dark ? Settings::ColorScheme::Dark : Settings::ColorScheme::Light);
+
+    QObject *popup = nullptr;
+    if (dialog == QLatin1StringView("deleteCallsDialog")) {
+        QVERIFY(showCalls());
+        QQuickItem *page = findItem(m_window->contentItem(), QStringLiteral("callsPage"));
+        QVERIFY(page);
+        popup = page->findChild<QObject *>(dialog);
+        QVERIFY(popup);
+        QVERIFY(QMetaObject::invokeMethod(page, "confirmDelete", Q_ARG(int, 2)));
+        QTRY_VERIFY(popup->property("opened").toBool());
+    } else {
+        popup = openDialog(dialog);
+        QVERIFY(popup);
+    }
+
+    QColor scrim;
+    QTRY_VERIFY((scrim = scrimColor(m_window->contentItem())).isValid());
+    QVERIFY2(qGray(scrim.rgb()) < 64, qPrintable(scrim.name(QColor::HexArgb)));
+    QVERIFY2(scrim.alphaF() >= 0.3, qPrintable(scrim.name(QColor::HexArgb)));
     QMetaObject::invokeMethod(popup, "close");
     QTRY_VERIFY(!popup->property("visible").toBool());
 }
@@ -718,6 +854,194 @@ void TestAccessibility::callsFocusChainReachesEveryControlOnce()
     for (const QString &name :
          {QStringLiteral("callList"), QStringLiteral("missedCallsTab"),
           QStringLiteral("exportCallsButton"), QStringLiteral("callBackButton")}) {
+        QVERIFY2(chain.contains(findItem(m_window->contentItem(), name)), qPrintable(name));
+    }
+}
+
+// A conversation with a picture, one with a sender name, and a scheduled message.
+bool TestAccessibility::showMessages()
+{
+    m_phone = std::make_unique<qpm::test::FakePhone>();
+    if (!m_phone->listen())
+        return false;
+    m_phone->config().scriptedReplies.insert(
+        QStringLiteral("AT*SIM"), {QByteArrayLiteral("AT*SIM\r\n*SIM: 0,,Privat,Beispielnetz,VS\r\n"
+                                                     "*SIM: 1,,Arbeit,Beispielnetz,\r\nOK\r\n")});
+    m_phone->setObjects(QStringLiteral("pb"),
+                        {{1, contactCard(1, QStringLiteral("Erika"), QStringLiteral("Mustermann"),
+                                         QStringLiteral("+491511234567"))}});
+    const QByteArray stamp =
+        QDateTime::currentDateTimeUtc().toString(QStringLiteral("yyyyMMddTHHmmssZ")).toLatin1();
+    m_phone->setObjects(
+        QStringLiteral("msg"),
+        {{11, "BEGIN:VMESSAGE\r\nTYP:SMS;IN\r\nBOX:INBOX\r\nREAD:0\r\nDATE:20261101T080000Z\r\n"
+              "NUMBER:Paketdienst\r\nBODY:Ihr Paket kommt heute.\r\nX-IRMC-LUID:00000000000B\r\n"
+              "END:VMESSAGE\r\n"},
+         {0x10000002, "BEGIN:VMESSAGE\r\nTYP:MMS;IN\r\nBOX:INBOX\r\nREAD:0\r\nDATE:" + stamp +
+                          "\r\nNUMBER:+491511234567\r\nSUBJECT:Ausflug\r\n"
+                          "ATT;NAME=text_0.txt;TYPE=text/plain:Schau mal\r\n"
+                          "ATT;NAME=bild.png;TYPE=image/png;SIZE=3;ENCODING=BASE64:UE5H\r\n\r\n"
+                          "X-IRMC-LUID:000010000002\r\nEND:VMESSAGE\r\n"},
+         {0x20000001, "BEGIN:VMESSAGE\r\nTYP:SMS;OUT\r\nBOX:SHEDULED\r\n"
+                      "RECIPIENT:Erika;+491511234567;SHEDULED;;\r\nDATE:20301224T170000Z\r\n"
+                      "BODY:Frohes Fest\r\nX-IRMC-LUID:000020000001\r\nEND:VMESSAGE\r\n"}});
+    auto *controller =
+        m_engine->singletonInstance<AppController *>("QPhoneManager.Ui", "AppController");
+    if (!controller ||
+        !controller->connectAddress(QStringLiteral("127.0.0.1:%1").arg(m_phone->port()))) {
+        return false;
+    }
+    if (!QTest::qWaitFor([controller]() { return controller->isConnected(); }, phoneTimeoutMs))
+        return false;
+    const QFuture<qpm::core::Result<qpm::core::store::ContactChanges>> contacts =
+        controller->contacts()->sync();
+    if (!QTest::qWaitFor([&contacts]() { return contacts.isFinished(); }, phoneTimeoutMs) ||
+        !contacts.result().hasValue()) {
+        return false;
+    }
+    const QFuture<qpm::core::Result<qpm::core::store::MessageChanges>> messages =
+        controller->messages()->sync();
+    if (!QTest::qWaitFor([&messages]() { return messages.isFinished(); }, phoneTimeoutMs) ||
+        !messages.result().hasValue()) {
+        return false;
+    }
+    m_window->setProperty("currentSection", 3);
+    qpm::ui::MessagesArea *area = controller->messages();
+    area->setCurrentThread(area->conversations()->threadKeyAt(0));
+    const bool shown = QTest::qWaitFor(
+        [this]() {
+            const QQuickItem *view =
+                findItem(m_window->contentItem(), QStringLiteral("conversationView"));
+            return view && view->isVisible();
+        },
+        phoneTimeoutMs);
+    announceAccessibility();
+    return shown;
+}
+
+void TestAccessibility::messageViewControlsHaveANameAndARole_data()
+{
+    QTest::addColumn<QString>("view");
+    QTest::addColumn<QStringList>("required");
+
+    QTest::newRow("conversation") << QStringLiteral("conversation")
+                                  << QStringList{QStringLiteral("conversationsTab"),
+                                                 QStringLiteral("scheduledTab"),
+                                                 QStringLiteral("newMessageButton"),
+                                                 QStringLiteral("importArchiveButton"),
+                                                 QStringLiteral("exportAllMessagesButton"),
+                                                 QStringLiteral("conversationList"),
+                                                 QStringLiteral("messageList"),
+                                                 QStringLiteral("replyButton"),
+                                                 QStringLiteral("markReadButton"),
+                                                 QStringLiteral("archiveConversationButton"),
+                                                 QStringLiteral("exportConversationButton"),
+                                                 QStringLiteral("deleteConversationButton")};
+    QTest::newRow("compose") << QStringLiteral("compose")
+                             << QStringList{QStringLiteral("recipientChip0"),
+                                            QStringLiteral("recipientField"),
+                                            QStringLiteral("addRecipientButton"),
+                                            QStringLiteral("messageTextArea"),
+                                            QStringLiteral("simBox"),
+                                            QStringLiteral("scheduleBox"),
+                                            QStringLiteral("scheduleDateField"),
+                                            QStringLiteral("scheduleTimeField"),
+                                            QStringLiteral("cancelComposeButton"),
+                                            QStringLiteral("submitMessageButton")};
+    QTest::newRow("scheduled") << QStringLiteral("scheduled")
+                               << QStringList{QStringLiteral("scheduledList"),
+                                              QStringLiteral("scheduledTab")};
+}
+
+void TestAccessibility::messageViewControlsHaveANameAndARole()
+{
+    QFETCH(QString, view);
+    QFETCH(QStringList, required);
+    QVERIFY(showMessages());
+    auto *controller =
+        m_engine->singletonInstance<AppController *>("QPhoneManager.Ui", "AppController");
+    qpm::ui::MessagesArea *area = controller->messages();
+    if (view == QLatin1StringView("compose")) {
+        QVERIFY(area->composeTo(QStringLiteral("0151 1234567")));
+        area->composer()->setScheduled(true);
+        QTRY_VERIFY(
+            findItem(m_window->contentItem(), QStringLiteral("scheduleDateField")) &&
+            findItem(m_window->contentItem(), QStringLiteral("scheduleDateField"))->isVisible());
+        announceAccessibility();
+    } else if (view == QLatin1StringView("scheduled")) {
+        QQuickItem *tabs = findItem(m_window->contentItem(), QStringLiteral("messageViewTabs"));
+        QVERIFY(tabs);
+        tabs->setProperty("currentIndex", 1);
+        QTRY_VERIFY(findItem(m_window->contentItem(), QStringLiteral("scheduledList")));
+        announceAccessibility();
+    }
+
+    const QList<QQuickItem *> found = controls();
+
+    verifyNamesAndRoles(found, {QAccessible::List});
+    for (const QString &name : std::as_const(required)) {
+        QQuickItem *item = findItem(m_window->contentItem(), name);
+        QVERIFY2(item && found.contains(item), qPrintable(name));
+    }
+    // Icon-only buttons carry their action as their name and as their tooltip.
+    for (QQuickItem *item : found) {
+        // AbstractButton.IconOnly is the first value of the display enumeration.
+        const bool iconOnly = item->metaObject()->indexOfProperty("display") >= 0 &&
+                              item->property("display").toInt() == 0;
+        if (!iconOnly || item->property("text").toString().isEmpty())
+            continue;
+        const QString accessibleName =
+            QAccessible::queryAccessibleInterface(item)->text(QAccessible::Name);
+        QCOMPARE(accessibleName, item->property("text").toString());
+    }
+}
+
+void TestAccessibility::messageDialogShowsItsFocusAndNamesItsControls()
+{
+    QVERIFY(showMessages());
+    QQuickItem *page = findItem(m_window->contentItem(), QStringLiteral("messagesPage"));
+    QVERIFY(page);
+    QObject *popup = page->findChild<QObject *>(QStringLiteral("deleteMessagesDialog"));
+    QVERIFY(popup);
+    const QList<QQuickItem *> before = controls();
+
+    for (int opening = 1; opening <= 2; ++opening) {
+        QVERIFY(QMetaObject::invokeMethod(page, "confirmDeleteConversation"));
+        QTRY_VERIFY(popup->property("opened").toBool());
+        announceAccessibility();
+        QList<QQuickItem *> inDialog = controls();
+        inDialog.removeIf([&before](QQuickItem *control) { return before.contains(control); });
+        QVERIFY(!inDialog.isEmpty());
+        verifyNamesAndRoles(inDialog);
+        QQuickItem *focused = m_window->activeFocusItem();
+        QVERIFY(focused);
+        QCOMPARE(focused->property("text").toString(), QStringLiteral("Cancel"));
+        QVERIFY2(focusIsShown(focused), qPrintable(QStringLiteral("opening %1").arg(opening)));
+        QVERIFY(qGray(scrimColor(m_window->contentItem()).rgb()) < 64);
+        QMetaObject::invokeMethod(popup, "close");
+        QTRY_VERIFY(!popup->property("visible").toBool());
+    }
+}
+
+void TestAccessibility::messagesFocusChainReachesEveryControlOnce()
+{
+    QVERIFY(showMessages());
+    QList<QQuickItem *> chain;
+    QQuickItem *item = m_window->contentItem()->nextItemInFocusChain(true);
+    while (item && !chain.contains(item) && chain.size() < 500) {
+        chain.append(item);
+        item = item->nextItemInFocusChain(true);
+    }
+
+    QVERIFY(item);
+    QCOMPARE(item, chain.constFirst());
+    const QList<QQuickItem *> found = controls();
+    for (QQuickItem *control : found) {
+        if (control->isEnabled() && control->activeFocusOnTab())
+            QVERIFY2(chain.contains(control), qPrintable(describe(control)));
+    }
+    for (const QString &name : {QStringLiteral("conversationList"), QStringLiteral("messageList"),
+                                QStringLiteral("replyButton"), QStringLiteral("scheduledTab")}) {
         QVERIFY2(chain.contains(findItem(m_window->contentItem(), name)), qPrintable(name));
     }
 }

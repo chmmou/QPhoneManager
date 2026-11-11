@@ -12,6 +12,8 @@ qt_add_library(qpm_core STATIC
     core/codec/CsvTable.cpp
     core/codec/Limits.h
     core/codec/Limits.cpp
+    core/codec/MessageExport.h
+    core/codec/MessageExport.cpp
     core/codec/PbMetadata.h
     core/codec/PbMetadata.cpp
     core/codec/PhoneTime.h
@@ -20,8 +22,12 @@ qt_add_library(qpm_core STATIC
     core/codec/PhoneVCard.cpp
     core/codec/SafeXml.h
     core/codec/SafeXml.cpp
+    core/codec/SmsLength.h
+    core/codec/SmsLength.cpp
     core/codec/VCardInterchange.h
     core/codec/VCardInterchange.cpp
+    core/codec/VMessage.h
+    core/codec/VMessage.cpp
     core/protocol/AdbBridge.h
     core/protocol/AdbBridge.cpp
     core/protocol/AtSession.h
@@ -45,12 +51,16 @@ qt_add_library(qpm_core STATIC
     core/service/ContactsService.cpp
     core/service/DeviceStatusService.h
     core/service/DeviceStatusService.cpp
+    core/service/MessagesService.h
+    core/service/MessagesService.cpp
     core/sync/IrmcSync.h
     core/sync/IrmcSync.cpp
     core/store/CallStore.h
     core/store/CallStore.cpp
     core/store/ContactStore.h
     core/store/ContactStore.cpp
+    core/store/MessageStore.h
+    core/store/MessageStore.cpp
     core/store/ProfileStore.h
     core/store/ProfileStore.cpp
     core/sync/SyncStoreAdapter.h
@@ -119,6 +129,7 @@ set(qpm_ui_qml_files
     components/ListDetailView.qml
     components/MessageBar.qml
     components/OverviewCard.qml
+    components/Scrim.qml
     components/SectionEntry.qml
     components/SectionPage.qml
     components/Sections.qml
@@ -143,6 +154,11 @@ set(qpm_ui_qml_files
     pages/contacts/ContactList.qml
     pages/contacts/ContactValueSection.qml
     pages/contacts/ContactsPage.qml
+    pages/messages/ComposeView.qml
+    pages/messages/ConversationList.qml
+    pages/messages/ConversationView.qml
+    pages/messages/MessagesPage.qml
+    pages/messages/ScheduledList.qml
 )
 set(qpm_ui_qml_sources "")
 foreach(file IN LISTS qpm_ui_qml_files)
@@ -200,6 +216,16 @@ qt_add_qml_module(qpm_ui
         ui/contacts/DuplicateListModel.cpp
         ui/contacts/PhoneImageProvider.h
         ui/contacts/PhoneImageProvider.cpp
+        ui/messages/ConversationListModel.h
+        ui/messages/ConversationListModel.cpp
+        ui/messages/MessageComposer.h
+        ui/messages/MessageComposer.cpp
+        ui/messages/MessageListModel.h
+        ui/messages/MessageListModel.cpp
+        ui/messages/MessagesArea.h
+        ui/messages/MessagesArea.cpp
+        ui/messages/ScheduledListModel.h
+        ui/messages/ScheduledListModel.cpp
 )
 
 set(qpm_ui_icons
@@ -208,6 +234,8 @@ set(qpm_ui_icons
     tabler/alert-triangle.svg
     tabler/antenna-bars-5.svg
     tabler/apps.svg
+    tabler/archive.svg
+    tabler/arrow-back-up.svg
     tabler/battery.svg
     tabler/bell.svg
     tabler/bluetooth.svg
@@ -215,12 +243,14 @@ set(qpm_ui_icons
     tabler/check.svg
     tabler/checklist.svg
     tabler/chevron-left.svg
+    tabler/clock.svg
     tabler/copy.svg
     tabler/cpu.svg
     tabler/database.svg
     tabler/device-mobile.svg
     tabler/download.svg
     tabler/edit.svg
+    tabler/file.svg
     tabler/folder.svg
     tabler/help.svg
     tabler/home.svg
@@ -239,6 +269,7 @@ set(qpm_ui_icons
     tabler/qrcode.svg
     tabler/refresh.svg
     tabler/screen-share.svg
+    tabler/send.svg
     tabler/settings.svg
     tabler/trash.svg
     tabler/upload.svg
@@ -261,6 +292,7 @@ target_include_directories(qpm_ui
         ${CMAKE_CURRENT_SOURCE_DIR}/ui
         ${CMAKE_CURRENT_SOURCE_DIR}/ui/calls
         ${CMAKE_CURRENT_SOURCE_DIR}/ui/contacts
+        ${CMAKE_CURRENT_SOURCE_DIR}/ui/messages
 )
 target_link_libraries(qpm_ui
     PUBLIC

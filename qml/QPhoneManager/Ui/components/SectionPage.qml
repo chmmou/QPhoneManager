@@ -62,6 +62,15 @@ Item {
         }
     }
 
+    Component {
+        id: messages
+
+        MessagesPage {
+            emptyText: root.entry.emptyText
+            onConnectRequested: root.connectRequested()
+        }
+    }
+
     Loader {
         anchors.fill: parent
         sourceComponent: {
@@ -71,6 +80,8 @@ Item {
                 return contacts;
             if (root.entry.key === "calls")
                 return calls;
+            if (root.entry.key === "messages")
+                return messages;
             return root.entry.hasList ? listAndDetail : placeholder;
         }
     }

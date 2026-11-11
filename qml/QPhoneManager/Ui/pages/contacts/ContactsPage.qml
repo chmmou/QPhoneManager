@@ -265,6 +265,7 @@ Item {
         anchors.centerIn: parent
         width: TypeScale.body * 28
         modal: true
+        Overlay.modal: Scrim {}
         Material.elevation: 0
         title: qsTr("Delete contact %1?").arg(root.area.list.nameOf(root.pendingDelete))
 
@@ -292,7 +293,10 @@ Item {
             }
         }
 
-        onOpened: cancelDeleteButton.forceActiveFocus(Qt.PopupFocusReason)
+        // The tab reason makes the button show its focus ring right away; giving the
+        // focus up on closing makes the next opening set that reason again.
+        onOpened: cancelDeleteButton.forceActiveFocus(Qt.TabFocusReason)
+        onClosed: cancelDeleteButton.focus = false
         onAccepted: root.area.removeContacts([root.pendingDelete])
 
         Label {

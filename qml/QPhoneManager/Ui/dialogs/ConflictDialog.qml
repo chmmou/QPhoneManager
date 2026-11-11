@@ -13,6 +13,7 @@ Dialog {
     width: Math.min(TypeScale.body * 44, parent ? parent.width - Theme.gridUnit * 8 : TypeScale.body * 44)
     height: Math.min(TypeScale.body * 34, parent ? parent.height - Theme.gridUnit * 8 : TypeScale.body * 34)
     modal: true
+    Overlay.modal: Scrim {}
     closePolicy: Popup.CloseOnEscape
     Material.elevation: 0
     title: qsTr("The contact was changed on the phone")
@@ -60,7 +61,10 @@ Dialog {
         }
     }
 
-    onOpened: backButton.forceActiveFocus(Qt.PopupFocusReason)
+    // The tab reason makes the button show its focus ring right away; giving the
+    // focus up on closing makes the next opening set that reason again.
+    onOpened: backButton.forceActiveFocus(Qt.TabFocusReason)
+    onClosed: backButton.focus = false
 
     ColumnLayout {
         anchors.fill: parent

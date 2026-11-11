@@ -10,10 +10,8 @@ ApplicationWindow {
 
     readonly property bool connected: AppController.connected
     readonly property string currentKey: sectionCatalog.all[root.currentSection].key
-    readonly property bool hasData: (root.currentKey === "contacts" && AppController.contacts.hasPhone) || (root.currentKey === "calls" && AppController.calls.hasPhone)
+    readonly property bool hasData: (root.currentKey === "contacts" && AppController.contacts.hasPhone) || (root.currentKey === "calls" && AppController.calls.hasPhone) || (root.currentKey === "messages" && AppController.messages.hasPhone)
     property int currentSection: 0
-    /// Number a new message should go to, handed over from another area.
-    property string messageRecipient: ""
 
     signal connectRequested
 
@@ -66,8 +64,8 @@ ApplicationWindow {
         }
 
         function onMessageRequested(number: string): void {
-            root.messageRecipient = number;
-            root.showSection("messages");
+            if (AppController.messages.composeTo(number))
+                root.showSection("messages");
         }
     }
 
@@ -89,13 +87,31 @@ ApplicationWindow {
         }
 
         function onMessageRequested(number: string): void {
-            root.messageRecipient = number;
-            root.showSection("messages");
+            if (AppController.messages.composeTo(number))
+                root.showSection("messages");
         }
 
         function onNewContactRequested(name: string, number: string): void {
             if (AppController.contacts.startNewContact(name, number))
                 root.showSection("contacts");
+        }
+    }
+
+    Binding {
+        target: AppController.messages
+        property: "searchText"
+        value: root.currentKey === "messages" ? appHeader.searchText : ""
+    }
+
+    Connections {
+        target: AppController.messages
+
+        function onErrorOccurred(message: string): void {
+            messageBar.show(message, true);
+        }
+
+        function onInfoMessage(message: string): void {
+            messageBar.show(message, false);
         }
     }
 

@@ -9,6 +9,26 @@ namespace qpm::core::codec {
 namespace {
 
 constexpr QChar quote = u'"';
+constexpr QChar guardMark = u'\'';
+
+bool startsLikeFormula(QStringView field)
+{
+    if (field.isEmpty())
+        return false;
+    const QChar first = field.front();
+    return first == u'=' || first == u'+' || first == u'-' || first == u'@' || first == u'\t' ||
+           first == u'\r';
+}
+
+// Apostrophes in front count as part of the field, so that a field that
+// already starts with one keeps it after writing and reading again.
+bool needsGuard(QStringView field)
+{
+    qsizetype start = 0;
+    while (start < field.size() && field.at(start) == guardMark)
+        ++start;
+    return startsLikeFormula(field.sliced(start));
+}
 
 bool needsQuotes(const QString &field)
 {
@@ -52,8 +72,9 @@ QByteArray writeCsv(const CsvRows &rows)
         QStringList fields;
         fields.reserve(row.size());
         for (const QString &field : row) {
-            if (needsQuotes(field)) {
-                QString doubled = field;
+            const bool guarded = needsGuard(field);
+            if (guarded || needsQuotes(field)) {
+                QString doubled = guarded ? guardMark + field : field;
                 doubled.replace(quote, QLatin1StringView("\"\""));
                 fields.append(quote + doubled + quote);
             } else {
@@ -89,6 +110,8 @@ Result<CsvRows> readCsv(const QByteArray &data)
             return Error(ErrorCode::LimitExceeded,
                          QStringLiteral("Row with more than %1 fields").arg(maxCsvFields));
         }
+        if (field.startsWith(guardMark) && needsGuard(QStringView(field).sliced(1)))
+            field.remove(0, 1);
         row.append(field);
         field.clear();
         fieldStarted = false;

@@ -34,6 +34,18 @@ numbers follow [Semantic Versioning](https://semver.org/).
   contacts, a filter by kind, search, details, deleting single calls or all
   calls in the list, export as a table, calling back, writing a message and
   taking a number into the contacts.
+- Messages: text and multimedia messages as conversations with the names of
+  the contacts, a search over all messages, pictures in the conversation,
+  saving attachments, an archive on this computer that keeps messages the
+  phone deleted, export as a table, a web page or an archive file, and reading
+  such an archive file back.
+- Writing text messages to one or more recipients with a count of characters
+  and messages and a choice of the SIM card, and scheduled messages the phone
+  sends on its own.
+- New messages are announced while the phone is connected.
+- Deleting messages and changing their read state are offered; where the app
+  on the phone refuses, the program says so and points to the archive.
+- The sync of all areas includes the messages.
 
 ### Changed
 
@@ -43,8 +55,20 @@ numbers follow [Semantic Versioning](https://semver.org/).
   accounts and groups; the contacts are loaded in full once after the update.
 - The profile database moves to schema version 3 with a table for the call
   log.
+- The profile database moves to schema version 4 with tables and a search
+  index for the messages; the messages are loaded in full once after the
+  update.
+- The question before deleting calls says that the app on the phone may
+  refuse it and what then happens.
 
 ### Fixed
 
 - A contact photo that was replaced or whose contact was deleted no longer
   stays behind as a file in the profile folder.
+- In the dark scheme the window behind a dialog is darkened instead of washed
+  out.
+- Tables for spreadsheets keep a cell that starts with =, +, -, @, a tab or a
+  carriage return from running as a formula; the program reads its own tables
+  back unchanged.
+- The dialogs of the contacts show where the keyboard focus is when they
+  open.
