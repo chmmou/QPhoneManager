@@ -30,6 +30,8 @@ qpm_add_core_test(tst_phonevcard)
 qpm_add_core_test(tst_vcardinterchange)
 qpm_add_core_test(tst_pbmetadata)
 qpm_add_core_test(tst_contactsservice)
+qpm_add_core_test(tst_calllogcodec)
+qpm_add_core_test(tst_calllogservice)
 qpm_add_core_test(tst_nothirdpartyservices)
 target_compile_definitions(tst_nothirdpartyservices PRIVATE
     "QPM_SOURCE_DIR=\"${PROJECT_SOURCE_DIR}\""
@@ -64,6 +66,12 @@ target_link_libraries(tst_contacts PRIVATE qpm_ui qpm_fakephone Qt6::Gui Qt6::Te
 qpm_set_project_warnings(tst_contacts)
 add_test(NAME tst_contacts COMMAND tst_contacts)
 set_tests_properties(tst_contacts PROPERTIES TIMEOUT 120)
+
+qt_add_executable(tst_calls ui/tst_calls.cpp)
+target_link_libraries(tst_calls PRIVATE qpm_ui qpm_fakephone Qt6::Test)
+qpm_set_project_warnings(tst_calls)
+add_test(NAME tst_calls COMMAND tst_calls)
+set_tests_properties(tst_calls PROPERTIES TIMEOUT 120)
 
 qt_add_executable(tst_accessibility ui/tst_accessibility.cpp)
 target_link_libraries(tst_accessibility PRIVATE qpm_ui qpm_uiplugin qpm_fakephone Qt6::Quick Qt6::Test)

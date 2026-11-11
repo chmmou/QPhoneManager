@@ -41,6 +41,161 @@
     </message>
 </context>
 <context>
+    <name>CallDetail</name>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallDetail.qml" line="16"/>
+        <source>Select a call in the list.</source>
+        <translation>Select a call in the list.</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallDetail.qml" line="86"/>
+        <source>Call</source>
+        <translation>Call</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallDetail.qml" line="100"/>
+        <source>Message</source>
+        <translation>Message</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallDetail.qml" line="115"/>
+        <source>Add to contacts</source>
+        <translation>Add to contacts</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallDetail.qml" line="130"/>
+        <source>Delete</source>
+        <translation>Delete</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallDetail.qml" line="153"/>
+        <source>Number</source>
+        <translation>Number</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallDetail.qml" line="154"/>
+        <source>Hidden</source>
+        <translation>Hidden</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallDetail.qml" line="160"/>
+        <source>Time</source>
+        <translation>Time</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallDetail.qml" line="167"/>
+        <source>Duration</source>
+        <translation>Duration</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallDetail.qml" line="174"/>
+        <source>SIM card</source>
+        <translation>SIM card</translation>
+    </message>
+</context>
+<context>
+    <name>CallList</name>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallList.qml" line="34"/>
+        <source>Calls</source>
+        <translation>Calls</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallList.qml" line="159"/>
+        <source>No call matches the search or filter.</source>
+        <translation>No call matches the search or filter.</translation>
+    </message>
+</context>
+<context>
+    <name>CallsPage</name>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="41"/>
+        <source>Show calls</source>
+        <translation>Show calls</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="49"/>
+        <source>All</source>
+        <translation>All</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="61"/>
+        <source>Incoming</source>
+        <translation>Incoming</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="74"/>
+        <source>Outgoing</source>
+        <translation>Outgoing</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="87"/>
+        <source>Missed</source>
+        <translation>Missed</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="104"/>
+        <source>Export the calls in the list</source>
+        <translation>Export the calls in the list</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="122"/>
+        <source>Delete the calls in the list</source>
+        <translation>Delete the calls in the list</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="154"/>
+        <source>No calls yet. Sync the phone to load the call log.</source>
+        <translation>No calls yet. Sync the phone to load the call log.</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="172"/>
+        <source>Connect</source>
+        <translation>Connect</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="187"/>
+        <source>Delete the call with %1?</source>
+        <translation>Delete the call with %1?</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="187"/>
+        <source>Delete %n call(s)?</source>
+        <translation>
+            <numerusform>Delete %n call?</numerusform>
+            <numerusform>Delete %n calls?</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="193"/>
+        <source>Delete</source>
+        <translation>Delete</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="204"/>
+        <source>Cancel</source>
+        <translation>Cancel</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="223"/>
+        <source>The call(s) are deleted on the phone and on this computer.</source>
+        <translation>
+            <numerusform>The call is deleted on the phone and on this computer.</numerusform>
+            <numerusform>The calls are deleted on the phone and on this computer.</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="232"/>
+        <source>Export calls</source>
+        <translation>Export calls</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="234"/>
+        <source>Table for spreadsheets (*.csv)</source>
+        <translation>Table for spreadsheets (*.csv)</translation>
+    </message>
+</context>
+<context>
     <name>ConflictDialog</name>
     <message>
         <location filename="../../qml/QPhoneManager/Ui/dialogs/ConflictDialog.qml" line="18"/>
@@ -1930,6 +2085,11 @@
 <context>
     <name>qpm::ui::AppController</name>
     <message>
+        <location filename="../../src/ui/AppController.cpp" line="129"/>
+        <source>Calls</source>
+        <translation>Calls</translation>
+    </message>
+    <message>
         <location filename="../../src/ui/AppController.cpp" line="119"/>
         <source>Contacts</source>
         <translation>Contacts</translation>
@@ -2153,6 +2313,148 @@
         <location filename="../../src/ui/AppController.cpp" line="972"/>
         <source>The phone sent an answer QPhoneManager does not understand. Update MyPhoneExplorer Client on the phone, then try again.</source>
         <translation>The phone sent an answer QPhoneManager does not understand. Update MyPhoneExplorer Client on the phone, then try again.</translation>
+    </message>
+</context>
+<context>
+    <name>qpm::ui::CallListModel</name>
+    <message>
+        <location filename="../../src/ui/calls/CallListModel.cpp" line="196"/>
+        <source>Unknown number</source>
+        <translation>Unknown number</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallListModel.cpp" line="216"/>
+        <source>Incoming call</source>
+        <translation>Incoming call</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallListModel.cpp" line="218"/>
+        <source>Missed call</source>
+        <translation>Missed call</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallListModel.cpp" line="222"/>
+        <source>Outgoing call</source>
+        <translation>Outgoing call</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallListModel.cpp" line="243"/>
+        <source>Today</source>
+        <translation>Today</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallListModel.cpp" line="245"/>
+        <source>Yesterday</source>
+        <translation>Yesterday</translation>
+    </message>
+</context>
+<context>
+    <name>qpm::ui::CallsArea</name>
+    <message>
+        <location filename="../../src/ui/calls/CallsArea.cpp" line="29"/>
+        <source>The phone is not connected. Connect it, then try again.</source>
+        <translation>The phone is not connected. Connect it, then try again.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallsArea.cpp" line="32"/>
+        <source>The app on the phone may not access the call log. Allow it in the Android settings.</source>
+        <translation>The app on the phone may not access the call log. Allow it in the Android settings.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallsArea.cpp" line="35"/>
+        <source>This entry is no longer on the phone. Sync to update the list.</source>
+        <translation>This entry is no longer on the phone. Sync to update the list.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallsArea.cpp" line="37"/>
+        <source>The call log on the phone is too long to read. Delete old calls on the phone, then sync again.</source>
+        <translation>The call log on the phone is too long to read. Delete old calls on the phone, then sync again.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallsArea.cpp" line="40"/>
+        <source>The call log cannot be saved on this computer. Check the storage folder in the settings.</source>
+        <translation>The call log cannot be saved on this computer. Check the storage folder in the settings.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallsArea.cpp" line="43"/>
+        <source>The phone does not support this. Update MyPhoneExplorer Client on the phone.</source>
+        <translation>The phone does not support this. Update MyPhoneExplorer Client on the phone.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallsArea.cpp" line="46"/>
+        <source>Choose a phone first.</source>
+        <translation>Choose a phone first.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallsArea.cpp" line="54"/>
+        <source>The phone did not accept the request. Sync, then try again.</source>
+        <translation>The phone did not accept the request. Sync, then try again.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallsArea.cpp" line="32"/>
+        <source>The app on the phone may not place calls. Allow it in the Android settings.</source>
+        <translation>The app on the phone may not place calls. Allow it in the Android settings.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallsArea.cpp" line="65"/>
+        <source>The phone did not place the call. Check the number, then try again.</source>
+        <translation>The phone did not place the call. Check the number, then try again.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallsArea.cpp" line="32"/>
+        <source>The app on the phone may not change the call log. Delete the call on the phone itself.</source>
+        <translation>The app on the phone may not change the call log. Delete the call on the phone itself.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallsArea.cpp" line="161"/>
+        <source>SIM %1</source>
+        <translation>SIM %1</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../../src/ui/calls/CallsArea.cpp" line="280"/>
+        <source>%n call(s) deleted.</source>
+        <translation>
+            <numerusform>%n call deleted.</numerusform>
+            <numerusform>%n calls deleted.</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallsArea.cpp" line="302"/>
+        <source>Choose a file on this computer.</source>
+        <translation>Choose a file on this computer.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallsArea.cpp" line="319"/>
+        <source>The file cannot be written. Choose another folder.</source>
+        <translation>The file cannot be written. Choose another folder.</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../../src/ui/calls/CallsArea.cpp" line="322"/>
+        <source>%n call(s) exported.</source>
+        <translation>
+            <numerusform>%n call exported.</numerusform>
+            <numerusform>%n calls exported.</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallsArea.cpp" line="330"/>
+        <source>This is no phone number the phone can call.</source>
+        <translation>This is no phone number the phone can call.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallsArea.cpp" line="344"/>
+        <source>The phone calls %1.</source>
+        <translation>The phone calls %1.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallsArea.cpp" line="353"/>
+        <source>This is no phone number a message can go to.</source>
+        <translation>This is no phone number a message can go to.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallsArea.cpp" line="365"/>
+        <source>This entry has no number that can be saved.</source>
+        <translation>This entry has no number that can be saved.</translation>
     </message>
 </context>
 <context>

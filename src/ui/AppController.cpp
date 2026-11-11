@@ -104,7 +104,8 @@ AppController::AppController(Settings *settings, std::unique_ptr<SecretStore> se
       m_bluetoothPhones(new FoundPhoneModel(this)),
       m_qrCode(new QrCodeProvider(this)),
       m_photos(std::make_shared<PhotoSource>()),
-      m_contacts(new ContactsArea(m_connection, m_photos, this))
+      m_contacts(new ContactsArea(m_connection, m_photos, this)),
+      m_calls(new CallsArea(m_connection, m_contacts->service(), this))
 {
     Q_ASSERT(settings);
     const QString configured = settings->dataDirectory();
@@ -125,6 +126,17 @@ AppController::AppController(Settings *settings, std::unique_ptr<SecretStore> se
                                    pulled.value().removed};
             });
     });
+    registerSyncArea(tr("Calls"), [this]() {
+        return m_calls->sync().then(
+            this, [](const Result<core::store::CallChanges> &pulled) -> Result<SyncChanges> {
+                if (!pulled.hasValue())
+                    return pulled.error();
+                return SyncChanges{pulled.value().added, pulled.value().changed,
+                                   pulled.value().removed};
+            });
+    });
+    connect(m_contacts->service(), &core::service::ContactsService::contactsChanged, m_calls,
+            &CallsArea::refreshNames);
     connect(settings, &Settings::listenForPhoneChanged, this, &AppController::updateListening);
     connect(settings, &Settings::dataDirectoryChanged, this, [this]() {
         const QString configuredNow = m_settings->dataDirectory();
@@ -392,6 +404,7 @@ void AppController::onStateChanged()
         m_waitingForPin = false;
     }
     m_contacts->setConnected(isConnected());
+    m_calls->setConnected(isConnected());
     Q_EMIT connectionStateChanged();
 }
 
@@ -883,13 +896,15 @@ bool AppController::openStore(const QString &deviceId)
     }
     m_store = std::move(store);
     m_contacts->setProfileStore(m_store.get());
+    m_calls->setProfileStore(m_store.get());
     return true;
 }
 
 void AppController::closeStore()
 {
-    // The contacts hold the store; they let go of it before it closes.
+    // The areas hold the store; they let go of it before it closes.
     m_contacts->setProfileStore(nullptr);
+    m_calls->setProfileStore(nullptr);
     m_store.reset();
 }
 

@@ -1,7 +1,9 @@
+#include "core/codec/PhoneTime.h"
 #include "core/codec/PhoneVCard.h"
 #include "platform/SecretStore.h"
 #include "ui/AppController.h"
 #include "ui/Settings.h"
+#include "ui/calls/CallsArea.h"
 #include "ui/contacts/ContactsArea.h"
 
 #include "FakePhone.h"
@@ -58,6 +60,19 @@ QByteArray contactCard(quint32 luid, const QString &given, const QString &family
         return address;
     }()};
     return qpm::core::codec::encodeAsPhoneSendsIt(contact);
+}
+
+qpm::test::FakeCall fakeCall(quint32 id, const QString &storage, const QString &number,
+                             qint64 duration)
+{
+    qpm::test::FakeCall call;
+    call.id = id;
+    call.storage = storage;
+    call.number = number;
+    call.duration = duration;
+    call.time = qpm::core::codec::formatCallLogTime(
+        QDateTime(QDate::currentDate(), QTime(10, 0)).addSecs(-3600 * qint64(id)));
+    return call;
 }
 
 bool isControl(const QQuickItem *item)
@@ -141,6 +156,9 @@ private Q_SLOTS:
     void contactDialogControlsHaveANameAndARole_data();
     void contactDialogControlsHaveANameAndARole();
     void contactsFocusChainReachesEveryControlOnce();
+    void callViewControlsHaveANameAndARole();
+    void callDialogControlsHaveANameAndARole();
+    void callsFocusChainReachesEveryControlOnce();
 
 private:
     [[nodiscard]] QList<QQuickItem *> controls() const;
@@ -149,6 +167,7 @@ private:
                              const QSet<QAccessible::Role> &extraRoles = {}) const;
     [[nodiscard]] Settings *settings() const;
     [[nodiscard]] bool showContacts();
+    [[nodiscard]] bool showCalls();
     static void announceAccessibility();
 
     QTemporaryDir m_config;
@@ -248,9 +267,10 @@ QObject *TestAccessibility::openDialog(const QString &name)
 {
     QObject *dialog = m_window->findChild<QObject *>(name);
     // Dialogs of a page live with the page, which a Loader created.
-    if (QQuickItem *page = findItem(m_window->contentItem(), QStringLiteral("contactsPage"));
-        !dialog && page) {
-        dialog = page->findChild<QObject *>(name);
+    for (const QString &pageName : {QStringLiteral("contactsPage"), QStringLiteral("callsPage")}) {
+        QQuickItem *page = findItem(m_window->contentItem(), pageName);
+        if (!dialog && page)
+            dialog = page->findChild<QObject *>(name);
     }
     if (!dialog)
         return nullptr;
@@ -567,6 +587,139 @@ void TestAccessibility::contactsFocusChainReachesEveryControlOnce()
             QVERIFY2(chain.contains(control), qPrintable(describe(control)));
     }
     QVERIFY(chain.contains(findItem(m_window->contentItem(), QStringLiteral("contactList"))));
+}
+
+bool TestAccessibility::showCalls()
+{
+    m_phone = std::make_unique<qpm::test::FakePhone>();
+    if (!m_phone->listen())
+        return false;
+    m_phone->setObjects(QStringLiteral("pb"),
+                        {{1, contactCard(1, QStringLiteral("Erika"), QStringLiteral("Mustermann"),
+                                         QStringLiteral("+491511234567"))}});
+    m_phone->setCalls({fakeCall(1, QStringLiteral("RC"), QStringLiteral("+491511234567"), 65),
+                       fakeCall(2, QStringLiteral("MC"), QStringLiteral("+49302000002"), 0),
+                       fakeCall(3, QStringLiteral("DC"), QStringLiteral("+49402000003"), 12)});
+    auto *controller =
+        m_engine->singletonInstance<AppController *>("QPhoneManager.Ui", "AppController");
+    if (!controller ||
+        !controller->connectAddress(QStringLiteral("127.0.0.1:%1").arg(m_phone->port()))) {
+        return false;
+    }
+    if (!QTest::qWaitFor([controller]() { return controller->isConnected(); }, phoneTimeoutMs))
+        return false;
+    const QFuture<qpm::core::Result<qpm::core::store::ContactChanges>> contacts =
+        controller->contacts()->sync();
+    if (!QTest::qWaitFor([&contacts]() { return contacts.isFinished(); }, phoneTimeoutMs) ||
+        !contacts.result().hasValue()) {
+        return false;
+    }
+    const QFuture<qpm::core::Result<qpm::core::store::CallChanges>> calls =
+        controller->calls()->sync();
+    if (!QTest::qWaitFor([&calls]() { return calls.isFinished(); }, phoneTimeoutMs) ||
+        !calls.result().hasValue()) {
+        return false;
+    }
+    m_window->setProperty("currentSection", 2);
+    controller->calls()->setCurrentId(2);
+    const bool shown = QTest::qWaitFor(
+        [this]() {
+            const QQuickItem *detail =
+                findItem(m_window->contentItem(), QStringLiteral("callDetail"));
+            return detail && detail->isVisible();
+        },
+        phoneTimeoutMs);
+    announceAccessibility();
+    return shown;
+}
+
+void TestAccessibility::callViewControlsHaveANameAndARole()
+{
+    QVERIFY(showCalls());
+
+    const QList<QQuickItem *> found = controls();
+
+    verifyNamesAndRoles(found, {QAccessible::List});
+    QQuickItem *list = findItem(m_window->contentItem(), QStringLiteral("callList"));
+    QVERIFY(list && found.contains(list));
+    QCOMPARE(QAccessible::queryAccessibleInterface(list)->role(), QAccessible::List);
+    for (const QString &name :
+         {QStringLiteral("allCallsTab"), QStringLiteral("incomingCallsTab"),
+          QStringLiteral("outgoingCallsTab"), QStringLiteral("missedCallsTab"),
+          QStringLiteral("exportCallsButton"), QStringLiteral("deleteShownCallsButton"),
+          QStringLiteral("callBackButton"), QStringLiteral("callMessageButton"),
+          QStringLiteral("addCallToContactsButton"), QStringLiteral("deleteCallButton")}) {
+        QQuickItem *item = findItem(m_window->contentItem(), name);
+        QVERIFY2(item && found.contains(item), qPrintable(name));
+    }
+    // Icon-only buttons carry their action as their name.
+    for (const QString &name :
+         {QStringLiteral("exportCallsButton"), QStringLiteral("deleteShownCallsButton")}) {
+        QQuickItem *button = findItem(m_window->contentItem(), name);
+        const QString accessibleName =
+            QAccessible::queryAccessibleInterface(button)->text(QAccessible::Name);
+        QVERIFY2(!accessibleName.isEmpty(), qPrintable(name));
+        QCOMPARE(accessibleName, button->property("text").toString());
+    }
+}
+
+void TestAccessibility::callDialogControlsHaveANameAndARole()
+{
+    QVERIFY(showCalls());
+    QQuickItem *page = findItem(m_window->contentItem(), QStringLiteral("callsPage"));
+    QVERIFY(page);
+    QObject *popup = page->findChild<QObject *>(QStringLiteral("deleteCallsDialog"));
+    QVERIFY(popup);
+    const QList<QQuickItem *> before = controls();
+    QVERIFY(QMetaObject::invokeMethod(page, "confirmDelete", Q_ARG(int, 2)));
+    QTRY_VERIFY(popup->property("opened").toBool());
+    announceAccessibility();
+
+    QList<QQuickItem *> inDialog = controls();
+    inDialog.removeIf([&before](QQuickItem *control) { return before.contains(control); });
+
+    QVERIFY(!inDialog.isEmpty());
+    verifyNamesAndRoles(inDialog);
+    QQuickItem *focused = m_window->activeFocusItem();
+    QVERIFY(focused);
+    QCOMPARE(focused->property("text").toString(), QStringLiteral("Cancel"));
+    QVERIFY2(focused->property("visualFocus").toBool(), "the focus is not shown");
+    QMetaObject::invokeMethod(popup, "close");
+    QTRY_VERIFY(!popup->property("visible").toBool());
+
+    // Opened a second time, the dialog shows the focus again.
+    QVERIFY(QMetaObject::invokeMethod(page, "confirmDeleteShown"));
+    QTRY_VERIFY(popup->property("opened").toBool());
+    QVERIFY(m_window->activeFocusItem());
+    QCOMPARE(m_window->activeFocusItem()->property("text").toString(), QStringLiteral("Cancel"));
+    QVERIFY2(m_window->activeFocusItem()->property("visualFocus").toBool(),
+             "the focus is not shown after opening again");
+    QMetaObject::invokeMethod(popup, "close");
+    QTRY_VERIFY(!popup->property("visible").toBool());
+}
+
+void TestAccessibility::callsFocusChainReachesEveryControlOnce()
+{
+    QVERIFY(showCalls());
+    QList<QQuickItem *> chain;
+    QQuickItem *item = m_window->contentItem()->nextItemInFocusChain(true);
+    while (item && !chain.contains(item) && chain.size() < 500) {
+        chain.append(item);
+        item = item->nextItemInFocusChain(true);
+    }
+
+    QVERIFY(item);
+    QCOMPARE(item, chain.constFirst());
+    const QList<QQuickItem *> found = controls();
+    for (QQuickItem *control : found) {
+        if (control->isEnabled() && control->activeFocusOnTab())
+            QVERIFY2(chain.contains(control), qPrintable(describe(control)));
+    }
+    for (const QString &name :
+         {QStringLiteral("callList"), QStringLiteral("missedCallsTab"),
+          QStringLiteral("exportCallsButton"), QStringLiteral("callBackButton")}) {
+        QVERIFY2(chain.contains(findItem(m_window->contentItem(), name)), qPrintable(name));
+    }
 }
 
 void TestAccessibility::darkSchemeDarkensTheWindow()

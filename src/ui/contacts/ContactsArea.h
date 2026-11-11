@@ -119,6 +119,12 @@ public:
     Q_INVOKABLE bool call(const QString &number);
     /// Asks the window to open a new message to `number`, see messageRequested().
     Q_INVOKABLE bool writeMessage(const QString &number);
+    /**
+     * Fills the form for a new contact with `name` and `number`, see
+     * ContactEditor::newContactWith(), and announces it through
+     * newContactStarted(). False and an error without a connection.
+     */
+    Q_INVOKABLE bool startNewContact(const QString &name, const QString &number);
     /// Looks for duplicates among all contacts and fills `duplicates`.
     Q_INVOKABLE bool findDuplicates();
     /// Joins the second contact of the pair in `row` into the first.
@@ -142,6 +148,8 @@ Q_SIGNALS:
     void messageRequested(const QString &number);
     /// The duplicate search finished with `count` pairs.
     void duplicatesFound(int count);
+    /// The form holds a new contact that startNewContact() filled in.
+    void newContactStarted();
 
 private:
     void reload();

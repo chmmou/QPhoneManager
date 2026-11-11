@@ -53,6 +53,15 @@ Item {
         }
     }
 
+    Component {
+        id: calls
+
+        CallsPage {
+            emptyText: root.entry.emptyText
+            onConnectRequested: root.connectRequested()
+        }
+    }
+
     Loader {
         anchors.fill: parent
         sourceComponent: {
@@ -60,6 +69,8 @@ Item {
                 return overview;
             if (root.entry.key === "contacts")
                 return contacts;
+            if (root.entry.key === "calls")
+                return calls;
             return root.entry.hasList ? listAndDetail : placeholder;
         }
     }

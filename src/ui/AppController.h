@@ -6,6 +6,7 @@
 #include "ui/FoundPhoneModel.h"
 #include "ui/ProfileListModel.h"
 #include "ui/QrCodeProvider.h"
+#include "ui/calls/CallsArea.h"
 #include "ui/contacts/ContactsArea.h"
 
 #include <QFuture>
@@ -54,8 +55,9 @@ class Settings;
  * connection, failed attempts stay quiet.
  *
  * The object owns the connection, the models, the areas and the profile
- * store of the current phone. The contacts area is part of syncAll(). `settings` must outlive it or be destroyed with the engine
- * first; the object never uses it after that.
+ * store of the current phone. The contacts and the call log are part of
+ * syncAll(), in that order. `settings` must outlive it or be destroyed with
+ * the engine first; the object never uses it after that.
  */
 class AppController : public QObject
 {
@@ -95,6 +97,7 @@ class AppController : public QObject
     /// A PIN can be kept in the keyring of the system.
     Q_PROPERTY(bool canRememberPin READ canRememberPin CONSTANT FINAL)
     Q_PROPERTY(qpm::ui::ContactsArea *contacts READ contacts CONSTANT FINAL)
+    Q_PROPERTY(qpm::ui::CallsArea *calls READ calls CONSTANT FINAL)
 
 public:
     enum class ConnectionState {
@@ -165,6 +168,7 @@ public:
     [[nodiscard]] bool isSyncing() const { return m_syncing; }
     [[nodiscard]] bool canRememberPin() const { return m_secrets != nullptr; }
     [[nodiscard]] ContactsArea *contacts() const { return m_contacts; }
+    [[nodiscard]] CallsArea *calls() const { return m_calls; }
     /// The pictures behind "image://qpm/", for the image provider of the engine.
     [[nodiscard]] std::shared_ptr<PhotoSource> photoSource() const { return m_photos; }
 
@@ -285,6 +289,7 @@ private:
     QrCodeProvider *m_qrCode = nullptr;
     std::shared_ptr<PhotoSource> m_photos;
     ContactsArea *m_contacts = nullptr;
+    CallsArea *m_calls = nullptr;
     core::protocol::Discovery *m_discovery = nullptr;
     BluetoothDeviceFinder *m_bluetoothFinder = nullptr;
     std::unique_ptr<core::protocol::AdbBridge> m_listAdb;

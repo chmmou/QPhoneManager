@@ -41,6 +41,161 @@
     </message>
 </context>
 <context>
+    <name>CallDetail</name>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallDetail.qml" line="16"/>
+        <source>Select a call in the list.</source>
+        <translation>Wählen Sie einen Anruf in der Liste.</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallDetail.qml" line="86"/>
+        <source>Call</source>
+        <translation>Anrufen</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallDetail.qml" line="100"/>
+        <source>Message</source>
+        <translation>Nachricht</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallDetail.qml" line="115"/>
+        <source>Add to contacts</source>
+        <translation>In Kontakte übernehmen</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallDetail.qml" line="130"/>
+        <source>Delete</source>
+        <translation>Löschen</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallDetail.qml" line="153"/>
+        <source>Number</source>
+        <translation>Nummer</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallDetail.qml" line="154"/>
+        <source>Hidden</source>
+        <translation>Unterdrückt</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallDetail.qml" line="160"/>
+        <source>Time</source>
+        <translation>Zeit</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallDetail.qml" line="167"/>
+        <source>Duration</source>
+        <translation>Dauer</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallDetail.qml" line="174"/>
+        <source>SIM card</source>
+        <translation>SIM-Karte</translation>
+    </message>
+</context>
+<context>
+    <name>CallList</name>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallList.qml" line="34"/>
+        <source>Calls</source>
+        <translation>Anrufe</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallList.qml" line="159"/>
+        <source>No call matches the search or filter.</source>
+        <translation>Kein Anruf passt zur Suche oder zum Filter.</translation>
+    </message>
+</context>
+<context>
+    <name>CallsPage</name>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="41"/>
+        <source>Show calls</source>
+        <translation>Anrufe anzeigen</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="49"/>
+        <source>All</source>
+        <translation>Alle</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="61"/>
+        <source>Incoming</source>
+        <translation>Eingehend</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="74"/>
+        <source>Outgoing</source>
+        <translation>Ausgehend</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="87"/>
+        <source>Missed</source>
+        <translation>Verpasst</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="104"/>
+        <source>Export the calls in the list</source>
+        <translation>Anrufe der Liste exportieren</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="122"/>
+        <source>Delete the calls in the list</source>
+        <translation>Anrufe der Liste löschen</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="154"/>
+        <source>No calls yet. Sync the phone to load the call log.</source>
+        <translation>Noch keine Anrufe. Gleichen Sie das Handy ab, um die Anrufliste zu laden.</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="172"/>
+        <source>Connect</source>
+        <translation>Verbinden</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="187"/>
+        <source>Delete the call with %1?</source>
+        <translation>Anruf mit %1 löschen?</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="187"/>
+        <source>Delete %n call(s)?</source>
+        <translation>
+            <numerusform>%n Anruf löschen?</numerusform>
+            <numerusform>%n Anrufe löschen?</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="193"/>
+        <source>Delete</source>
+        <translation>Löschen</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="204"/>
+        <source>Cancel</source>
+        <translation>Abbrechen</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="223"/>
+        <source>The call(s) are deleted on the phone and on this computer.</source>
+        <translation>
+            <numerusform>Der Anruf wird auf dem Handy und auf diesem Rechner gelöscht.</numerusform>
+            <numerusform>Die Anrufe werden auf dem Handy und auf diesem Rechner gelöscht.</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="232"/>
+        <source>Export calls</source>
+        <translation>Anrufe exportieren</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="234"/>
+        <source>Table for spreadsheets (*.csv)</source>
+        <translation>Tabelle für Tabellenkalkulation (*.csv)</translation>
+    </message>
+</context>
+<context>
     <name>ConflictDialog</name>
     <message>
         <location filename="../../qml/QPhoneManager/Ui/dialogs/ConflictDialog.qml" line="18"/>
@@ -1930,6 +2085,11 @@
 <context>
     <name>qpm::ui::AppController</name>
     <message>
+        <location filename="../../src/ui/AppController.cpp" line="129"/>
+        <source>Calls</source>
+        <translation>Anrufe</translation>
+    </message>
+    <message>
         <location filename="../../src/ui/AppController.cpp" line="119"/>
         <source>Contacts</source>
         <translation>Kontakte</translation>
@@ -2153,6 +2313,148 @@
         <location filename="../../src/ui/AppController.cpp" line="972"/>
         <source>The phone sent an answer QPhoneManager does not understand. Update MyPhoneExplorer Client on the phone, then try again.</source>
         <translation>Das Handy hat eine Antwort gesendet, die QPhoneManager nicht versteht. Aktualisieren Sie MyPhoneExplorer Client auf dem Handy und versuchen Sie es erneut.</translation>
+    </message>
+</context>
+<context>
+    <name>qpm::ui::CallListModel</name>
+    <message>
+        <location filename="../../src/ui/calls/CallListModel.cpp" line="196"/>
+        <source>Unknown number</source>
+        <translation>Unbekannte Nummer</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallListModel.cpp" line="216"/>
+        <source>Incoming call</source>
+        <translation>Eingehender Anruf</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallListModel.cpp" line="218"/>
+        <source>Missed call</source>
+        <translation>Verpasster Anruf</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallListModel.cpp" line="222"/>
+        <source>Outgoing call</source>
+        <translation>Ausgehender Anruf</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallListModel.cpp" line="243"/>
+        <source>Today</source>
+        <translation>Heute</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallListModel.cpp" line="245"/>
+        <source>Yesterday</source>
+        <translation>Gestern</translation>
+    </message>
+</context>
+<context>
+    <name>qpm::ui::CallsArea</name>
+    <message>
+        <location filename="../../src/ui/calls/CallsArea.cpp" line="29"/>
+        <source>The phone is not connected. Connect it, then try again.</source>
+        <translation>Das Handy ist nicht verbunden. Verbinden Sie es und versuchen Sie es erneut.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallsArea.cpp" line="32"/>
+        <source>The app on the phone may not access the call log. Allow it in the Android settings.</source>
+        <translation>Die App auf dem Handy darf nicht auf die Anrufliste zugreifen. Erlauben Sie es in den Android-Einstellungen.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallsArea.cpp" line="35"/>
+        <source>This entry is no longer on the phone. Sync to update the list.</source>
+        <translation>Dieser Eintrag ist nicht mehr auf dem Handy. Gleichen Sie ab, um die Liste zu aktualisieren.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallsArea.cpp" line="37"/>
+        <source>The call log on the phone is too long to read. Delete old calls on the phone, then sync again.</source>
+        <translation>Die Anrufliste auf dem Handy ist zu lang. Löschen Sie alte Anrufe auf dem Handy und gleichen Sie dann erneut ab.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallsArea.cpp" line="40"/>
+        <source>The call log cannot be saved on this computer. Check the storage folder in the settings.</source>
+        <translation>Die Anrufliste lässt sich auf diesem Rechner nicht speichern. Prüfen Sie den Ablageort in den Einstellungen.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallsArea.cpp" line="43"/>
+        <source>The phone does not support this. Update MyPhoneExplorer Client on the phone.</source>
+        <translation>Das Handy unterstützt das nicht. Aktualisieren Sie MyPhoneExplorer Client auf dem Handy.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallsArea.cpp" line="46"/>
+        <source>Choose a phone first.</source>
+        <translation>Wählen Sie zuerst ein Handy.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallsArea.cpp" line="54"/>
+        <source>The phone did not accept the request. Sync, then try again.</source>
+        <translation>Das Handy hat die Anfrage nicht angenommen. Gleichen Sie ab und versuchen Sie es erneut.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallsArea.cpp" line="32"/>
+        <source>The app on the phone may not place calls. Allow it in the Android settings.</source>
+        <translation>Die App auf dem Handy darf keine Anrufe starten. Erlauben Sie es in den Android-Einstellungen.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallsArea.cpp" line="65"/>
+        <source>The phone did not place the call. Check the number, then try again.</source>
+        <translation>Das Handy hat den Anruf nicht gestartet. Prüfen Sie die Nummer und versuchen Sie es erneut.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallsArea.cpp" line="32"/>
+        <source>The app on the phone may not change the call log. Delete the call on the phone itself.</source>
+        <translation>Die App auf dem Handy darf die Anrufliste nicht ändern. Löschen Sie den Anruf direkt auf dem Handy.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallsArea.cpp" line="161"/>
+        <source>SIM %1</source>
+        <translation>SIM %1</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../../src/ui/calls/CallsArea.cpp" line="280"/>
+        <source>%n call(s) deleted.</source>
+        <translation>
+            <numerusform>%n Anruf gelöscht.</numerusform>
+            <numerusform>%n Anrufe gelöscht.</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallsArea.cpp" line="302"/>
+        <source>Choose a file on this computer.</source>
+        <translation>Wählen Sie eine Datei auf diesem Rechner.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallsArea.cpp" line="319"/>
+        <source>The file cannot be written. Choose another folder.</source>
+        <translation>Die Datei lässt sich nicht schreiben. Wählen Sie einen anderen Ordner.</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../../src/ui/calls/CallsArea.cpp" line="322"/>
+        <source>%n call(s) exported.</source>
+        <translation>
+            <numerusform>%n Anruf exportiert.</numerusform>
+            <numerusform>%n Anrufe exportiert.</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallsArea.cpp" line="330"/>
+        <source>This is no phone number the phone can call.</source>
+        <translation>Diese Nummer kann das Handy nicht anrufen.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallsArea.cpp" line="344"/>
+        <source>The phone calls %1.</source>
+        <translation>Das Handy ruft %1 an.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallsArea.cpp" line="353"/>
+        <source>This is no phone number a message can go to.</source>
+        <translation>An diese Nummer lässt sich keine Nachricht schicken.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/calls/CallsArea.cpp" line="365"/>
+        <source>This entry has no number that can be saved.</source>
+        <translation>Dieser Eintrag hat keine Nummer, die sich speichern lässt.</translation>
     </message>
 </context>
 <context>

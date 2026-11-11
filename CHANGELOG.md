@@ -30,6 +30,10 @@ numbers follow [Semantic Versioning](https://semver.org/).
   and as a table.
 - Calling a number from a contact, and handing a number over for a message.
 - The sync of all areas includes the contacts and reports their changes.
+- Call log: outgoing, incoming and missed calls with the names of the
+  contacts, a filter by kind, search, details, deleting single calls or all
+  calls in the list, export as a table, calling back, writing a message and
+  taking a number into the contacts.
 
 ### Changed
 
@@ -37,3 +41,10 @@ numbers follow [Semantic Versioning](https://semver.org/).
 - The sidebar is as wide as its longest label needs.
 - The profile database moves to schema version 2 with tables for contacts,
   accounts and groups; the contacts are loaded in full once after the update.
+- The profile database moves to schema version 3 with a table for the call
+  log.
+
+### Fixed
+
+- A contact photo that was replaced or whose contact was deleted no longer
+  stays behind as a file in the profile folder.

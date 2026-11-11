@@ -8,6 +8,8 @@
 #include "FakePhone.h"
 #include "WaitFor.h"
 
+#include <QCryptographicHash>
+#include <QFile>
 #include <QSignalSpy>
 #include <QTemporaryDir>
 #include <QTest>
@@ -128,6 +130,7 @@ private Q_SLOTS:
     void dialSendsTheNumberAndRefusesWhatIsNoNumber_data();
     void dialSendsTheNumberAndRefusesWhatIsNoNumber();
     void callsWithoutStoreOrConnectionFail();
+    void replacedOrDeletedPhotoLeavesNoFileBehind();
 
 private:
     [[nodiscard]] bool syncOnce(ContactChanges *changes = nullptr);
@@ -519,6 +522,55 @@ void TestContactsService::callsWithoutStoreOrConnectionFail()
     const QFuture<Result<void>> dialled = m_service->dial(QStringLiteral("+4930123456"));
     QVERIFY(waitFor(dialled));
     QCOMPARE(dialled.result().error().code(), ErrorCode::ConnectionClosed);
+}
+
+// The photo files of a profile grew with every photo change and deletion:
+// the store wrote the new photo and kept the old file, which nothing pointed
+// at any more. A photo two contacts share stays while one still uses it.
+void TestContactsService::replacedOrDeletedPhotoLeavesNoFileBehind()
+{
+    const auto photo = [](char fill) {
+        return QByteArray("\xFF\xD8\xFF", 3) + QByteArray(2000, fill);
+    };
+    const auto file = [this](const QByteArray &data) {
+        return m_profile->directory() + QStringLiteral("/blobs/") +
+               QString::fromLatin1(
+                   QCryptographicHash::hash(data, QCryptographicHash::Sha1).toHex());
+    };
+    Contact first = erika();
+    first.photo = photo('a');
+    Contact second = maxMueller();
+    second.photo = photo('b');
+    Contact third = erikaTwice();
+    third.photo = photo('b');
+    m_phone->setObjects(QStringLiteral("pb"), {{1, encodeAsPhoneSendsIt(first)},
+                                               {2, encodeAsPhoneSendsIt(second)},
+                                               {3, encodeAsPhoneSendsIt(third)}});
+    QVERIFY(syncOnce());
+    QVERIFY(QFile::exists(file(photo('a'))));
+    QVERIFY(QFile::exists(file(photo('b'))));
+
+    first.photo = photo('c');
+    m_phone->editObject(QStringLiteral("pb"), 1, encodeAsPhoneSendsIt(first));
+    QVERIFY(syncOnce());
+    QVERIFY(!QFile::exists(file(photo('a'))));
+    QVERIFY(QFile::exists(file(photo('c'))));
+
+    m_phone->removeObject(QStringLiteral("pb"), 2);
+    QVERIFY(syncOnce());
+    QVERIFY(QFile::exists(file(photo('b'))));
+
+    const QFuture<Result<void>> removed = m_service->remove({3});
+    QVERIFY(waitFor(removed, timeoutMs));
+    QVERIFY(removed.result().hasValue());
+    QVERIFY(!QFile::exists(file(photo('b'))));
+
+    first.photo.clear();
+    m_phone->editObject(QStringLiteral("pb"), 1, encodeAsPhoneSendsIt(first));
+    m_phone->forgetChanges(QStringLiteral("pb"));
+    QVERIFY(syncOnce());
+    QVERIFY(!QFile::exists(file(photo('c'))));
+    QCOMPARE(m_store->contact(1).value().photo, QByteArray());
 }
 
 QTEST_GUILESS_MAIN(TestContactsService)

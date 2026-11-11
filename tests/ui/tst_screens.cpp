@@ -1,7 +1,9 @@
+#include "core/codec/PhoneTime.h"
 #include "core/codec/PhoneVCard.h"
 #include "ui/AppController.h"
 #include "ui/DeviceStatusModel.h"
 #include "ui/Settings.h"
+#include "ui/calls/CallsArea.h"
 #include "ui/contacts/ContactsArea.h"
 
 #include "FakePhone.h"
@@ -109,6 +111,43 @@ QList<qpm::test::FakeSyncObject> exampleContacts()
     return objects;
 }
 
+// Calls of the made-up people above and of numbers no contact has.
+QList<qpm::test::FakeCall> exampleCalls()
+{
+    struct Call
+    {
+        quint32 id;
+        const char *storage;
+        int daysAgo;
+        QTime time;
+        const char *number;
+        const char *name;
+        qint64 duration;
+    };
+    const QList<Call> calls = {
+        {1, "RC", 0, QTime(9, 12), "+49 151 2000001", "", 65},
+        {2, "MC", 0, QTime(8, 40), "+49 30 2000002", "", 0},
+        {3, "DC", 0, QTime(7, 55), "+49 170 2000003", "", 312},
+        {4, "MC", 1, QTime(19, 3), "", "", 0},
+        {5, "RC", 1, QTime(14, 20), "+49 89 2000099", "Praxis Dr. Klein", 1832},
+        {6, "DC", 3, QTime(11, 5), "+49 221 3000004", "", 47},
+        {7, "DC", 9, QTime(16, 45), "+49 40 2000006", "", 3725},
+    };
+    QList<qpm::test::FakeCall> result;
+    for (const Call &call : calls) {
+        qpm::test::FakeCall entry;
+        entry.id = call.id;
+        entry.storage = QString::fromLatin1(call.storage);
+        entry.time = qpm::core::codec::formatCallLogTime(
+            QDateTime(QDate::currentDate().addDays(-call.daysAgo), call.time));
+        entry.number = QString::fromUtf8(call.number);
+        entry.name = QString::fromUtf8(call.name);
+        entry.duration = call.duration;
+        result.append(entry);
+    }
+    return result;
+}
+
 QByteArray exampleMetadata()
 {
     return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<metadata version=\"1.0\">\r\n"
@@ -139,6 +178,8 @@ private Q_SLOTS:
     void viewsAreGermanAndRenderInBothSchemes();
     void contactViewsAreGermanAndRenderInBothSchemes_data();
     void contactViewsAreGermanAndRenderInBothSchemes();
+    void callViewsAreGermanAndRenderInBothSchemes_data();
+    void callViewsAreGermanAndRenderInBothSchemes();
 
 private:
     [[nodiscard]] QObject *dialog(const QString &name) const;
@@ -184,6 +225,7 @@ void TestScreens::initTestCase()
         {QByteArrayLiteral("AT*SIM\r\n*SIM: 0,,Privat,Beispielnetz,VS\r\nOK\r\n")});
     m_phone->setObjects(QStringLiteral("pb"), exampleContacts());
     m_phone->setMetadata(QStringLiteral("pb"), exampleMetadata());
+    m_phone->setCalls(exampleCalls());
 
     m_engine = std::make_unique<QQmlApplicationEngine>();
     m_engine->loadFromModule("QPhoneManager.Ui", "Main");
@@ -236,8 +278,12 @@ QObject *TestScreens::dialog(const QString &name) const
 {
     if (QObject *found = m_window->findChild<QObject *>(name))
         return found;
-    QQuickItem *page = item(QStringLiteral("contactsPage"));
-    return page ? page->findChild<QObject *>(name) : nullptr;
+    for (const QString &pageName : {QStringLiteral("contactsPage"), QStringLiteral("callsPage")}) {
+        QQuickItem *page = item(pageName);
+        if (QObject *found = page ? page->findChild<QObject *>(name) : nullptr)
+            return found;
+    }
+    return nullptr;
 }
 
 QQuickItem *TestScreens::item(const QString &name) const
@@ -399,6 +445,96 @@ void TestScreens::contactViewsAreGermanAndRenderInBothSchemes()
         QTRY_VERIFY(!popup->property("visible").toBool());
     }
     page->setProperty("editing", false);
+    QVERIFY(m_controller->isConnected());
+}
+
+void TestScreens::callViewsAreGermanAndRenderInBothSchemes_data()
+{
+    QTest::addColumn<QString>("view");
+    QTest::addColumn<QString>("germanTitle");
+
+    QTest::newRow("list and detail") << QStringLiteral("calls") << QStringLiteral("Anrufe");
+    QTest::newRow("missed only") << QStringLiteral("callsMissed") << QStringLiteral("Anrufe");
+    QTest::newRow("delete one") << QStringLiteral("deleteCall")
+                                << QStringLiteral("Anruf mit Bernd Albrecht löschen?");
+    QTest::newRow("delete shown") << QStringLiteral("deleteShownCalls")
+                                  << QStringLiteral("7 Anrufe löschen?");
+    QTest::newRow("export") << QStringLiteral("exportCallsDialog")
+                            << QStringLiteral("Anrufe exportieren");
+}
+
+void TestScreens::callViewsAreGermanAndRenderInBothSchemes()
+{
+    QFETCH(QString, view);
+    QFETCH(QString, germanTitle);
+    if (m_controller->contacts()->list()->totalCount() == 0) {
+        const QFuture<qpm::core::Result<qpm::core::store::ContactChanges>> contacts =
+            m_controller->contacts()->sync();
+        QTRY_VERIFY_WITH_TIMEOUT(contacts.isFinished(), connectTimeoutMs);
+        QVERIFY(contacts.result().hasValue());
+    }
+    qpm::ui::CallsArea *area = m_controller->calls();
+    if (area->list()->totalCount() == 0) {
+        const QFuture<qpm::core::Result<qpm::core::store::CallChanges>> calls = area->sync();
+        QTRY_VERIFY_WITH_TIMEOUT(calls.isFinished(), connectTimeoutMs);
+        QVERIFY(calls.result().hasValue());
+    }
+    m_window->setProperty("currentSection", 2);
+    QQuickItem *header = m_window->property("header").value<QQuickItem *>();
+    QCOMPARE(header->property("title").toString(), QStringLiteral("Anrufe"));
+    QQuickItem *page = item(QStringLiteral("callsPage"));
+    QVERIFY(page);
+    area->list()->setKindFilter(view == QLatin1StringView("callsMissed")
+                                    ? qpm::ui::CallListModel::Kind::Missed
+                                    : qpm::ui::CallListModel::Kind::All);
+    area->setCurrentId(2);
+    QTRY_VERIFY(item(QStringLiteral("callTitle")) &&
+                item(QStringLiteral("callTitle"))->property("text").toString() ==
+                    QStringLiteral("Bernd Albrecht"));
+
+    // The highlight of the tab bar slides to the chosen tab; the picture waits for it.
+    QQuickItem *tabs = item(QStringLiteral("callKindTabs"));
+    QVERIFY(tabs);
+    const auto *tabList = tabs->property("contentItem").value<QQuickItem *>();
+    QVERIFY(tabList);
+    QTRY_VERIFY([tabList]() {
+        const auto *highlight = tabList->property("highlightItem").value<QQuickItem *>();
+        const auto *current = tabList->property("currentItem").value<QQuickItem *>();
+        return highlight && current && qFuzzyCompare(highlight->x() + 1, current->x() + 1);
+    }());
+
+    QObject *popup = nullptr;
+    if (view == QLatin1StringView("calls") || view == QLatin1StringView("callsMissed")) {
+        // A file dialog of an earlier picture may have taken the window's focus.
+        m_window->requestActivate();
+        QVERIFY(QTest::qWaitForWindowActive(m_window));
+        QQuickItem *list = item(QStringLiteral("callList"));
+        QVERIFY(list);
+        list->forceActiveFocus(Qt::TabFocusReason);
+        QTRY_VERIFY(list->hasActiveFocus());
+    } else {
+        popup = dialog(view == QLatin1StringView("exportCallsDialog")
+                           ? view
+                           : QStringLiteral("deleteCallsDialog"));
+        QVERIFY(popup);
+        if (view == QLatin1StringView("deleteCall"))
+            QVERIFY(QMetaObject::invokeMethod(page, "confirmDelete", Q_ARG(int, 2)));
+        else if (view == QLatin1StringView("deleteShownCalls"))
+            QVERIFY(QMetaObject::invokeMethod(page, "confirmDeleteShown"));
+        else
+            QMetaObject::invokeMethod(popup, "open");
+        const bool hasOpened = popup->metaObject()->indexOfProperty("opened") >= 0;
+        QTRY_VERIFY(popup->property(hasOpened ? "opened" : "visible").toBool());
+        QCOMPARE(popup->property("title").toString(), germanTitle);
+    }
+
+    QVERIFY(saveBothSchemes(view));
+
+    if (popup) {
+        QMetaObject::invokeMethod(popup, "close");
+        QTRY_VERIFY(!popup->property("visible").toBool());
+    }
+    area->list()->setKindFilter(qpm::ui::CallListModel::Kind::All);
     QVERIFY(m_controller->isConnected());
 }
 

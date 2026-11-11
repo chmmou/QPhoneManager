@@ -52,6 +52,21 @@ struct FakeSyncArea
     quint64 nextChangeId = 1;
 };
 
+/// One row of the fake phone's call log.
+struct FakeCall
+{
+    quint32 id = 0;
+    QString number;
+    QString name;
+    /// "DC" dialled, "RC" received or "MC" missed.
+    QString storage = QStringLiteral("DC");
+    /// "yy/MM/dd,HH:mm:ss" in local time.
+    QString time;
+    qint64 duration = 0;
+    /// "128", or "SIM<n>" on a phone with two SIM cards.
+    QString addressType = QStringLiteral("128");
+};
+
 /// A file in the fake phone's storage.
 struct FakeFile
 {
@@ -91,6 +106,10 @@ struct FakePhoneConfig
     QByteArray afterDisconnect;
     /// Name of an OBEX GET; the connection is closed right after its last answer packet.
     QString dropAfterGet;
+    /// Answer every call log command with ERROR, as a client without the permission does.
+    bool callLogDenied = false;
+    /// Refuse AT+CPBW and AT+CPBD like a client that may read the call log but not change it.
+    bool callLogReadOnly = false;
 };
 
 /**
@@ -106,8 +125,9 @@ struct FakePhoneConfig
  *
  * Contacts written to "telecom/pb" are treated like the client does: a new
  * contact gets a LUID and keys for its entries, a change touches only the
- * entries it names, and an empty body deletes the contact. A dial or hang-up
- * command is answered with OK and only recorded.
+ * entries it names, and an empty body deletes the contact. The call log
+ * answers AT+CPBS, AT+CPBR, AT+CPBW and AT+CPBD like the client, newest entry
+ * first. A dial or hang-up command is answered with OK and only recorded.
  *
  * Never sends text messages or places calls: there is nothing behind it.
  */
@@ -150,6 +170,9 @@ public:
     void forgetChanges(const QString &area);
     [[nodiscard]] quint64 changeCounter(const QString &area) const;
 
+    void setCalls(const QList<FakeCall> &calls);
+    [[nodiscard]] QList<FakeCall> calls() const { return m_calls; }
+
     /// Paths use backslashes and start at a storage root, e.g. "\sdcard\DCIM".
     void addFolder(const QString &path);
     void addFile(const QString &path, const QByteArray &data, const QDateTime &modified);
@@ -182,6 +205,8 @@ private:
     void onReadyRead();
     void processAt();
     void handleAt(const QString &command);
+    /// Answers a call log command; returns false for any other command.
+    bool handleCallLog(const QString &command, const QString &name);
     void writeAt(const QByteArray &bytes);
     void processObex();
     void handleObex(const QByteArray &bytes);
@@ -212,6 +237,9 @@ private:
     /// Next key for a contact entry the fake phone creates.
     quint64 m_nextDataId = 1000;
     QHash<QString, FakeSyncArea> m_areas;
+    QList<FakeCall> m_calls;
+    QString m_callStorage = QStringLiteral("ALL");
+    quint32 m_nextCallId = 5000;
     QMap<QString, FakeFile> m_files;
     QSet<QString> m_folders;
     std::optional<quint8> m_failNext;

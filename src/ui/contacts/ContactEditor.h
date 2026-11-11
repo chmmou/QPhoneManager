@@ -153,6 +153,12 @@ public:
 
     /// Empties the form for a new contact in the phone's default account.
     Q_INVOKABLE void newContact();
+    /**
+     * Like newContact(), with `number` as a mobile number. A `name` of two or
+     * more words is split at the last space into given names and family name;
+     * a single word becomes the given name.
+     */
+    void newContactWith(const QString &name, const QString &number);
     /// Fills the form with the stored contact `luid`; false and an error when it is unknown.
     Q_INVOKABLE bool load(int luid);
     /// Starts saving; false and an error when the form cannot be saved now.

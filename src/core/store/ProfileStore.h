@@ -55,7 +55,7 @@ class ProfileStore : public sync::SyncStoreAdapter
 {
 public:
     /// The version open() migrates to.
-    static constexpr int schemaVersion = 2;
+    static constexpr int schemaVersion = 3;
 
     /// Work that runs inside the transaction of applyWith(), on the store's connection.
     using ExtraStep = std::function<Result<void>(const QString &connectionName)>;
@@ -135,6 +135,14 @@ public:
      * hex SHA-1 and ErrorCode::NotFound when no such blob exists.
      */
     [[nodiscard]] Result<QByteArray> blob(const QString &name) const;
+
+    /**
+     * Deletes the blob `name`; succeeds when there is no such blob. Fails with
+     * ErrorCode::InvalidInput when `name` is not a hex SHA-1 and
+     * ErrorCode::IoFailure when the file cannot be deleted. Whether anything
+     * still refers to the blob is for the caller to know.
+     */
+    [[nodiscard]] Result<void> removeBlob(const QString &name);
 
     /// When the area was last pulled, or nothing before the first pull.
     [[nodiscard]] std::optional<QDateTime> lastSync(sync::IrmcDomain domain) const;

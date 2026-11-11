@@ -352,6 +352,27 @@ void ContactEditor::newContact()
     show(Contact());
 }
 
+void ContactEditor::newContactWith(const QString &name, const QString &number)
+{
+    reloadAccounts();
+    Contact contact;
+    const QString words = name.simplified();
+    const qsizetype split = words.lastIndexOf(u' ');
+    if (split > 0) {
+        contact.givenName = words.left(split);
+        contact.familyName = words.mid(split + 1);
+    } else {
+        contact.givenName = words;
+    }
+    if (!number.trimmed().isEmpty()) {
+        core::codec::ContactValue phone;
+        phone.type = core::codec::phoneType::mobile;
+        phone.value = number.trimmed();
+        contact.phones = {phone};
+    }
+    show(contact);
+}
+
 bool ContactEditor::load(int luid)
 {
     const std::shared_ptr<core::store::ContactStore> store = m_store.lock();
