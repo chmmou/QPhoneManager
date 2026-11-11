@@ -1,14 +1,45 @@
 qt_add_library(qpm_core STATIC
+    core/Error.h
+    core/Logging.h
+    core/Logging.cpp
     core/Version.h
     core/Version.cpp
+    core/codec/AtText.h
+    core/codec/AtText.cpp
+    core/codec/Limits.h
+    core/codec/Limits.cpp
+    core/codec/PhoneTime.h
+    core/codec/PhoneTime.cpp
+    core/codec/SafeXml.h
+    core/codec/SafeXml.cpp
+    core/protocol/AdbBridge.h
+    core/protocol/AdbBridge.cpp
+    core/protocol/AtSession.h
+    core/protocol/AtSession.cpp
+    core/protocol/Discovery.h
+    core/protocol/Discovery.cpp
+    core/protocol/ObexClient.h
+    core/protocol/ObexClient.cpp
+    core/protocol/ObexPacket.h
+    core/protocol/ObexPacket.cpp
+    core/protocol/PhoneConnection.h
+    core/protocol/PhoneConnection.cpp
+    core/protocol/PinAuth.h
+    core/protocol/PinAuth.cpp
+    core/protocol/TcpTransport.h
+    core/protocol/TcpTransport.cpp
+    core/protocol/Transport.h
+    core/sync/IrmcSync.h
+    core/sync/IrmcSync.cpp
+    core/sync/SyncStoreAdapter.h
 )
 target_include_directories(qpm_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_definitions(qpm_core PRIVATE "QPM_VERSION=\"${PROJECT_VERSION}\"")
 target_link_libraries(qpm_core
     PUBLIC
         Qt6::Core
-    PRIVATE
         Qt6::Network
+    PRIVATE
         Qt6::Concurrent
         Qt6::Sql
 )
