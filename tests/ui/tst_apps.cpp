@@ -72,6 +72,11 @@ FakeApp fakeApp(const QString &package, const QString &label, bool user, int see
     return app;
 }
 
+QString imagePrefix()
+{
+    return QStringLiteral("image://qpm/");
+}
+
 QString role(const QAbstractItemModel &model, int row, const QByteArray &name)
 {
     return model.data(model.index(row, 0), model.roleNames().key(name)).toString();
@@ -104,6 +109,7 @@ private Q_SLOTS:
     void yourAppsAreShownSortedWithTheirRoles();
     void filterAndSearchNarrowTheList();
     void iconsAreHandedOutUnderTheirAddress();
+    void iconAddressChangesWithTheIcon();
     void startReportsWhetherTheAppOpened();
     void removalIsAskedAndShownOnceConfirmed();
     void apkIsSavedWithProgress();
@@ -115,6 +121,7 @@ private Q_SLOTS:
 
 private:
     [[nodiscard]] bool loadAndWait();
+    [[nodiscard]] QString iconUrl(const QString &package) const;
 
     std::unique_ptr<QTemporaryDir> m_dir;
     std::unique_ptr<FakePhone> m_phone;
@@ -181,6 +188,12 @@ bool TestApps::loadAndWait()
         timeoutMs);
 }
 
+QString TestApps::iconUrl(const QString &package) const
+{
+    const int row = m_model->rowOf(package);
+    return row < 0 ? QString() : m_model->index(row).data(AppListModel::IconUrlRole).toString();
+}
+
 void TestApps::yourAppsAreShownSortedWithTheirRoles()
 {
     QVERIFY(m_phone->receivedCommands().filter(QStringLiteral("EJAVA")).isEmpty());
@@ -243,24 +256,62 @@ void TestApps::filterAndSearchNarrowTheList()
 void TestApps::iconsAreHandedOutUnderTheirAddress()
 {
     QVERIFY(loadAndWait());
-    const int row = m_model->rowOf(QStringLiteral("org.example.zoo"));
-    QVERIFY(row >= 0);
-    QTRY_COMPARE_WITH_TIMEOUT(m_model->index(row).data(AppListModel::IconUrlRole).toString(),
-                              QStringLiteral("image://qpm/app/org.example.zoo"), timeoutMs);
+    QTRY_VERIFY_WITH_TIMEOUT(!iconUrl(QStringLiteral("org.example.zoo")).isEmpty(), timeoutMs);
+    const QString url = iconUrl(QStringLiteral("org.example.zoo"));
+    QVERIFY2(url.startsWith(imagePrefix() + QStringLiteral("app/org.example.zoo/")),
+             qPrintable(url));
 
     PhoneImageProvider provider(m_photos);
     QSize size;
-    const QImage icon = provider.requestImage(QStringLiteral("app/org.example.zoo"), &size, {});
+    const QImage icon = provider.requestImage(url.mid(imagePrefix().size()), &size, {});
     QCOMPARE(icon.size(), QSize(48, 48));
     QCOMPARE(size, QSize(48, 48));
-    QVERIFY(provider.requestImage(QStringLiteral("app/org.example.unknown"), nullptr, {}).isNull());
+    QVERIFY(
+        provider.requestImage(QStringLiteral("app/org.example.unknown/1"), nullptr, {}).isNull());
     QVERIFY(provider.requestImage(QStringLiteral("app/../org.example.zoo"), nullptr, {}).isNull());
+    QVERIFY(provider.requestImage(QStringLiteral("app/org.example.zoo"), nullptr, {}).isNull());
+    QVERIFY(provider.requestImage(QStringLiteral("app/org.example.zoo/x"), nullptr, {}).isNull());
 
     m_model->setFilter(AppListModel::Filter::All);
     const int bare = m_model->rowOf(QStringLiteral("android.ext.shared"));
     QTRY_VERIFY_WITH_TIMEOUT(!m_photos->appIcon(QStringLiteral("com.android.settings")).isNull(),
                              timeoutMs);
     QVERIFY(m_model->index(bare).data(AppListModel::IconUrlRole).toString().isEmpty());
+}
+
+// After an update the icon kept its address, so the window went on showing
+// the picture it had cached for the old version.
+void TestApps::iconAddressChangesWithTheIcon()
+{
+    QVERIFY(loadAndWait());
+    QTRY_VERIFY_WITH_TIMEOUT(!iconUrl(QStringLiteral("org.example.zoo")).isEmpty(), timeoutMs);
+    const QString before = iconUrl(QStringLiteral("org.example.zoo"));
+    const QString other = iconUrl(QStringLiteral("org.example.uebung"));
+
+    FakeApp zoo = fakeApp(QStringLiteral("org.example.zoo"), QStringLiteral("Zoo"), true, 1);
+    zoo.version = QStringLiteral("1.1");
+    zoo.icon = iconPng(Qt::red);
+    // The phone drops what it reports on its own while an OBEX session runs.
+    QTRY_COMPARE_WITH_TIMEOUT(m_connection->state(), PhoneConnection::State::Ready, timeoutMs);
+    m_phone->confirmInstall(zoo);
+    QTRY_VERIFY_WITH_TIMEOUT(!iconUrl(QStringLiteral("org.example.zoo")).isEmpty() &&
+                                 iconUrl(QStringLiteral("org.example.zoo")) != before,
+                             timeoutMs);
+    const QString after = iconUrl(QStringLiteral("org.example.zoo"));
+    QVERIFY2(after.startsWith(imagePrefix() + QStringLiteral("app/org.example.zoo/")),
+             qPrintable(after));
+    QCOMPARE(iconUrl(QStringLiteral("org.example.uebung")), other);
+    PhoneImageProvider provider(m_photos);
+    QCOMPARE(provider.requestImage(after.mid(imagePrefix().size()), nullptr, {}).pixelColor(0, 0),
+             QColor(Qt::red));
+
+    // A new connection may bring another phone with the same package.
+    m_model->setConnected(false);
+    m_model->setConnected(true);
+    QVERIFY(loadAndWait());
+    QTRY_VERIFY_WITH_TIMEOUT(!iconUrl(QStringLiteral("org.example.zoo")).isEmpty(), timeoutMs);
+    QCOMPARE_NE(iconUrl(QStringLiteral("org.example.zoo")), before);
+    QCOMPARE_NE(iconUrl(QStringLiteral("org.example.zoo")), after);
 }
 
 void TestApps::startReportsWhetherTheAppOpened()

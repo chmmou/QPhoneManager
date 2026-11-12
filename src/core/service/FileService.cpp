@@ -467,9 +467,10 @@ void FileService::cancelTransfer()
     static_cast<void>(transfer->obex->abort());
 }
 
-void FileService::finishTransfer(const std::shared_ptr<Transfer> &transfer,
-                                 const Result<void> &result)
+void FileService::finishTransfer(const std::shared_ptr<Transfer> &ended, const Result<void> &result)
 {
+    // A copy, since `ended` may be m_transfer itself, which is reset below.
+    const std::shared_ptr<Transfer> transfer = ended;
     if (transfer->settled)
         return;
     transfer->settled = true;

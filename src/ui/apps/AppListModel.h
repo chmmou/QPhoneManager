@@ -81,7 +81,11 @@ public:
         /// When the APK was installed or last updated; invalid when not known.
         InstalledRole,
         InstalledTextRole,
-        /// "image://qpm/app/<package>" once the icon is there, else empty.
+        /**
+         * "image://qpm/app/<package>/<n>" once the icon is there, else empty.
+         * The number changes whenever the icon is read again, as after an
+         * update of the app, so that no cached picture is shown.
+         */
         IconUrlRole,
         IsUserAppRole,
         /// The phone named the APK, so it can be saved.
@@ -180,8 +184,10 @@ private:
     QList<core::codec::AppInfo> m_apps;
     /// Indexes into m_apps of the rows shown.
     QList<qsizetype> m_rows;
-    /// Packages whose icon is kept in the photo source.
-    QSet<QString> m_withIcon;
+    /// The number in the icon address of each package whose icon is kept in the photo source.
+    QHash<QString, quint64> m_iconNumbers;
+    /// Last number given to an icon; never reset, so that no address comes back.
+    quint64 m_lastIconNumber = 0;
     /// Packages whose removal the phone asks about.
     QSet<QString> m_pendingRemovals;
     QString m_searchText;

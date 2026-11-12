@@ -26,6 +26,12 @@ bool isBlobName(const QString &name)
     });
 }
 
+bool isNumber(const QString &text)
+{
+    return !text.isEmpty() &&
+           std::all_of(text.cbegin(), text.cend(), [](QChar c) { return c >= u'0' && c <= u'9'; });
+}
+
 QImage fitted(const QImage &image, const QSize &requestedSize)
 {
     if (image.isNull() || !requestedSize.isValid() || requestedSize.isEmpty())
@@ -170,8 +176,8 @@ QImage PhoneImageProvider::requestImage(const QString &id, QSize *size, const QS
         const quint64 thumb = parts.at(1).toULongLong(&ok);
         if (ok)
             image = fitted(m_source->thumbnail(thumb), requestedSize);
-    } else if (parts.size() == 2 && parts.at(0) == QLatin1StringView("app") &&
-               core::codec::isValidPackageName(parts.at(1))) {
+    } else if (parts.size() == 3 && parts.at(0) == QLatin1StringView("app") &&
+               core::codec::isValidPackageName(parts.at(1)) && isNumber(parts.at(2))) {
         image = fitted(m_source->appIcon(parts.at(1)), requestedSize);
     } else if ((parts.size() == 3 && parts.at(0) == QLatin1StringView("photo") &&
                 isBlobName(parts.at(2))) ||

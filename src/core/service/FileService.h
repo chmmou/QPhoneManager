@@ -161,7 +161,8 @@ private:
     QFuture<Result<QString>> startUpload(const QString &localPath, const QString &remoteFolder,
                                          const QString &remoteName);
     void keepTransfer(const std::shared_ptr<Transfer> &transfer);
-    void finishTransfer(const std::shared_ptr<Transfer> &transfer, const Result<void> &result);
+    /// Settles `ended` once and reports `result` to its caller; `ended` may be m_transfer.
+    void finishTransfer(const std::shared_ptr<Transfer> &ended, const Result<void> &result);
 
     void runSocketDownload(const std::shared_ptr<Transfer> &transfer, protocol::ObexClient &obex);
     void runInlineDownload(const std::shared_ptr<Transfer> &transfer, protocol::ObexClient &obex);

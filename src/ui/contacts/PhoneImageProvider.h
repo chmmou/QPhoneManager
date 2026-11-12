@@ -84,9 +84,10 @@ private:
  * for a stored contact photo, "part/<blob>" for a picture sent in a message,
  * "draft/<n>" for the photo being edited, "candidate/<n>" for the picture
  * being cropped, "thumb/<n>" for the thumbnail of a phone file and
- * "app/<package>" for the icon of an app on the phone. Stored pictures are read with
- * readImageSafely(). An unknown or malformed id, and a blob that is no picture, yield an empty
- * image. requestImage() may run on a loader thread of the engine.
+ * "app/<package>/<n>" for the icon of an app on the phone, with any number.
+ * Stored pictures are read with readImageSafely(). An unknown or malformed
+ * id, and a blob that is no picture, yield an empty image. requestImage() may
+ * run on a loader thread of the engine.
  */
 class PhoneImageProvider : public QQuickImageProvider
 {

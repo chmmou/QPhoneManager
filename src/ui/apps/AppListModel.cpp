@@ -114,10 +114,12 @@ QVariant AppListModel::data(const QModelIndex &index, int role) const
         return entry.installed;
     case InstalledTextRole:
         return installedText;
-    case IconUrlRole:
-        return m_withIcon.contains(entry.package)
-                   ? QStringLiteral("image://qpm/app/") + entry.package
-                   : QString();
+    case IconUrlRole: {
+        const auto number = m_iconNumbers.constFind(entry.package);
+        return number == m_iconNumbers.cend()
+                   ? QString()
+                   : QStringLiteral("image://qpm/app/%1/%2").arg(entry.package).arg(*number);
+    }
     case IsUserAppRole:
         return entry.isUserApp;
     case CanBackupRole:
@@ -223,7 +225,7 @@ void AppListModel::setConnected(bool connected)
     m_failureText.clear();
     m_pendingRemovals.clear();
     m_awaitingInstall = false;
-    m_withIcon.clear();
+    m_iconNumbers.clear();
     m_photos->clearAppIcons();
     setBusy(false);
     setApps({});
@@ -467,12 +469,13 @@ void AppListModel::readApps()
 void AppListModel::setApps(QList<AppInfo> apps)
 {
     m_apps = std::move(apps);
-    QSet<QString> kept;
+    QHash<QString, quint64> kept;
     for (const AppInfo &entry : std::as_const(m_apps)) {
-        if (m_withIcon.contains(entry.package))
-            kept.insert(entry.package);
+        const auto number = m_iconNumbers.constFind(entry.package);
+        if (number != m_iconNumbers.cend())
+            kept.insert(entry.package, *number);
     }
-    m_withIcon = kept;
+    m_iconNumbers = kept;
     refilter();
 }
 
@@ -514,7 +517,7 @@ void AppListModel::fetchIcons(quint64 generation, QStringList packages)
                 if (!app(package))
                     continue;
                 m_photos->setAppIcon(package, image);
-                m_withIcon.insert(package);
+                m_iconNumbers.insert(package, ++m_lastIconNumber);
                 const int row = rowOf(package);
                 if (row >= 0) {
                     const QModelIndex changed = index(row);
@@ -538,7 +541,7 @@ void AppListModel::onAppAdded(const AppInfo &added)
     apps.removeIf([&added](const AppInfo &entry) { return entry.package == added.package; });
     apps.insert(std::lower_bound(apps.begin(), apps.end(), added, labelLess), added);
     setApps(std::move(apps));
-    m_withIcon.remove(added.package);
+    m_iconNumbers.remove(added.package);
     fetchIcons(m_generation, {added.package});
 }
 
