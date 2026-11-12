@@ -47,9 +47,10 @@ struct DeviceProfile
  * copied to `data.sqlite.bak`. A database written by a newer version is not
  * touched.
  *
- * Every call other than open() requires a successful open(). Use from the
- * main thread only; the object owns its database connection and closes it on
- * destruction.
+ * Every call other than open() and openReadOnly() requires one of them to
+ * have succeeded. Use from the thread that opened it only; the object owns
+ * its database connection and closes it on destruction. The stores of the
+ * program use theirs from the main thread.
  */
 class ProfileStore : public sync::SyncStoreAdapter
 {
@@ -106,6 +107,17 @@ public:
      * SQLite is not available, and ErrorCode::IoFailure otherwise.
      */
     [[nodiscard]] Result<void> open();
+
+    /**
+     * Opens the database of an existing profile for reading only, so that a
+     * worker thread can read while the main thread keeps its own connection;
+     * a read waits up to ten seconds for a write of that connection. Creates
+     * and migrates nothing. Fails with ErrorCode::InvalidInput for an empty
+     * device id, ErrorCode::NotFound when the profile has no database,
+     * ErrorCode::NotSupported when its schema version is not schemaVersion,
+     * and ErrorCode::IoFailure otherwise.
+     */
+    [[nodiscard]] Result<void> openReadOnly();
 
     [[nodiscard]] QString deviceId() const;
     /// The profile folder.

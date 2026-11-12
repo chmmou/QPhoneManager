@@ -7,6 +7,8 @@
 #include "ui/DeviceStatusModel.h"
 #include "ui/Settings.h"
 #include "ui/apps/AppListModel.h"
+#include "ui/backup/BackupController.h"
+#include "ui/backup/BackupSectionModel.h"
 #include "ui/calls/CallsArea.h"
 #include "ui/contacts/ContactsArea.h"
 #include "ui/desktop/CallControl.h"
@@ -564,6 +566,8 @@ private Q_SLOTS:
     void screenViewsAreGermanAndRenderInBothSchemes();
     void desktopViewsAreGermanAndRenderInBothSchemes_data();
     void desktopViewsAreGermanAndRenderInBothSchemes();
+    void backupViewsAreGermanAndRenderInBothSchemes_data();
+    void backupViewsAreGermanAndRenderInBothSchemes();
 
 private:
     [[nodiscard]] QObject *dialog(const QString &name) const;
@@ -1722,6 +1726,99 @@ void TestScreens::desktopViewsAreGermanAndRenderInBothSchemes()
         QVERIFY(notifications->refresh());
         QTRY_COMPARE_WITH_TIMEOUT(notifications->count(), 3, connectTimeoutMs);
     }
+    QVERIFY(m_controller->isConnected());
+}
+
+void TestScreens::backupViewsAreGermanAndRenderInBothSchemes_data()
+{
+    QTest::addColumn<QString>("view");
+    QTest::addColumn<QString>("germanText");
+
+    QTest::newRow("backup") << QStringLiteral("backupDialog") << QStringLiteral("Sichern");
+    QTest::newRow("backup saved")
+        << QStringLiteral("backupSaved")
+        << QStringLiteral("Die Sicherung ist gespeichert. Sie ist nicht verschlüsselt. Bewahren "
+                          "Sie sie sicher auf.");
+    QTest::newRow("restore preview")
+        << QStringLiteral("restorePreview")
+        << QStringLiteral("Wählen Sie, was Sie wiederherstellen möchten.");
+    QTest::newRow("restore done") << QStringLiteral("restoreDone")
+                                  << QStringLiteral("Die Wiederherstellung ist fertig.");
+}
+
+// The last views of the run: the restore gives the fake phone one of its
+// contacts back under a new number.
+void TestScreens::backupViewsAreGermanAndRenderInBothSchemes()
+{
+    QFETCH(QString, view);
+    QFETCH(QString, germanText);
+    m_window->requestActivate();
+    QVERIFY(QTest::qWaitForWindowActive(m_window));
+    qpm::ui::BackupController *backup = m_controller->backup();
+    // A backup holds what this computer stored, so the contacts are pulled first.
+    const QFuture<qpm::core::Result<qpm::core::store::ContactChanges>> pulled =
+        m_controller->contacts()->sync();
+    QTRY_VERIFY_WITH_TIMEOUT(pulled.isFinished(), connectTimeoutMs);
+    QVERIFY(pulled.result().hasValue());
+    const QString path = m_home.filePath(QStringLiteral("screens.qpmbackup"));
+    const QUrl url = QUrl::fromLocalFile(path);
+    if (view != QLatin1StringView("backupDialog") && !QFile::exists(path)) {
+        QVERIFY(backup->create(url, backup->sections()->chosenKeys()));
+        QTRY_VERIFY_WITH_TIMEOUT(!backup->isBusy(), connectTimeoutMs);
+    }
+
+    QObject *popup = dialog(QStringLiteral("backupDialog"));
+    QVERIFY(popup);
+    QMetaObject::invokeMethod(popup, "open");
+    QTRY_VERIFY(popup->property("opened").toBool());
+    QCOMPARE(popup->property("title").toString(), QStringLiteral("Sichern und wiederherstellen"));
+    QQuickItem *tabs = item(QStringLiteral("backupTabs"));
+    QVERIFY(tabs);
+
+    if (view == QLatin1StringView("backupDialog")) {
+        tabs->setProperty("currentIndex", 0);
+        QCOMPARE(item(QStringLiteral("backupTab"))->property("text").toString(), germanText);
+        QVERIFY(labelWithText(item(QStringLiteral("backupPage")),
+                              QStringLiteral("nicht verschlüsselt")));
+        item(QStringLiteral("backup-contacts"))->forceActiveFocus(Qt::TabFocusReason);
+    } else if (view == QLatin1StringView("backupSaved")) {
+        tabs->setProperty("currentIndex", 0);
+        QVERIFY(backup->create(url, backup->sections()->chosenKeys()));
+        QTRY_VERIFY_WITH_TIMEOUT(!backup->isBusy(), connectTimeoutMs);
+        QCOMPARE(backup->statusText(), germanText);
+        item(QStringLiteral("saveBackupButton"))->forceActiveFocus(Qt::TabFocusReason);
+    } else {
+        tabs->setProperty("currentIndex", 1);
+        // Jörg Weiß is gone from the phone, so the preview offers him again.
+        bool onPhone = false;
+        for (const qpm::test::FakeSyncObject &object : m_phone->area(QStringLiteral("pb")).objects)
+            onPhone = onPhone || object.luid == 6;
+        if (onPhone)
+            m_phone->removeObject(QStringLiteral("pb"), 6);
+        popup->setProperty("openedFile", url);
+        QVERIFY(backup->preview(url));
+        QTRY_VERIFY_WITH_TIMEOUT(!backup->isBusy(), connectTimeoutMs);
+        QVERIFY(backup->hasPreview());
+        if (view == QLatin1StringView("restoreDone")) {
+            QVERIFY(backup->restore(url, backup->restoreSections()->chosenKeys()));
+            QTRY_VERIFY_WITH_TIMEOUT(!backup->isBusy(), connectTimeoutMs);
+            item(QStringLiteral("openBackupButton"))->forceActiveFocus(Qt::TabFocusReason);
+        } else {
+            QQuickItem *restore = item(QStringLiteral("restoreBackupButton"));
+            QTRY_VERIFY(restore->isEnabled());
+            restore->forceActiveFocus(Qt::TabFocusReason);
+        }
+        QCOMPARE(backup->statusText(), germanText);
+        QVERIFY(labelWithText(item(QStringLiteral("restorePage")),
+                              view == QLatin1StringView("restoreDone")
+                                  ? QStringLiteral("wiederhergestellt")
+                                  : QStringLiteral("Neu: 1")));
+    }
+
+    QVERIFY(saveBothSchemes(view));
+
+    QMetaObject::invokeMethod(popup, "close");
+    QTRY_VERIFY(!popup->property("visible").toBool());
     QVERIFY(m_controller->isConnected());
 }
 

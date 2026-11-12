@@ -425,6 +425,42 @@ Result<void> ProfileStore::open()
     return {};
 }
 
+Result<void> ProfileStore::openReadOnly()
+{
+    if (m_open)
+        return {};
+    if (m_deviceId.isEmpty())
+        return Error(ErrorCode::InvalidInput, QStringLiteral("The device id is empty"));
+    if (!QSqlDatabase::isDriverAvailable(driverName()))
+        return Error(ErrorCode::NotSupported, QStringLiteral("The SQLite driver is not available"));
+    const QString databasePath = QDir(directory()).filePath(databaseFile());
+    if (!QFileInfo::exists(databasePath))
+        return Error(ErrorCode::NotFound, QStringLiteral("The profile has no database yet"));
+
+    if (m_connectionName.isEmpty())
+        m_connectionName = newConnectionName();
+    QSqlDatabase db = QSqlDatabase::contains(m_connectionName)
+                          ? QSqlDatabase::database(m_connectionName, false)
+                          : QSqlDatabase::addDatabase(driverName(), m_connectionName);
+    db.setDatabaseName(databasePath);
+    // The connection of the main thread may be writing; reads wait for it.
+    db.setConnectOptions(QStringLiteral("QSQLITE_OPEN_READONLY;QSQLITE_BUSY_TIMEOUT=10000"));
+    if (!db.open()) {
+        return Error(
+            ErrorCode::IoFailure,
+            QStringLiteral("Cannot open the profile database: %1").arg(db.lastError().text()));
+    }
+    const std::optional<int> version = readUserVersion(db);
+    if (!version || *version != schemaVersion) {
+        db.close();
+        return Error(ErrorCode::NotSupported,
+                     QStringLiteral("The profile database does not have schema version %1")
+                         .arg(schemaVersion));
+    }
+    m_open = true;
+    return {};
+}
+
 Result<void> ProfileStore::migrate(int fromVersion)
 {
     QSqlDatabase db = QSqlDatabase::database(m_connectionName, false);

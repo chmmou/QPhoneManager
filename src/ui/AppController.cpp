@@ -133,6 +133,9 @@ AppController::AppController(Settings *settings, std::unique_ptr<SecretStore> se
       m_callMonitor(new core::service::CallMonitor(m_connection, this)),
       m_notifications(new NotificationListModel(m_notificationService, m_photos, this)),
       m_call(new CallControl(m_callMonitor, this)),
+      m_backup(new BackupController(
+          {m_contacts->service(), m_calendar->service(), m_notes->service(), m_messages->service()},
+          this)),
       m_desktop(new DesktopIntegration(settings, m_notificationService, m_clipboardService, this))
 {
     Q_ASSERT(settings);
@@ -483,6 +486,7 @@ void AppController::onStateChanged()
     m_apps->setConnected(isConnected());
     m_screen->setConnected(isConnected());
     m_notifications->setConnected(isConnected());
+    m_backup->setConnected(isConnected());
     Q_EMIT connectionStateChanged();
 }
 
@@ -1002,6 +1006,7 @@ bool AppController::openStore(const QString &deviceId)
     m_notes->setStore(m_calendar->store());
     m_callerNames = std::make_shared<core::store::ContactStore>(m_store.get());
     m_callMonitor->setContactStore(m_callerNames);
+    m_backup->setProfileStore(m_store.get());
     return true;
 }
 
@@ -1010,6 +1015,7 @@ void AppController::closeStore()
     // The areas hold the store; they let go of it before it closes.
     m_callMonitor->setContactStore(nullptr);
     m_callerNames.reset();
+    m_backup->setProfileStore(nullptr);
     m_contacts->setProfileStore(nullptr);
     m_calls->setProfileStore(nullptr);
     m_messages->setProfileStore(nullptr);

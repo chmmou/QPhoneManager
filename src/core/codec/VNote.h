@@ -42,7 +42,10 @@ struct Note
 [[nodiscard]] QByteArray encodePhoneNote(const Note &note,
                                          const QList<std::optional<quint32>> &categoryColors);
 
-/// The note as the phone sends it back, X-IRMC-LUID included; for tests and the fake phone.
+/**
+ * The note as the phone sends it back, X-IRMC-LUID included; parsePhoneNote()
+ * reads it back unchanged. For backups, tests and the fake phone.
+ */
 [[nodiscard]] QByteArray encodeNoteAsPhoneSendsIt(const Note &note);
 
 /// True when both notes hold the same text and categories.

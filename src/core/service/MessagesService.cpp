@@ -672,6 +672,36 @@ Result<void> MessagesService::setArchived(const QList<quint32> &luids, bool arch
     return changed;
 }
 
+QFuture<Result<int>> MessagesService::importToArchive(const QList<codec::Message> &messages)
+{
+    const std::shared_ptr<MessageStore> store = m_store.lock();
+    if (!store)
+        return failed<int>(noStore());
+    // The parts go to the folder of this phone; the result must go to its store too.
+    const std::weak_ptr<MessageStore> target = m_store;
+    const QString directory = store->profileDirectory();
+    return QtConcurrent::run([messages, directory]() -> Result<QList<StoredMessage>> {
+               // A failure must not escape the worker; the caller gets an error instead.
+               try {
+                   return MessageStore::prepareImport(messages, directory);
+               } catch (...) {
+                   return Error(ErrorCode::IoFailure,
+                                QStringLiteral("Preparing the messages stopped unexpectedly"));
+               }
+           })
+        .then(this, [this, target](const Result<QList<StoredMessage>> &prepared) -> Result<int> {
+            if (!prepared.hasValue())
+                return prepared.error();
+            const std::shared_ptr<MessageStore> current = target.lock();
+            if (!current || current != m_store.lock())
+                return storeGone();
+            const Result<int> added = current->importPrepared(prepared.value());
+            if (added.hasValue() && added.value() > 0)
+                Q_EMIT messagesChanged();
+            return added;
+        });
+}
+
 Result<QString> MessagesService::sendCommand(const QString &number, const QString &text,
                                              int simSlot, bool withSim)
 {

@@ -115,6 +115,15 @@ public:
     [[nodiscard]] Result<void> setArchived(const QList<quint32> &luids, bool archived);
 
     /**
+     * Adds `messages` to the archive on this computer only, the way
+     * store::MessageStore::importPrepared() does, and returns how many were
+     * added; the phone is not asked. Their parts are written on a worker
+     * thread. Works without a connection. Fails with ErrorCode::Cancelled when
+     * another phone was chosen meanwhile; nothing is added then.
+     */
+    QFuture<Result<int>> importToArchive(const QList<codec::Message> &messages);
+
+    /**
      * The AT command that sends `text` to `number` in text mode, with the SIM
      * card when `withSim` and `simSlot` is not -1. Both values are escaped the
      * way the phone app reads them.

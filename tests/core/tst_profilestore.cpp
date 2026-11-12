@@ -17,6 +17,7 @@
 #include <QTemporaryDir>
 #include <QTest>
 #include <QTimeZone>
+#include <QtConcurrentRun>
 
 #include <memory>
 
@@ -139,6 +140,8 @@ private Q_SLOTS:
     void removedProfileIsGoneWithItsData();
     void removingAnUnknownProfileSucceeds();
     void removeDoesNotFollowALinkOutOfTheFolder();
+    void readOnlyOpenReadsFromAnotherThreadAndWritesNothing();
+    void readOnlyOpenNeedsAnExistingCurrentDatabase();
 
 private:
     [[nodiscard]] std::unique_ptr<ProfileStore> openStore(const QString &deviceId) const;
@@ -747,6 +750,57 @@ void TestProfileStore::removeDoesNotFollowALinkOutOfTheFolder()
 
     QCOMPARE(removed.error().code(), ErrorCode::InvalidInput);
     QVERIFY(QFileInfo::exists(keep.fileName()));
+}
+
+// The backup reads on a worker thread with a connection of its own while
+// the main connection stays open.
+void TestProfileStore::readOnlyOpenReadsFromAnotherThreadAndWritesNothing()
+{
+    std::unique_ptr<ProfileStore> main = openStore(QStringLiteral("dev-1"));
+    QVERIFY(main);
+    DeviceProfile profile;
+    profile.deviceId = QStringLiteral("dev-1");
+    profile.displayName = QStringLiteral("Größe");
+    QVERIFY(main->saveProfile(profile).hasValue());
+
+    const QString root = m_root->path();
+    const QFuture<std::pair<QString, bool>> read = QtConcurrent::run([root]() {
+        ProfileStore worker(root, QStringLiteral("dev-1"));
+        if (!worker.openReadOnly().hasValue())
+            return std::pair<QString, bool>(QString(), false);
+        const Result<DeviceProfile> loaded = worker.loadProfile();
+        DeviceProfile changed = loaded.value();
+        changed.displayName = QStringLiteral("Anders");
+        return std::pair<QString, bool>(loaded.value().displayName,
+                                        worker.saveProfile(changed).hasValue());
+    });
+    QVERIFY(waitFor(read, 10000));
+
+    QCOMPARE(read.result().first, QStringLiteral("Größe"));
+    QVERIFY(!read.result().second);
+    QCOMPARE(main->loadProfile().value().displayName, QStringLiteral("Größe"));
+}
+
+void TestProfileStore::readOnlyOpenNeedsAnExistingCurrentDatabase()
+{
+    ProfileStore missing(m_root->path(), QStringLiteral("dev-1"));
+    QCOMPARE(missing.openReadOnly().error().code(), ErrorCode::NotFound);
+    QVERIFY(!QFileInfo::exists(databasePath(QStringLiteral("dev-1"))));
+
+    {
+        QSqlDatabase db =
+            QSqlDatabase::addDatabase(QStringLiteral("QSQLITE"), QStringLiteral("old"));
+        QVERIFY(QDir().mkpath(QFileInfo(databasePath(QStringLiteral("dev-2"))).path()));
+        db.setDatabaseName(databasePath(QStringLiteral("dev-2")));
+        QVERIFY(db.open());
+        QSqlQuery query(db);
+        QVERIFY(query.exec(QStringLiteral("PRAGMA user_version = 1")));
+        db.close();
+    }
+    QSqlDatabase::removeDatabase(QStringLiteral("old"));
+    ProfileStore older(m_root->path(), QStringLiteral("dev-2"));
+    QCOMPARE(older.openReadOnly().error().code(), ErrorCode::NotSupported);
+    QVERIFY(!QFileInfo::exists(m_root->filePath(QStringLiteral("dev-2/data.sqlite.bak"))));
 }
 
 QTEST_GUILESS_MAIN(TestProfileStore)

@@ -309,6 +309,7 @@ ApplicationWindow {
             compact: root.width < Theme.compactWindowWidth
             onSectionSelected: index => root.currentSection = index
             onSettingsRequested: settingsDialog.open()
+            onBackupRequested: backupDialog.open()
         }
 
         Rectangle {
@@ -378,6 +379,12 @@ ApplicationWindow {
         canRemember: AppController.canRememberPin
         onPinEntered: (pin, remember) => AppController.submitPin(pin, remember)
         onCancelled: AppController.cancelPin()
+    }
+
+    BackupDialog {
+        id: backupDialog
+
+        objectName: "backupDialog"
     }
 
     SettingsDialog {

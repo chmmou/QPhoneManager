@@ -7,6 +7,8 @@
 #include "ui/AppController.h"
 #include "ui/Settings.h"
 #include "ui/apps/AppListModel.h"
+#include "ui/backup/BackupController.h"
+#include "ui/backup/BackupSectionModel.h"
 #include "ui/calls/CallsArea.h"
 #include "ui/contacts/ContactsArea.h"
 #include "ui/desktop/CallControl.h"
@@ -320,6 +322,7 @@ private Q_SLOTS:
     void notificationsFocusChainReachesEveryControlOnce();
     void notificationsAreUsedByKeyboard();
     void callWindowNamesItsControlsAndShowsItsFocus();
+    void backupDialogIsUsedByKeyboard();
 
 private:
     [[nodiscard]] QList<QQuickItem *> controls() const;
@@ -496,6 +499,7 @@ void TestAccessibility::everyDialogControlHasANameAndARole_data()
     QTest::newRow("PIN") << QStringLiteral("pinDialog") << QString();
     QTest::newRow("settings") << QStringLiteral("settingsDialog") << QStringLiteral("settingsTabs");
     QTest::newRow("phones") << QStringLiteral("profilesDialog") << QString();
+    QTest::newRow("backup") << QStringLiteral("backupDialog") << QStringLiteral("backupTabs");
 }
 
 // The dialogs live in the overlay of the window; every page of a dialog with
@@ -2203,6 +2207,82 @@ void TestAccessibility::callWindowNamesItsControlsAndShowsItsFocus()
     QVERIFY(controller->call()->hangUp());
     QTRY_VERIFY_WITH_TIMEOUT(!callWindow->isVisible(), phoneTimeoutMs);
     QVERIFY(m_phone->receivedCommands().contains(QStringLiteral("ATH")));
+}
+
+// The backup dialog starts on its first tab with the focus shown; the sections
+// are chosen with the space bar, and after a preview the sections to restore
+// carry a name, a role and what restoring them would do.
+void TestAccessibility::backupDialogIsUsedByKeyboard()
+{
+    QVERIFY(showContacts());
+    m_window->requestActivate();
+    QVERIFY(QTest::qWaitForWindowActive(m_window));
+    auto *controller =
+        m_engine->singletonInstance<AppController *>("QPhoneManager.Ui", "AppController");
+    qpm::ui::BackupController *backup = controller->backup();
+    // Moves the focus with the tab key until it reaches `name`, as a user does.
+    const auto tabTo = [this](const QString &name) {
+        for (int press = 0; press < 40; ++press) {
+            const QQuickItem *focused = m_window->activeFocusItem();
+            if (focused && focused->objectName() == name)
+                return true;
+            QTest::keyClick(m_window, Qt::Key_Tab);
+        }
+        return false;
+    };
+    const QList<QQuickItem *> before = controls();
+    QObject *popup = openDialog(QStringLiteral("backupDialog"));
+    QVERIFY(popup);
+    announceAccessibility();
+    QQuickItem *focused = m_window->activeFocusItem();
+    QVERIFY(focused);
+    QCOMPARE(focused->objectName(), QStringLiteral("backupTab"));
+    QVERIFY(focusIsShown(focused));
+
+    QVERIFY(tabTo(QStringLiteral("backup-messages")));
+    QVERIFY(focusIsShown(m_window->activeFocusItem()));
+    QTest::keyClick(m_window, Qt::Key_Space);
+    QTRY_VERIFY(!backup->sections()->chosenKeys().contains(QStringLiteral("messages")));
+    QTest::keyClick(m_window, Qt::Key_Tab);
+    QTRY_COMPARE(m_window->activeFocusItem()->objectName(), QStringLiteral("saveBackupButton"));
+    QVERIFY(focusIsShown(m_window->activeFocusItem()));
+
+    // The file dialog is the system's; the backup itself is made directly.
+    const QUrl url = QUrl::fromLocalFile(m_config.filePath(QStringLiteral("a11y.qpmbackup")));
+    QVERIFY(backup->create(url, backup->sections()->chosenKeys()));
+    QTRY_VERIFY_WITH_TIMEOUT(!backup->isBusy(), phoneTimeoutMs);
+    m_phone->removeObject(QStringLiteral("pb"), 2);
+
+    QQuickItem *tabs = findItem(m_window->contentItem(), QStringLiteral("backupTabs"));
+    QVERIFY(tabs);
+    QVERIFY(tabTo(QStringLiteral("restoreTab")));
+    QVERIFY(focusIsShown(m_window->activeFocusItem()));
+    QTest::keyClick(m_window, Qt::Key_Space);
+    QTRY_COMPARE(tabs->property("currentIndex").toInt(), 1);
+    popup->setProperty("openedFile", url);
+    QVERIFY(backup->preview(url));
+    QTRY_VERIFY_WITH_TIMEOUT(!backup->isBusy(), phoneTimeoutMs);
+    QVERIFY(backup->hasPreview());
+    announceAccessibility();
+
+    QList<QQuickItem *> inDialog = controls();
+    inDialog.removeIf([&before](QQuickItem *control) { return before.contains(control); });
+    verifyNamesAndRoles(inDialog);
+    QQuickItem *contacts = findItem(m_window->contentItem(), QStringLiteral("restore-contacts"));
+    QVERIFY(contacts && inDialog.contains(contacts) && contacts->isEnabled());
+    QAccessibleInterface *accessible = QAccessible::queryAccessibleInterface(contacts);
+    QCOMPARE(accessible->role(), QAccessible::CheckBox);
+    QVERIFY(accessible->text(QAccessible::Description).contains(QStringLiteral("New: 1")));
+    QQuickItem *restore = findItem(m_window->contentItem(), QStringLiteral("restoreBackupButton"));
+    QTRY_VERIFY(restore->isEnabled());
+    QVERIFY(tabTo(QStringLiteral("restore-contacts")));
+    QVERIFY(focusIsShown(m_window->activeFocusItem()));
+    QTest::keyClick(m_window, Qt::Key_Space);
+    QTRY_VERIFY(backup->restoreSections()->chosenKeys().isEmpty());
+    QTRY_VERIFY(!restore->isEnabled());
+
+    QTest::keyClick(m_window, Qt::Key_Escape);
+    QTRY_VERIFY(!popup->property("visible").toBool());
 }
 
 QTEST_MAIN(TestAccessibility)

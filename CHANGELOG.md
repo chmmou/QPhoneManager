@@ -62,6 +62,17 @@ numbers follow [Semantic Versioning](https://semver.org/).
   ends the connection and quits; the program can start with only that icon.
 - Settings for desktop notifications, the shared clipboard and the start in
   the notification area.
+- Backup: contacts, calendar, tasks, notes, the call log and messages go into
+  one file with the extension `.qpmbackup`, each part chosen on its own. The
+  file holds the standard formats and the form of the phone app, and it is not
+  encrypted, which the program says before saving.
+- Restore from a backup: a preview shows per part what is new, changed or
+  unchanged. Contacts, calendar, tasks and notes go back to the phone; a backup
+  of another phone only adds what this phone lacks. Messages go into the
+  archive on this computer, because the app on the phone does not take
+  messages. The call log stays in the backup, because the app on the phone
+  may not change it.
+- The sidebar opens backup and restore above the settings.
 
 ### Changed
 

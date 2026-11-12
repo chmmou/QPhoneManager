@@ -242,6 +242,78 @@
     </message>
 </context>
 <context>
+    <name>BackupDialog</name>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="24"/>
+        <source>Back up and restore</source>
+        <translation>Back up and restore</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="31"/>
+        <source>Close</source>
+        <translation>Close</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="67"/>
+        <source>Back up</source>
+        <translation>Back up</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="79"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="240"/>
+        <source>Restore</source>
+        <translation>Restore</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="112"/>
+        <source>Choose what goes into the backup. It holds what this computer stored at the last sync.</source>
+        <translation>Choose what goes into the backup. It holds what this computer stored at the last sync.</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="135"/>
+        <source>The backup file is not encrypted. It holds personal data such as contacts and messages, so keep it in a safe place.</source>
+        <translation>The backup file is not encrypted. It holds personal data such as contacts and messages, so keep it in a safe place.</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="146"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="301"/>
+        <source>Save backup</source>
+        <translation>Save backup</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="179"/>
+        <source>Open a backup file. QPhoneManager compares it with the phone and shows what a restore would change.</source>
+        <translation>Open a backup file. QPhoneManager compares it with the phone and shows what a restore would change.</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="187"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="312"/>
+        <source>Open backup</source>
+        <translation>Open backup</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="212"/>
+        <source>This backup is of another phone. A restore only adds what this phone lacks and changes nothing it has.</source>
+        <translation>This backup is of another phone. A restore only adds what this phone lacks and changes nothing it has.</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="269"/>
+        <source>Stop</source>
+        <translation>Stop</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="303"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="314"/>
+        <source>QPhoneManager backup (*.qpmbackup)</source>
+        <translation>QPhoneManager backup (*.qpmbackup)</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="314"/>
+        <source>All files (*)</source>
+        <translation>All files (*)</translation>
+    </message>
+</context>
+<context>
     <name>CalendarGrid</name>
     <message>
         <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarGrid.qml" line="54"/>
@@ -4113,19 +4185,25 @@
 <context>
     <name>Sidebar</name>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/components/Sidebar.qml" line="35"/>
+        <location filename="../../qml/QPhoneManager/Ui/components/Sidebar.qml" line="36"/>
         <source>Sections</source>
         <translation>Sections</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/components/Sidebar.qml" line="61"/>
-        <location filename="../../qml/QPhoneManager/Ui/components/Sidebar.qml" line="88"/>
+        <location filename="../../qml/QPhoneManager/Ui/components/Sidebar.qml" line="60"/>
+        <location filename="../../qml/QPhoneManager/Ui/components/Sidebar.qml" line="98"/>
+        <source>Backup</source>
+        <translation>Backup</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/components/Sidebar.qml" line="71"/>
+        <location filename="../../qml/QPhoneManager/Ui/components/Sidebar.qml" line="98"/>
         <source>Settings</source>
         <translation>Settings</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/components/Sidebar.qml" line="70"/>
-        <location filename="../../qml/QPhoneManager/Ui/components/Sidebar.qml" line="88"/>
+        <location filename="../../qml/QPhoneManager/Ui/components/Sidebar.qml" line="80"/>
+        <location filename="../../qml/QPhoneManager/Ui/components/Sidebar.qml" line="98"/>
         <source>Help</source>
         <translation>Help</translation>
     </message>
@@ -4522,247 +4600,247 @@
 <context>
     <name>qpm::ui::AppController</name>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="163"/>
+        <location filename="../../src/ui/AppController.cpp" line="166"/>
         <source>Calls</source>
         <translation>Calls</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="154"/>
+        <location filename="../../src/ui/AppController.cpp" line="157"/>
         <source>Contacts</source>
         <translation>Contacts</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="172"/>
+        <location filename="../../src/ui/AppController.cpp" line="175"/>
         <source>Messages</source>
         <translation>Messages</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="181"/>
+        <location filename="../../src/ui/AppController.cpp" line="184"/>
         <source>Calendar and tasks</source>
         <translation>Calendar and tasks</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="190"/>
+        <location filename="../../src/ui/AppController.cpp" line="193"/>
         <source>Notes</source>
         <translation>Notes</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="284"/>
+        <location filename="../../src/ui/AppController.cpp" line="287"/>
         <source>Wi-Fi</source>
         <translation>Wi-Fi</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="286"/>
+        <location filename="../../src/ui/AppController.cpp" line="289"/>
         <source>USB</source>
         <translation>USB</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="288"/>
+        <location filename="../../src/ui/AppController.cpp" line="291"/>
         <source>Bluetooth</source>
         <translation>Bluetooth</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="333"/>
-        <location filename="../../src/ui/AppController.cpp" line="1084"/>
+        <location filename="../../src/ui/AppController.cpp" line="336"/>
+        <location filename="../../src/ui/AppController.cpp" line="1090"/>
         <source>Enter the IP address of the phone, for example 192.168.1.20. MyPhoneExplorer Client shows it on the phone.</source>
         <translation>Enter the IP address of the phone, for example 192.168.1.20. MyPhoneExplorer Client shows it on the phone.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="356"/>
+        <location filename="../../src/ui/AppController.cpp" line="359"/>
         <source>Choose a paired phone from the list.</source>
         <translation>Choose a paired phone from the list.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="386"/>
+        <location filename="../../src/ui/AppController.cpp" line="389"/>
         <source>This phone was not connected in a way that can be repeated. Choose Connect and pick how to connect.</source>
         <translation>This phone was not connected in a way that can be repeated. Choose Connect and pick how to connect.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="578"/>
+        <location filename="../../src/ui/AppController.cpp" line="582"/>
         <source>The data of this phone cannot be saved on this computer. Check the storage folder in the settings.</source>
         <translation>The data of this phone cannot be saved on this computer. Check the storage folder in the settings.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="599"/>
+        <location filename="../../src/ui/AppController.cpp" line="603"/>
         <source>The PIN could not be saved, because the keyring of the system is not available. You will be asked for it next time.</source>
         <translation>The PIN could not be saved, because the keyring of the system is not available. You will be asked for it next time.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="620"/>
+        <location filename="../../src/ui/AppController.cpp" line="624"/>
         <source>The connection to the phone was lost. QPhoneManager connects again as soon as the phone can be reached.</source>
         <translation>The connection to the phone was lost. QPhoneManager connects again as soon as the phone can be reached.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="648"/>
+        <location filename="../../src/ui/AppController.cpp" line="652"/>
         <source>This computer cannot wait for the phone, because port %1 is in use. Close the program that uses it, then try again.</source>
         <translation>This computer cannot wait for the phone, because port %1 is in use. Close the program that uses it, then try again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="683"/>
+        <location filename="../../src/ui/AppController.cpp" line="687"/>
         <source>This computer cannot search the network right now. Enter the address of the phone instead.</source>
         <translation>This computer cannot search the network right now. Enter the address of the phone instead.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="690"/>
-        <location filename="../../src/ui/AppController.cpp" line="1081"/>
+        <location filename="../../src/ui/AppController.cpp" line="694"/>
+        <location filename="../../src/ui/AppController.cpp" line="1087"/>
         <source>adb was not found. Install the Android platform tools or choose adb in the settings.</source>
         <translation>adb was not found. Install the Android platform tools or choose adb in the settings.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="699"/>
+        <location filename="../../src/ui/AppController.cpp" line="703"/>
         <source>adb did not work. Check the adb path in the settings.</source>
         <translation>adb did not work. Check the adb path in the settings.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="707"/>
+        <location filename="../../src/ui/AppController.cpp" line="711"/>
         <source>Allow USB debugging on the phone, then search again.</source>
         <translation>Allow USB debugging on the phone, then search again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="709"/>
+        <location filename="../../src/ui/AppController.cpp" line="713"/>
         <source>The phone is not ready yet. Unlock it and search again.</source>
         <translation>The phone is not ready yet. Unlock it and search again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="714"/>
+        <location filename="../../src/ui/AppController.cpp" line="718"/>
         <source>No phone found at USB. Connect the cable and allow USB debugging on the phone.</source>
         <translation>No phone found at USB. Connect the cable and allow USB debugging on the phone.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="735"/>
-        <location filename="../../src/ui/AppController.cpp" line="1068"/>
+        <location filename="../../src/ui/AppController.cpp" line="739"/>
+        <location filename="../../src/ui/AppController.cpp" line="1074"/>
         <source>This computer has no Bluetooth, or it is turned off. Turn Bluetooth on, or connect over Wi-Fi or USB.</source>
         <translation>This computer has no Bluetooth, or it is turned off. Turn Bluetooth on, or connect over Wi-Fi or USB.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="737"/>
+        <location filename="../../src/ui/AppController.cpp" line="741"/>
         <source>The Bluetooth search failed. Turn Bluetooth on and try again.</source>
         <translation>The Bluetooth search failed. Turn Bluetooth on and try again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="743"/>
+        <location filename="../../src/ui/AppController.cpp" line="747"/>
         <source>No paired phone found. Pair the phone in the system settings first.</source>
         <translation>No paired phone found. Pair the phone in the system settings first.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="798"/>
+        <location filename="../../src/ui/AppController.cpp" line="802"/>
         <source>Enter a name with 1 to 64 characters.</source>
         <translation>Enter a name with 1 to 64 characters.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="806"/>
-        <location filename="../../src/ui/AppController.cpp" line="815"/>
-        <location filename="../../src/ui/AppController.cpp" line="822"/>
+        <location filename="../../src/ui/AppController.cpp" line="810"/>
+        <location filename="../../src/ui/AppController.cpp" line="819"/>
+        <location filename="../../src/ui/AppController.cpp" line="826"/>
         <source>The name could not be saved. Check the storage folder in the settings.</source>
         <translation>The name could not be saved. Check the storage folder in the settings.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="840"/>
+        <location filename="../../src/ui/AppController.cpp" line="844"/>
         <source>The phone could not be removed from this computer. Check the storage folder in the settings, then try again.</source>
         <translation>The phone could not be removed from this computer. Check the storage folder in the settings, then try again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="895"/>
+        <location filename="../../src/ui/AppController.cpp" line="899"/>
         <source>Connect the phone first, then sync.</source>
         <translation>Connect the phone first, then sync.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="899"/>
+        <location filename="../../src/ui/AppController.cpp" line="903"/>
         <source>There is nothing to sync yet.</source>
         <translation>There is nothing to sync yet.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="919"/>
+        <location filename="../../src/ui/AppController.cpp" line="923"/>
         <source>%1: not synced. %2</source>
         <translation>%1: not synced. %2</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="923"/>
+        <location filename="../../src/ui/AppController.cpp" line="927"/>
         <source>%1: %2 new, %3 changed, %4 deleted</source>
         <translation>%1: %2 new, %3 changed, %4 deleted</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="968"/>
+        <location filename="../../src/ui/AppController.cpp" line="972"/>
         <source>Phone</source>
         <translation>Phone</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="992"/>
+        <location filename="../../src/ui/AppController.cpp" line="996"/>
         <source>The data of this phone cannot be opened on this computer. Check the storage folder in the settings.</source>
         <translation>The data of this phone cannot be opened on this computer. Check the storage folder in the settings.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1039"/>
+        <location filename="../../src/ui/AppController.cpp" line="1045"/>
         <source>The phone does not answer over Bluetooth. Turn Bluetooth on at the phone, keep it close and try again.</source>
         <translation>The phone does not answer over Bluetooth. Turn Bluetooth on at the phone, keep it close and try again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1042"/>
+        <location filename="../../src/ui/AppController.cpp" line="1048"/>
         <source>The phone does not answer. Check that MyPhoneExplorer Client is open on the phone, then try again.</source>
         <translation>The phone does not answer. Check that MyPhoneExplorer Client is open on the phone, then try again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1046"/>
+        <location filename="../../src/ui/AppController.cpp" line="1052"/>
         <source>The phone cannot be reached over Wi-Fi. Check that it is in the same network and that MyPhoneExplorer Client is open, then try again.</source>
         <translation>The phone cannot be reached over Wi-Fi. Check that it is in the same network and that MyPhoneExplorer Client is open, then try again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1049"/>
+        <location filename="../../src/ui/AppController.cpp" line="1055"/>
         <source>The connection to the phone ended. Open MyPhoneExplorer Client on the phone, then connect again.</source>
         <translation>The connection to the phone ended. Open MyPhoneExplorer Client on the phone, then connect again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1052"/>
+        <location filename="../../src/ui/AppController.cpp" line="1058"/>
         <source>The phone is connected to another computer. End that connection first, then try again.</source>
         <translation>The phone is connected to another computer. End that connection first, then try again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1055"/>
+        <location filename="../../src/ui/AppController.cpp" line="1061"/>
         <source>MyPhoneExplorer Client does not allow Wi-Fi connections. Allow them in the app settings on the phone, or connect over USB.</source>
         <translation>MyPhoneExplorer Client does not allow Wi-Fi connections. Allow them in the app settings on the phone, or connect over USB.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1058"/>
+        <location filename="../../src/ui/AppController.cpp" line="1064"/>
         <source>The phone asks for a PIN. Connect again and enter the PIN you set in MyPhoneExplorer Client.</source>
         <translation>The phone asks for a PIN. Connect again and enter the PIN you set in MyPhoneExplorer Client.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1061"/>
+        <location filename="../../src/ui/AppController.cpp" line="1067"/>
         <source>MyPhoneExplorer Client stopped after too many wrong PINs. Open the app on the phone again, then connect.</source>
         <translation>MyPhoneExplorer Client stopped after too many wrong PINs. Open the app on the phone again, then connect.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1064"/>
+        <location filename="../../src/ui/AppController.cpp" line="1070"/>
         <source>MyPhoneExplorer Client lacks a permission on the phone. Allow it in the Android settings under Apps.</source>
         <translation>MyPhoneExplorer Client lacks a permission on the phone. Allow it in the Android settings under Apps.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1071"/>
+        <location filename="../../src/ui/AppController.cpp" line="1077"/>
         <source>The phone does not support this. Update MyPhoneExplorer Client on the phone.</source>
         <translation>The phone does not support this. Update MyPhoneExplorer Client on the phone.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1075"/>
+        <location filename="../../src/ui/AppController.cpp" line="1081"/>
         <source>MyPhoneExplorer Client is not installed on the phone. Install it from Google Play, then try again.</source>
         <translation>MyPhoneExplorer Client is not installed on the phone. Install it from Google Play, then try again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1078"/>
+        <location filename="../../src/ui/AppController.cpp" line="1084"/>
         <source>The phone did not find what was asked for. Sync again.</source>
         <translation>The phone did not find what was asked for. Sync again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1088"/>
+        <location filename="../../src/ui/AppController.cpp" line="1094"/>
         <source>adb cannot reach the phone. Check the USB cable and allow USB debugging on the phone, then try again.</source>
         <translation>adb cannot reach the phone. Check the USB cable and allow USB debugging on the phone, then try again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1091"/>
+        <location filename="../../src/ui/AppController.cpp" line="1097"/>
         <source>This computer could not open the connection. Try again, or restart the computer if it keeps failing.</source>
         <translation>This computer could not open the connection. Try again, or restart the computer if it keeps failing.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1098"/>
+        <location filename="../../src/ui/AppController.cpp" line="1104"/>
         <source>The phone sent an answer QPhoneManager does not understand. Update MyPhoneExplorer Client on the phone, then try again.</source>
         <translation>The phone sent an answer QPhoneManager does not understand. Update MyPhoneExplorer Client on the phone, then try again.</translation>
     </message>
@@ -4918,6 +4996,269 @@
         <location filename="../../src/ui/apps/AppListModel.cpp" line="613"/>
         <source>Another transfer is running. Try again when it is done.</source>
         <translation>Another transfer is running. Try again when it is done.</translation>
+    </message>
+</context>
+<context>
+    <name>qpm::ui::BackupController</name>
+    <message>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="62"/>
+        <source>Backup from %1</source>
+        <translation>Backup from %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="63"/>
+        <source>Backup of %1 from %2</source>
+        <translation>Backup of %1 from %2</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="113"/>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="161"/>
+        <source>Choose a phone first.</source>
+        <translation>Choose a phone first.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="117"/>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="165"/>
+        <source>Choose a file on this computer.</source>
+        <translation>Choose a file on this computer.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="122"/>
+        <source>Choose at least one part to back up.</source>
+        <translation>Choose at least one part to back up.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="132"/>
+        <source>Saving the backup.</source>
+        <translation>Saving the backup.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="142"/>
+        <source>Stopped. No backup was saved.</source>
+        <translation>Stopped. No backup was saved.</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../../src/ui/backup/BackupController.cpp" line="149"/>
+        <source>%n entry(s) saved</source>
+        <translation>
+            <numerusform>%n entry saved</numerusform>
+            <numerusform>%n entries saved</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="150"/>
+        <source>The backup is saved. It is not encrypted, so keep it in a safe place.</source>
+        <translation>The backup is saved. It is not encrypted, so keep it in a safe place.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="172"/>
+        <source>Reading the backup.</source>
+        <translation>Reading the backup.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="179"/>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="186"/>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="203"/>
+        <source>Stopped.</source>
+        <translation>Stopped.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="192"/>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="208"/>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="257"/>
+        <source>Another phone was chosen meanwhile. Open the backup again.</source>
+        <translation>Another phone was chosen meanwhile. Open the backup again.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="196"/>
+        <source>Comparing the backup with the phone.</source>
+        <translation>Comparing the backup with the phone.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="218"/>
+        <source>Choose what to restore.</source>
+        <translation>Choose what to restore.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="219"/>
+        <source>The phone is not connected, so the backup was compared with the data stored on this computer. Connect the phone to restore contacts, calendar, tasks and notes.</source>
+        <translation>The phone is not connected, so the backup was compared with the data stored on this computer. Connect the phone to restore contacts, calendar, tasks and notes.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="233"/>
+        <source>Open the backup first.</source>
+        <translation>Open the backup first.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="238"/>
+        <source>Choose at least one part to restore.</source>
+        <translation>Choose at least one part to restore.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="243"/>
+        <source>Connect the phone first, then restore.</source>
+        <translation>Connect the phone first, then restore.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="250"/>
+        <source>Restoring. Keep the phone connected.</source>
+        <translation>Restoring. Keep the phone connected.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="310"/>
+        <source>Not in this backup.</source>
+        <translation>Not in this backup.</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../../src/ui/backup/BackupController.cpp" line="312"/>
+        <source>%n call(s). They stay in the backup, because the app on the phone may not change the call log.</source>
+        <translation>
+            <numerusform>%n call. It stays in the backup, because the app on the phone may not change the call log.</numerusform>
+            <numerusform>%n calls. They stay in the backup, because the app on the phone may not change the call log.</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="317"/>
+        <source>New: %1, already here: %2. They go to the archive on this computer, not to the phone.</source>
+        <translation>New: %1, already here: %2. They go to the archive on this computer, not to the phone.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="323"/>
+        <source>New: %1, changed: %2, unchanged: %3.</source>
+        <translation>New: %1, changed: %2, unchanged: %3.</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../../src/ui/backup/BackupController.cpp" line="344"/>
+        <source>%n entry(s) restored.</source>
+        <translation>
+            <numerusform>%n entry restored.</numerusform>
+            <numerusform>%n entries restored.</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="349"/>
+        <source>Restored: %1, failed: %2. %3</source>
+        <translation>Restored: %1, failed: %2. %3</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="355"/>
+        <source>The restore was stopped. What was restored until then stays.</source>
+        <translation>The restore was stopped. What was restored until then stays.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="357"/>
+        <source>The restore is done, but some entries failed. The list says why.</source>
+        <translation>The restore is done, but some entries failed. The list says why.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="359"/>
+        <source>The restore is done.</source>
+        <translation>The restore is done.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="408"/>
+        <source>The backup could not be compared with the data of this phone. Open it again.</source>
+        <translation>The backup could not be compared with the data of this phone. Open it again.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="416"/>
+        <source>This backup was made by a newer version of QPhoneManager. Update QPhoneManager, then open it again.</source>
+        <translation>This backup was made by a newer version of QPhoneManager. Update QPhoneManager, then open it again.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="419"/>
+        <source>The phone does not support this. Update MyPhoneExplorer Client on the phone.</source>
+        <translation>The phone does not support this. Update MyPhoneExplorer Client on the phone.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="422"/>
+        <source>This file is not a QPhoneManager backup, or it is damaged. Choose another file.</source>
+        <translation>This file is not a QPhoneManager backup, or it is damaged. Choose another file.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="426"/>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="436"/>
+        <source>The backup cannot be saved there. Choose another folder.</source>
+        <translation>The backup cannot be saved there. Choose another folder.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="427"/>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="457"/>
+        <source>The phone did not take an entry. Check it on the phone.</source>
+        <translation>The phone did not take an entry. Check it on the phone.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="430"/>
+        <source>The backup is too large for one file. Choose fewer parts.</source>
+        <translation>The backup is too large for one file. Choose fewer parts.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="432"/>
+        <source>This backup holds more than QPhoneManager can read. Choose another file.</source>
+        <translation>This backup holds more than QPhoneManager can read. Choose another file.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="433"/>
+        <source>An entry is too large for the phone.</source>
+        <translation>An entry is too large for the phone.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="438"/>
+        <source>The file cannot be opened. Check that it exists and that you may read it.</source>
+        <translation>The file cannot be opened. Check that it exists and that you may read it.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="439"/>
+        <source>The data on this computer cannot be changed. Check the storage folder in the settings.</source>
+        <translation>The data on this computer cannot be changed. Check the storage folder in the settings.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="443"/>
+        <source>The connection to the phone ended. Connect it again, then try again.</source>
+        <translation>The connection to the phone ended. Connect it again, then try again.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="446"/>
+        <source>MyPhoneExplorer Client lacks a permission on the phone. Allow it in the Android settings under Apps.</source>
+        <translation>MyPhoneExplorer Client lacks a permission on the phone. Allow it in the Android settings under Apps.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupController.cpp" line="449"/>
+        <source>An entry is no longer on the phone. Open the backup again.</source>
+        <translation>An entry is no longer on the phone. Open the backup again.</translation>
+    </message>
+</context>
+<context>
+    <name>qpm::ui::BackupSectionModel</name>
+    <message>
+        <location filename="../../src/ui/backup/BackupSectionModel.cpp" line="127"/>
+        <source>Contacts</source>
+        <translation>Contacts</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupSectionModel.cpp" line="129"/>
+        <source>Calendar</source>
+        <translation>Calendar</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupSectionModel.cpp" line="131"/>
+        <source>Tasks</source>
+        <translation>Tasks</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupSectionModel.cpp" line="133"/>
+        <source>Notes</source>
+        <translation>Notes</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupSectionModel.cpp" line="135"/>
+        <source>Call log</source>
+        <translation>Call log</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/backup/BackupSectionModel.cpp" line="139"/>
+        <source>Messages</source>
+        <translation>Messages</translation>
     </message>
 </context>
 <context>

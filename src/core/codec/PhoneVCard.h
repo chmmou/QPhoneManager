@@ -235,7 +235,8 @@ inline constexpr qsizetype maxPhotoBytes = 16 * 1024 * 1024;
 
 /**
  * Writes the contact the way the phone sends it, with data ids, X-IRMC-LUID
- * and a blank line after the photo. For tests and for a stand-in of the phone.
+ * and a blank line after the photo; parsePhoneVCard() reads it back
+ * unchanged. For backups, tests and a stand-in of the phone.
  */
 [[nodiscard]] QByteArray encodeAsPhoneSendsIt(const Contact &contact);
 

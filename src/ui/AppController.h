@@ -7,6 +7,7 @@
 #include "ui/ProfileListModel.h"
 #include "ui/QrCodeProvider.h"
 #include "ui/apps/AppListModel.h"
+#include "ui/backup/BackupController.h"
 #include "ui/calls/CallsArea.h"
 #include "ui/contacts/ContactsArea.h"
 #include "ui/desktop/CallControl.h"
@@ -80,7 +81,7 @@ class Settings;
  *
  * The object owns the connection, the models, the areas, the file browser
  * with its transfers, the apps, the screen, the notifications, the call, the
- * clipboard sync and the profile store of the current phone. The
+ * clipboard sync, the backup and the profile store of the current phone. The
  * contacts, the call log, the messages, the calendar with the tasks and the notes are part of
  * syncAll(), in that order. `settings` must outlive it or be destroyed with the engine first; the
  * object never uses it after that.
@@ -134,6 +135,7 @@ class AppController : public QObject
     Q_PROPERTY(qpm::ui::ScreenMirror *screen READ screen CONSTANT FINAL)
     Q_PROPERTY(qpm::ui::NotificationListModel *notifications READ notifications CONSTANT FINAL)
     Q_PROPERTY(qpm::ui::CallControl *call READ call CONSTANT FINAL)
+    Q_PROPERTY(qpm::ui::BackupController *backup READ backup CONSTANT FINAL)
 
 public:
     enum class ConnectionState {
@@ -215,6 +217,7 @@ public:
     [[nodiscard]] ScreenMirror *screen() const { return m_screen; }
     [[nodiscard]] NotificationListModel *notifications() const { return m_notifications; }
     [[nodiscard]] CallControl *call() const { return m_call; }
+    [[nodiscard]] BackupController *backup() const { return m_backup; }
     [[nodiscard]] core::service::ScreenMirrorClient *screenClient() const { return m_screenClient; }
     [[nodiscard]] core::service::NotificationService *notificationService() const
     {
@@ -383,6 +386,7 @@ private:
     core::service::CallMonitor *m_callMonitor = nullptr;
     NotificationListModel *m_notifications = nullptr;
     CallControl *m_call = nullptr;
+    BackupController *m_backup = nullptr;
     DesktopIntegration *m_desktop = nullptr;
     std::unique_ptr<DesktopNotifier> m_notifier;
     /// The contacts the call monitor looks names up in; it keeps only a weak reference.

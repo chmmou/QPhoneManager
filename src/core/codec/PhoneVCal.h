@@ -105,10 +105,17 @@ struct CalendarTask
 [[nodiscard]] QByteArray encodePhoneTask(const CalendarTask &task,
                                          const QList<std::optional<quint32>> &categoryColors);
 
-/// The event as the phone sends it back, X-IRMC-LUID included; for tests and the fake phone.
+/**
+ * The event as the phone sends it back, X-IRMC-LUID included;
+ * parsePhoneEvent() reads it back unchanged. For backups, tests and the fake
+ * phone.
+ */
 [[nodiscard]] QByteArray encodeEventAsPhoneSendsIt(const CalendarEvent &event);
 
-/// The task as the phone sends it back, X-IRMC-LUID included; for tests and the fake phone.
+/**
+ * The task as the phone sends it back, X-IRMC-LUID included; parsePhoneTask()
+ * reads it back unchanged. For backups, tests and the fake phone.
+ */
 [[nodiscard]] QByteArray encodeTaskAsPhoneSendsIt(const CalendarTask &task);
 
 /**
