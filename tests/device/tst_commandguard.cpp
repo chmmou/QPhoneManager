@@ -72,6 +72,10 @@ private Q_SLOTS:
     void incompleteAllowedNumberAllowsNothing();
     void appCommandsPassOnlyInTheirThreeForms_data();
     void appCommandsPassOnlyInTheirThreeForms();
+    void screenCommandsPassOnlyToAnEmulator_data();
+    void screenCommandsPassOnlyToAnEmulator();
+    void callAndMessageCommandsStayBlockedOnAnEmulator();
+    void guardOfAPhoneKeepsInputAwayFromIt();
 };
 
 // The allow list comes from the environment; every test starts without it.
@@ -370,6 +374,98 @@ void TestCommandGuard::appCommandsPassOnlyInTheirThreeForms()
 
     QCOMPARE(!CommandGuard::blockReason(command).has_value(), passes);
     QCOMPARE(!CommandGuard::blockReasonForFrame(command.toUtf8() + "\r\n").has_value(), passes);
+}
+
+void TestCommandGuard::screenCommandsPassOnlyToAnEmulator_data()
+{
+    QTest::addColumn<QString>("command");
+    QTest::addColumn<bool>("screen");
+
+    QTest::newRow("capture probe") << QStringLiteral("AT*STARTCAPTURESERVER=?") << true;
+    QTest::newRow("capture") << QStringLiteral("AT*STARTCAPTURESERVER") << true;
+    QTest::newRow("touch") << QStringLiteral("AT*C=0,540,1200,1") << true;
+    QTest::newRow("touch probe") << QStringLiteral("AT*C=?") << true;
+    QTest::newRow("key") << QStringLiteral("AT*K=back") << true;
+    QTest::newRow("key probe") << QStringLiteral("AT*K=?") << true;
+    QTest::newRow("text") << QStringLiteral("AT*T=Hallo,") << true;
+    QTest::newRow("selected text") << QStringLiteral("AT*SELTEXT?") << true;
+    QTest::newRow("keyboard") << QStringLiteral("AT*KBRD=2,0,Hallo,") << true;
+    QTest::newRow("keyboard state") << QStringLiteral("AT*KBRD?") << true;
+    QTest::newRow("accessibility settings") << QStringLiteral("AT*SHOWACCSETTINGS") << true;
+    QTest::newRow("padded and lower case") << QStringLiteral(" at*k=home\t") << true;
+    QTest::newRow("clipboard") << QStringLiteral("AT*CLIPBOARD?") << false;
+    QTest::newRow("clipboard watch") << QStringLiteral("AT*CLIPWATCH=1") << false;
+    QTest::newRow("display") << QStringLiteral("AT*DISPLAY") << false;
+    QTest::newRow("call log storage") << QStringLiteral("AT+CPBS=\"DC\"") << false;
+}
+
+// The capture asks the owner of the phone, and input acts on whatever it
+// shows, so neither reaches a phone that is not an emulator.
+void TestCommandGuard::screenCommandsPassOnlyToAnEmulator()
+{
+    QFETCH(QString, command);
+    QFETCH(bool, screen);
+    using Target = CommandGuard::Target;
+
+    QCOMPARE(CommandGuard::blockReason(command).has_value(), screen);
+    QCOMPARE(CommandGuard::blockReason(command, Target::Phone).has_value(), screen);
+    QCOMPARE(
+        CommandGuard::blockReasonForFrame(command.toUtf8() + "\r\n", Target::Phone).has_value(),
+        screen);
+    QVERIFY(!CommandGuard::blockReason(command, Target::Emulator).has_value());
+    QVERIFY(!CommandGuard::blockReasonForFrame(command.toUtf8() + "\r\n", Target::Emulator)
+                 .has_value());
+}
+
+void TestCommandGuard::callAndMessageCommandsStayBlockedOnAnEmulator()
+{
+    using Target = CommandGuard::Target;
+    for (const QString &command : {QStringLiteral("ATD+49301234567;"), QStringLiteral("ATA"),
+                                   QStringLiteral("AT+CMGS=+49301234567,Hello,1,1"),
+                                   QStringLiteral("AT*NOTIACTION=1,tag,com.example,Reply"),
+                                   QStringLiteral("AT*EJAVA=3,com.example")}) {
+        QVERIFY2(CommandGuard::blockReason(command, Target::Emulator).has_value(),
+                 qPrintable(command));
+    }
+    QVERIFY(CommandGuard::blockReasonForFrame(
+                obexPut(QStringLiteral("telecom/msg/luid/.vmg"), "BEGIN:VMESSAGE\r\n"),
+                Target::Emulator)
+                .has_value());
+}
+
+void TestCommandGuard::guardOfAPhoneKeepsInputAwayFromIt()
+{
+    FakePhone phone;
+    QVERIFY(phone.listen());
+    CommandGuard emulatorGuard(
+        std::make_unique<TcpTransport>(QStringLiteral("127.0.0.1"), phone.port()),
+        CommandGuard::Target::Emulator);
+    AtSession emulatorSession(&emulatorGuard);
+    QSignalSpy emulatorOpened(&emulatorGuard, &Transport::opened);
+    emulatorGuard.open();
+    QVERIFY(emulatorOpened.wait());
+    const QFuture<AtReply> key = emulatorSession.send(QStringLiteral("AT*K=back"));
+    QVERIFY(waitFor(key));
+    QCOMPARE(key.result().status, AtReply::Status::Ok);
+    QVERIFY(emulatorGuard.blocked().isEmpty());
+    emulatorGuard.close();
+
+    CommandGuard phoneGuard(
+        std::make_unique<TcpTransport>(QStringLiteral("127.0.0.1"), phone.port()));
+    AtSession phoneSession(&phoneGuard);
+    QSignalSpy phoneOpened(&phoneGuard, &Transport::opened);
+    QSignalSpy failed(&phoneGuard, &Transport::failed);
+    phoneGuard.open();
+    QVERIFY(phoneOpened.wait());
+    phone.clearLog();
+    const QFuture<AtReply> capture = phoneSession.send(QStringLiteral("AT*STARTCAPTURESERVER"));
+    QVERIFY(waitFor(capture));
+
+    QCOMPARE(capture.result().status, AtReply::Status::Closed);
+    QCOMPARE(failed.count(), 1);
+    QCOMPARE(failed.first().first().value<Error>().code(), ErrorCode::Rejected);
+    QCOMPARE(phoneGuard.blocked().size(), 1);
+    QVERIFY(phone.receivedCommands().isEmpty());
 }
 
 QTEST_GUILESS_MAIN(TestCommandGuard)

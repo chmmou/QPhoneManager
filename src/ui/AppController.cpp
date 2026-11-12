@@ -9,6 +9,7 @@
 #include "core/service/AppsService.h"
 #include "core/service/DeviceStatusService.h"
 #include "core/service/FileService.h"
+#include "core/service/ScreenMirrorClient.h"
 #include "core/service/ThumbnailChannel.h"
 #include "platform/SecretStore.h"
 #include "ui/DeviceStatusModel.h"
@@ -118,7 +119,9 @@ AppController::AppController(Settings *settings, std::unique_ptr<SecretStore> se
       m_transfers(new TransferQueue(m_fileService, this)),
       m_files(new FileBrowserModel(m_fileService, m_thumbnailChannel, m_transfers, m_photos, this)),
       m_appsService(new core::service::AppsService(m_connection, m_fileService, this)),
-      m_apps(new AppListModel(m_appsService, m_fileService, m_photos, this))
+      m_apps(new AppListModel(m_appsService, m_fileService, m_photos, this)),
+      m_screenClient(new core::service::ScreenMirrorClient(m_connection, this)),
+      m_screen(new ScreenMirror(m_screenClient, this))
 {
     Q_ASSERT(settings);
     const QString configured = settings->dataDirectory();
@@ -459,6 +462,7 @@ void AppController::onStateChanged()
     m_transfers->setConnected(isConnected());
     m_files->setConnected(isConnected());
     m_apps->setConnected(isConnected());
+    m_screen->setConnected(isConnected());
     Q_EMIT connectionStateChanged();
 }
 

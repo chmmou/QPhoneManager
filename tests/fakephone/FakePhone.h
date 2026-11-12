@@ -179,6 +179,17 @@ struct FakePhoneConfig
      */
     int droppedDownloadConnections = 0;
     int droppedThumbnailConnections = 0;
+
+    /// How the user of the phone answers the question whether to allow the screen capture.
+    enum class ScreenConsent { Allow, Decline, NoAnswer };
+    ScreenConsent screenConsent = ScreenConsent::Allow;
+    /// The accessibility service of the client is on, so the phone takes keys and text.
+    bool accessibilityService = true;
+    /// Sent on the screen channel in answer to every request there, verbatim; nothing when empty.
+    QByteArray screenFrame;
+    /// Connections to the screen channel that are taken and closed again unread before one is
+    /// served.
+    int droppedScreenConnections = 0;
 };
 
 /**
@@ -228,6 +239,13 @@ struct FakePhoneConfig
  * "\getthumbnail" answers with the side channel and sends there the data of
  * each listed file with a picture or video extension as its thumbnail, in
  * the stream form of the client.
+ *
+ * The screen capture follows FakePhoneConfig::screenConsent. Once allowed,
+ * the screen channel listens on a port of its own, see screenPort(), and
+ * answers each request there with FakePhoneConfig::screenFrame. Keys and
+ * text need FakePhoneConfig::accessibilityService and an Android version of
+ * at least 7, the capture at least 5; touches are always taken, as the client
+ * does, and only recorded.
  *
  * Never sends text messages or places calls: there is nothing behind it.
  */
@@ -313,6 +331,16 @@ public:
         m_failNextAppParameters = appParameters;
     }
 
+    /// Port of the screen channel while it listens or is connected; 0 otherwise.
+    [[nodiscard]] quint16 screenPort() const;
+    [[nodiscard]] bool isScreenConnected() const;
+    /// The requests received on the screen channel, in order.
+    [[nodiscard]] QList<QByteArray> screenRequests() const { return m_screenRequests; }
+    /// Writes `bytes` to the screen channel as they are.
+    void sendScreenData(const QByteArray &bytes);
+    /// Closes the screen channel, as the phone does when the capture ends.
+    void closeScreen();
+
     /// Writes an unsolicited line in AT mode.
     void sendUnsolicited(const QByteArray &line);
 
@@ -347,6 +375,9 @@ private:
     bool handleAlarms(const QString &command, const QString &name);
     /// Answers AT*EJAVA; returns false for any other command.
     bool handleApps(const QString &command, const QString &name);
+    /// Answers the screen and input commands; returns false for any other command.
+    bool handleScreen(const QString &command, const QString &name);
+    void openScreenChannel();
     [[nodiscard]] QByteArray appLine(const FakeApp &app) const;
     /// Keeps what an upload delivered: a file, or an installation request at the root.
     void keepUpload(const Transfer &transfer, const QByteArray &data);
@@ -404,6 +435,9 @@ private:
     std::unique_ptr<Transfer> m_transfer;
     QList<QByteArray> m_thumbnailRequests;
     QTcpServer *m_thumbnailServer = nullptr;
+    QTcpServer *m_screenServer = nullptr;
+    QPointer<QTcpSocket> m_screenSocket;
+    QList<QByteArray> m_screenRequests;
 };
 
 } // namespace qpm::test

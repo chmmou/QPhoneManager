@@ -150,11 +150,22 @@ build tools and a platform of the Android SDK next to `adb`; without them it
 skips installing and removing. On any other phone it opens, saves, installs
 and removes nothing and prints only counts.
 
+The screen test reads on every phone only whether the accessibility service
+of MyPhoneExplorer Client is on. On an emulator it also shows the screen: it
+confirms the question of the phone through adb, waits for a picture of the
+size of the display, presses Back on the phone and checks through adb that
+Settings, which it opened, is left, and saves a screenshot. Where the service
+is off on the emulator, the test switches it on through adb and puts the
+setting back afterwards. On any other phone it starts no capture and sends no
+input: the capture asks the owner of the phone, and input acts on whatever it
+shows.
+
 All traffic of these tests goes through a guard. It lets a text message
 through only to the number in `QPM_TEST_SMS_TO` and a call only to the number
 in `QPM_TEST_CALL_TO`. Without these variables, every message and every call
 is refused. Answering a call is always refused; hanging up is allowed, so a
-call test can end its own call. Keep the numbers out of the repository, for
+call test can end its own call. The commands that capture or control the
+screen pass only to an emulator. Keep the numbers out of the repository, for
 example in a file outside it that you load before the run.
 
 ```bash

@@ -50,6 +50,7 @@ qpm_add_core_test(tst_thumbnails)
 qpm_add_core_test(tst_applist)
 qpm_add_core_test(tst_appsservice)
 target_link_libraries(tst_appsservice PRIVATE Qt6::Gui)
+qpm_add_core_test(tst_screenmirror)
 qpm_add_core_test(tst_nothirdpartyservices)
 target_compile_definitions(tst_nothirdpartyservices PRIVATE
     "QPM_SOURCE_DIR=\"${PROJECT_SOURCE_DIR}\""
@@ -131,6 +132,13 @@ target_link_libraries(tst_apps PRIVATE qpm_ui qpm_fakephone Qt6::Gui Qt6::Test)
 qpm_set_project_warnings(tst_apps)
 add_test(NAME tst_apps COMMAND tst_apps)
 set_tests_properties(tst_apps PROPERTIES TIMEOUT 120)
+
+# The core test of the screen client has the name tst_screenmirror already.
+qt_add_executable(tst_screenview ui/tst_screenmirror.cpp)
+target_link_libraries(tst_screenview PRIVATE qpm_ui qpm_fakephone Qt6::Quick Qt6::Test)
+qpm_set_project_warnings(tst_screenview)
+add_test(NAME tst_screenview COMMAND tst_screenview)
+set_tests_properties(tst_screenview PROPERTIES TIMEOUT 120)
 
 qt_add_executable(tst_accessibility ui/tst_accessibility.cpp)
 target_link_libraries(tst_accessibility PRIVATE qpm_ui qpm_uiplugin qpm_fakephone Qt6::Quick Qt6::Test)

@@ -5,6 +5,9 @@
 
 #include <QLoggingCategory>
 
+#include <algorithm>
+#include <array>
+
 namespace qpm::test {
 
 namespace {
@@ -108,6 +111,23 @@ bool isAllowedAppCommand(const QString &command)
     return false;
 }
 
+// `command` is trimmed and in upper case. The phone resolves the name of a
+// command as the text before "=" and "?", and compares it as a whole.
+bool isScreenCommand(const QString &command)
+{
+    static constexpr std::array names = {
+        QLatin1StringView("AT*STARTCAPTURESERVER"),
+        QLatin1StringView("AT*C"),
+        QLatin1StringView("AT*K"),
+        QLatin1StringView("AT*T"),
+        QLatin1StringView("AT*SELTEXT"),
+        QLatin1StringView("AT*KBRD"),
+        QLatin1StringView("AT*SHOWACCSETTINGS"),
+    };
+    const QString name = command.section(u'=', 0, 0).section(u'?', 0, 0);
+    return std::find(names.cbegin(), names.cend(), name) != names.cend();
+}
+
 std::optional<QString> blockReasonForPut(const QByteArray &frame)
 {
     const auto packet = core::protocol::ObexPacket::decode(
@@ -130,8 +150,8 @@ using core::Error;
 using core::ErrorCode;
 using core::protocol::Transport;
 
-CommandGuard::CommandGuard(std::unique_ptr<Transport> inner, QObject *parent)
-    : Transport(parent), m_inner(std::move(inner))
+CommandGuard::CommandGuard(std::unique_ptr<Transport> inner, Target target, QObject *parent)
+    : Transport(parent), m_inner(std::move(inner)), m_target(target)
 {
     Q_ASSERT(m_inner);
     connect(m_inner.get(), &Transport::opened, this, &Transport::opened);
@@ -152,7 +172,7 @@ void CommandGuard::close()
 
 void CommandGuard::write(const QByteArray &frame)
 {
-    const std::optional<QString> reason = blockReasonForFrame(frame);
+    const std::optional<QString> reason = blockReasonForFrame(frame, m_target);
     if (!reason) {
         m_inner->write(frame);
         return;
@@ -174,9 +194,11 @@ QString CommandGuard::peerDescription() const
     return m_inner->peerDescription();
 }
 
-std::optional<QString> CommandGuard::blockReason(const QString &command)
+std::optional<QString> CommandGuard::blockReason(const QString &command, Target target)
 {
     const QString upper = trimmedLikeThePhone(command).toUpper();
+    if (target != Target::Emulator && isScreenCommand(upper))
+        return QStringLiteral("screen capture and input only on an emulator");
     if (upper.startsWith(QLatin1StringView("ATD"))) {
         if (isAllowedCall(upper.sliced(3)))
             return std::nullopt;
@@ -201,7 +223,7 @@ std::optional<QString> CommandGuard::blockReason(const QString &command)
     return std::nullopt;
 }
 
-std::optional<QString> CommandGuard::blockReasonForFrame(const QByteArray &frame)
+std::optional<QString> CommandGuard::blockReasonForFrame(const QByteArray &frame, Target target)
 {
     // The opcode is checked before any trimming: 0x02, a PUT, is one of the
     // characters the phone would trim from a line. A line that merely starts
@@ -215,7 +237,7 @@ std::optional<QString> CommandGuard::blockReasonForFrame(const QByteArray &frame
         const QString command = trimmedLikeThePhone(QString::fromUtf8(line));
         if (!command.startsWith(QLatin1StringView("AT"), Qt::CaseInsensitive))
             continue;
-        if (std::optional<QString> reason = blockReason(command))
+        if (std::optional<QString> reason = blockReason(command, target))
             return reason;
     }
     return std::nullopt;

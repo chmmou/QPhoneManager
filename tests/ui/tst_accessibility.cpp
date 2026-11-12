@@ -2,6 +2,7 @@
 #include "core/codec/PhoneVCal.h"
 #include "core/codec/PhoneVCard.h"
 #include "core/codec/VNote.h"
+#include "core/service/ScreenMirrorClient.h"
 #include "platform/SecretStore.h"
 #include "ui/AppController.h"
 #include "ui/Settings.h"
@@ -13,6 +14,7 @@
 #include "ui/organizer/CalendarArea.h"
 #include "ui/organizer/NotesArea.h"
 #include "ui/organizer/TasksArea.h"
+#include "ui/screen/ScreenMirror.h"
 
 #include "FakePhone.h"
 
@@ -21,6 +23,7 @@
 #include <QColor>
 #include <QFile>
 #include <QImage>
+#include <QPainter>
 #include <QQmlApplicationEngine>
 #include <QQmlExtensionPlugin>
 #include <QQuickItem>
@@ -307,6 +310,10 @@ private Q_SLOTS:
     void appDialogsShowTheFocusAndNameTheirControls();
     void appsFocusChainReachesEveryControlOnce();
     void appsAreUsedByKeyboard();
+    void screenViewControlsHaveANameAndARole_data();
+    void screenViewControlsHaveANameAndARole();
+    void screenFocusChainReachesEveryControlOnce();
+    void screenIsUsedByKeyboard();
 
 private:
     [[nodiscard]] QList<QQuickItem *> controls() const;
@@ -323,6 +330,8 @@ private:
     [[nodiscard]] bool showFiles();
     /// Connects a phone with a few apps and shows them.
     [[nodiscard]] bool showApps();
+    /// Connects a phone and shows its mirrored screen; `control` is its accessibility service.
+    [[nodiscard]] bool showScreen(bool control);
     /// Brings the contacts area into the state in which `dialog` has something to show.
     [[nodiscard]] bool prepareContactDialog(const QString &dialog);
     static void announceAccessibility();
@@ -424,10 +433,11 @@ QObject *TestAccessibility::openDialog(const QString &name)
 {
     QObject *dialog = m_window->findChild<QObject *>(name);
     // Dialogs of a page live with the page, which a Loader created.
-    for (const QString &pageName : {QStringLiteral("contactsPage"), QStringLiteral("callsPage"),
-                                    QStringLiteral("messagesPage"), QStringLiteral("calendarPage"),
-                                    QStringLiteral("tasksPage"), QStringLiteral("notesPage"),
-                                    QStringLiteral("filesPage"), QStringLiteral("appsPage")}) {
+    for (const QString &pageName :
+         {QStringLiteral("contactsPage"), QStringLiteral("callsPage"),
+          QStringLiteral("messagesPage"), QStringLiteral("calendarPage"),
+          QStringLiteral("tasksPage"), QStringLiteral("notesPage"), QStringLiteral("filesPage"),
+          QStringLiteral("appsPage"), QStringLiteral("screenPage")}) {
         QQuickItem *page = findItem(m_window->contentItem(), pageName);
         if (!dialog && page)
             dialog = page->findChild<QObject *>(name);
@@ -1853,6 +1863,165 @@ void TestAccessibility::appsAreUsedByKeyboard()
         m_engine->singletonInstance<AppController *>("QPhoneManager.Ui", "AppController");
     QTRY_COMPARE(controller->apps()->filter(), qpm::ui::AppListModel::Filter::System);
     QVERIFY(m_phone->uninstallRequests().isEmpty());
+}
+
+bool TestAccessibility::showScreen(bool control)
+{
+    QImage screen(270, 600, QImage::Format_RGB32);
+    screen.fill(QColor(24, 48, 64));
+    QPainter painter(&screen);
+    painter.fillRect(QRect(20, 60, 230, 70), QColor(236, 240, 238));
+    painter.end();
+    QByteArray png;
+    QBuffer buffer(&png);
+    buffer.open(QIODevice::WriteOnly);
+    screen.save(&buffer, "PNG");
+    m_phone = std::make_unique<qpm::test::FakePhone>();
+    if (!m_phone->listen())
+        return false;
+    m_phone->config().screenFrame = "FileBegin;270x600;0;270x600;PNG;100\r\n" + png + "\r\nFileEnd";
+    m_phone->config().accessibilityService = control;
+    auto *controller =
+        m_engine->singletonInstance<AppController *>("QPhoneManager.Ui", "AppController");
+    if (!controller ||
+        !controller->connectAddress(QStringLiteral("127.0.0.1:%1").arg(m_phone->port()))) {
+        return false;
+    }
+    if (!QTest::qWaitFor([controller]() { return controller->isConnected(); }, phoneTimeoutMs))
+        return false;
+    // The fake phone opens its screen channel on a port of its own.
+    controller->screenClient()->setEndpointResolver(
+        [this](quint16) -> std::optional<qpm::core::protocol::Endpoint> {
+            return qpm::core::protocol::Endpoint{QStringLiteral("127.0.0.1"),
+                                                 m_phone->screenPort()};
+        });
+    m_window->setProperty("currentSection", 9);
+    qpm::ui::ScreenMirror *mirror = controller->screen();
+    if (!QTest::qWaitFor(
+            [this]() {
+                const QQuickItem *page =
+                    findItem(m_window->contentItem(), QStringLiteral("screenPage"));
+                return page && page->isVisible();
+            },
+            phoneTimeoutMs) ||
+        !mirror->start()) {
+        return false;
+    }
+    const bool shown = QTest::qWaitFor([mirror]() { return mirror->hasFrame(); }, phoneTimeoutMs);
+    announceAccessibility();
+    return shown;
+}
+
+void TestAccessibility::screenViewControlsHaveANameAndARole_data()
+{
+    QTest::addColumn<bool>("control");
+
+    QTest::newRow("controlled") << true;
+    QTest::newRow("accessibility service off") << false;
+}
+
+void TestAccessibility::screenViewControlsHaveANameAndARole()
+{
+    QFETCH(bool, control);
+    QVERIFY(showScreen(control));
+
+    const QList<QQuickItem *> found = controls();
+
+    verifyNamesAndRoles(found, {QAccessible::Graphic});
+    QStringList required = {QStringLiteral("screenStartButton"),
+                            QStringLiteral("screenBackButton"),
+                            QStringLiteral("screenHomeButton"),
+                            QStringLiteral("screenRecentsButton"),
+                            QStringLiteral("screenKeyboardButton"),
+                            QStringLiteral("screenRotateButton"),
+                            QStringLiteral("screenFitButton"),
+                            QStringLiteral("screenshotButton"),
+                            QStringLiteral("screenView")};
+    if (!control)
+        required << QStringLiteral("screenAccessibilityButton")
+                 << QStringLiteral("screenCheckButton");
+    for (const QString &name : std::as_const(required)) {
+        QQuickItem *item = findItem(m_window->contentItem(), name);
+        QVERIFY2(item && found.contains(item), qPrintable(name));
+    }
+    // Keys that do nothing without control stay in view, switched off.
+    for (const QString &name :
+         {QStringLiteral("screenBackButton"), QStringLiteral("screenHomeButton"),
+          QStringLiteral("screenRecentsButton"), QStringLiteral("screenKeyboardButton")}) {
+        QCOMPARE(findItem(m_window->contentItem(), name)->isEnabled(), control);
+    }
+    for (QQuickItem *item : found) {
+        const bool iconOnly = item->metaObject()->indexOfProperty("display") >= 0 &&
+                              item->property("display").toInt() == 0;
+        if (!iconOnly || item->property("text").toString().isEmpty())
+            continue;
+        QCOMPARE(QAccessible::queryAccessibleInterface(item)->text(QAccessible::Name),
+                 item->property("text").toString());
+    }
+    QQuickItem *view = findItem(m_window->contentItem(), QStringLiteral("screenView"));
+    const QAccessibleInterface *accessible = QAccessible::queryAccessibleInterface(view);
+    QVERIFY(accessible);
+    QCOMPARE(accessible->role(), QAccessible::Graphic);
+    QVERIFY(!accessible->text(QAccessible::Description).isEmpty());
+}
+
+void TestAccessibility::screenFocusChainReachesEveryControlOnce()
+{
+    QVERIFY(showScreen(false));
+    QList<QQuickItem *> chain;
+    QQuickItem *item = m_window->contentItem()->nextItemInFocusChain(true);
+    while (item && !chain.contains(item) && chain.size() < 500) {
+        chain.append(item);
+        item = item->nextItemInFocusChain(true);
+    }
+
+    QVERIFY(item);
+    QCOMPARE(item, chain.constFirst());
+    const QList<QQuickItem *> found = controls();
+    for (QQuickItem *control : found) {
+        if (control->isEnabled() && control->activeFocusOnTab())
+            QVERIFY2(chain.contains(control), qPrintable(describe(control)));
+    }
+    for (const QString &name :
+         {QStringLiteral("screenStartButton"), QStringLiteral("screenView"),
+          QStringLiteral("screenAccessibilityButton"), QStringLiteral("screenshotButton")}) {
+        QVERIFY2(chain.contains(findItem(m_window->contentItem(), name)), qPrintable(name));
+    }
+}
+
+// The keys of the phone, typing into it and leaving the picture all work
+// from the keyboard, and the picture shows when it has the focus.
+void TestAccessibility::screenIsUsedByKeyboard()
+{
+    QVERIFY(showScreen(true));
+    m_window->requestActivate();
+    QVERIFY(QTest::qWaitForWindowActive(m_window));
+    QQuickItem *back = findItem(m_window->contentItem(), QStringLiteral("screenBackButton"));
+    QQuickItem *keyboard =
+        findItem(m_window->contentItem(), QStringLiteral("screenKeyboardButton"));
+    QQuickItem *view = findItem(m_window->contentItem(), QStringLiteral("screenView"));
+    QVERIFY(back && keyboard && view);
+    m_phone->clearLog();
+
+    back->forceActiveFocus(Qt::TabFocusReason);
+    QVERIFY(focusIsShown(back));
+    QTest::keyClick(m_window, Qt::Key_Space);
+    QTRY_VERIFY_WITH_TIMEOUT(m_phone->receivedCommands().contains(QStringLiteral("AT*K=back")),
+                             phoneTimeoutMs);
+
+    keyboard->forceActiveFocus(Qt::TabFocusReason);
+    QTest::keyClick(m_window, Qt::Key_Space);
+    QTRY_VERIFY(view->hasActiveFocus());
+    QVERIFY(keyboard->property("checked").toBool());
+    QVERIFY(findItem(m_window->contentItem(), QStringLiteral("screenViewFocusRing"))->isVisible());
+    QTest::keyClick(m_window, Qt::Key_A);
+    QTest::keyClick(m_window, Qt::Key_Return);
+    QTRY_VERIFY_WITH_TIMEOUT(m_phone->receivedCommands().contains(QStringLiteral("AT*K=enter")),
+                             phoneTimeoutMs);
+    QVERIFY(m_phone->receivedCommands().contains(QStringLiteral("AT*T=a,")));
+
+    QTest::keyClick(m_window, Qt::Key_Tab);
+    QTRY_VERIFY(!view->hasActiveFocus());
 }
 
 QTEST_MAIN(TestAccessibility)

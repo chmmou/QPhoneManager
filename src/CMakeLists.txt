@@ -84,6 +84,8 @@ qt_add_library(qpm_core STATIC
     core/service/OrganizerSession.h
     core/service/OrganizerSession.cpp
     core/service/SaveMode.h
+    core/service/ScreenMirrorClient.h
+    core/service/ScreenMirrorClient.cpp
     core/service/ThumbnailChannel.h
     core/service/ThumbnailChannel.cpp
     core/sync/IrmcSync.h
@@ -215,6 +217,7 @@ set(qpm_ui_qml_files
     pages/organizer/TaskForm.qml
     pages/organizer/TaskList.qml
     pages/organizer/TasksPage.qml
+    pages/screen/ScreenPage.qml
 )
 set(qpm_ui_qml_sources "")
 foreach(file IN LISTS qpm_ui_qml_files)
@@ -318,6 +321,10 @@ qt_add_qml_module(qpm_ui
         ui/organizer/TaskListModel.cpp
         ui/organizer/TasksArea.h
         ui/organizer/TasksArea.cpp
+        ui/screen/ScreenMirror.h
+        ui/screen/ScreenMirror.cpp
+        ui/screen/ScreenMirrorItem.h
+        ui/screen/ScreenMirrorItem.cpp
 )
 
 set(qpm_ui_icons
@@ -328,10 +335,12 @@ set(qpm_ui_icons
     tabler/apps.svg
     tabler/archive.svg
     tabler/arrow-back-up.svg
+    tabler/arrows-maximize.svg
     tabler/battery.svg
     tabler/bell.svg
     tabler/bluetooth.svg
     tabler/calendar.svg
+    tabler/camera.svg
     tabler/check.svg
     tabler/checklist.svg
     tabler/chevron-left.svg
@@ -352,6 +361,7 @@ set(qpm_ui_icons
     tabler/help.svg
     tabler/home.svg
     tabler/info-circle.svg
+    tabler/keyboard.svg
     tabler/layout-grid.svg
     tabler/list.svg
     tabler/message.svg
@@ -365,12 +375,15 @@ set(qpm_ui_icons
     tabler/plug-connected-x.svg
     tabler/plug-connected.svg
     tabler/player-play.svg
+    tabler/player-stop.svg
     tabler/plus.svg
     tabler/qrcode.svg
     tabler/refresh.svg
+    tabler/rotate-clockwise.svg
     tabler/screen-share.svg
     tabler/send.svg
     tabler/settings.svg
+    tabler/square.svg
     tabler/trash.svg
     tabler/upload.svg
     tabler/usb.svg
@@ -396,6 +409,7 @@ target_include_directories(qpm_ui
         ${CMAKE_CURRENT_SOURCE_DIR}/ui/files
         ${CMAKE_CURRENT_SOURCE_DIR}/ui/messages
         ${CMAKE_CURRENT_SOURCE_DIR}/ui/organizer
+        ${CMAKE_CURRENT_SOURCE_DIR}/ui/screen
 )
 target_link_libraries(qpm_ui
     PUBLIC

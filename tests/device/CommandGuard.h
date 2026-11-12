@@ -23,6 +23,12 @@ namespace qpm::test {
  * AT*EJAVA is refused. Each line of a frame is checked after trimming it the way the phone
  * does, without regard to case. Hanging up with ATH or AT+CHUP passes.
  *
+ * The commands that capture or control the screen of the phone,
+ * AT*STARTCAPTURESERVER, AT*C, AT*K, AT*T, AT*SELTEXT, AT*KBRD and
+ * AT*SHOWACCSETTINGS, probes included, pass only when the guard was made for
+ * an emulator: on someone's own phone the capture asks its owner, and input
+ * acts on whatever the phone shows.
+ *
  * Two exceptions come from the environment. AT+CMGS=<number>,<text>,... and
  * AT+CMGS=<number>,,<flags> pass when <number> is the one in QPM_TEST_SMS_TO,
  * and ATD<number>; or ATD<number>;,<sim> passes when <number> is the one in
@@ -41,8 +47,11 @@ class CommandGuard : public qpm::core::protocol::Transport
     Q_OBJECT
 
 public:
+    /// The device behind the guard. Anything unknown counts as a phone.
+    enum class Target { Phone, Emulator };
+
     explicit CommandGuard(std::unique_ptr<qpm::core::protocol::Transport> inner,
-                          QObject *parent = nullptr);
+                          Target target = Target::Phone, QObject *parent = nullptr);
 
     void open() override;
     void close() override;
@@ -54,20 +63,24 @@ public:
     [[nodiscard]] QStringList blocked() const { return m_blocked; }
 
     /**
-     * Returns why the AT command `command` must not reach a phone, or nothing
-     * when it may. Reads the allowed numbers from the environment on each call.
+     * Returns why the AT command `command` must not reach `target`, or
+     * nothing when it may. Reads the allowed numbers from the environment on
+     * each call.
      */
-    [[nodiscard]] static std::optional<QString> blockReason(const QString &command);
+    [[nodiscard]] static std::optional<QString> blockReason(const QString &command,
+                                                            Target target = Target::Phone);
 
     /**
      * Same for a frame as written to the transport: one or more AT lines or
      * an OBEX packet.
      */
-    [[nodiscard]] static std::optional<QString> blockReasonForFrame(const QByteArray &frame);
+    [[nodiscard]] static std::optional<QString> blockReasonForFrame(const QByteArray &frame,
+                                                                    Target target = Target::Phone);
 
 private:
     std::unique_ptr<qpm::core::protocol::Transport> m_inner;
     QStringList m_blocked;
+    Target m_target = Target::Phone;
 };
 
 } // namespace qpm::test

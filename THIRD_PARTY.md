@@ -38,15 +38,16 @@ same license.
   `@tabler/icons` 3.51.0, whose archive matched the integrity value published
   by the npm registry
   (`sha512-0pinvPZz7YeX+OSfxuEAbnEPWbocVXW5iU8h5lh41pYG8sZuQfpWECC980lxOT0clGIcNGn8xsBr+zKaRGdA/g==`).
-- Files (63): address-book, alert-triangle, antenna-bars-5, apps, archive,
-  arrow-back-up, arrows-sort, battery, bell, bluetooth, calendar, check,
-  checklist, chevron-left, chevron-right, clipboard, clock, copy, cpu,
-  database, device-desktop, device-mobile, device-sd-card, download, edit,
-  external-link, file, filter, folder, folder-plus, help, home, info-circle,
-  keyboard, layout-grid, list, lock, message, messages, notes, phone,
-  phone-incoming, phone-outgoing, phone-x, photo, player-play, plug-connected,
-  plug-connected-x, plus, qrcode, refresh, screen-share, search, send,
-  settings, star, trash, upload, usb, user, users, wifi, x.
+- Files (68): address-book, alert-triangle, antenna-bars-5, apps, archive,
+  arrow-back-up, arrows-maximize, arrows-sort, battery, bell, bluetooth,
+  calendar, camera, check, checklist, chevron-left, chevron-right, clipboard,
+  clock, copy, cpu, database, device-desktop, device-mobile, device-sd-card,
+  download, edit, external-link, file, filter, folder, folder-plus, help,
+  home, info-circle, keyboard, layout-grid, list, lock, message, messages,
+  notes, phone, phone-incoming, phone-outgoing, phone-x, photo, player-play,
+  player-stop, plug-connected, plug-connected-x, plus, qrcode, refresh,
+  rotate-clockwise, screen-share, search, send, settings, square, star, trash,
+  upload, usb, user, users, wifi, x.
 
 ## QR Code generator library
 
