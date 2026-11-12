@@ -74,6 +74,8 @@ private Q_SLOTS:
     void appCommandsPassOnlyInTheirThreeForms();
     void screenCommandsPassOnlyToAnEmulator_data();
     void screenCommandsPassOnlyToAnEmulator();
+    void dismissingAndClipboardWritesPassOnlyToAnEmulator_data();
+    void dismissingAndClipboardWritesPassOnlyToAnEmulator();
     void callAndMessageCommandsStayBlockedOnAnEmulator();
     void guardOfAPhoneKeepsInputAwayFromIt();
 };
@@ -417,12 +419,50 @@ void TestCommandGuard::screenCommandsPassOnlyToAnEmulator()
                  .has_value());
 }
 
+void TestCommandGuard::dismissingAndClipboardWritesPassOnlyToAnEmulator_data()
+{
+    QTest::addColumn<QString>("command");
+    QTest::addColumn<bool>("emulatorOnly");
+
+    QTest::newRow("dismiss one") << QStringLiteral("AT*NOTIC=12,,com.example.chat") << true;
+    QTest::newRow("dismiss all") << QStringLiteral("AT*NOTIC") << true;
+    QTest::newRow("dismiss, padded and lower case")
+        << QStringLiteral(" at*notic=12,tag,com.example	") << true;
+    QTest::newRow("write clipboard") << QStringLiteral("AT*CLIPBOARD=Hallo,") << true;
+    QTest::newRow("write clipboard, lower case") << QStringLiteral("at*clipboard=x,") << true;
+    QTest::newRow("read clipboard") << QStringLiteral("AT*CLIPBOARD?") << false;
+    QTest::newRow("watch clipboard") << QStringLiteral("AT*CLIPWATCH=1") << false;
+    QTest::newRow("list notifications") << QStringLiteral("AT*NOTIR") << false;
+    QTest::newRow("notification mode") << QStringLiteral("AT*NOTIFY=2") << false;
+    QTest::newRow("notification picture name") << QStringLiteral("AT*NOTIFYX") << false;
+    QTest::newRow("mute") << QStringLiteral("AT+CMUT=1") << false;
+    QTest::newRow("speaker") << QStringLiteral("AT*SESP=0") << false;
+}
+
+// Dismissing removes a notification its owner may not have read, and a
+// clip written to a phone replaces what its owner copied.
+void TestCommandGuard::dismissingAndClipboardWritesPassOnlyToAnEmulator()
+{
+    QFETCH(QString, command);
+    QFETCH(bool, emulatorOnly);
+    using Target = CommandGuard::Target;
+
+    QCOMPARE(CommandGuard::blockReason(command).has_value(), emulatorOnly);
+    QCOMPARE(
+        CommandGuard::blockReasonForFrame(command.toUtf8() + "\r\n", Target::Phone).has_value(),
+        emulatorOnly);
+    QVERIFY(!CommandGuard::blockReason(command, Target::Emulator).has_value());
+    QVERIFY(!CommandGuard::blockReasonForFrame(command.toUtf8() + "\r\n", Target::Emulator)
+                 .has_value());
+}
+
 void TestCommandGuard::callAndMessageCommandsStayBlockedOnAnEmulator()
 {
     using Target = CommandGuard::Target;
     for (const QString &command : {QStringLiteral("ATD+49301234567;"), QStringLiteral("ATA"),
                                    QStringLiteral("AT+CMGS=+49301234567,Hello,1,1"),
                                    QStringLiteral("AT*NOTIACTION=1,tag,com.example,Reply"),
+                                   QStringLiteral("AT*NOTIACTION=1,,com.example"),
                                    QStringLiteral("AT*EJAVA=3,com.example")}) {
         QVERIFY2(CommandGuard::blockReason(command, Target::Emulator).has_value(),
                  qPrintable(command));

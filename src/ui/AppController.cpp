@@ -7,10 +7,15 @@
 #include "core/protocol/Discovery.h"
 #include "core/protocol/PhoneConnection.h"
 #include "core/service/AppsService.h"
+#include "core/service/CallMonitor.h"
+#include "core/service/ClipboardService.h"
 #include "core/service/DeviceStatusService.h"
 #include "core/service/FileService.h"
+#include "core/service/NotificationService.h"
 #include "core/service/ScreenMirrorClient.h"
 #include "core/service/ThumbnailChannel.h"
+#include "core/store/ContactStore.h"
+#include "platform/DesktopNotifier.h"
 #include "platform/SecretStore.h"
 #include "ui/DeviceStatusModel.h"
 #include "ui/FoundPhoneModel.h"
@@ -18,6 +23,7 @@
 #include "ui/QrCodeProvider.h"
 #include "ui/Settings.h"
 #include "ui/contacts/PhoneImageProvider.h"
+#include "ui/desktop/DesktopIntegration.h"
 
 #include <QBluetoothAddress>
 #include <QDir>
@@ -121,7 +127,13 @@ AppController::AppController(Settings *settings, std::unique_ptr<SecretStore> se
       m_appsService(new core::service::AppsService(m_connection, m_fileService, this)),
       m_apps(new AppListModel(m_appsService, m_fileService, m_photos, this)),
       m_screenClient(new core::service::ScreenMirrorClient(m_connection, this)),
-      m_screen(new ScreenMirror(m_screenClient, this))
+      m_screen(new ScreenMirror(m_screenClient, this)),
+      m_notificationService(new core::service::NotificationService(m_connection, this)),
+      m_clipboardService(new core::service::ClipboardService(m_connection, this)),
+      m_callMonitor(new core::service::CallMonitor(m_connection, this)),
+      m_notifications(new NotificationListModel(m_notificationService, m_photos, this)),
+      m_call(new CallControl(m_callMonitor, this)),
+      m_desktop(new DesktopIntegration(settings, m_notificationService, m_clipboardService, this))
 {
     Q_ASSERT(settings);
     const QString configured = settings->dataDirectory();
@@ -133,6 +145,12 @@ AppController::AppController(Settings *settings, std::unique_ptr<SecretStore> se
     connect(m_connection, &PhoneConnection::deviceIdentified, this, &AppController::onIdentified);
     connect(m_connection, &PhoneConnection::failed, this, &AppController::onFailed);
     connect(m_qrCode, &QrCodeProvider::activeChanged, this, &AppController::updateListening);
+    connect(m_desktop, &DesktopIntegration::notificationsRequested, this,
+            &AppController::notificationsRequested);
+    // A phone that connects to this computer gets these options as well.
+    applyConnectionOptions(std::chrono::milliseconds(0));
+    connect(settings, &Settings::clipboardSyncChanged, this,
+            [this]() { applyConnectionOptions(m_reconnectDelay); });
     registerSyncArea(tr("Contacts"), [this]() {
         return m_contacts->sync().then(
             this, [](const Result<core::store::ContactChanges> &pulled) -> Result<SyncChanges> {
@@ -210,6 +228,8 @@ AppController::~AppController()
     // The connection is a child and goes after this destructor; nothing it
     // reports may reach the half-destroyed controller.
     m_connection->disconnect(this);
+    m_callMonitor->setContactStore(nullptr);
+    m_callerNames.reset();
 }
 
 AppController *AppController::create(QQmlEngine *qmlEngine, QJSEngine *jsEngine)
@@ -217,6 +237,7 @@ AppController *AppController::create(QQmlEngine *qmlEngine, QJSEngine *jsEngine)
     Q_UNUSED(jsEngine)
     auto *settings = qmlEngine->singletonInstance<Settings *>("QPhoneManager.Ui", "Settings");
     auto *controller = new AppController(settings, std::make_unique<SecretStore>(), Environment());
+    controller->setDesktopNotifier(std::make_unique<DesktopNotifier>());
     // The engine takes ownership of the provider.
     qmlEngine->addImageProvider(QStringLiteral("qpm"),
                                 new PhoneImageProvider(controller->photoSource()));
@@ -388,9 +409,7 @@ void AppController::startAttempt(const Attempt &attempt)
     m_inbound = false;
     m_reachedReady = false;
     m_reconnecting = false;
-    PhoneConnection::Options options;
-    options.reconnectDelay = std::chrono::milliseconds(0);
-    m_connection->setOptions(options);
+    applyConnectionOptions(std::chrono::milliseconds(0));
     m_startingAttempt = true;
     const auto done = qScopeGuard([this]() { m_startingAttempt = false; });
 
@@ -463,6 +482,7 @@ void AppController::onStateChanged()
     m_files->setConnected(isConnected());
     m_apps->setConnected(isConnected());
     m_screen->setConnected(isConnected());
+    m_notifications->setConnected(isConnected());
     Q_EMIT connectionStateChanged();
 }
 
@@ -520,11 +540,9 @@ void AppController::onIdentified()
     m_reconnecting = false;
     m_waitingForPin = false;
 
-    PhoneConnection::Options options;
     const bool autoConnect = m_settings && m_settings->autoConnect();
-    options.reconnectDelay = autoConnect ? std::chrono::milliseconds(reconnectDelay)
-                                         : std::chrono::milliseconds(0);
-    m_connection->setOptions(options);
+    applyConnectionOptions(autoConnect ? std::chrono::milliseconds(reconnectDelay)
+                                       : std::chrono::milliseconds(0));
 
     if (m_attempt.kind == ConnectionKind::None) {
         // The phone connected to this computer after scanning the QR code.
@@ -846,6 +864,29 @@ void AppController::registerSyncArea(const QString &title, SyncRunner runner)
     m_syncAreas.append({title, std::move(runner)});
 }
 
+void AppController::setDesktopNotifier(std::unique_ptr<DesktopNotifier> notifier)
+{
+    m_desktop->setNotifier(notifier.get());
+    m_notifier = std::move(notifier);
+}
+
+void AppController::requestNewMessage()
+{
+    Q_EMIT newMessageRequested();
+}
+
+void AppController::applyConnectionOptions(std::chrono::milliseconds reconnectDelay)
+{
+    PhoneConnection::Options options;
+    options.reconnectDelay = reconnectDelay;
+    // The list of notifications is always read; the setting decides only
+    // whether new ones show on the desktop.
+    options.notifications = true;
+    options.clipboardWatch = m_settings && m_settings->clipboardSync();
+    m_connection->setOptions(options);
+    m_reconnectDelay = reconnectDelay;
+}
+
 void AppController::syncAll()
 {
     if (m_syncing)
@@ -959,12 +1000,16 @@ bool AppController::openStore(const QString &deviceId)
     m_calendar->setProfileStore(m_store.get());
     m_tasks->setStore(m_calendar->store());
     m_notes->setStore(m_calendar->store());
+    m_callerNames = std::make_shared<core::store::ContactStore>(m_store.get());
+    m_callMonitor->setContactStore(m_callerNames);
     return true;
 }
 
 void AppController::closeStore()
 {
     // The areas hold the store; they let go of it before it closes.
+    m_callMonitor->setContactStore(nullptr);
+    m_callerNames.reset();
     m_contacts->setProfileStore(nullptr);
     m_calls->setProfileStore(nullptr);
     m_messages->setProfileStore(nullptr);

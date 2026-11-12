@@ -29,6 +29,9 @@ namespace qpm::test {
  * an emulator: on someone's own phone the capture asks its owner, and input
  * acts on whatever the phone shows.
  *
+ * For the same reason AT*NOTIC in every form, which dismisses notifications,
+ * and AT*CLIPBOARD=, which replaces the clipboard, pass only to an emulator.
+ *
  * Two exceptions come from the environment. AT+CMGS=<number>,<text>,... and
  * AT+CMGS=<number>,,<flags> pass when <number> is the one in QPM_TEST_SMS_TO,
  * and ATD<number>; or ATD<number>;,<sim> passes when <number> is the one in

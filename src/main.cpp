@@ -1,5 +1,7 @@
 #include "core/Logging.h"
 #include "core/Version.h"
+#include "platform/TrayIcon.h"
+#include "ui/AppController.h"
 #include "ui/Settings.h"
 
 #include <QApplication>
@@ -7,6 +9,7 @@
 #include <QLocale>
 #include <QQmlApplicationEngine>
 #include <QQmlExtensionPlugin>
+#include <QQuickWindow>
 #include <QTranslator>
 
 #include <cstdlib>
@@ -52,7 +55,8 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
     QApplication::setWindowIcon(QIcon(QStringLiteral(":/icons/app/qphonemanager.svg")));
 
-    const QString language = uiLanguage(qpm::ui::Settings().language());
+    const qpm::ui::Settings startup;
+    const QString language = uiLanguage(startup.language());
     // Numbers, dates and sizes follow the language of the texts; the region
     // of the system stays when it already speaks that language.
     if (QLocale::system().name().section(u'_', 0, 0) != language)
@@ -64,11 +68,36 @@ int main(int argc, char *argv[])
     installCatalogue(qtBaseTranslator, QStringLiteral("qtbase"), language);
     installCatalogue(qtQuickTranslator, QStringLiteral("qtdeclarative"), language);
 
+    qpm::TrayIcon tray(QApplication::windowIcon());
+    const bool trayShown = tray.show();
     QQmlApplicationEngine engine;
     QObject::connect(
         &engine, &QQmlApplicationEngine::objectCreationFailed, &app,
         []() { QCoreApplication::exit(EXIT_FAILURE); }, Qt::QueuedConnection);
+    if (qpm::TrayIcon::shouldStartHidden(startup.startMinimized(), trayShown))
+        engine.setInitialProperties({{QStringLiteral("visible"), false}});
     engine.loadFromModule("QPhoneManager.Ui", "Main");
+
+    auto *controller =
+        engine.singletonInstance<qpm::ui::AppController *>("QPhoneManager.Ui", "AppController");
+    auto *window = engine.rootObjects().isEmpty()
+                       ? nullptr
+                       : qobject_cast<QQuickWindow *>(engine.rootObjects().constFirst());
+    if (controller && window) {
+        tray.setConnected(controller->isConnected());
+        QObject::connect(controller, &qpm::ui::AppController::connectionStateChanged, &tray,
+                         [&tray, controller]() { tray.setConnected(controller->isConnected()); });
+        QObject::connect(&tray, &qpm::TrayIcon::showWindowRequested, window, [window]() {
+            window->show();
+            window->raise();
+            window->requestActivate();
+        });
+        QObject::connect(&tray, &qpm::TrayIcon::writeMessageRequested, controller,
+                         &qpm::ui::AppController::requestNewMessage);
+        QObject::connect(&tray, &qpm::TrayIcon::disconnectRequested, controller,
+                         &qpm::ui::AppController::disconnectPhone);
+    }
+    QObject::connect(&tray, &qpm::TrayIcon::quitRequested, &app, &QCoreApplication::quit);
 
     return QApplication::exec();
 }

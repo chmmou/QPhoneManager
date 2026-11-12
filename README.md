@@ -103,6 +103,7 @@ report themselves as skipped. They read these environment variables:
 | `QPM_TEST_CALL_TO` | The only number a test may call. Optional. |
 | `QPM_TEST_READ_ONLY` | When set, the call log test writes nothing to a phone that is not an emulator. Optional. |
 | `QPM_TEST_SEND_SMS` | When `1`, the messages test sends one real text message to `QPM_TEST_SMS_TO`. Optional. |
+| `QPM_TEST_CALL` | When `1`, the desktop test places one real call to `QPM_TEST_CALL_TO`. Optional. |
 
 The contacts test writes freely only to an emulator, that is a serial that
 starts with `emulator-`. On any other phone it only reads the contacts and
@@ -160,13 +161,30 @@ setting back afterwards. On any other phone it starts no capture and sends no
 input: the capture asks the owner of the phone, and input acts on whatever it
 shows.
 
+The desktop test reads on every phone whether MyPhoneExplorer Client may read
+the notifications, and with that access it counts them and checks their form.
+It never prints their content. On an emulator it also writes the clipboard
+from this computer and reads it back through the app on the phone, and puts
+back what was there before. It posts a notification of its own with
+`cmd notification post`, waits for it with its title and text, and dismisses
+it. Where the app on the emulator may not read notifications, the test allows
+it with `cmd notification allow_listener` and takes that back afterwards. It
+lets the emulator ring through its console (`adb emu gsm call`), which calls
+nobody, checks that the call shows with its number, and ends it. On any other
+phone it reads only: no clipboard, no dismissing, no action of a notification
+and no setting. Only with `QPM_TEST_CALL=1` and on a phone that is not an
+emulator does it call the number in `QPM_TEST_CALL_TO`, check that the call
+shows, and hang up after at most ten seconds. It never prints that number.
+
 All traffic of these tests goes through a guard. It lets a text message
 through only to the number in `QPM_TEST_SMS_TO` and a call only to the number
 in `QPM_TEST_CALL_TO`. Without these variables, every message and every call
 is refused. Answering a call is always refused; hanging up is allowed, so a
 call test can end its own call. The commands that capture or control the
-screen pass only to an emulator. Keep the numbers out of the repository, for
-example in a file outside it that you load before the run.
+screen, dismiss notifications or write the clipboard pass only to an emulator.
+Running an action of a notification is always refused. Keep the numbers out
+of the repository, for example in a file outside it that you load before the
+run.
 
 ```bash
 QPM_TEST_ADB=$HOME/Android/Sdk/platform-tools/adb QPM_TEST_SERIAL=emulator-5554 \

@@ -51,6 +51,17 @@ numbers follow [Semantic Versioning](https://semver.org/).
   opened on the phone, its APK saved on this computer, an APK installed from
   this computer and an app removed; the phone asks before it installs or
   removes anything.
+- Notifications of the phone: a list with app, title, text, time and picture,
+  dismissing a notification and running its actions on the phone, and a
+  desktop notification for each new one with the same buttons.
+- The clipboard can be shared between the phone and this computer.
+- Incoming calls show in a window of their own with the name of the contact
+  and the number; the call can be answered, declined or ended, and the
+  microphone and the speaker switched.
+- An icon in the notification area shows the window, starts a new message,
+  ends the connection and quits; the program can start with only that icon.
+- Settings for desktop notifications, the shared clipboard and the start in
+  the notification area.
 
 ### Changed
 

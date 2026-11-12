@@ -536,6 +536,39 @@
     </message>
 </context>
 <context>
+    <name>CallWindow</name>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/CallWindow.qml" line="17"/>
+        <source>Call</source>
+        <translation>Call</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/CallWindow.qml" line="104"/>
+        <source>Answer</source>
+        <translation>Answer</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/CallWindow.qml" line="119"/>
+        <source>Decline</source>
+        <translation>Decline</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/CallWindow.qml" line="119"/>
+        <source>Hang up</source>
+        <translation>Hang up</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/CallWindow.qml" line="138"/>
+        <source>Mute</source>
+        <translation>Mute</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/CallWindow.qml" line="156"/>
+        <source>Speaker</source>
+        <translation>Speaker</translation>
+    </message>
+</context>
+<context>
     <name>CallsPage</name>
     <message>
         <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="41"/>
@@ -2724,6 +2757,77 @@
     </message>
 </context>
 <context>
+    <name>NotificationsPage</name>
+    <message numerus="yes">
+        <location filename="../../qml/QPhoneManager/Ui/pages/notifications/NotificationsPage.qml" line="39"/>
+        <source>%n notification(s) on the phone</source>
+        <translation>
+            <numerusform>%n notification on the phone</numerusform>
+            <numerusform>%n notifications on the phone</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/notifications/NotificationsPage.qml" line="48"/>
+        <source>Open on the phone</source>
+        <translation>Open on the phone</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/notifications/NotificationsPage.qml" line="66"/>
+        <source>Dismiss on the phone</source>
+        <translation>Dismiss on the phone</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/notifications/NotificationsPage.qml" line="86"/>
+        <source>Load again</source>
+        <translation>Load again</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/notifications/NotificationsPage.qml" line="130"/>
+        <source>Notifications</source>
+        <translation>Notifications</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/notifications/NotificationsPage.qml" line="131"/>
+        <source>Enter opens the notification on the phone, Delete dismisses it there</source>
+        <translation>Enter opens the notification on the phone, Delete dismisses it there</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/notifications/NotificationsPage.qml" line="176"/>
+        <source>%1, %2</source>
+        <translation>%1, %2</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/notifications/NotificationsPage.qml" line="188"/>
+        <source>Select a notification in the list.</source>
+        <translation>Select a notification in the list.</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/notifications/NotificationsPage.qml" line="220"/>
+        <source>Picture of the notification</source>
+        <translation>Picture of the notification</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/notifications/NotificationsPage.qml" line="243"/>
+        <source>Runs this action on the phone</source>
+        <translation>Runs this action on the phone</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/notifications/NotificationsPage.qml" line="266"/>
+        <source>Connect</source>
+        <translation>Connect</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/notifications/NotificationsPage.qml" line="266"/>
+        <source>Show the setting on the phone</source>
+        <translation>Show the setting on the phone</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/notifications/NotificationsPage.qml" line="297"/>
+        <source>%1, %2. %3</source>
+        <translation>%1, %2. %3</translation>
+    </message>
+</context>
+<context>
     <name>OrganizerText</name>
     <message>
         <location filename="../../src/ui/organizer/OrganizerText.cpp" line="31"/>
@@ -3784,184 +3888,224 @@
 <context>
     <name>SettingsDialog</name>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="21"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="22"/>
         <source>Settings</source>
         <translation>Settings</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="28"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="29"/>
         <source>Close</source>
         <translation>Close</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="56"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="58"/>
         <source>Connection</source>
         <translation>Connection</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="66"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="69"/>
         <source>Appearance</source>
         <translation>Appearance</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="76"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="80"/>
         <source>Language and storage</source>
         <translation>Language and storage</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="99"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="92"/>
+        <source>Notifications</source>
+        <translation>Notifications</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="115"/>
         <source>adb program for USB</source>
         <translation>adb program for USB</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="113"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="129"/>
         <source>Path of the adb program</source>
         <translation>Path of the adb program</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="125"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="141"/>
         <source>Choose</source>
         <translation>Choose</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="136"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="152"/>
         <source>Empty means: use %1.</source>
         <translation>Empty means: use %1.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="136"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="152"/>
         <source>adb was not found on this computer. Install the Android platform tools, then choose adb here.</source>
         <translation>adb was not found on this computer. Install the Android platform tools, then choose adb here.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="144"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="160"/>
         <source>Order of the connection ways</source>
         <translation>Order of the connection ways</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="162"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="178"/>
         <source>%1. %2</source>
         <translation>%1. %2</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="168"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="184"/>
         <source>Earlier</source>
         <translation>Earlier</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="171"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="187"/>
         <source>Try %1 earlier</source>
         <translation>Try %1 earlier</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="182"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="198"/>
         <source>Later</source>
         <translation>Later</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="185"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="201"/>
         <source>Try %1 later</source>
         <translation>Try %1 later</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="198"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="214"/>
         <source>Connect to the last phone at start and after a lost connection</source>
         <translation>Connect to the last phone at start and after a lost connection</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="206"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="222"/>
         <source>Let the phone connect to this computer at any time</source>
         <translation>Let the phone connect to this computer at any time</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="213"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="229"/>
         <source>Without this, this computer waits for the phone only while the QR code is shown.</source>
         <translation>Without this, this computer waits for the phone only while the QR code is shown.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="222"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="238"/>
         <source>Wi-Fi connections are not encrypted. Use them only in a network you trust, or connect over USB.</source>
         <translation>Wi-Fi connections are not encrypted. Use them only in a network you trust, or connect over USB.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="232"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="248"/>
         <source>Colors</source>
         <translation>Colors</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="241"/>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="290"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="257"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="306"/>
         <source>Like the system</source>
         <translation>Like the system</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="248"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="264"/>
         <source>Light</source>
         <translation>Light</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="255"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="271"/>
         <source>Dark</source>
         <translation>Dark</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="263"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="279"/>
         <source>Reduce animations</source>
         <translation>Reduce animations</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="277"/>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="303"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="293"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="319"/>
         <source>Language</source>
         <translation>Language</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="309"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="325"/>
         <source>A new language applies after QPhoneManager restarts.</source>
         <translation>A new language applies after QPhoneManager restarts.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="316"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="332"/>
         <source>Storage folder</source>
         <translation>Storage folder</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="333"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="349"/>
         <source>Choose folder</source>
         <translation>Choose folder</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="344"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="360"/>
         <source>Use default folder</source>
         <translation>Use default folder</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="356"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="372"/>
         <source>Data that is already stored stays in the old folder.</source>
         <translation>Data that is already stored stays in the old folder.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="372"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="388"/>
+        <source>Phone and desktop</source>
+        <translation>Phone and desktop</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="395"/>
+        <source>Show new notifications of the phone on this computer</source>
+        <translation>Show new notifications of the phone on this computer</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="403"/>
+        <source>Share the clipboard between the phone and this computer</source>
+        <translation>Share the clipboard between the phone and this computer</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="410"/>
+        <source>Text you copy on this computer goes to the phone. Android passes on text copied on the phone only while MyPhoneExplorer Client is open there.</source>
+        <translation>Text you copy on this computer goes to the phone. Android passes on text copied on the phone only while MyPhoneExplorer Client is open there.</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="417"/>
+        <source>Start</source>
+        <translation>Start</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="424"/>
+        <source>Start in the notification area, without the window</source>
+        <translation>Start in the notification area, without the window</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="431"/>
+        <source>If the desktop has no notification area, the window opens anyway. This applies from the next start.</source>
+        <translation>If the desktop has no notification area, the window opens anyway. This applies from the next start.</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="447"/>
         <source>Choose the adb program</source>
         <translation>Choose the adb program</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="386"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="461"/>
         <source>Choose the storage folder</source>
         <translation>Choose the storage folder</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="396"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="471"/>
         <source>USB cable</source>
         <translation>USB cable</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="398"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="473"/>
         <source>Wi-Fi</source>
         <translation>Wi-Fi</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="399"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="474"/>
         <source>Bluetooth</source>
         <translation>Bluetooth</translation>
     </message>
@@ -4340,6 +4484,29 @@
     </message>
 </context>
 <context>
+    <name>qpm::TrayIcon</name>
+    <message>
+        <location filename="../../src/platform/TrayIcon.cpp" line="14"/>
+        <source>Show window</source>
+        <translation>Show window</translation>
+    </message>
+    <message>
+        <location filename="../../src/platform/TrayIcon.cpp" line="15"/>
+        <source>Write message</source>
+        <translation>Write message</translation>
+    </message>
+    <message>
+        <location filename="../../src/platform/TrayIcon.cpp" line="16"/>
+        <source>Disconnect</source>
+        <translation>Disconnect</translation>
+    </message>
+    <message>
+        <location filename="../../src/platform/TrayIcon.cpp" line="18"/>
+        <source>Quit</source>
+        <translation>Quit</translation>
+    </message>
+</context>
+<context>
     <name>qpm::ui::AlarmListModel</name>
     <message>
         <location filename="../../src/ui/organizer/AlarmListModel.cpp" line="70"/>
@@ -4355,247 +4522,247 @@
 <context>
     <name>qpm::ui::AppController</name>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="145"/>
+        <location filename="../../src/ui/AppController.cpp" line="163"/>
         <source>Calls</source>
         <translation>Calls</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="136"/>
+        <location filename="../../src/ui/AppController.cpp" line="154"/>
         <source>Contacts</source>
         <translation>Contacts</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="154"/>
+        <location filename="../../src/ui/AppController.cpp" line="172"/>
         <source>Messages</source>
         <translation>Messages</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="163"/>
+        <location filename="../../src/ui/AppController.cpp" line="181"/>
         <source>Calendar and tasks</source>
         <translation>Calendar and tasks</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="172"/>
+        <location filename="../../src/ui/AppController.cpp" line="190"/>
         <source>Notes</source>
         <translation>Notes</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="263"/>
+        <location filename="../../src/ui/AppController.cpp" line="284"/>
         <source>Wi-Fi</source>
         <translation>Wi-Fi</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="265"/>
+        <location filename="../../src/ui/AppController.cpp" line="286"/>
         <source>USB</source>
         <translation>USB</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="267"/>
+        <location filename="../../src/ui/AppController.cpp" line="288"/>
         <source>Bluetooth</source>
         <translation>Bluetooth</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="312"/>
-        <location filename="../../src/ui/AppController.cpp" line="1039"/>
+        <location filename="../../src/ui/AppController.cpp" line="333"/>
+        <location filename="../../src/ui/AppController.cpp" line="1084"/>
         <source>Enter the IP address of the phone, for example 192.168.1.20. MyPhoneExplorer Client shows it on the phone.</source>
         <translation>Enter the IP address of the phone, for example 192.168.1.20. MyPhoneExplorer Client shows it on the phone.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="335"/>
+        <location filename="../../src/ui/AppController.cpp" line="356"/>
         <source>Choose a paired phone from the list.</source>
         <translation>Choose a paired phone from the list.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="365"/>
+        <location filename="../../src/ui/AppController.cpp" line="386"/>
         <source>This phone was not connected in a way that can be repeated. Choose Connect and pick how to connect.</source>
         <translation>This phone was not connected in a way that can be repeated. Choose Connect and pick how to connect.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="560"/>
+        <location filename="../../src/ui/AppController.cpp" line="578"/>
         <source>The data of this phone cannot be saved on this computer. Check the storage folder in the settings.</source>
         <translation>The data of this phone cannot be saved on this computer. Check the storage folder in the settings.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="581"/>
+        <location filename="../../src/ui/AppController.cpp" line="599"/>
         <source>The PIN could not be saved, because the keyring of the system is not available. You will be asked for it next time.</source>
         <translation>The PIN could not be saved, because the keyring of the system is not available. You will be asked for it next time.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="602"/>
+        <location filename="../../src/ui/AppController.cpp" line="620"/>
         <source>The connection to the phone was lost. QPhoneManager connects again as soon as the phone can be reached.</source>
         <translation>The connection to the phone was lost. QPhoneManager connects again as soon as the phone can be reached.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="630"/>
+        <location filename="../../src/ui/AppController.cpp" line="648"/>
         <source>This computer cannot wait for the phone, because port %1 is in use. Close the program that uses it, then try again.</source>
         <translation>This computer cannot wait for the phone, because port %1 is in use. Close the program that uses it, then try again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="665"/>
+        <location filename="../../src/ui/AppController.cpp" line="683"/>
         <source>This computer cannot search the network right now. Enter the address of the phone instead.</source>
         <translation>This computer cannot search the network right now. Enter the address of the phone instead.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="672"/>
-        <location filename="../../src/ui/AppController.cpp" line="1036"/>
+        <location filename="../../src/ui/AppController.cpp" line="690"/>
+        <location filename="../../src/ui/AppController.cpp" line="1081"/>
         <source>adb was not found. Install the Android platform tools or choose adb in the settings.</source>
         <translation>adb was not found. Install the Android platform tools or choose adb in the settings.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="681"/>
+        <location filename="../../src/ui/AppController.cpp" line="699"/>
         <source>adb did not work. Check the adb path in the settings.</source>
         <translation>adb did not work. Check the adb path in the settings.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="689"/>
+        <location filename="../../src/ui/AppController.cpp" line="707"/>
         <source>Allow USB debugging on the phone, then search again.</source>
         <translation>Allow USB debugging on the phone, then search again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="691"/>
+        <location filename="../../src/ui/AppController.cpp" line="709"/>
         <source>The phone is not ready yet. Unlock it and search again.</source>
         <translation>The phone is not ready yet. Unlock it and search again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="696"/>
+        <location filename="../../src/ui/AppController.cpp" line="714"/>
         <source>No phone found at USB. Connect the cable and allow USB debugging on the phone.</source>
         <translation>No phone found at USB. Connect the cable and allow USB debugging on the phone.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="717"/>
-        <location filename="../../src/ui/AppController.cpp" line="1023"/>
+        <location filename="../../src/ui/AppController.cpp" line="735"/>
+        <location filename="../../src/ui/AppController.cpp" line="1068"/>
         <source>This computer has no Bluetooth, or it is turned off. Turn Bluetooth on, or connect over Wi-Fi or USB.</source>
         <translation>This computer has no Bluetooth, or it is turned off. Turn Bluetooth on, or connect over Wi-Fi or USB.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="719"/>
+        <location filename="../../src/ui/AppController.cpp" line="737"/>
         <source>The Bluetooth search failed. Turn Bluetooth on and try again.</source>
         <translation>The Bluetooth search failed. Turn Bluetooth on and try again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="725"/>
+        <location filename="../../src/ui/AppController.cpp" line="743"/>
         <source>No paired phone found. Pair the phone in the system settings first.</source>
         <translation>No paired phone found. Pair the phone in the system settings first.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="780"/>
+        <location filename="../../src/ui/AppController.cpp" line="798"/>
         <source>Enter a name with 1 to 64 characters.</source>
         <translation>Enter a name with 1 to 64 characters.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="788"/>
-        <location filename="../../src/ui/AppController.cpp" line="797"/>
-        <location filename="../../src/ui/AppController.cpp" line="804"/>
+        <location filename="../../src/ui/AppController.cpp" line="806"/>
+        <location filename="../../src/ui/AppController.cpp" line="815"/>
+        <location filename="../../src/ui/AppController.cpp" line="822"/>
         <source>The name could not be saved. Check the storage folder in the settings.</source>
         <translation>The name could not be saved. Check the storage folder in the settings.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="822"/>
+        <location filename="../../src/ui/AppController.cpp" line="840"/>
         <source>The phone could not be removed from this computer. Check the storage folder in the settings, then try again.</source>
         <translation>The phone could not be removed from this computer. Check the storage folder in the settings, then try again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="854"/>
+        <location filename="../../src/ui/AppController.cpp" line="895"/>
         <source>Connect the phone first, then sync.</source>
         <translation>Connect the phone first, then sync.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="858"/>
+        <location filename="../../src/ui/AppController.cpp" line="899"/>
         <source>There is nothing to sync yet.</source>
         <translation>There is nothing to sync yet.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="878"/>
+        <location filename="../../src/ui/AppController.cpp" line="919"/>
         <source>%1: not synced. %2</source>
         <translation>%1: not synced. %2</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="882"/>
+        <location filename="../../src/ui/AppController.cpp" line="923"/>
         <source>%1: %2 new, %3 changed, %4 deleted</source>
         <translation>%1: %2 new, %3 changed, %4 deleted</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="927"/>
+        <location filename="../../src/ui/AppController.cpp" line="968"/>
         <source>Phone</source>
         <translation>Phone</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="951"/>
+        <location filename="../../src/ui/AppController.cpp" line="992"/>
         <source>The data of this phone cannot be opened on this computer. Check the storage folder in the settings.</source>
         <translation>The data of this phone cannot be opened on this computer. Check the storage folder in the settings.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="994"/>
+        <location filename="../../src/ui/AppController.cpp" line="1039"/>
         <source>The phone does not answer over Bluetooth. Turn Bluetooth on at the phone, keep it close and try again.</source>
         <translation>The phone does not answer over Bluetooth. Turn Bluetooth on at the phone, keep it close and try again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="997"/>
+        <location filename="../../src/ui/AppController.cpp" line="1042"/>
         <source>The phone does not answer. Check that MyPhoneExplorer Client is open on the phone, then try again.</source>
         <translation>The phone does not answer. Check that MyPhoneExplorer Client is open on the phone, then try again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1001"/>
+        <location filename="../../src/ui/AppController.cpp" line="1046"/>
         <source>The phone cannot be reached over Wi-Fi. Check that it is in the same network and that MyPhoneExplorer Client is open, then try again.</source>
         <translation>The phone cannot be reached over Wi-Fi. Check that it is in the same network and that MyPhoneExplorer Client is open, then try again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1004"/>
+        <location filename="../../src/ui/AppController.cpp" line="1049"/>
         <source>The connection to the phone ended. Open MyPhoneExplorer Client on the phone, then connect again.</source>
         <translation>The connection to the phone ended. Open MyPhoneExplorer Client on the phone, then connect again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1007"/>
+        <location filename="../../src/ui/AppController.cpp" line="1052"/>
         <source>The phone is connected to another computer. End that connection first, then try again.</source>
         <translation>The phone is connected to another computer. End that connection first, then try again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1010"/>
+        <location filename="../../src/ui/AppController.cpp" line="1055"/>
         <source>MyPhoneExplorer Client does not allow Wi-Fi connections. Allow them in the app settings on the phone, or connect over USB.</source>
         <translation>MyPhoneExplorer Client does not allow Wi-Fi connections. Allow them in the app settings on the phone, or connect over USB.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1013"/>
+        <location filename="../../src/ui/AppController.cpp" line="1058"/>
         <source>The phone asks for a PIN. Connect again and enter the PIN you set in MyPhoneExplorer Client.</source>
         <translation>The phone asks for a PIN. Connect again and enter the PIN you set in MyPhoneExplorer Client.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1016"/>
+        <location filename="../../src/ui/AppController.cpp" line="1061"/>
         <source>MyPhoneExplorer Client stopped after too many wrong PINs. Open the app on the phone again, then connect.</source>
         <translation>MyPhoneExplorer Client stopped after too many wrong PINs. Open the app on the phone again, then connect.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1019"/>
+        <location filename="../../src/ui/AppController.cpp" line="1064"/>
         <source>MyPhoneExplorer Client lacks a permission on the phone. Allow it in the Android settings under Apps.</source>
         <translation>MyPhoneExplorer Client lacks a permission on the phone. Allow it in the Android settings under Apps.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1026"/>
+        <location filename="../../src/ui/AppController.cpp" line="1071"/>
         <source>The phone does not support this. Update MyPhoneExplorer Client on the phone.</source>
         <translation>The phone does not support this. Update MyPhoneExplorer Client on the phone.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1030"/>
+        <location filename="../../src/ui/AppController.cpp" line="1075"/>
         <source>MyPhoneExplorer Client is not installed on the phone. Install it from Google Play, then try again.</source>
         <translation>MyPhoneExplorer Client is not installed on the phone. Install it from Google Play, then try again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1033"/>
+        <location filename="../../src/ui/AppController.cpp" line="1078"/>
         <source>The phone did not find what was asked for. Sync again.</source>
         <translation>The phone did not find what was asked for. Sync again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1043"/>
+        <location filename="../../src/ui/AppController.cpp" line="1088"/>
         <source>adb cannot reach the phone. Check the USB cable and allow USB debugging on the phone, then try again.</source>
         <translation>adb cannot reach the phone. Check the USB cable and allow USB debugging on the phone, then try again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1046"/>
+        <location filename="../../src/ui/AppController.cpp" line="1091"/>
         <source>This computer could not open the connection. Try again, or restart the computer if it keeps failing.</source>
         <translation>This computer could not open the connection. Try again, or restart the computer if it keeps failing.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1053"/>
+        <location filename="../../src/ui/AppController.cpp" line="1098"/>
         <source>The phone sent an answer QPhoneManager does not understand. Update MyPhoneExplorer Client on the phone, then try again.</source>
         <translation>The phone sent an answer QPhoneManager does not understand. Update MyPhoneExplorer Client on the phone, then try again.</translation>
     </message>
@@ -4888,6 +5055,54 @@
         <location filename="../../src/ui/organizer/CalendarModel.cpp" line="127"/>
         <source>%1 to %2</source>
         <translation>%1 to %2</translation>
+    </message>
+</context>
+<context>
+    <name>qpm::ui::CallControl</name>
+    <message>
+        <location filename="../../src/ui/desktop/CallControl.cpp" line="47"/>
+        <source>Unknown number</source>
+        <translation>Unknown number</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/desktop/CallControl.cpp" line="61"/>
+        <source>Incoming call</source>
+        <translation>Incoming call</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/desktop/CallControl.cpp" line="63"/>
+        <source>Calling</source>
+        <translation>Calling</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/desktop/CallControl.cpp" line="65"/>
+        <source>Call in progress</source>
+        <translation>Call in progress</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/desktop/CallControl.cpp" line="69"/>
+        <source>No call</source>
+        <translation>No call</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/desktop/CallControl.cpp" line="130"/>
+        <source>The phone is not connected. Use the phone itself for this call.</source>
+        <translation>The phone is not connected. Use the phone itself for this call.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/desktop/CallControl.cpp" line="132"/>
+        <source>MyPhoneExplorer Client may not control calls. Allow it the phone permission in the Android settings.</source>
+        <translation>MyPhoneExplorer Client may not control calls. Allow it the phone permission in the Android settings.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/desktop/CallControl.cpp" line="135"/>
+        <source>The phone does not answer. Use the phone itself for this call.</source>
+        <translation>The phone does not answer. Use the phone itself for this call.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/desktop/CallControl.cpp" line="139"/>
+        <source>The phone did not do that. Use the phone itself for this call.</source>
+        <translation>The phone did not do that. Use the phone itself for this call.</translation>
     </message>
 </context>
 <context>
@@ -5212,6 +5427,19 @@
         <location filename="../../src/ui/messages/ConversationListModel.cpp" line="181"/>
         <source>Yesterday</source>
         <translation>Yesterday</translation>
+    </message>
+</context>
+<context>
+    <name>qpm::ui::DesktopIntegration</name>
+    <message>
+        <location filename="../../src/ui/desktop/DesktopIntegration.cpp" line="92"/>
+        <source>Show</source>
+        <translation>Show</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/desktop/DesktopIntegration.cpp" line="96"/>
+        <source>Dismiss on the phone</source>
+        <translation>Dismiss on the phone</translation>
     </message>
 </context>
 <context>
@@ -5874,6 +6102,75 @@
     </message>
 </context>
 <context>
+    <name>qpm::ui::NotificationListModel</name>
+    <message>
+        <location filename="../../src/ui/desktop/NotificationListModel.cpp" line="112"/>
+        <source>Connect your phone to see its notifications.</source>
+        <translation>Connect your phone to see its notifications.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/desktop/NotificationListModel.cpp" line="115"/>
+        <location filename="../../src/ui/desktop/NotificationListModel.cpp" line="296"/>
+        <source>MyPhoneExplorer Client may not read the notifications of the phone. Allow it on the phone under notification access.</source>
+        <translation>MyPhoneExplorer Client may not read the notifications of the phone. Allow it on the phone under notification access.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/desktop/NotificationListModel.cpp" line="118"/>
+        <source>The notification access of MyPhoneExplorer Client is not running. Turn it off and on again on the phone.</source>
+        <translation>The notification access of MyPhoneExplorer Client is not running. Turn it off and on again on the phone.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/desktop/NotificationListModel.cpp" line="121"/>
+        <source>This phone cannot pass on its notifications.</source>
+        <translation>This phone cannot pass on its notifications.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/desktop/NotificationListModel.cpp" line="123"/>
+        <source>Loading the notifications of the phone.</source>
+        <translation>Loading the notifications of the phone.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/desktop/NotificationListModel.cpp" line="127"/>
+        <source>The phone shows no notifications.</source>
+        <translation>The phone shows no notifications.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/desktop/NotificationListModel.cpp" line="170"/>
+        <source>Done on the phone.</source>
+        <translation>Done on the phone.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/desktop/NotificationListModel.cpp" line="198"/>
+        <source>The phone shows the setting now. Allow MyPhoneExplorer Client there, then load the list again.</source>
+        <translation>The phone shows the setting now. Allow MyPhoneExplorer Client there, then load the list again.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/desktop/NotificationListModel.cpp" line="294"/>
+        <source>The phone is not connected. Connect it, then try again.</source>
+        <translation>The phone is not connected. Connect it, then try again.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/desktop/NotificationListModel.cpp" line="299"/>
+        <source>The notification is no longer on the phone.</source>
+        <translation>The notification is no longer on the phone.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/desktop/NotificationListModel.cpp" line="301"/>
+        <source>The phone keeps this notification. Close it on the phone.</source>
+        <translation>The phone keeps this notification. Close it on the phone.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/desktop/NotificationListModel.cpp" line="303"/>
+        <source>The phone does not answer. Check that MyPhoneExplorer Client is open on the phone, then try again.</source>
+        <translation>The phone does not answer. Check that MyPhoneExplorer Client is open on the phone, then try again.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/desktop/NotificationListModel.cpp" line="308"/>
+        <source>The phone did not do that. Try again.</source>
+        <translation>The phone did not do that. Try again.</translation>
+    </message>
+</context>
+<context>
     <name>qpm::ui::ScheduledListModel</name>
     <message>
         <location filename="../../src/ui/messages/ScheduledListModel.cpp" line="55"/>
@@ -5924,97 +6221,97 @@
         <translation>This phone shows its screen but takes no input from here. That needs Android 7 or newer.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/screen/ScreenMirror.cpp" line="274"/>
+        <location filename="../../src/ui/screen/ScreenMirror.cpp" line="278"/>
         <source>The phone shows how to switch on the service. Come back here afterwards and check again.</source>
         <translation>The phone shows how to switch on the service. Come back here afterwards and check again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/screen/ScreenMirror.cpp" line="292"/>
+        <location filename="../../src/ui/screen/ScreenMirror.cpp" line="296"/>
         <source>The phone can be controlled from here now.</source>
         <translation>The phone can be controlled from here now.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/screen/ScreenMirror.cpp" line="301"/>
+        <location filename="../../src/ui/screen/ScreenMirror.cpp" line="305"/>
         <source>There is no picture of the screen yet. Start the mirroring first.</source>
         <translation>There is no picture of the screen yet. Start the mirroring first.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/screen/ScreenMirror.cpp" line="307"/>
+        <location filename="../../src/ui/screen/ScreenMirror.cpp" line="311"/>
         <source>Choose a file on this computer.</source>
         <translation>Choose a file on this computer.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/screen/ScreenMirror.cpp" line="319"/>
+        <location filename="../../src/ui/screen/ScreenMirror.cpp" line="324"/>
         <source>The screenshot is saved as %1.</source>
         <translation>The screenshot is saved as %1.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/screen/ScreenMirror.cpp" line="321"/>
+        <location filename="../../src/ui/screen/ScreenMirror.cpp" line="326"/>
         <source>The screenshot cannot be saved. Check the folder and the free space.</source>
         <translation>The screenshot cannot be saved. Check the folder and the free space.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/screen/ScreenMirror.cpp" line="382"/>
+        <location filename="../../src/ui/screen/ScreenMirror.cpp" line="388"/>
         <source>The connection to the phone ended. Connect again and try again.</source>
         <translation>The connection to the phone ended. Connect again and try again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/screen/ScreenMirror.cpp" line="384"/>
+        <location filename="../../src/ui/screen/ScreenMirror.cpp" line="390"/>
         <source>The phone did not answer in time. Try again.</source>
         <translation>The phone did not answer in time. Try again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/screen/ScreenMirror.cpp" line="386"/>
+        <location filename="../../src/ui/screen/ScreenMirror.cpp" line="392"/>
         <source>The phone takes no input from here. Switch on the accessibility service of MyPhoneExplorer Client on the phone.</source>
         <translation>The phone takes no input from here. Switch on the accessibility service of MyPhoneExplorer Client on the phone.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/screen/ScreenMirror.cpp" line="389"/>
+        <location filename="../../src/ui/screen/ScreenMirror.cpp" line="395"/>
         <source>This phone takes no input from here. That needs Android 7 or newer.</source>
         <translation>This phone takes no input from here. That needs Android 7 or newer.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/screen/ScreenMirror.cpp" line="391"/>
+        <location filename="../../src/ui/screen/ScreenMirror.cpp" line="397"/>
         <source>The phone sent a larger picture than this program reads.</source>
         <translation>The phone sent a larger picture than this program reads.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/screen/ScreenMirror.cpp" line="393"/>
+        <location filename="../../src/ui/screen/ScreenMirror.cpp" line="399"/>
         <source>The phone sent its screen in a form this program cannot read.</source>
         <translation>The phone sent its screen in a form this program cannot read.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/screen/ScreenMirror.cpp" line="395"/>
+        <location filename="../../src/ui/screen/ScreenMirror.cpp" line="401"/>
         <source>That position is outside the phone screen.</source>
         <translation>That position is outside the phone screen.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/screen/ScreenMirror.cpp" line="405"/>
+        <location filename="../../src/ui/screen/ScreenMirror.cpp" line="411"/>
         <source>The phone could not do this. Try again.</source>
         <translation>The phone could not do this. Try again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/screen/ScreenMirror.cpp" line="412"/>
+        <location filename="../../src/ui/screen/ScreenMirror.cpp" line="418"/>
         <source>The phone did not share its screen. Start again and allow it on the phone.</source>
         <translation>The phone did not share its screen. Start again and allow it on the phone.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/screen/ScreenMirror.cpp" line="414"/>
+        <location filename="../../src/ui/screen/ScreenMirror.cpp" line="420"/>
         <source>Nobody confirmed the sharing on the phone in time. Start again and confirm it there.</source>
         <translation>Nobody confirmed the sharing on the phone in time. Start again and confirm it there.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/screen/ScreenMirror.cpp" line="417"/>
+        <location filename="../../src/ui/screen/ScreenMirror.cpp" line="423"/>
         <source>This phone cannot share its screen here. That needs Android 5 or newer and a connection over Wi-Fi or USB.</source>
         <translation>This phone cannot share its screen here. That needs Android 5 or newer and a connection over Wi-Fi or USB.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/screen/ScreenMirror.cpp" line="420"/>
+        <location filename="../../src/ui/screen/ScreenMirror.cpp" line="426"/>
         <source>The phone did not send its screen. Start the mirroring again.</source>
         <translation>The phone did not send its screen. Start the mirroring again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/screen/ScreenMirror.cpp" line="467"/>
+        <location filename="../../src/ui/screen/ScreenMirror.cpp" line="473"/>
         <source>The picture of the screen broke off. Start the mirroring again.</source>
         <translation>The picture of the screen broke off. Start the mirroring again.</translation>
     </message>

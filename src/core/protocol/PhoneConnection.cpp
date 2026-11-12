@@ -426,11 +426,15 @@ void PhoneConnection::finishHandshake()
 
 void PhoneConnection::handleReply(const AtReply &reply)
 {
+    const QString command = reply.command.trimmed();
+    if (command == QLatin1StringView("AT*NOTIR")) {
+        Q_EMIT notificationListRead(reply);
+        return;
+    }
     // These details are optional: a phone without the permission or the
     // feature answers with an error, and the field stays unknown.
     if (reply.status != AtReply::Status::Ok)
         return;
-    const QString command = reply.command.trimmed();
     if (command == QLatin1StringView("ATI")) {
         m_identity.model = reply.lines.value(0).trimmed();
     } else if (command == QLatin1StringView("AT+CGMI")) {
@@ -469,11 +473,6 @@ void PhoneConnection::handleReply(const AtReply &reply)
         const QStringList fields = replyFields(reply.lines, QLatin1StringView("*ECPU:"));
         if (const std::optional<int> load = boundedInt(fields, 0, 0, maxPercent))
             m_status.cpuPercent = load;
-    } else if (command == QLatin1StringView("AT*NOTIR")) {
-        for (const QString &line : reply.lines) {
-            if (line.trimmed().startsWith(QLatin1StringView("*NOTIR:")))
-                Q_EMIT unsolicited(line.trimmed());
-        }
     }
 }
 

@@ -48,10 +48,18 @@ class Settings : public QObject
     Q_PROPERTY(ColorScheme colorScheme READ colorScheme WRITE setColorScheme NOTIFY
                    colorSchemeChanged FINAL)
     Q_PROPERTY(bool reduceMotion READ reduceMotion WRITE setReduceMotion NOTIFY reduceMotionChanged FINAL)
+    /// Show new notifications of the phone on the desktop. On by default.
     Q_PROPERTY(bool notificationsEnabled READ notificationsEnabled WRITE setNotificationsEnabled
                    NOTIFY notificationsEnabledChanged FINAL)
+    /// Keep the clipboards of this computer and the phone the same. Off by default.
     Q_PROPERTY(bool clipboardSync READ clipboardSync WRITE setClipboardSync NOTIFY
                    clipboardSyncChanged FINAL)
+    /**
+     * Start with the window hidden and only the icon in the notification
+     * area; without such an area the window shows anyway. Off by default.
+     */
+    Q_PROPERTY(bool startMinimized READ startMinimized WRITE setStartMinimized NOTIFY
+                   startMinimizedChanged FINAL)
     /**
      * Absolute path of the folder that holds the data of the phones; empty
      * means the default below the application data folder. A relative path
@@ -93,6 +101,8 @@ public:
     void setNotificationsEnabled(bool enabled);
     [[nodiscard]] bool clipboardSync() const;
     void setClipboardSync(bool enabled);
+    [[nodiscard]] bool startMinimized() const;
+    void setStartMinimized(bool enabled);
     [[nodiscard]] QString dataDirectory() const;
     void setDataDirectory(const QString &path);
     [[nodiscard]] QString lastDevice() const;
@@ -113,6 +123,7 @@ Q_SIGNALS:
     void reduceMotionChanged();
     void notificationsEnabledChanged();
     void clipboardSyncChanged();
+    void startMinimizedChanged();
     void dataDirectoryChanged();
     void lastDeviceChanged();
     void holidayRegionChanged();

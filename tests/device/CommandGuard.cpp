@@ -128,6 +128,19 @@ bool isScreenCommand(const QString &command)
     return std::find(names.cbegin(), names.cend(), name) != names.cend();
 }
 
+// `command` is trimmed and in upper case. Dismissing a notification acts on
+// what the owner of a phone has not read yet, and a clip written to a phone
+// replaces whatever its owner copied there.
+std::optional<QString> emulatorOnlyReason(const QString &command)
+{
+    const QString name = command.section(u'=', 0, 0).section(u'?', 0, 0);
+    if (name == QLatin1StringView("AT*NOTIC"))
+        return QStringLiteral("AT*NOTIC dismisses notifications only on an emulator");
+    if (command.startsWith(QLatin1StringView("AT*CLIPBOARD=")))
+        return QStringLiteral("AT*CLIPBOARD= writes the clipboard only on an emulator");
+    return std::nullopt;
+}
+
 std::optional<QString> blockReasonForPut(const QByteArray &frame)
 {
     const auto packet = core::protocol::ObexPacket::decode(
@@ -199,6 +212,10 @@ std::optional<QString> CommandGuard::blockReason(const QString &command, Target 
     const QString upper = trimmedLikeThePhone(command).toUpper();
     if (target != Target::Emulator && isScreenCommand(upper))
         return QStringLiteral("screen capture and input only on an emulator");
+    if (target != Target::Emulator) {
+        if (std::optional<QString> reason = emulatorOnlyReason(upper))
+            return reason;
+    }
     if (upper.startsWith(QLatin1StringView("ATD"))) {
         if (isAllowedCall(upper.sliced(3)))
             return std::nullopt;

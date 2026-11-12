@@ -52,6 +52,11 @@ QString clipboardSyncKey()
     return QStringLiteral("clipboard/sync");
 }
 
+QString startMinimizedKey()
+{
+    return QStringLiteral("window/startMinimized");
+}
+
 QString dataDirectoryKey()
 {
     return QStringLiteral("storage/dataDirectory");
@@ -232,6 +237,16 @@ bool Settings::clipboardSync() const
 void Settings::setClipboardSync(bool enabled)
 {
     setFlag(clipboardSyncKey(), false, enabled, &Settings::clipboardSyncChanged);
+}
+
+bool Settings::startMinimized() const
+{
+    return m_settings->value(startMinimizedKey(), false).toBool();
+}
+
+void Settings::setStartMinimized(bool enabled)
+{
+    setFlag(startMinimizedKey(), false, enabled, &Settings::startMinimizedChanged);
 }
 
 QString Settings::dataDirectory() const
