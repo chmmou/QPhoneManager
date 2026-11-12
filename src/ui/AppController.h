@@ -15,6 +15,7 @@
 #include "ui/organizer/CalendarArea.h"
 #include "ui/organizer/NotesArea.h"
 #include "ui/organizer/TasksArea.h"
+#include "ui/screen/ScreenMirror.h"
 
 #include <QFuture>
 #include <QHostAddress>
@@ -46,6 +47,7 @@ namespace qpm::core::service {
 class AppsService;
 class DeviceStatusService;
 class FileService;
+class ScreenMirrorClient;
 class ThumbnailChannel;
 } // namespace qpm::core::service
 
@@ -65,10 +67,10 @@ class Settings;
  * connection, failed attempts stay quiet.
  *
  * The object owns the connection, the models, the areas, the file browser
- * with its transfers, the apps and the profile store of the current phone. The contacts, the call
- * log, the messages, the calendar with the tasks and the notes are part of syncAll(), in that
- * order. `settings` must outlive it or be destroyed with the engine first; the object never uses it
- * after that.
+ * with its transfers, the apps, the screen and the profile store of the current phone. The
+ * contacts, the call log, the messages, the calendar with the tasks and the notes are part of
+ * syncAll(), in that order. `settings` must outlive it or be destroyed with the engine first; the
+ * object never uses it after that.
  */
 class AppController : public QObject
 {
@@ -116,6 +118,7 @@ class AppController : public QObject
     Q_PROPERTY(qpm::ui::FileBrowserModel *files READ files CONSTANT FINAL)
     Q_PROPERTY(qpm::ui::TransferQueue *transfers READ transfers CONSTANT FINAL)
     Q_PROPERTY(qpm::ui::AppListModel *apps READ apps CONSTANT FINAL)
+    Q_PROPERTY(qpm::ui::ScreenMirror *screen READ screen CONSTANT FINAL)
 
 public:
     enum class ConnectionState {
@@ -194,6 +197,8 @@ public:
     [[nodiscard]] FileBrowserModel *files() const { return m_files; }
     [[nodiscard]] TransferQueue *transfers() const { return m_transfers; }
     [[nodiscard]] AppListModel *apps() const { return m_apps; }
+    [[nodiscard]] ScreenMirror *screen() const { return m_screen; }
+    [[nodiscard]] core::service::ScreenMirrorClient *screenClient() const { return m_screenClient; }
     [[nodiscard]] core::service::AppsService *appsService() const { return m_appsService; }
     [[nodiscard]] core::service::FileService *fileService() const { return m_fileService; }
     [[nodiscard]] core::service::ThumbnailChannel *thumbnailChannel() const
@@ -331,6 +336,8 @@ private:
     FileBrowserModel *m_files = nullptr;
     core::service::AppsService *m_appsService = nullptr;
     AppListModel *m_apps = nullptr;
+    core::service::ScreenMirrorClient *m_screenClient = nullptr;
+    ScreenMirror *m_screen = nullptr;
     core::protocol::Discovery *m_discovery = nullptr;
     BluetoothDeviceFinder *m_bluetoothFinder = nullptr;
     std::unique_ptr<core::protocol::AdbBridge> m_listAdb;

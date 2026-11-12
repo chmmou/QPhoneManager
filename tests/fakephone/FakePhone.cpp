@@ -662,6 +662,121 @@ bool FakePhone::handleApps(const QString &command, const QString &name)
     return true;
 }
 
+bool FakePhone::handleScreen(const QString &command, const QString &name)
+{
+    constexpr int captureApi = 21;
+    constexpr int inputApi = 24;
+    const QByteArray echo = command.toUtf8() + "\r\n";
+    if (name == QLatin1StringView("AT*STARTCAPTURESERVER")) {
+        if (m_config.androidApi < captureApi) {
+            writeAt(echo + "*STARTCAPTURESERVER: NOT SUPPORTED\r\nERROR\r\n");
+        } else if (command.endsWith(QLatin1StringView("=?"))) {
+            writeAt(echo + "OK\r\n");
+        } else if (m_config.screenConsent == FakePhoneConfig::ScreenConsent::Decline) {
+            writeAt(echo + "CANCELED\r\nERROR\r\n");
+        } else if (m_config.screenConsent == FakePhoneConfig::ScreenConsent::NoAnswer) {
+            writeAt(echo + "TIMEOUT\r\nERROR\r\n");
+        } else {
+            openScreenChannel();
+            writeAt(echo + "OK\r\n");
+        }
+        return true;
+    }
+    const bool key = name == QLatin1StringView("AT*K");
+    const bool text = name == QLatin1StringView("AT*T");
+    if (key || text) {
+        const QByteArray prefix = key ? "*K: " : "*T: ";
+        if (m_config.androidApi < inputApi)
+            writeAt(echo + prefix + "NOT SUPPORTED\r\nERROR\r\n");
+        else if (!m_config.accessibilityService)
+            writeAt(echo + prefix + "PERMISSION DENIED\r\nERROR\r\n");
+        else
+            writeAt(echo + "OK\r\n");
+        return true;
+    }
+    if (name == QLatin1StringView("AT*C")) {
+        // The pointer drawn on the phone needs a permission the client lacks here.
+        if (command.startsWith(QLatin1StringView("AT*C=1,")))
+            writeAt(echo + "*C: PERMISSION DENIED\r\nERROR\r\n");
+        else
+            writeAt(echo + "OK\r\n");
+        return true;
+    }
+    if (name == QLatin1StringView("AT*SHOWACCSETTINGS")) {
+        writeAt(echo + "OK\r\n");
+        return true;
+    }
+    if (name == QLatin1StringView("AT*KBRD")) {
+        writeAt(echo + "*KBRD: NOT BOUND\r\nERROR\r\n");
+        return true;
+    }
+    return false;
+}
+
+void FakePhone::openScreenChannel()
+{
+    closeScreen();
+    m_screenServer = new QTcpServer(this);
+    if (!m_screenServer->listen(QHostAddress::LocalHost, 0)) {
+        protocolError(QStringLiteral("screen channel cannot listen"));
+        return;
+    }
+    QTcpServer *server = m_screenServer;
+    connect(server, &QTcpServer::newConnection, this, [this, server]() {
+        QTcpSocket *side = server->nextPendingConnection();
+        if (m_config.droppedScreenConnections > 0) {
+            --m_config.droppedScreenConnections;
+            side->disconnectFromHost();
+            connect(side, &QTcpSocket::disconnected, side, &QObject::deleteLater);
+            return;
+        }
+        // The client serves one viewer and then stops listening.
+        server->close();
+        m_screenSocket = side;
+        connect(side, &QTcpSocket::readyRead, this, [this, side]() {
+            const QByteArray request = side->readAll();
+            m_screenRequests.append(request);
+            if (!m_config.screenFrame.isEmpty()) {
+                side->write(m_config.screenFrame);
+                side->flush();
+            }
+        });
+        connect(side, &QTcpSocket::disconnected, side, &QObject::deleteLater);
+    });
+}
+
+quint16 FakePhone::screenPort() const
+{
+    if (m_screenSocket)
+        return m_screenSocket->localPort();
+    return m_screenServer ? m_screenServer->serverPort() : 0;
+}
+
+bool FakePhone::isScreenConnected() const
+{
+    return m_screenSocket && m_screenSocket->state() == QAbstractSocket::ConnectedState;
+}
+
+void FakePhone::sendScreenData(const QByteArray &bytes)
+{
+    if (!isScreenConnected())
+        return;
+    m_screenSocket->write(bytes);
+    m_screenSocket->flush();
+}
+
+void FakePhone::closeScreen()
+{
+    if (m_screenSocket)
+        m_screenSocket->disconnectFromHost();
+    m_screenSocket = nullptr;
+    if (m_screenServer) {
+        m_screenServer->close();
+        m_screenServer->deleteLater();
+        m_screenServer = nullptr;
+    }
+}
+
 void FakePhone::sendUnsolicited(const QByteArray &line)
 {
     if (isConnected() && !m_obexMode) {
@@ -699,8 +814,11 @@ void FakePhone::attach(QTcpSocket *socket)
         m_aliveTimer->start(m_config.alivePeriod);
     connect(socket, &QTcpSocket::readyRead, this, &FakePhone::onReadyRead);
     connect(socket, &QTcpSocket::disconnected, this, [this, socket]() {
-        if (m_socket == socket)
-            m_obexMode = false;
+        if (m_socket != socket)
+            return;
+        m_obexMode = false;
+        // Like the client, the capture ends with the connection.
+        closeScreen();
     });
 }
 
@@ -785,6 +903,8 @@ void FakePhone::handleAt(const QString &command)
     if (handleAlarms(command, name))
         return;
     if (handleApps(command, name))
+        return;
+    if (handleScreen(command, name))
         return;
 
     if (command == QLatin1StringView("AT+CPROT=0")) {

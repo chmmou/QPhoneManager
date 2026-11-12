@@ -116,6 +116,15 @@ Item {
         }
     }
 
+    Component {
+        id: screen
+
+        ScreenPage {
+            emptyText: root.entry.emptyText
+            onConnectRequested: root.connectRequested()
+        }
+    }
+
     Loader {
         anchors.fill: parent
         sourceComponent: {
@@ -137,6 +146,8 @@ Item {
                 return files;
             if (root.entry.key === "apps")
                 return apps;
+            if (root.entry.key === "screen")
+                return screen;
             return root.entry.hasList ? listAndDetail : placeholder;
         }
     }

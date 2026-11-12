@@ -2,6 +2,7 @@
 #include "core/codec/PhoneVCal.h"
 #include "core/codec/PhoneVCard.h"
 #include "core/codec/VNote.h"
+#include "core/service/ScreenMirrorClient.h"
 #include "ui/AppController.h"
 #include "ui/DeviceStatusModel.h"
 #include "ui/Settings.h"
@@ -16,6 +17,7 @@
 #include "ui/organizer/NotesArea.h"
 #include "ui/organizer/TaskListModel.h"
 #include "ui/organizer/TasksArea.h"
+#include "ui/screen/ScreenMirror.h"
 
 #include "FakePhone.h"
 
@@ -26,6 +28,7 @@
 #include <QImage>
 #include <QSignalSpy>
 #include <QLocale>
+#include <QPainter>
 #include <QQmlApplicationEngine>
 #include <QQmlExtensionPlugin>
 #include <QQuickItem>
@@ -390,6 +393,35 @@ QList<qpm::test::FakeApp> exampleApps()
     return result;
 }
 
+// A made-up home screen of a phone, sent as the phone sends its screen.
+QByteArray exampleScreen()
+{
+    const QSize screen(540, 1200);
+    QImage image(screen, QImage::Format_RGB32);
+    image.fill(QColor(24, 48, 64));
+    QPainter painter(&image);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.fillRect(QRect(0, 0, screen.width(), 40), QColor(16, 32, 44));
+    painter.setPen(Qt::NoPen);
+    painter.setBrush(QColor(236, 240, 238));
+    painter.drawRoundedRect(QRect(40, 120, 460, 140), 24, 24);
+    const QList<QColor> colors = {QColor(0, 106, 106), QColor(200, 120, 30), QColor(90, 60, 150),
+                                  QColor(40, 140, 80), QColor(30, 90, 180),  QColor(180, 90, 40),
+                                  QColor(70, 70, 70),  QColor(160, 40, 90)};
+    for (int i = 0; i < colors.size(); ++i) {
+        painter.setBrush(colors.at(i));
+        painter.drawRoundedRect(QRect(52 + (i % 4) * 116, 760 + (i / 4) * 150, 88, 88), 24, 24);
+    }
+    painter.setBrush(QColor(236, 240, 238));
+    painter.drawRoundedRect(QRect(40, 1080, 460, 72), 36, 36);
+    painter.end();
+    QByteArray png;
+    QBuffer buffer(&png);
+    buffer.open(QIODevice::WriteOnly);
+    image.save(&buffer, "PNG");
+    return "FileBegin;540x1200;0;540x1200;PNG;100\r\n" + png + "\r\nFileEnd";
+}
+
 QByteArray noteMetadata()
 {
     return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<metadata version=\"1.0\"><note_categories>\r\n"
@@ -494,6 +526,8 @@ private Q_SLOTS:
     void fileViewsAreGermanAndRenderInBothSchemes();
     void appViewsAreGermanAndRenderInBothSchemes_data();
     void appViewsAreGermanAndRenderInBothSchemes();
+    void screenViewsAreGermanAndRenderInBothSchemes_data();
+    void screenViewsAreGermanAndRenderInBothSchemes();
 
 private:
     [[nodiscard]] QObject *dialog(const QString &name) const;
@@ -564,6 +598,7 @@ void TestScreens::initTestCase()
     m_phone->addFile(QStringLiteral("\\sdcard\\DCIM\\Camera\\Reiseplan.pdf"),
                      QByteArray(184320, 'p'), taken);
     m_phone->setApps(exampleApps());
+    m_phone->config().screenFrame = exampleScreen();
     m_phone->config().alarms =
         QStringList{QStringLiteral("\"06:30\",1,0,\"Aufstehen\",\"1,2,3,4,5\",1"),
                     QStringLiteral("\"08:00\",2,0,\"Wochenende\",\"6,7\",0")};
@@ -579,6 +614,12 @@ void TestScreens::initTestCase()
     QVERIFY(m_settings);
     QVERIFY(m_controller);
 
+    // The fake phone opens its screen channel on a port of its own.
+    m_controller->screenClient()->setEndpointResolver(
+        [this](quint16) -> std::optional<qpm::core::protocol::Endpoint> {
+            return qpm::core::protocol::Endpoint{QStringLiteral("127.0.0.1"),
+                                                 m_phone->screenPort()};
+        });
     QVERIFY(m_controller->connectAddress(QStringLiteral("127.0.0.1:%1").arg(m_phone->port())));
     QTRY_VERIFY_WITH_TIMEOUT(m_controller->isConnected(), connectTimeoutMs);
     QTRY_VERIFY_WITH_TIMEOUT(!m_controller->status()->display().isEmpty() &&
@@ -602,10 +643,11 @@ QObject *TestScreens::dialog(const QString &name) const
 {
     if (QObject *found = m_window->findChild<QObject *>(name))
         return found;
-    for (const QString &pageName : {QStringLiteral("contactsPage"), QStringLiteral("callsPage"),
-                                    QStringLiteral("messagesPage"), QStringLiteral("calendarPage"),
-                                    QStringLiteral("tasksPage"), QStringLiteral("notesPage"),
-                                    QStringLiteral("filesPage"), QStringLiteral("appsPage")}) {
+    for (const QString &pageName :
+         {QStringLiteral("contactsPage"), QStringLiteral("callsPage"),
+          QStringLiteral("messagesPage"), QStringLiteral("calendarPage"),
+          QStringLiteral("tasksPage"), QStringLiteral("notesPage"), QStringLiteral("filesPage"),
+          QStringLiteral("appsPage"), QStringLiteral("screenPage")}) {
         QQuickItem *page = item(pageName);
         if (QObject *found = page ? page->findChild<QObject *>(name) : nullptr)
             return found;
@@ -1437,6 +1479,95 @@ void TestScreens::appViewsAreGermanAndRenderInBothSchemes()
         QCOMPARE(m_phone->installRequests().size(), 1);
     }
     QVERIFY(m_phone->uninstallRequests().isEmpty());
+    QVERIFY(m_controller->isConnected());
+}
+
+void TestScreens::screenViewsAreGermanAndRenderInBothSchemes_data()
+{
+    QTest::addColumn<QString>("view");
+    QTest::addColumn<QString>("germanText");
+
+    QTest::newRow("not started") << QStringLiteral("screenIdle")
+                                 << QStringLiteral("Bildschirm zeigen");
+    QTest::newRow("question on the phone")
+        << QStringLiteral("screenConsent") << QStringLiteral("Bestätigen Sie auf dem Handy");
+    QTest::newRow("mirrored") << QStringLiteral("screen") << QStringLiteral("Beenden");
+    QTest::newRow("no control") << QStringLiteral("screenNoControl")
+                                << QStringLiteral("Bedienungshilfe");
+    QTest::newRow("screenshot") << QStringLiteral("screenshotDialog")
+                                << QStringLiteral("Bildschirmfoto speichern");
+}
+
+void TestScreens::screenViewsAreGermanAndRenderInBothSchemes()
+{
+    QFETCH(QString, view);
+    QFETCH(QString, germanText);
+    qpm::ui::ScreenMirror *mirror = m_controller->screen();
+    m_window->setProperty("currentSection", 9);
+    QQuickItem *header = m_window->property("header").value<QQuickItem *>();
+    QCOMPARE(header->property("title").toString(), QStringLiteral("Bildschirm"));
+    QTRY_VERIFY(item(QStringLiteral("screenPage")));
+    QQuickItem *page = item(QStringLiteral("screenPage"));
+    m_window->requestActivate();
+    QVERIFY(QTest::qWaitForWindowActive(m_window));
+    mirror->stop();
+    m_phone->config().accessibilityService = view != QLatin1StringView("screenNoControl");
+
+    QObject *popup = nullptr;
+    if (view == QLatin1StringView("screenIdle")) {
+        QVERIFY(labelWithText(page, QStringLiteral("Hier erscheint der Bildschirm des Handys")));
+        QQuickItem *start = item(QStringLiteral("screenStartButton"));
+        QCOMPARE(start->property("text").toString(), germanText);
+        start->forceActiveFocus(Qt::TabFocusReason);
+    } else if (view == QLatin1StringView("screenConsent")) {
+        // The phone leaves the question open, as long as its user has not answered.
+        m_phone->config().unanswered.insert(QStringLiteral("AT*STARTCAPTURESERVER"));
+        QVERIFY(mirror->start());
+        QTRY_COMPARE_WITH_TIMEOUT(mirror->state(), qpm::ui::ScreenMirror::State::WaitingForConsent,
+                                  connectTimeoutMs);
+        QTRY_VERIFY(item(QStringLiteral("screenStatusText"))->isVisible());
+        QVERIFY(item(QStringLiteral("screenStatusText"))
+                    ->property("text")
+                    .toString()
+                    .startsWith(germanText));
+    } else {
+        QVERIFY(mirror->start());
+        QTRY_VERIFY_WITH_TIMEOUT(mirror->hasFrame(), connectTimeoutMs);
+        QCOMPARE(item(QStringLiteral("screenStartButton"))->property("text").toString(),
+                 QStringLiteral("Beenden"));
+        if (view == QLatin1StringView("screenNoControl")) {
+            QTRY_VERIFY(item(QStringLiteral("screenControlHint"))->isVisible());
+            QVERIFY(item(QStringLiteral("screenControlHintText"))
+                        ->property("text")
+                        .toString()
+                        .contains(germanText));
+            QVERIFY(!item(QStringLiteral("screenBackButton"))->isEnabled());
+        } else {
+            QVERIFY(!item(QStringLiteral("screenControlHint"))->isVisible());
+            item(QStringLiteral("screenView"))->forceActiveFocus(Qt::TabFocusReason);
+        }
+        if (view == QLatin1StringView("screenshotDialog")) {
+            popup = dialog(view);
+            QVERIFY(popup);
+            QMetaObject::invokeMethod(popup, "open");
+            QTRY_VERIFY(popup->property("visible").toBool());
+            QCOMPARE(popup->property("title").toString(), germanText);
+        }
+    }
+
+    QVERIFY(saveBothSchemes(view));
+
+    if (popup) {
+        QMetaObject::invokeMethod(popup, "close");
+        QTRY_VERIFY(!popup->property("visible").toBool());
+    }
+    mirror->stop();
+    if (view == QLatin1StringView("screenConsent")) {
+        m_phone->config().unanswered.remove(QStringLiteral("AT*STARTCAPTURESERVER"));
+        // Frees the session, as the phone does when nobody answers.
+        m_phone->sendUnsolicited("AT*STARTCAPTURESERVER\r\nTIMEOUT\r\nERROR");
+    }
+    m_phone->config().accessibilityService = true;
     QVERIFY(m_controller->isConnected());
 }
 
