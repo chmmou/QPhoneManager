@@ -8,6 +8,8 @@
 #include "ui/QrCodeProvider.h"
 #include "ui/calls/CallsArea.h"
 #include "ui/contacts/ContactsArea.h"
+#include "ui/files/FileBrowserModel.h"
+#include "ui/files/TransferQueue.h"
 #include "ui/messages/MessagesArea.h"
 #include "ui/organizer/CalendarArea.h"
 #include "ui/organizer/NotesArea.h"
@@ -41,7 +43,9 @@ class PhoneConnection;
 
 namespace qpm::core::service {
 class DeviceStatusService;
-}
+class FileService;
+class ThumbnailChannel;
+} // namespace qpm::core::service
 
 namespace qpm::ui {
 
@@ -58,10 +62,11 @@ class Settings;
  * that says what went wrong and what to do. While reconnecting after a lost
  * connection, failed attempts stay quiet.
  *
- * The object owns the connection, the models, the areas and the profile
- * store of the current phone. The contacts, the call log, the messages, the
- * calendar with the tasks and the notes are part of syncAll(), in that order. `settings` must outlive it or be destroyed with
- * the engine first; the object never uses it after that.
+ * The object owns the connection, the models, the areas, the file browser
+ * with its transfers and the profile store of the current phone. The contacts, the call log, the
+ * messages, the calendar with the tasks and the notes are part of syncAll(), in that order.
+ * `settings` must outlive it or be destroyed with the engine first; the object never uses it after
+ * that.
  */
 class AppController : public QObject
 {
@@ -106,6 +111,8 @@ class AppController : public QObject
     Q_PROPERTY(qpm::ui::CalendarArea *calendar READ calendar CONSTANT FINAL)
     Q_PROPERTY(qpm::ui::TasksArea *tasks READ tasks CONSTANT FINAL)
     Q_PROPERTY(qpm::ui::NotesArea *notes READ notes CONSTANT FINAL)
+    Q_PROPERTY(qpm::ui::FileBrowserModel *files READ files CONSTANT FINAL)
+    Q_PROPERTY(qpm::ui::TransferQueue *transfers READ transfers CONSTANT FINAL)
 
 public:
     enum class ConnectionState {
@@ -181,6 +188,13 @@ public:
     [[nodiscard]] CalendarArea *calendar() const { return m_calendar; }
     [[nodiscard]] TasksArea *tasks() const { return m_tasks; }
     [[nodiscard]] NotesArea *notes() const { return m_notes; }
+    [[nodiscard]] FileBrowserModel *files() const { return m_files; }
+    [[nodiscard]] TransferQueue *transfers() const { return m_transfers; }
+    [[nodiscard]] core::service::FileService *fileService() const { return m_fileService; }
+    [[nodiscard]] core::service::ThumbnailChannel *thumbnailChannel() const
+    {
+        return m_thumbnailChannel;
+    }
     /// The pictures behind "image://qpm/", for the image provider of the engine.
     [[nodiscard]] std::shared_ptr<PhotoSource> photoSource() const { return m_photos; }
 
@@ -306,6 +320,10 @@ private:
     CalendarArea *m_calendar = nullptr;
     TasksArea *m_tasks = nullptr;
     NotesArea *m_notes = nullptr;
+    core::service::FileService *m_fileService = nullptr;
+    core::service::ThumbnailChannel *m_thumbnailChannel = nullptr;
+    TransferQueue *m_transfers = nullptr;
+    FileBrowserModel *m_files = nullptr;
     core::protocol::Discovery *m_discovery = nullptr;
     BluetoothDeviceFinder *m_bluetoothFinder = nullptr;
     std::unique_ptr<core::protocol::AdbBridge> m_listAdb;

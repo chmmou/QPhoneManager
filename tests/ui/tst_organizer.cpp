@@ -204,6 +204,9 @@ private Q_SLOTS:
     void alarmsWithoutAClockAppAreNotSupported();
     void tasksAreFilteredAndTickedOff();
     void newTaskWithANewCategory();
+    void taskStartingAfterItsDueDateIsRefused();
+    void emptyDateFieldsShowTheFormOfADate();
+    void dayListMarksTheAppointmentShown();
     void taskCategoriesAreAddedOnThePhone();
     void notesAreListedFilteredAndSaved();
     void noteChangedOnThePhoneOffersBothVersions();
@@ -645,6 +648,64 @@ void TestOrganizer::newTaskWithANewCategory()
     QCOMPARE(onPhone->due, QDate(2026, 12, 31));
     QCOMPARE(onPhone->categories, QStringList{QStringLiteral("Büro")});
     QTRY_VERIFY_WITH_TIMEOUT(tasks()->categories()->names().contains(QStringLiteral("Büro")), timeoutMs);
+}
+
+// A task starting after its due date was saved as it was.
+void TestOrganizer::taskStartingAfterItsDueDateIsRefused()
+{
+    tasks()->startNew();
+    qpm::ui::TaskEditor *editor = tasks()->editor();
+    editor->setSummary(QStringLiteral("Steuer"));
+    editor->setStartDate(OrganizerText::formatDate(QDate(2026, 11, 12)));
+    editor->setDueDate(OrganizerText::formatDate(QDate(2026, 11, 2)));
+    QSignalSpy errors(editor, &qpm::ui::TaskEditor::errorOccurred);
+
+    QCOMPARE(editor->dateOrderProblem(),
+             QStringLiteral("The start lies after the due date. Change one of the two dates."));
+    QCOMPARE(editor->problem(), editor->dateOrderProblem());
+    QVERIFY(!editor->canSave());
+    QVERIFY(!editor->save());
+    QCOMPARE(errors.count(), 1);
+    QVERIFY(!phoneTaskNamed(*m_phone, QStringLiteral("Steuer")));
+
+    editor->setStartDate(OrganizerText::formatDate(QDate(2026, 11, 2)));
+    QCOMPARE(editor->dateOrderProblem(), QString());
+    QVERIFY(editor->canSave());
+}
+
+// An empty date field showed the date of today in grey, which read as a value.
+void TestOrganizer::emptyDateFieldsShowTheFormOfADate()
+{
+    QCOMPARE(calendar()->editor()->dateHint(), QStringLiteral("DD/MM/YYYY"));
+    QCOMPARE(calendar()->editor()->timeHint(), QStringLiteral("hh:mm"));
+    QCOMPARE(tasks()->editor()->dateHint(), QStringLiteral("DD/MM/YYYY"));
+    const QLocale british;
+    QLocale::setDefault(QLocale(QLocale::English, QLocale::UnitedStates));
+    const QString american = OrganizerText::dateHint();
+    QLocale::setDefault(QLocale(QLocale::German, QLocale::Germany));
+    const QString german = OrganizerText::dateHint();
+    QLocale::setDefault(british);
+
+    QCOMPARE(american, QStringLiteral("MM/DD/YYYY"));
+    // The letters come from the catalogue, which is the English one here.
+    QCOMPARE(german, QStringLiteral("DD.MM.YYYY"));
+    QVERIFY(!OrganizerText::dateHint().contains(QString::number(QDate::currentDate().year())));
+}
+
+// The day list left the appointment shown unmarked.
+void TestOrganizer::dayListMarksTheAppointmentShown()
+{
+    QCOMPARE(calendar()->currentRow(), -1);
+
+    calendar()->selectRow(0);
+    QCOMPARE(calendar()->currentLuid(), int(meetingLuid));
+    QCOMPARE(calendar()->currentRow(), 0);
+    calendar()->setCurrentDate(QDate(2026, 11, 10));
+    QCOMPARE(calendar()->currentRow(), -1);
+    calendar()->setCurrentDate(QDate(2026, 11, 12));
+    QCOMPARE(calendar()->currentRow(), 0);
+    calendar()->selectEvent(int(meetingLuid), 0);
+    QCOMPARE(calendar()->currentRow(), 0);
 }
 
 void TestOrganizer::taskCategoriesAreAddedOnThePhone()

@@ -98,6 +98,15 @@ Item {
         }
     }
 
+    Component {
+        id: files
+
+        FilesPage {
+            emptyText: root.entry.emptyText
+            onConnectRequested: root.connectRequested()
+        }
+    }
+
     Loader {
         anchors.fill: parent
         sourceComponent: {
@@ -115,6 +124,8 @@ Item {
                 return tasks;
             if (root.entry.key === "notes")
                 return notes;
+            if (root.entry.key === "files")
+                return files;
             return root.entry.hasList ? listAndDetail : placeholder;
         }
     }

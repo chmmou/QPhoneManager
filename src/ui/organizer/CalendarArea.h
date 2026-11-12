@@ -79,6 +79,8 @@ class CalendarArea : public QObject
     Q_PROPERTY(bool busy READ isBusy NOTIFY busyChanged FINAL)
     /// The event shown; 0 for none.
     Q_PROPERTY(int currentLuid READ currentLuid NOTIFY currentChanged FINAL)
+    /// The row of the appearance shown in the list; -1 when the list does not show it.
+    Q_PROPERTY(int currentRow READ currentRow NOTIFY currentChanged FINAL)
     Q_PROPERTY(QString currentSummary READ currentSummary NOTIFY currentChanged FINAL)
     Q_PROPERTY(QString currentWhen READ currentWhen NOTIFY currentChanged FINAL)
     Q_PROPERTY(QString currentLocation READ currentLocation NOTIFY currentChanged FINAL)
@@ -122,6 +124,7 @@ public:
     [[nodiscard]] bool canEdit() const { return m_connected && m_store; }
     [[nodiscard]] bool isBusy() const { return m_busy > 0; }
     [[nodiscard]] int currentLuid() const { return m_current ? int(m_current->luid) : 0; }
+    [[nodiscard]] int currentRow() const;
     [[nodiscard]] QString currentSummary() const;
     [[nodiscard]] QString currentWhen() const;
     [[nodiscard]] QString currentLocation() const;

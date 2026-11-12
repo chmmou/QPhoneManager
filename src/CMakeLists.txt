@@ -16,6 +16,8 @@ qt_add_library(qpm_core STATIC
     core/codec/ContentLines.cpp
     core/codec/CsvTable.h
     core/codec/CsvTable.cpp
+    core/codec/FolderListing.h
+    core/codec/FolderListing.cpp
     core/codec/ICalendar.h
     core/codec/ICalendar.cpp
     core/codec/Limits.h
@@ -69,6 +71,8 @@ qt_add_library(qpm_core STATIC
     core/service/ContactsService.cpp
     core/service/DeviceStatusService.h
     core/service/DeviceStatusService.cpp
+    core/service/FileService.h
+    core/service/FileService.cpp
     core/service/MessagesService.h
     core/service/MessagesService.cpp
     core/service/NotesService.h
@@ -76,6 +80,8 @@ qt_add_library(qpm_core STATIC
     core/service/OrganizerSession.h
     core/service/OrganizerSession.cpp
     core/service/SaveMode.h
+    core/service/ThumbnailChannel.h
+    core/service/ThumbnailChannel.cpp
     core/sync/IrmcSync.h
     core/sync/IrmcSync.cpp
     core/store/CallStore.h
@@ -184,6 +190,10 @@ set(qpm_ui_qml_files
     pages/contacts/ContactList.qml
     pages/contacts/ContactValueSection.qml
     pages/contacts/ContactsPage.qml
+    pages/files/FileConflictDialog.qml
+    pages/files/FileNameDialog.qml
+    pages/files/FilesPage.qml
+    pages/files/TransferPanel.qml
     pages/messages/ComposeView.qml
     pages/messages/ConversationList.qml
     pages/messages/ConversationView.qml
@@ -259,6 +269,10 @@ qt_add_qml_module(qpm_ui
         ui/contacts/DuplicateListModel.cpp
         ui/contacts/PhoneImageProvider.h
         ui/contacts/PhoneImageProvider.cpp
+        ui/files/FileBrowserModel.h
+        ui/files/FileBrowserModel.cpp
+        ui/files/TransferQueue.h
+        ui/files/TransferQueue.cpp
         ui/messages/ConversationListModel.h
         ui/messages/ConversationListModel.cpp
         ui/messages/MessageComposer.h
@@ -315,15 +329,18 @@ set(qpm_ui_icons
     tabler/checklist.svg
     tabler/chevron-left.svg
     tabler/chevron-right.svg
+    tabler/clipboard.svg
     tabler/clock.svg
     tabler/copy.svg
     tabler/cpu.svg
     tabler/database.svg
     tabler/device-mobile.svg
+    tabler/device-sd-card.svg
     tabler/download.svg
     tabler/edit.svg
     tabler/filter.svg
     tabler/file.svg
+    tabler/folder-plus.svg
     tabler/folder.svg
     tabler/help.svg
     tabler/home.svg
@@ -367,6 +384,7 @@ target_include_directories(qpm_ui
         ${CMAKE_CURRENT_SOURCE_DIR}/ui
         ${CMAKE_CURRENT_SOURCE_DIR}/ui/calls
         ${CMAKE_CURRENT_SOURCE_DIR}/ui/contacts
+        ${CMAKE_CURRENT_SOURCE_DIR}/ui/files
         ${CMAKE_CURRENT_SOURCE_DIR}/ui/messages
         ${CMAKE_CURRENT_SOURCE_DIR}/ui/organizer
 )

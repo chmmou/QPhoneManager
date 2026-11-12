@@ -136,6 +136,29 @@ struct FakePhoneConfig
      * app the client cannot reach: AT+CALA then fails.
      */
     std::optional<QStringList> alarms;
+    /// The EXIF orientation sent with every thumbnail, 0 to 8.
+    int thumbnailOrientation = 0;
+    /**
+     * Delay before the phone reads a socket upload. Data that the desktop
+     * sends and then closes its side on before the phone read it is lost,
+     * as over adb forwarding, and the phone keeps an empty file.
+     */
+    std::chrono::milliseconds uploadReadDelay{0};
+    /**
+     * Number of socket uploads whose channel the phone opens too late. The
+     * connection is taken and closed again unread, as adb forwarding does.
+     * SOCKET STATUS then answers "request timeout" and keeps the empty file,
+     * as the client does after ten seconds.
+     */
+    int missedUploadChannels = 0;
+    /**
+     * Number of connections to the channel of a socket download, and to the
+     * thumbnail channel, that are taken and closed again unread before one
+     * is served. That is how adb forwarding handles a connection that comes
+     * before the phone listens; the phone then keeps listening.
+     */
+    int droppedDownloadConnections = 0;
+    int droppedThumbnailConnections = 0;
 };
 
 /**
@@ -170,6 +193,14 @@ struct FakePhoneConfig
  * phone does not know yet are added to its metadata, and metadata.xml takes
  * the choice of calendars and changes of categories. AT+CALA answers from
  * FakePhoneConfig::alarms.
+ *
+ * The file browser lists a folder, and when asked for the subfolders also
+ * every folder below it, one block each. Uploads to a name that exists get a free
+ * name like "a (1).txt", as on the client. ABORT drops a running socket
+ * transfer, so nothing of an aborted upload is kept. A PUT of
+ * "\getthumbnail" answers with the side channel and sends there the data of
+ * each listed file with a picture or video extension as its thumbnail, in
+ * the stream form of the client.
  *
  * Never sends text messages or places calls: there is nothing behind it.
  */
@@ -222,6 +253,11 @@ public:
     void addFolder(const QString &path);
     void addFile(const QString &path, const QByteArray &data, const QDateTime &modified);
     [[nodiscard]] std::optional<FakeFile> file(const QString &path) const;
+    [[nodiscard]] bool hasFolder(const QString &path) const { return m_folders.contains(path); }
+    /// Paths of all files, sorted.
+    [[nodiscard]] QStringList filePaths() const { return m_files.keys(); }
+    /// The body of every PUT of "\getthumbnail", in order.
+    [[nodiscard]] QList<QByteArray> thumbnailRequests() const { return m_thumbnailRequests; }
 
     /**
      * Answers the next OBEX request other than CONNECT and DISCONNECT with
@@ -273,8 +309,12 @@ private:
     void endOfStream();
     void recordChange(const QString &area, char type, quint32 luid);
     void finishTransfer();
+    /// Ends the socket transfer without an answer, as ABORT does.
+    void dropTransfer();
+    void handleThumbnailRequest(const QByteArray &body);
     [[nodiscard]] QString resolve(const QString &name) const;
-    [[nodiscard]] QByteArray folderListing() const;
+    [[nodiscard]] QByteArray folderListing(bool withSubfolders) const;
+    [[nodiscard]] QString folderListingBlock(const QString &folder) const;
     [[nodiscard]] QString uniqueName(const QString &path) const;
     void protocolError(const QString &what);
 
@@ -309,6 +349,8 @@ private:
     qsizetype m_discard = 0;
     QByteArray m_pendingStream;
     std::unique_ptr<Transfer> m_transfer;
+    QList<QByteArray> m_thumbnailRequests;
+    QTcpServer *m_thumbnailServer = nullptr;
 };
 
 } // namespace qpm::test

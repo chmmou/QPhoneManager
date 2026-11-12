@@ -91,9 +91,9 @@ Item {
                         Layout.fillWidth: true
                         Layout.columnSpan: 2
                         text: root.editor.startDate
-                        // Shown only while empty: the outlined field would float the example
-                        // above the value like a label.
-                        placeholderText: startField.text.length > 0 ? "" : root.editor.dateExample
+                        // Shown only while empty: the outlined field would float the form
+                        // of the date above the value like a label.
+                        placeholderText: startField.text.length > 0 ? "" : root.editor.dateHint
                         Accessible.name: qsTr("Start date")
                         onTextEdited: root.editor.startDate = startField.text
                     }
@@ -109,9 +109,27 @@ Item {
                         Layout.fillWidth: true
                         Layout.columnSpan: 2
                         text: root.editor.dueDate
-                        placeholderText: dueField.text.length > 0 ? "" : root.editor.dateExample
+                        placeholderText: dueField.text.length > 0 ? "" : root.editor.dateHint
                         Accessible.name: qsTr("Due date")
+                        Accessible.description: root.editor.dateOrderProblem
                         onTextEdited: root.editor.dueDate = dueField.text
+                    }
+
+                    Item {
+                        visible: dateOrderLabel.visible
+                    }
+
+                    Label {
+                        id: dateOrderLabel
+
+                        objectName: "taskDateOrderProblem"
+                        Layout.fillWidth: true
+                        Layout.columnSpan: 2
+                        visible: root.editor.dateOrderProblem.length > 0
+                        text: root.editor.dateOrderProblem
+                        color: Theme.error
+                        font.pixelSize: TypeScale.hint
+                        wrapMode: Text.Wrap
                     }
 
                     Label {
@@ -124,7 +142,7 @@ Item {
                         objectName: "taskReminderDateField"
                         Layout.fillWidth: true
                         text: root.editor.reminderDate
-                        placeholderText: reminderDateField.text.length > 0 ? "" : root.editor.dateExample
+                        placeholderText: reminderDateField.text.length > 0 ? "" : root.editor.dateHint
                         Accessible.name: qsTr("Date of the reminder")
                         onTextEdited: root.editor.reminderDate = reminderDateField.text
                     }
@@ -135,7 +153,7 @@ Item {
                         objectName: "taskReminderTimeField"
                         Layout.preferredWidth: TypeScale.body * 6
                         text: root.editor.reminderTime
-                        placeholderText: reminderTimeField.text.length > 0 ? "" : root.editor.timeExample
+                        placeholderText: reminderTimeField.text.length > 0 ? "" : root.editor.timeHint
                         Accessible.name: qsTr("Time of the reminder")
                         onTextEdited: root.editor.reminderTime = reminderTimeField.text
                     }
@@ -267,7 +285,8 @@ Item {
                 Label {
                     objectName: "taskProblem"
                     Layout.fillWidth: true
-                    visible: root.editor.problem.length > 0
+                    // A wrong order of the dates is said under the due date already.
+                    visible: root.editor.problem.length > 0 && root.editor.problem !== root.editor.dateOrderProblem
                     text: root.editor.problem
                     color: Theme.error
                     wrapMode: Text.Wrap

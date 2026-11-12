@@ -64,8 +64,14 @@ class TaskEditor : public QObject
     Q_PROPERTY(QStringList selectedCategories READ selectedCategories NOTIFY fieldsChanged FINAL)
     /// Why the form cannot be saved as it is; empty when it can.
     Q_PROPERTY(QString problem READ problem NOTIFY fieldsChanged FINAL)
+    /// What is wrong with the order of start and due date; empty when nothing is.
+    Q_PROPERTY(QString dateOrderProblem READ dateOrderProblem NOTIFY fieldsChanged FINAL)
     Q_PROPERTY(QString dateExample READ dateExample CONSTANT FINAL)
     Q_PROPERTY(QString timeExample READ timeExample CONSTANT FINAL)
+    /// The form of a date with letters, for an empty date field.
+    Q_PROPERTY(QString dateHint READ dateHint CONSTANT FINAL)
+    /// The form of a time with letters, for an empty time field.
+    Q_PROPERTY(QString timeHint READ timeHint CONSTANT FINAL)
     Q_PROPERTY(bool modified READ isModified NOTIFY fieldsChanged FINAL)
     Q_PROPERTY(bool busy READ isBusy NOTIFY busyChanged FINAL)
     /// Connected, not busy, no problem.
@@ -106,8 +112,11 @@ public:
     [[nodiscard]] QStringList categoryNames() const;
     [[nodiscard]] QStringList selectedCategories() const { return m_task.categories; }
     [[nodiscard]] QString problem() const;
+    [[nodiscard]] QString dateOrderProblem() const;
     [[nodiscard]] QString dateExample() const;
     [[nodiscard]] QString timeExample() const;
+    [[nodiscard]] QString dateHint() const;
+    [[nodiscard]] QString timeHint() const;
     [[nodiscard]] bool isModified() const;
     [[nodiscard]] bool isBusy() const { return m_busy; }
     [[nodiscard]] bool canSave() const;

@@ -95,7 +95,7 @@ Dialog {
                 implicitHeight: rowContent.implicitHeight + Theme.gridUnit * 3
                 color: ListView.isCurrentItem ? Theme.surfaceVariant : "transparent"
                 Accessible.role: Accessible.ListItem
-                Accessible.name: qsTr("%1, %2").arg(alarmRow.timeText, alarmRow.daysText)
+                Accessible.name: qsTr("%1, %2").arg(alarmRow.timeText).arg(alarmRow.daysText)
                 Accessible.description: alarmRow.name
 
                 TapHandler {
@@ -177,9 +177,9 @@ Dialog {
 
                 objectName: "alarmTimeField"
                 Layout.fillWidth: true
-                // Shown only while empty: the outlined field would float the example
-                // above the value like a label.
-                placeholderText: timeField.text.length > 0 ? "" : root.area.editor.timeExample
+                // Shown only while empty: the outlined field would float the form
+                // of the time above the value like a label.
+                placeholderText: timeField.text.length > 0 ? "" : root.area.editor.timeHint
                 Accessible.name: qsTr("Time of the alarm")
             }
 

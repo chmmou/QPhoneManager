@@ -7,6 +7,7 @@
 #include "ui/Settings.h"
 #include "ui/calls/CallsArea.h"
 #include "ui/contacts/ContactsArea.h"
+#include "ui/files/FileBrowserModel.h"
 #include "ui/messages/MessagesArea.h"
 #include "ui/organizer/CalendarArea.h"
 #include "ui/organizer/NotesArea.h"
@@ -273,6 +274,12 @@ private Q_SLOTS:
     void calendarDaysAreChosenByKeyboard();
     void organizerFocusChainReachesEveryControlOnce_data();
     void organizerFocusChainReachesEveryControlOnce();
+    void fileViewControlsHaveANameAndARole_data();
+    void fileViewControlsHaveANameAndARole();
+    void fileDialogsShowTheFocusAndNameTheirControls_data();
+    void fileDialogsShowTheFocusAndNameTheirControls();
+    void filesFocusChainReachesEveryControlOnce();
+    void filesAreBrowsedByKeyboard();
 
 private:
     [[nodiscard]] QList<QQuickItem *> controls() const;
@@ -285,6 +292,8 @@ private:
     [[nodiscard]] bool showMessages();
     /// Connects a phone with a calendar, a task and a note and shows the section `section`.
     [[nodiscard]] bool showOrganizer(int section);
+    /// Connects a phone with a few files and shows its internal storage.
+    [[nodiscard]] bool showFiles();
     /// Brings the contacts area into the state in which `dialog` has something to show.
     [[nodiscard]] bool prepareContactDialog(const QString &dialog);
     static void announceAccessibility();
@@ -387,8 +396,9 @@ QObject *TestAccessibility::openDialog(const QString &name)
     QObject *dialog = m_window->findChild<QObject *>(name);
     // Dialogs of a page live with the page, which a Loader created.
     for (const QString &pageName :
-         {QStringLiteral("contactsPage"), QStringLiteral("callsPage"), QStringLiteral("messagesPage"),
-          QStringLiteral("calendarPage"), QStringLiteral("tasksPage"), QStringLiteral("notesPage")}) {
+         {QStringLiteral("contactsPage"), QStringLiteral("callsPage"),
+          QStringLiteral("messagesPage"), QStringLiteral("calendarPage"),
+          QStringLiteral("tasksPage"), QStringLiteral("notesPage"), QStringLiteral("filesPage")}) {
         QQuickItem *page = findItem(m_window->contentItem(), pageName);
         if (!dialog && page)
             dialog = page->findChild<QObject *>(name);
@@ -1414,6 +1424,219 @@ void TestAccessibility::darkSchemeDarkensTheWindow()
     QVERIFY(dark.save(shots.filePath(QStringLiteral("shell-dark.png"))));
     if (!shots.autoRemove())
         qInfo() << "Screenshots kept in" << shots.path();
+}
+
+bool TestAccessibility::showFiles()
+{
+    m_phone = std::make_unique<qpm::test::FakePhone>();
+    if (!m_phone->listen())
+        return false;
+    const QDateTime when(QDate(2026, 11, 2), QTime(9, 0), QTimeZone::UTC);
+    m_phone->addFile(QStringLiteral("\\sdcard\\DCIM\\Camera\\See.jpg"), "jpeg", when);
+    m_phone->addFile(QStringLiteral("\\sdcard\\Download\\Brief.pdf"), "pdf", when);
+    auto *controller =
+        m_engine->singletonInstance<AppController *>("QPhoneManager.Ui", "AppController");
+    if (!controller ||
+        !controller->connectAddress(QStringLiteral("127.0.0.1:%1").arg(m_phone->port()))) {
+        return false;
+    }
+    if (!QTest::qWaitFor([controller]() { return controller->isConnected(); }, phoneTimeoutMs))
+        return false;
+    m_window->setProperty("currentSection", 7);
+    const bool shown = QTest::qWaitFor(
+        [this]() {
+            const QQuickItem *page = findItem(m_window->contentItem(), QStringLiteral("filesPage"));
+            return page && page->isVisible();
+        },
+        phoneTimeoutMs);
+    qpm::ui::FileBrowserModel *files = controller->files();
+    if (!shown || !files->open(QStringLiteral("\\sdcard")))
+        return false;
+    const bool listed = QTest::qWaitFor(
+        [files]() { return !files->isBusy() && files->count() == 2; }, phoneTimeoutMs);
+    announceAccessibility();
+    return listed;
+}
+
+void TestAccessibility::fileViewControlsHaveANameAndARole_data()
+{
+    QTest::addColumn<bool>("grid");
+
+    QTest::newRow("grid") << true;
+    QTest::newRow("list") << false;
+}
+
+void TestAccessibility::fileViewControlsHaveANameAndARole()
+{
+    QFETCH(bool, grid);
+    QVERIFY(showFiles());
+    QQuickItem *page = findItem(m_window->contentItem(), QStringLiteral("filesPage"));
+    QVERIFY(page);
+    page->setProperty("showGrid", grid);
+    page->setProperty("currentRow", 0);
+    QTRY_VERIFY(findItem(m_window->contentItem(),
+                         grid ? QStringLiteral("fileGrid") : QStringLiteral("fileList"))
+                    ->isVisible());
+    announceAccessibility();
+
+    const QList<QQuickItem *> found = controls();
+
+    verifyNamesAndRoles(found, {QAccessible::List});
+    const QStringList required = {QStringLiteral("folderUpButton"),
+                                  QStringLiteral("crumb0"),
+                                  QStringLiteral("crumb1"),
+                                  QStringLiteral("newFolderButton"),
+                                  QStringLiteral("uploadFilesButton"),
+                                  QStringLiteral("downloadFilesButton"),
+                                  QStringLiteral("pasteFilesButton"),
+                                  QStringLiteral("refreshFilesButton"),
+                                  QStringLiteral("fileViewButton"),
+                                  grid ? QStringLiteral("fileGrid") : QStringLiteral("fileList")};
+    for (const QString &name : required) {
+        QQuickItem *item = findItem(m_window->contentItem(), name);
+        QVERIFY2(item && found.contains(item), qPrintable(name));
+    }
+    for (QQuickItem *item : found) {
+        const bool iconOnly = item->metaObject()->indexOfProperty("display") >= 0 &&
+                              item->property("display").toInt() == 0;
+        if (!iconOnly || item->property("text").toString().isEmpty())
+            continue;
+        QCOMPARE(QAccessible::queryAccessibleInterface(item)->text(QAccessible::Name),
+                 item->property("text").toString());
+    }
+    QQuickItem *view = findItem(m_window->contentItem(),
+                                grid ? QStringLiteral("fileGrid") : QStringLiteral("fileList"));
+    const QAccessibleInterface *accessible = QAccessible::queryAccessibleInterface(view);
+    QVERIFY(accessible);
+    QCOMPARE(accessible->role(), QAccessible::List);
+    QVERIFY(!accessible->text(QAccessible::Description).isEmpty());
+}
+
+void TestAccessibility::fileDialogsShowTheFocusAndNameTheirControls_data()
+{
+    QTest::addColumn<QString>("dialog");
+
+    QTest::newRow("new folder") << QStringLiteral("fileNameDialog");
+    QTest::newRow("delete") << QStringLiteral("deleteFileDialog");
+    QTest::newRow("conflict") << QStringLiteral("fileConflictDialog");
+    QTest::newRow("menu") << QStringLiteral("fileMenu");
+}
+
+void TestAccessibility::fileDialogsShowTheFocusAndNameTheirControls()
+{
+    QFETCH(QString, dialog);
+    QVERIFY(showFiles());
+    m_window->requestActivate();
+    QVERIFY(QTest::qWaitForWindowActive(m_window));
+    QQuickItem *page = findItem(m_window->contentItem(), QStringLiteral("filesPage"));
+    QVERIFY(page);
+    page->setProperty("currentRow", 1);
+    const QList<QQuickItem *> before = controls();
+
+    QObject *popup = nullptr;
+    if (dialog == QLatin1StringView("fileNameDialog")) {
+        QVERIFY(QMetaObject::invokeMethod(page, "startNewFolder"));
+    } else if (dialog == QLatin1StringView("deleteFileDialog")) {
+        QVERIFY(QMetaObject::invokeMethod(page, "confirmDelete"));
+    } else if (dialog == QLatin1StringView("fileMenu")) {
+        QVERIFY(QMetaObject::invokeMethod(page, "showMenu"));
+    } else {
+        popup = openDialog(dialog);
+        QVERIFY(popup);
+    }
+    if (!popup)
+        popup = page->findChild<QObject *>(dialog);
+    QVERIFY(popup);
+    QTRY_VERIFY(popup->property("opened").toBool());
+    announceAccessibility();
+
+    QList<QQuickItem *> inDialog = controls();
+    inDialog.removeIf([&before](QQuickItem *control) { return before.contains(control); });
+    QVERIFY(!inDialog.isEmpty());
+    verifyNamesAndRoles(inDialog, {QAccessible::MenuItem});
+    if (dialog != QLatin1StringView("fileMenu")) {
+        QQuickItem *focused = m_window->activeFocusItem();
+        QVERIFY(focused);
+        QVERIFY2(focusIsShown(focused), qPrintable(describe(focused)));
+    }
+    QMetaObject::invokeMethod(popup, "close");
+    QTRY_VERIFY(!popup->property("visible").toBool());
+}
+
+void TestAccessibility::filesFocusChainReachesEveryControlOnce()
+{
+    QVERIFY(showFiles());
+    QList<QQuickItem *> chain;
+    QQuickItem *item = m_window->contentItem()->nextItemInFocusChain(true);
+    while (item && !chain.contains(item) && chain.size() < 500) {
+        chain.append(item);
+        item = item->nextItemInFocusChain(true);
+    }
+
+    QVERIFY(item);
+    QCOMPARE(item, chain.constFirst());
+    const QList<QQuickItem *> found = controls();
+    for (QQuickItem *control : found) {
+        if (control->isEnabled() && control->activeFocusOnTab())
+            QVERIFY2(chain.contains(control), qPrintable(describe(control)));
+    }
+    for (const QString &name : {QStringLiteral("fileGrid"), QStringLiteral("folderUpButton"),
+                                QStringLiteral("crumb0"), QStringLiteral("newFolderButton")}) {
+        QVERIFY2(chain.contains(findItem(m_window->contentItem(), name)), qPrintable(name));
+    }
+}
+
+// Every action on a file is reached from the keyboard: opening, going up,
+// renaming, deleting and the menu.
+void TestAccessibility::filesAreBrowsedByKeyboard()
+{
+    QVERIFY(showFiles());
+    auto *controller =
+        m_engine->singletonInstance<AppController *>("QPhoneManager.Ui", "AppController");
+    qpm::ui::FileBrowserModel *files = controller->files();
+    m_window->requestActivate();
+    QVERIFY(QTest::qWaitForWindowActive(m_window));
+    QQuickItem *page = findItem(m_window->contentItem(), QStringLiteral("filesPage"));
+    QQuickItem *grid = findItem(m_window->contentItem(), QStringLiteral("fileGrid"));
+    QVERIFY(page && grid);
+    page->setProperty("currentRow", 0);
+    grid->forceActiveFocus(Qt::TabFocusReason);
+    QTRY_VERIFY(grid->hasActiveFocus());
+
+    QTest::keyClick(m_window, Qt::Key_Right);
+    QTRY_COMPARE(page->property("currentRow").toInt(), 1);
+    QTest::keyClick(m_window, Qt::Key_Left);
+    QTRY_COMPARE(page->property("currentRow").toInt(), 0);
+    QTest::keyClick(m_window, Qt::Key_Return);
+    QTRY_COMPARE(files->path(), QStringLiteral("\\sdcard\\DCIM"));
+    QTRY_VERIFY(!files->isBusy());
+    QTest::keyClick(m_window, Qt::Key_Backspace);
+    QTRY_COMPARE(files->path(), QStringLiteral("\\sdcard"));
+    // The folder left is the one chosen again.
+    QTRY_COMPARE(page->property("currentName").toString(), QStringLiteral("DCIM"));
+    QVERIFY(grid->hasActiveFocus());
+
+    QObject *nameDialog = page->findChild<QObject *>(QStringLiteral("fileNameDialog"));
+    QTest::keyClick(m_window, Qt::Key_F2);
+    QTRY_VERIFY(nameDialog->property("opened").toBool());
+    QCOMPARE(nameDialog->property("oldName").toString(), QStringLiteral("DCIM"));
+    QTest::keyClick(m_window, Qt::Key_Escape);
+    QTRY_VERIFY(!nameDialog->property("visible").toBool());
+
+    grid->forceActiveFocus(Qt::TabFocusReason);
+    QObject *deleteDialog = page->findChild<QObject *>(QStringLiteral("deleteFileDialog"));
+    QTest::keyClick(m_window, Qt::Key_Delete);
+    QTRY_VERIFY(deleteDialog->property("opened").toBool());
+    QTest::keyClick(m_window, Qt::Key_Escape);
+    QTRY_VERIFY(!deleteDialog->property("visible").toBool());
+
+    grid->forceActiveFocus(Qt::TabFocusReason);
+    QObject *menu = page->findChild<QObject *>(QStringLiteral("fileMenu"));
+    QTest::keyClick(m_window, Qt::Key_Menu);
+    QTRY_VERIFY(menu->property("opened").toBool());
+    QTest::keyClick(m_window, Qt::Key_Escape);
+    QTRY_VERIFY(!menu->property("visible").toBool());
+    QVERIFY(m_phone->hasFolder(QStringLiteral("\\sdcard\\DCIM")));
 }
 
 QTEST_MAIN(TestAccessibility)

@@ -316,6 +316,22 @@ void CalendarArea::selectEvent(int luid, qint64 startMs)
     Q_EMIT currentChanged();
 }
 
+int CalendarArea::currentRow() const
+{
+    if (!m_current)
+        return -1;
+    const int luid = int(m_current->luid);
+    const int exact = m_list->rowOf(luid, m_currentStart.toMSecsSinceEpoch());
+    if (exact >= 0 || !m_current->rrule.isEmpty())
+        return exact;
+    // A single event chosen without its start appears at most once.
+    for (int row = 0; row < m_list->rowCount(); ++row) {
+        if (m_list->luidAt(row) == luid)
+            return row;
+    }
+    return -1;
+}
+
 void CalendarArea::selectRow(int row)
 {
     const QList<Occurrence> &shown = m_list->shown();

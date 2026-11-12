@@ -35,6 +35,13 @@ ToolBar {
         }
 
         Label {
+            objectName: "transferStatus"
+            visible: AppController.transfers.active
+            text: AppController.transfers.statusText
+            font.pixelSize: TypeScale.hint
+        }
+
+        Label {
             objectName: "listeningStatus"
             visible: AppController.listening
             text: qsTr("Waiting for the phone to connect")

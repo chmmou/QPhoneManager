@@ -131,6 +131,16 @@ it shows among the sent messages. The app on the phone cannot delete text
 messages, so that message stays on the phone. Scheduled messages are written
 only to the fake phone of the other tests.
 
+The files test writes only into a folder `QPM-Test-` with eight hex digits
+below `Download`, which it creates and deletes again; such folders left over
+from an earlier run are removed first. There it copies a few small files and
+a picture of its own in both directions, renames and deletes them and asks
+for the thumbnail of the picture. On an emulator it also copies a file of
+100 MB both ways and cancels a large upload. On any other phone it only counts
+the storages and the top level of the internal storage. The app on the phone
+needs access to all files; where the phone has not granted it, the test is
+skipped rather than the permission asked for on the phone.
+
 All traffic of these tests goes through a guard. It lets a text message
 through only to the number in `QPM_TEST_SMS_TO` and a call only to the number
 in `QPM_TEST_CALL_TO`. Without these variables, every message and every call

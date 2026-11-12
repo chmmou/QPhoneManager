@@ -146,7 +146,7 @@
         <translation>Tage im %1</translation>
     </message>
     <message numerus="yes">
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarGrid.qml" line="155"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarGrid.qml" line="160"/>
         <source>%n more</source>
         <translation>
             <numerusform>%n weiterer</numerusform>
@@ -2087,20 +2087,231 @@
 <context>
     <name>EventList</name>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventList.qml" line="34"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventList.qml" line="35"/>
         <source>Appointments</source>
         <translation>Termine</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventList.qml" line="69"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventList.qml" line="103"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventList.qml" line="70"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventList.qml" line="104"/>
         <source>(No title)</source>
         <translation>(Ohne Titel)</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventList.qml" line="110"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventList.qml" line="111"/>
         <source>%1, %2</source>
         <translation>%1, %2</translation>
+    </message>
+</context>
+<context>
+    <name>FileConflictDialog</name>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FileConflictDialog.qml" line="17"/>
+        <source>%1 exists already</source>
+        <translation>%1 gibt es schon</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FileConflictDialog.qml" line="26"/>
+        <source>Replace</source>
+        <translation>Ersetzen</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FileConflictDialog.qml" line="38"/>
+        <source>Keep both</source>
+        <translation>Beide behalten</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FileConflictDialog.qml" line="50"/>
+        <source>Skip</source>
+        <translation>Überspringen</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FileConflictDialog.qml" line="71"/>
+        <source>The folder on the phone already has a file with this name. Replace it, keep both files, or skip this one.</source>
+        <translation>Im Ordner auf dem Handy gibt es schon eine Datei mit diesem Namen. Ersetzen Sie sie, behalten Sie beide Dateien oder überspringen Sie diese.</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FileConflictDialog.qml" line="71"/>
+        <source>The folder on this computer already has a file with this name. Replace it, keep both files, or skip this one.</source>
+        <translation>Im Ordner auf diesem Rechner gibt es schon eine Datei mit diesem Namen. Ersetzen Sie sie, behalten Sie beide Dateien oder überspringen Sie diese.</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FileConflictDialog.qml" line="80"/>
+        <source>Do the same for the other files of this transfer</source>
+        <translation>Bei den weiteren Dateien genauso entscheiden</translation>
+    </message>
+</context>
+<context>
+    <name>FileNameDialog</name>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FileNameDialog.qml" line="22"/>
+        <source>Rename %1</source>
+        <translation>%1 umbenennen</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FileNameDialog.qml" line="22"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FileNameDialog.qml" line="52"/>
+        <source>New folder</source>
+        <translation>Neuer Ordner</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FileNameDialog.qml" line="29"/>
+        <source>Rename</source>
+        <translation>Umbenennen</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FileNameDialog.qml" line="29"/>
+        <source>Create</source>
+        <translation>Anlegen</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FileNameDialog.qml" line="42"/>
+        <source>Cancel</source>
+        <translation>Abbrechen</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FileNameDialog.qml" line="66"/>
+        <source>Name</source>
+        <translation>Name</translation>
+    </message>
+</context>
+<context>
+    <name>FilesPage</name>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="51"/>
+        <source>Up to the folder above</source>
+        <translation>Zum übergeordneten Ordner</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="78"/>
+        <source>Path</source>
+        <translation>Pfad</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="110"/>
+        <source>Go to this folder</source>
+        <translation>Zu diesem Ordner wechseln</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="126"/>
+        <source>New folder</source>
+        <translation>Neuer Ordner</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="144"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="505"/>
+        <source>Copy files from this computer</source>
+        <translation>Dateien von diesem Rechner kopieren</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="162"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="588"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="739"/>
+        <source>Save on this computer</source>
+        <translation>Auf diesem Rechner speichern</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="180"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="606"/>
+        <source>Paste here</source>
+        <translation>Hier einfügen</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="198"/>
+        <source>Load the folder again</source>
+        <translation>Ordner neu laden</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="216"/>
+        <source>Show as a list</source>
+        <translation>Als Liste zeigen</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="216"/>
+        <source>Show as a grid</source>
+        <translation>Als Raster zeigen</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="263"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="387"/>
+        <source>Files</source>
+        <translation>Dateien</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="264"/>
+        <source>Enter opens, Backspace goes up, F2 renames, Delete deletes, the menu key shows more</source>
+        <translation>Eingabe öffnet, Rücktaste geht nach oben, F2 benennt um, Entf löscht, die Menütaste zeigt mehr</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="554"/>
+        <source>Connect</source>
+        <translation>Verbinden</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="566"/>
+        <source>Copy files</source>
+        <translation>Dateien kopieren</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="571"/>
+        <source>Copy a folder</source>
+        <translation>Ordner kopieren</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="582"/>
+        <source>Open</source>
+        <translation>Öffnen</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="582"/>
+        <source>Open on this computer</source>
+        <translation>Auf diesem Rechner öffnen</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="594"/>
+        <source>Rename</source>
+        <translation>Umbenennen</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="600"/>
+        <source>Cut</source>
+        <translation>Ausschneiden</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="612"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="647"/>
+        <source>Delete</source>
+        <translation>Löschen</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="641"/>
+        <source>Delete %1?</source>
+        <translation>%1 löschen?</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="658"/>
+        <source>Cancel</source>
+        <translation>Abbrechen</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="675"/>
+        <source>The folder is deleted on the phone with everything in it. This cannot be undone.</source>
+        <translation>Der Ordner wird mit allem Inhalt auf dem Handy gelöscht. Das lässt sich nicht rückgängig machen.</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="675"/>
+        <source>The file is deleted on the phone. This cannot be undone.</source>
+        <translation>Die Datei wird auf dem Handy gelöscht. Das lässt sich nicht rückgängig machen.</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="722"/>
+        <source>Copy files to the phone</source>
+        <translation>Dateien auf das Handy kopieren</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="731"/>
+        <source>Copy a folder to the phone</source>
+        <translation>Ordner auf das Handy kopieren</translation>
     </message>
 </context>
 <context>
@@ -2452,177 +2663,201 @@
         <translation>Grau</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="124"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="134"/>
+        <source>DD</source>
+        <comment>letters for the day in the form of a date</comment>
+        <translation>TT</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="136"/>
+        <source>MM</source>
+        <comment>letters for the month in the form of a date</comment>
+        <translation>MM</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="138"/>
+        <source>YYYY</source>
+        <comment>letters for the year in the form of a date</comment>
+        <translation>JJJJ</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="148"/>
+        <source>hh:mm</source>
+        <comment>letters for hours and minutes in the form of a time</comment>
+        <translation>hh:mm</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="159"/>
         <source>The phone is not connected. Connect it, then try again.</source>
         <translation>Das Handy ist nicht verbunden. Verbinden Sie es und versuchen Sie es noch einmal.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="128"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="163"/>
         <source>The app on the phone may not reach the alarms. Allow it in the Android settings.</source>
         <translation>Die App auf dem Handy darf nicht auf die Wecker zugreifen. Erlauben Sie es in den Android-Einstellungen.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="130"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="165"/>
         <source>The app on the phone may not access the calendar. Allow it in the Android settings.</source>
         <translation>Die App auf dem Handy darf nicht auf den Kalender zugreifen. Erlauben Sie es in den Android-Einstellungen.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="135"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="170"/>
         <source>This appointment is no longer on the phone. Sync to update the calendar.</source>
         <translation>Dieser Termin ist nicht mehr auf dem Handy. Gleichen Sie ab, um den Kalender zu aktualisieren.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="137"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="172"/>
         <source>This task is no longer on the phone. Sync to update the list.</source>
         <translation>Diese Aufgabe ist nicht mehr auf dem Handy. Gleichen Sie ab, um die Liste zu aktualisieren.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="139"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="174"/>
         <source>This note is no longer on the phone. Sync to update the list.</source>
         <translation>Diese Notiz ist nicht mehr auf dem Handy. Gleichen Sie ab, um die Liste zu aktualisieren.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="143"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="178"/>
         <source>This alarm is no longer on the phone. Load the alarms again.</source>
         <translation>Dieser Wecker ist nicht mehr auf dem Handy. Laden Sie die Wecker neu.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="147"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="182"/>
         <source>Enter a title and a start, and choose a calendar the phone can write to.</source>
         <translation>Geben Sie einen Titel und einen Beginn ein und wählen Sie einen Kalender, in den das Handy schreiben darf.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="149"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="184"/>
         <source>Enter a title for the task.</source>
         <translation>Geben Sie einen Titel für die Aufgabe ein.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="151"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="186"/>
         <source>Write some text for the note.</source>
         <translation>Schreiben Sie einen Text für die Notiz.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="155"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="190"/>
         <source>Enter a time like %1.</source>
         <translation>Geben Sie eine Uhrzeit wie %1 ein.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="157"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="192"/>
         <source>The data cannot be saved on this computer. Check the storage folder in the settings.</source>
         <translation>Die Daten lassen sich auf diesem Rechner nicht speichern. Prüfen Sie den Speicherordner in den Einstellungen.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="161"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="196"/>
         <source>This phone does not let the app reach its alarms.</source>
         <translation>Das Handy lässt die App nicht an seine Wecker.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="162"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="197"/>
         <source>The phone does not support this. Update MyPhoneExplorer Client on the phone.</source>
         <translation>Das Handy unterstützt das nicht. Aktualisieren Sie MyPhoneExplorer Client auf dem Handy.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="164"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="199"/>
         <source>The entry is too large for the phone. Shorten the text.</source>
         <translation>Der Eintrag ist zu groß für das Handy. Kürzen Sie den Text.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="172"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="207"/>
         <source>The phone did not take the change. Sync, then try again.</source>
         <translation>Das Handy hat die Änderung nicht übernommen. Gleichen Sie ab und versuchen Sie es noch einmal.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="180"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="215"/>
         <source>New Year&apos;s Day</source>
         <translation>Neujahr</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="182"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="217"/>
         <source>Epiphany</source>
         <translation>Heilige Drei Könige</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="184"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="219"/>
         <source>Berchtold&apos;s Day</source>
         <translation>Berchtoldstag</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="186"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="221"/>
         <source>Good Friday</source>
         <translation>Karfreitag</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="188"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="223"/>
         <source>Easter Monday</source>
         <translation>Ostermontag</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="190"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="225"/>
         <source>Labour Day</source>
         <translation>Tag der Arbeit</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="192"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="227"/>
         <source>Ascension Day</source>
         <translation>Christi Himmelfahrt</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="194"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="229"/>
         <source>Whit Monday</source>
         <translation>Pfingstmontag</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="196"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="231"/>
         <source>Corpus Christi</source>
         <translation>Fronleichnam</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="198"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="233"/>
         <source>Assumption Day</source>
         <translation>Mariä Himmelfahrt</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="200"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="235"/>
         <source>Swiss National Day</source>
         <translation>Bundesfeier</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="202"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="237"/>
         <source>Day of German Unity</source>
         <translation>Tag der Deutschen Einheit</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="204"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="239"/>
         <source>Austrian National Day</source>
         <translation>Nationalfeiertag</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="206"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="241"/>
         <source>All Saints&apos; Day</source>
         <translation>Allerheiligen</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="208"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="243"/>
         <source>Immaculate Conception</source>
         <translation>Mariä Empfängnis</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="210"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="245"/>
         <source>Christmas Day</source>
         <translation>1. Weihnachtstag</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="214"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="249"/>
         <source>St Stephen&apos;s Day</source>
         <translation>Stephanstag</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="223"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="258"/>
         <source>Repeats by a rule of its own</source>
         <translation>Wiederholt sich nach eigener Regel</translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="228"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="263"/>
         <source>Every %n day(s)</source>
         <translation>
             <numerusform>Jeden Tag</numerusform>
@@ -2630,7 +2865,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="232"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="267"/>
         <source>Every %n week(s)</source>
         <translation>
             <numerusform>Jede Woche</numerusform>
@@ -2638,7 +2873,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="237"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="272"/>
         <source>Every %n week(s) on %1</source>
         <translation>
             <numerusform>Jede Woche am %1</numerusform>
@@ -2646,7 +2881,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="241"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="276"/>
         <source>Every %n month(s)</source>
         <translation>
             <numerusform>Jeden Monat</numerusform>
@@ -2654,7 +2889,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="244"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="279"/>
         <source>Every %n year(s)</source>
         <translation>
             <numerusform>Jedes Jahr</numerusform>
@@ -2662,7 +2897,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="248"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="283"/>
         <source>%1, %n time(s) in all</source>
         <translation>
             <numerusform>%1, %n Mal insgesamt</numerusform>
@@ -2670,42 +2905,42 @@
         </translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="250"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="285"/>
         <source>%1, until %2</source>
         <translation>%1, bis %2</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="256"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="291"/>
         <source>Does not repeat</source>
         <translation>Keine Wiederholung</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="256"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="291"/>
         <source>Every day</source>
         <translation>Jeden Tag</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="256"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="291"/>
         <source>Every week</source>
         <translation>Jede Woche</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="256"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="291"/>
         <source>Every month</source>
         <translation>Jeden Monat</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="257"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="292"/>
         <source>Every year</source>
         <translation>Jedes Jahr</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="320"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="355"/>
         <source>At the start</source>
         <translation>Zu Beginn</translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="323"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="358"/>
         <source>%n minute(s) after the start</source>
         <translation>
             <numerusform>%n Minute nach Beginn</numerusform>
@@ -2713,7 +2948,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="327"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="362"/>
         <source>%n day(s) before</source>
         <translation>
             <numerusform>%n Tag vorher</numerusform>
@@ -2721,7 +2956,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="329"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="364"/>
         <source>%n hour(s) before</source>
         <translation>
             <numerusform>%n Stunde vorher</numerusform>
@@ -2729,7 +2964,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="330"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="365"/>
         <source>%n minute(s) before</source>
         <translation>
             <numerusform>%n Minute vorher</numerusform>
@@ -2737,57 +2972,57 @@
         </translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="335"/>
-        <source>As the calendar sets it</source>
-        <translation>Wie im Kalender eingestellt</translation>
-    </message>
-    <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="335"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="370"/>
         <source>Confidential</source>
         <translation>Vertraulich</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="335"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="370"/>
         <source>Private</source>
         <translation>Privat</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="335"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="370"/>
         <source>Public</source>
         <translation>Öffentlich</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="340"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="370"/>
+        <source>Like the calendar</source>
+        <translation>Wie der Kalender</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="375"/>
         <source>Busy</source>
         <translation>Beschäftigt</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="340"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="375"/>
         <source>Free</source>
         <translation>Frei</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="340"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="375"/>
         <source>Tentative</source>
         <translation>Vorläufig</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="345"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="380"/>
         <source>High</source>
         <translation>Hoch</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="345"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="380"/>
         <source>Normal</source>
         <translation>Normal</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="345"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="380"/>
         <source>Low</source>
         <translation>Niedrig</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="350"/>
+        <location filename="../../src/ui/organizer/OrganizerText.cpp" line="385"/>
         <source>Colour of the calendar</source>
         <translation>Farbe des Kalenders</translation>
     </message>
@@ -3557,32 +3792,32 @@
         <translation>Akku %1 %</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/components/StatusBar.qml" line="40"/>
+        <location filename="../../qml/QPhoneManager/Ui/components/StatusBar.qml" line="47"/>
         <source>Waiting for the phone to connect</source>
         <translation>Wartet auf das Handy</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/components/StatusBar.qml" line="48"/>
+        <location filename="../../qml/QPhoneManager/Ui/components/StatusBar.qml" line="55"/>
         <source>Connected over %1</source>
         <translation>Verbunden über %1</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/components/StatusBar.qml" line="50"/>
+        <location filename="../../qml/QPhoneManager/Ui/components/StatusBar.qml" line="57"/>
         <source>Connecting</source>
         <translation>Verbindung wird aufgebaut</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/components/StatusBar.qml" line="52"/>
+        <location filename="../../qml/QPhoneManager/Ui/components/StatusBar.qml" line="59"/>
         <source>Waiting for the PIN</source>
         <translation>Wartet auf die PIN</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/components/StatusBar.qml" line="54"/>
+        <location filename="../../qml/QPhoneManager/Ui/components/StatusBar.qml" line="61"/>
         <source>Connection lost</source>
         <translation>Verbindung unterbrochen</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/components/StatusBar.qml" line="56"/>
+        <location filename="../../qml/QPhoneManager/Ui/components/StatusBar.qml" line="63"/>
         <source>Not connected</source>
         <translation>Nicht verbunden</translation>
     </message>
@@ -3636,75 +3871,75 @@
         <translation>Fälligkeitsdatum</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="118"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="136"/>
         <source>Reminder</source>
         <translation>Erinnerung</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="128"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="146"/>
         <source>Date of the reminder</source>
         <translation>Datum der Erinnerung</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="139"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="157"/>
         <source>Time of the reminder</source>
         <translation>Uhrzeit der Erinnerung</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="144"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="155"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="162"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="173"/>
         <source>Repeats</source>
         <translation>Wiederholung</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="164"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="175"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="182"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="193"/>
         <source>Priority</source>
         <translation>Priorität</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="185"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="203"/>
         <source>Categories</source>
         <translation>Kategorien</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="222"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="240"/>
         <source>New category</source>
         <translation>Neue Kategorie</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="223"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="241"/>
         <source>Name of a new category</source>
         <translation>Name einer neuen Kategorie</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="233"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="251"/>
         <source>Add category</source>
         <translation>Kategorie hinzufügen</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="247"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="260"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="265"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="278"/>
         <source>Description</source>
         <translation>Beschreibung</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="286"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="305"/>
         <source>Delete</source>
         <translation>Löschen</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="306"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="325"/>
         <source>Saving</source>
         <translation>Wird gespeichert</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="313"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="332"/>
         <source>Cancel</source>
         <translation>Abbrechen</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="327"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="346"/>
         <source>Save</source>
         <translation>Speichern</translation>
     </message>
@@ -3834,6 +4069,34 @@
     </message>
 </context>
 <context>
+    <name>TransferPanel</name>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/TransferPanel.qml" line="28"/>
+        <source>Transfers finished</source>
+        <translation>Übertragungen beendet</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/TransferPanel.qml" line="38"/>
+        <source>Cancel all</source>
+        <translation>Alle abbrechen</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/TransferPanel.qml" line="52"/>
+        <source>Clear the list</source>
+        <translation>Liste leeren</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/TransferPanel.qml" line="82"/>
+        <source>Transfers</source>
+        <translation>Übertragungen</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/TransferPanel.qml" line="138"/>
+        <source>Cancel the transfer of %1</source>
+        <translation>Übertragung von %1 abbrechen</translation>
+    </message>
+</context>
+<context>
     <name>VersionConflictDialog</name>
     <message>
         <location filename="../../qml/QPhoneManager/Ui/dialogs/VersionConflictDialog.qml" line="30"/>
@@ -3885,247 +4148,247 @@
 <context>
     <name>qpm::ui::AppController</name>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="132"/>
+        <location filename="../../src/ui/AppController.cpp" line="138"/>
         <source>Calls</source>
         <translation>Anrufe</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="123"/>
+        <location filename="../../src/ui/AppController.cpp" line="129"/>
         <source>Contacts</source>
         <translation>Kontakte</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="141"/>
+        <location filename="../../src/ui/AppController.cpp" line="147"/>
         <source>Messages</source>
         <translation>Nachrichten</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="150"/>
+        <location filename="../../src/ui/AppController.cpp" line="156"/>
         <source>Calendar and tasks</source>
         <translation>Kalender und Aufgaben</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="159"/>
+        <location filename="../../src/ui/AppController.cpp" line="165"/>
         <source>Notes</source>
         <translation>Notizen</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="250"/>
+        <location filename="../../src/ui/AppController.cpp" line="256"/>
         <source>Wi-Fi</source>
         <translation>WLAN</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="252"/>
+        <location filename="../../src/ui/AppController.cpp" line="258"/>
         <source>USB</source>
         <translation>USB</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="254"/>
+        <location filename="../../src/ui/AppController.cpp" line="260"/>
         <source>Bluetooth</source>
         <translation>Bluetooth</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="299"/>
-        <location filename="../../src/ui/AppController.cpp" line="1022"/>
+        <location filename="../../src/ui/AppController.cpp" line="305"/>
+        <location filename="../../src/ui/AppController.cpp" line="1030"/>
         <source>Enter the IP address of the phone, for example 192.168.1.20. MyPhoneExplorer Client shows it on the phone.</source>
         <translation>Geben Sie die IP-Adresse des Handys ein, zum Beispiel 192.168.1.20. MyPhoneExplorer Client zeigt sie auf dem Handy an.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="322"/>
+        <location filename="../../src/ui/AppController.cpp" line="328"/>
         <source>Choose a paired phone from the list.</source>
         <translation>Wählen Sie ein gekoppeltes Handy aus der Liste.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="352"/>
+        <location filename="../../src/ui/AppController.cpp" line="358"/>
         <source>This phone was not connected in a way that can be repeated. Choose Connect and pick how to connect.</source>
         <translation>Für dieses Handy ist kein Verbindungsweg gespeichert. Wählen Sie Verbinden und dann, wie verbunden werden soll.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="543"/>
+        <location filename="../../src/ui/AppController.cpp" line="551"/>
         <source>The data of this phone cannot be saved on this computer. Check the storage folder in the settings.</source>
         <translation>Die Daten dieses Handys lassen sich auf diesem Rechner nicht speichern. Prüfen Sie den Ablageordner in den Einstellungen.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="564"/>
+        <location filename="../../src/ui/AppController.cpp" line="572"/>
         <source>The PIN could not be saved, because the keyring of the system is not available. You will be asked for it next time.</source>
         <translation>Die PIN wurde nicht gespeichert, weil der Schlüsselbund des Systems nicht erreichbar ist. Sie werden beim nächsten Mal wieder danach gefragt.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="585"/>
+        <location filename="../../src/ui/AppController.cpp" line="593"/>
         <source>The connection to the phone was lost. QPhoneManager connects again as soon as the phone can be reached.</source>
         <translation>Die Verbindung zum Handy ist unterbrochen. QPhoneManager verbindet sich wieder, sobald das Handy erreichbar ist.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="613"/>
+        <location filename="../../src/ui/AppController.cpp" line="621"/>
         <source>This computer cannot wait for the phone, because port %1 is in use. Close the program that uses it, then try again.</source>
         <translation>Dieser Rechner kann nicht auf das Handy warten, weil Port %1 belegt ist. Schließen Sie das Programm, das ihn nutzt, und versuchen Sie es erneut.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="648"/>
+        <location filename="../../src/ui/AppController.cpp" line="656"/>
         <source>This computer cannot search the network right now. Enter the address of the phone instead.</source>
         <translation>Dieser Rechner kann das Netz gerade nicht durchsuchen. Geben Sie stattdessen die Adresse des Handys ein.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="655"/>
-        <location filename="../../src/ui/AppController.cpp" line="1019"/>
+        <location filename="../../src/ui/AppController.cpp" line="663"/>
+        <location filename="../../src/ui/AppController.cpp" line="1027"/>
         <source>adb was not found. Install the Android platform tools or choose adb in the settings.</source>
         <translation>adb wurde nicht gefunden. Installieren Sie die Android Platform Tools oder wählen Sie adb in den Einstellungen aus.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="664"/>
+        <location filename="../../src/ui/AppController.cpp" line="672"/>
         <source>adb did not work. Check the adb path in the settings.</source>
         <translation>adb hat nicht funktioniert. Prüfen Sie den Pfad zu adb in den Einstellungen.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="672"/>
+        <location filename="../../src/ui/AppController.cpp" line="680"/>
         <source>Allow USB debugging on the phone, then search again.</source>
         <translation>Erlauben Sie USB-Debugging auf dem Handy und suchen Sie dann erneut.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="674"/>
+        <location filename="../../src/ui/AppController.cpp" line="682"/>
         <source>The phone is not ready yet. Unlock it and search again.</source>
         <translation>Das Handy ist noch nicht bereit. Entsperren Sie es und suchen Sie erneut.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="679"/>
+        <location filename="../../src/ui/AppController.cpp" line="687"/>
         <source>No phone found at USB. Connect the cable and allow USB debugging on the phone.</source>
         <translation>Kein Handy an USB gefunden. Schließen Sie das Kabel an und erlauben Sie USB-Debugging auf dem Handy.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="700"/>
-        <location filename="../../src/ui/AppController.cpp" line="1006"/>
+        <location filename="../../src/ui/AppController.cpp" line="708"/>
+        <location filename="../../src/ui/AppController.cpp" line="1014"/>
         <source>This computer has no Bluetooth, or it is turned off. Turn Bluetooth on, or connect over Wi-Fi or USB.</source>
         <translation>Dieser Rechner hat kein Bluetooth, oder es ist ausgeschaltet. Schalten Sie Bluetooth ein oder verbinden Sie über WLAN oder USB.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="702"/>
+        <location filename="../../src/ui/AppController.cpp" line="710"/>
         <source>The Bluetooth search failed. Turn Bluetooth on and try again.</source>
         <translation>Die Suche über Bluetooth hat nicht geklappt. Schalten Sie Bluetooth ein und versuchen Sie es erneut.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="708"/>
+        <location filename="../../src/ui/AppController.cpp" line="716"/>
         <source>No paired phone found. Pair the phone in the system settings first.</source>
         <translation>Kein gekoppeltes Handy gefunden. Koppeln Sie das Handy zuerst in den Systemeinstellungen.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="763"/>
+        <location filename="../../src/ui/AppController.cpp" line="771"/>
         <source>Enter a name with 1 to 64 characters.</source>
         <translation>Geben Sie einen Namen mit 1 bis 64 Zeichen ein.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="771"/>
-        <location filename="../../src/ui/AppController.cpp" line="780"/>
-        <location filename="../../src/ui/AppController.cpp" line="787"/>
+        <location filename="../../src/ui/AppController.cpp" line="779"/>
+        <location filename="../../src/ui/AppController.cpp" line="788"/>
+        <location filename="../../src/ui/AppController.cpp" line="795"/>
         <source>The name could not be saved. Check the storage folder in the settings.</source>
         <translation>Der Name wurde nicht gespeichert. Prüfen Sie den Ablageordner in den Einstellungen.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="805"/>
+        <location filename="../../src/ui/AppController.cpp" line="813"/>
         <source>The phone could not be removed from this computer. Check the storage folder in the settings, then try again.</source>
         <translation>Das Handy ließ sich nicht von diesem Rechner entfernen. Prüfen Sie den Ablageordner in den Einstellungen und versuchen Sie es erneut.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="837"/>
+        <location filename="../../src/ui/AppController.cpp" line="845"/>
         <source>Connect the phone first, then sync.</source>
         <translation>Verbinden Sie zuerst das Handy, dann können Sie abgleichen.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="841"/>
+        <location filename="../../src/ui/AppController.cpp" line="849"/>
         <source>There is nothing to sync yet.</source>
         <translation>Es gibt noch nichts abzugleichen.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="861"/>
+        <location filename="../../src/ui/AppController.cpp" line="869"/>
         <source>%1: not synced. %2</source>
         <translation>%1: nicht abgeglichen. %2</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="865"/>
+        <location filename="../../src/ui/AppController.cpp" line="873"/>
         <source>%1: %2 new, %3 changed, %4 deleted</source>
         <translation>%1: %2 neu, %3 geändert, %4 gelöscht</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="910"/>
+        <location filename="../../src/ui/AppController.cpp" line="918"/>
         <source>Phone</source>
         <translation>Handy</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="934"/>
+        <location filename="../../src/ui/AppController.cpp" line="942"/>
         <source>The data of this phone cannot be opened on this computer. Check the storage folder in the settings.</source>
         <translation>Die Daten dieses Handys lassen sich auf diesem Rechner nicht öffnen. Prüfen Sie den Ablageordner in den Einstellungen.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="977"/>
+        <location filename="../../src/ui/AppController.cpp" line="985"/>
         <source>The phone does not answer over Bluetooth. Turn Bluetooth on at the phone, keep it close and try again.</source>
         <translation>Das Handy antwortet nicht über Bluetooth. Schalten Sie Bluetooth am Handy ein, halten Sie es in der Nähe und versuchen Sie es erneut.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="980"/>
+        <location filename="../../src/ui/AppController.cpp" line="988"/>
         <source>The phone does not answer. Check that MyPhoneExplorer Client is open on the phone, then try again.</source>
         <translation>Das Handy antwortet nicht. Prüfen Sie, ob MyPhoneExplorer Client auf dem Handy geöffnet ist, und versuchen Sie es erneut.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="984"/>
+        <location filename="../../src/ui/AppController.cpp" line="992"/>
         <source>The phone cannot be reached over Wi-Fi. Check that it is in the same network and that MyPhoneExplorer Client is open, then try again.</source>
         <translation>Das Handy ist über WLAN nicht erreichbar. Prüfen Sie, ob es im selben Netz ist und MyPhoneExplorer Client geöffnet ist, und versuchen Sie es erneut.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="987"/>
+        <location filename="../../src/ui/AppController.cpp" line="995"/>
         <source>The connection to the phone ended. Open MyPhoneExplorer Client on the phone, then connect again.</source>
         <translation>Die Verbindung zum Handy wurde beendet. Öffnen Sie MyPhoneExplorer Client auf dem Handy und verbinden Sie erneut.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="990"/>
+        <location filename="../../src/ui/AppController.cpp" line="998"/>
         <source>The phone is connected to another computer. End that connection first, then try again.</source>
         <translation>Das Handy ist mit einem anderen Rechner verbunden. Beenden Sie zuerst diese Verbindung und versuchen Sie es dann erneut.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="993"/>
+        <location filename="../../src/ui/AppController.cpp" line="1001"/>
         <source>MyPhoneExplorer Client does not allow Wi-Fi connections. Allow them in the app settings on the phone, or connect over USB.</source>
         <translation>MyPhoneExplorer Client lässt keine WLAN-Verbindungen zu. Erlauben Sie sie in den Einstellungen der App oder verbinden Sie über USB.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="996"/>
+        <location filename="../../src/ui/AppController.cpp" line="1004"/>
         <source>The phone asks for a PIN. Connect again and enter the PIN you set in MyPhoneExplorer Client.</source>
         <translation>Das Handy verlangt eine PIN. Verbinden Sie erneut und geben Sie die PIN ein, die Sie in MyPhoneExplorer Client festgelegt haben.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="999"/>
+        <location filename="../../src/ui/AppController.cpp" line="1007"/>
         <source>MyPhoneExplorer Client stopped after too many wrong PINs. Open the app on the phone again, then connect.</source>
         <translation>MyPhoneExplorer Client hat sich nach zu vielen falschen PINs beendet. Öffnen Sie die App auf dem Handy erneut und verbinden Sie dann.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1002"/>
+        <location filename="../../src/ui/AppController.cpp" line="1010"/>
         <source>MyPhoneExplorer Client lacks a permission on the phone. Allow it in the Android settings under Apps.</source>
         <translation>MyPhoneExplorer Client fehlt eine Berechtigung auf dem Handy. Erlauben Sie sie in den Android-Einstellungen unter Apps.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1009"/>
+        <location filename="../../src/ui/AppController.cpp" line="1017"/>
         <source>The phone does not support this. Update MyPhoneExplorer Client on the phone.</source>
         <translation>Das Handy unterstützt das nicht. Aktualisieren Sie MyPhoneExplorer Client auf dem Handy.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1013"/>
+        <location filename="../../src/ui/AppController.cpp" line="1021"/>
         <source>MyPhoneExplorer Client is not installed on the phone. Install it from Google Play, then try again.</source>
         <translation>MyPhoneExplorer Client ist auf dem Handy nicht installiert. Installieren Sie die App aus Google Play und versuchen Sie es erneut.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1016"/>
+        <location filename="../../src/ui/AppController.cpp" line="1024"/>
         <source>The phone did not find what was asked for. Sync again.</source>
         <translation>Das Handy hat das Angefragte nicht gefunden. Gleichen Sie erneut ab.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1026"/>
+        <location filename="../../src/ui/AppController.cpp" line="1034"/>
         <source>adb cannot reach the phone. Check the USB cable and allow USB debugging on the phone, then try again.</source>
         <translation>adb erreicht das Handy nicht. Prüfen Sie das USB-Kabel, erlauben Sie USB-Debugging auf dem Handy und versuchen Sie es erneut.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1029"/>
+        <location filename="../../src/ui/AppController.cpp" line="1037"/>
         <source>This computer could not open the connection. Try again, or restart the computer if it keeps failing.</source>
         <translation>Dieser Rechner konnte die Verbindung nicht öffnen. Versuchen Sie es erneut oder starten Sie den Rechner neu, wenn es weiter scheitert.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1036"/>
+        <location filename="../../src/ui/AppController.cpp" line="1044"/>
         <source>The phone sent an answer QPhoneManager does not understand. Update MyPhoneExplorer Client on the phone, then try again.</source>
         <translation>Das Handy hat eine Antwort gesendet, die QPhoneManager nicht versteht. Aktualisieren Sie MyPhoneExplorer Client auf dem Handy und versuchen Sie es erneut.</translation>
     </message>
@@ -4143,43 +4406,43 @@
         <translation>%1, %2</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/CalendarArea.cpp" line="540"/>
+        <location filename="../../src/ui/organizer/CalendarArea.cpp" line="556"/>
         <source>The appointment was changed on the phone. Sync, then try again.</source>
         <translation>Der Termin wurde auf dem Handy geändert. Gleichen Sie ab und versuchen Sie es noch einmal.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/CalendarArea.cpp" line="546"/>
+        <location filename="../../src/ui/organizer/CalendarArea.cpp" line="562"/>
         <source>This appointment is left out of the series.</source>
         <translation>Dieser Termin ist aus der Serie ausgelassen.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/CalendarArea.cpp" line="558"/>
-        <location filename="../../src/ui/organizer/CalendarArea.cpp" line="620"/>
+        <location filename="../../src/ui/organizer/CalendarArea.cpp" line="574"/>
+        <location filename="../../src/ui/organizer/CalendarArea.cpp" line="636"/>
         <source>Choose a file on this computer.</source>
         <translation>Wählen Sie eine Datei auf diesem Rechner.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/CalendarArea.cpp" line="574"/>
+        <location filename="../../src/ui/organizer/CalendarArea.cpp" line="590"/>
         <source>The file cannot be opened. Check that it exists.</source>
         <translation>Die Datei lässt sich nicht öffnen. Prüfen Sie, ob sie vorhanden ist.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/CalendarArea.cpp" line="575"/>
+        <location filename="../../src/ui/organizer/CalendarArea.cpp" line="591"/>
         <source>The file holds no appointments or tasks QPhoneManager can read. Choose an iCalendar file.</source>
         <translation>Die Datei enthält keine Termine oder Aufgaben, die QPhoneManager lesen kann. Wählen Sie eine iCalendar-Datei.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/CalendarArea.cpp" line="581"/>
+        <location filename="../../src/ui/organizer/CalendarArea.cpp" line="597"/>
         <source>The file holds no appointments or tasks.</source>
         <translation>Die Datei enthält keine Termine oder Aufgaben.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/CalendarArea.cpp" line="586"/>
+        <location filename="../../src/ui/organizer/CalendarArea.cpp" line="602"/>
         <source>The phone has no calendar the app may write to. Add one on the phone, then try again.</source>
         <translation>Das Handy hat keinen Kalender, in den die App schreiben darf. Legen Sie einen auf dem Handy an und versuchen Sie es noch einmal.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/ui/organizer/CalendarArea.cpp" line="600"/>
+        <location filename="../../src/ui/organizer/CalendarArea.cpp" line="616"/>
         <source>%n entry(s) imported.</source>
         <translation>
             <numerusform>%n Eintrag importiert.</numerusform>
@@ -4187,7 +4450,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/ui/organizer/CalendarArea.cpp" line="603"/>
+        <location filename="../../src/ui/organizer/CalendarArea.cpp" line="619"/>
         <source>%n entry(s) were left out, because they lack a title or a start.</source>
         <translation>
             <numerusform>%n Eintrag wurde ausgelassen, weil Titel oder Beginn fehlen.</numerusform>
@@ -4195,12 +4458,12 @@
         </translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/CalendarArea.cpp" line="638"/>
+        <location filename="../../src/ui/organizer/CalendarArea.cpp" line="654"/>
         <source>The file cannot be written. Choose another folder.</source>
         <translation>Die Datei lässt sich nicht schreiben. Wählen Sie einen anderen Ordner.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/ui/organizer/CalendarArea.cpp" line="641"/>
+        <location filename="../../src/ui/organizer/CalendarArea.cpp" line="657"/>
         <source>%n entry(s) exported.</source>
         <translation>
             <numerusform>%n Eintrag exportiert.</numerusform>
@@ -4208,12 +4471,12 @@
         </translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/CalendarArea.cpp" line="661"/>
+        <location filename="../../src/ui/organizer/CalendarArea.cpp" line="677"/>
         <source>The phone now syncs the calendars you chose.</source>
         <translation>Das Handy gleicht jetzt die gewählten Kalender ab.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/CalendarArea.cpp" line="737"/>
+        <location filename="../../src/ui/organizer/CalendarArea.cpp" line="753"/>
         <source>The alarm is saved on the phone.</source>
         <translation>Der Wecker ist auf dem Handy gespeichert.</translation>
     </message>
@@ -4687,54 +4950,182 @@
 <context>
     <name>qpm::ui::EventEditor</name>
     <message>
-        <location filename="../../src/ui/organizer/EventEditor.cpp" line="257"/>
+        <location filename="../../src/ui/organizer/EventEditor.cpp" line="267"/>
         <source>Enter a title.</source>
         <translation>Geben Sie einen Titel ein.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/EventEditor.cpp" line="259"/>
+        <location filename="../../src/ui/organizer/EventEditor.cpp" line="269"/>
         <source>Enter the start date like %1.</source>
         <translation>Geben Sie das Datum des Beginns wie %1 ein.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/EventEditor.cpp" line="261"/>
+        <location filename="../../src/ui/organizer/EventEditor.cpp" line="271"/>
         <source>Enter the start time like %1.</source>
         <translation>Geben Sie die Uhrzeit des Beginns wie %1 ein.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/EventEditor.cpp" line="263"/>
+        <location filename="../../src/ui/organizer/EventEditor.cpp" line="273"/>
         <source>Enter the end date like %1.</source>
         <translation>Geben Sie das Datum des Endes wie %1 ein.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/EventEditor.cpp" line="265"/>
+        <location filename="../../src/ui/organizer/EventEditor.cpp" line="275"/>
         <source>Enter the end time like %1.</source>
         <translation>Geben Sie die Uhrzeit des Endes wie %1 ein.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/EventEditor.cpp" line="267"/>
+        <location filename="../../src/ui/organizer/EventEditor.cpp" line="277"/>
         <source>The end lies before the start.</source>
         <translation>Das Ende liegt vor dem Beginn.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/EventEditor.cpp" line="269"/>
+        <location filename="../../src/ui/organizer/EventEditor.cpp" line="279"/>
         <source>The phone has no calendar the app may write to.</source>
         <translation>Das Handy hat keinen Kalender, in den die App schreiben darf.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/EventEditor.cpp" line="320"/>
+        <location filename="../../src/ui/organizer/EventEditor.cpp" line="330"/>
         <source>%1, %2</source>
         <translation>%1, %2</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/EventEditor.cpp" line="322"/>
+        <location filename="../../src/ui/organizer/EventEditor.cpp" line="332"/>
         <source>Place: %1</source>
         <translation>Ort: %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/EventEditor.cpp" line="328"/>
+        <location filename="../../src/ui/organizer/EventEditor.cpp" line="338"/>
         <source>Reminder: %1 %2</source>
         <translation>Erinnerung: %1 %2</translation>
+    </message>
+</context>
+<context>
+    <name>qpm::ui::FileBrowserModel</name>
+    <message>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="131"/>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="256"/>
+        <source>Connect your phone to browse its files.</source>
+        <translation>Verbinden Sie Ihr Handy, um seine Dateien zu sehen.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="176"/>
+        <source>Storage</source>
+        <translation>Speicher</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="176"/>
+        <source>Folder</source>
+        <translation>Ordner</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="177"/>
+        <source>%1, %2</source>
+        <translation>%1, %2</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="209"/>
+        <source>Phone</source>
+        <translation>Handy</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="231"/>
+        <source>Internal storage</source>
+        <translation>Interner Speicher</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="233"/>
+        <source>Memory card</source>
+        <translation>Speicherkarte</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="235"/>
+        <source>Phone storage</source>
+        <translation>Telefonspeicher</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="237"/>
+        <source>Second profile</source>
+        <translation>Zweitprofil</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="315"/>
+        <source>Choose a folder on this computer.</source>
+        <translation>Wählen Sie einen Ordner auf diesem Rechner.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="327"/>
+        <source>Open a folder on the phone first, then copy into it.</source>
+        <translation>Öffnen Sie zuerst einen Ordner auf dem Handy und kopieren Sie dann hinein.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="337"/>
+        <source>Only files and folders on this computer can be copied.</source>
+        <translation>Nur Dateien und Ordner auf diesem Rechner lassen sich kopieren.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="359"/>
+        <source>The folder %1 is created.</source>
+        <translation>Der Ordner %1 ist angelegt.</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="396"/>
+        <source>%n entry(s) deleted on the phone.</source>
+        <translation>
+            <numerusform>%n Eintrag auf dem Handy gelöscht.</numerusform>
+            <numerusform>%n Einträge auf dem Handy gelöscht.</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="418"/>
+        <source>%n entry(s) cut. Open the target folder and paste them there.</source>
+        <translation>
+            <numerusform>%n Eintrag ausgeschnitten. Öffnen Sie den Zielordner und fügen Sie ihn dort ein.</numerusform>
+            <numerusform>%n Einträge ausgeschnitten. Öffnen Sie den Zielordner und fügen Sie sie dort ein.</numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="439"/>
+        <source>%n entry(s) moved.</source>
+        <translation>
+            <numerusform>%n Eintrag verschoben.</numerusform>
+            <numerusform>%n Einträge verschoben.</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="475"/>
+        <source>Enter a name.</source>
+        <translation>Geben Sie einen Namen ein.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="477"/>
+        <source>A name cannot start or end with a space.</source>
+        <translation>Ein Name darf nicht mit einem Leerzeichen beginnen oder enden.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="479"/>
+        <source>Use a name without / or \ and without control characters.</source>
+        <translation>Verwenden Sie einen Namen ohne / oder \ und ohne Steuerzeichen.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="484"/>
+        <source>There is already an entry named %1 here.</source>
+        <translation>Hier gibt es schon einen Eintrag mit dem Namen %1.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="502"/>
+        <source>This folder cannot be shown.</source>
+        <translation>Dieser Ordner lässt sich nicht anzeigen.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="516"/>
+        <source>The phone shows no storage.</source>
+        <translation>Das Handy zeigt keinen Speicher.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="516"/>
+        <source>This folder is empty.</source>
+        <translation>Dieser Ordner ist leer.</translation>
     </message>
 </context>
 <context>
@@ -5148,62 +5539,67 @@
 <context>
     <name>qpm::ui::TaskEditor</name>
     <message>
-        <location filename="../../src/ui/organizer/TaskEditor.cpp" line="152"/>
+        <location filename="../../src/ui/organizer/TaskEditor.cpp" line="162"/>
         <source>Enter a title.</source>
         <translation>Geben Sie einen Titel ein.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/TaskEditor.cpp" line="154"/>
+        <location filename="../../src/ui/organizer/TaskEditor.cpp" line="164"/>
         <source>Enter the start date like %1, or leave it empty.</source>
         <translation>Geben Sie das Datum des Beginns wie %1 ein oder lassen Sie es leer.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/TaskEditor.cpp" line="156"/>
+        <location filename="../../src/ui/organizer/TaskEditor.cpp" line="166"/>
         <source>Enter the due date like %1, or leave it empty.</source>
         <translation>Geben Sie das Fälligkeitsdatum wie %1 ein oder lassen Sie es leer.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/TaskEditor.cpp" line="160"/>
+        <location filename="../../src/ui/organizer/TaskEditor.cpp" line="172"/>
         <source>Enter both the date and the time of the reminder, or neither.</source>
         <translation>Geben Sie Datum und Uhrzeit der Erinnerung ein oder keines von beiden.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/TaskEditor.cpp" line="162"/>
+        <location filename="../../src/ui/organizer/TaskEditor.cpp" line="174"/>
         <source>Enter the date of the reminder like %1.</source>
         <translation>Geben Sie das Datum der Erinnerung wie %1 ein.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/TaskEditor.cpp" line="164"/>
+        <location filename="../../src/ui/organizer/TaskEditor.cpp" line="176"/>
         <source>Enter the time of the reminder like %1.</source>
         <translation>Geben Sie die Uhrzeit der Erinnerung wie %1 ein.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/TaskEditor.cpp" line="198"/>
+        <location filename="../../src/ui/organizer/TaskEditor.cpp" line="185"/>
+        <source>The start lies after the due date. Change one of the two dates.</source>
+        <translation>Der Beginn liegt nach dem Fälligkeitsdatum. Ändern Sie eines der beiden Daten.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/organizer/TaskEditor.cpp" line="219"/>
         <source>Done</source>
         <translation>Erledigt</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/TaskEditor.cpp" line="200"/>
+        <location filename="../../src/ui/organizer/TaskEditor.cpp" line="221"/>
         <source>Start: %1</source>
         <translation>Beginn: %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/TaskEditor.cpp" line="202"/>
+        <location filename="../../src/ui/organizer/TaskEditor.cpp" line="223"/>
         <source>Due: %1</source>
         <translation>Fällig: %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/TaskEditor.cpp" line="205"/>
+        <location filename="../../src/ui/organizer/TaskEditor.cpp" line="226"/>
         <source>Reminder: %1 %2</source>
         <translation>Erinnerung: %1 %2</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/TaskEditor.cpp" line="208"/>
+        <location filename="../../src/ui/organizer/TaskEditor.cpp" line="229"/>
         <source>Priority: %1</source>
         <translation>Priorität: %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/organizer/TaskEditor.cpp" line="211"/>
+        <location filename="../../src/ui/organizer/TaskEditor.cpp" line="232"/>
         <source>Categories: %1</source>
         <translation>Kategorien: %1</translation>
     </message>
@@ -5287,6 +5683,130 @@
             <numerusform>%n Aufgabe wurde ausgelassen, weil der Titel fehlt.</numerusform>
             <numerusform>%n Aufgaben wurden ausgelassen, weil der Titel fehlt.</numerusform>
         </translation>
+    </message>
+</context>
+<context>
+    <name>qpm::ui::TransferQueue</name>
+    <message>
+        <location filename="../../src/ui/files/TransferQueue.cpp" line="148"/>
+        <source>Transfer %1 of %2, %3 %</source>
+        <translation>Übertragung %1 von %2, %3 %</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/files/TransferQueue.cpp" line="336"/>
+        <source>The app on the phone may not access the files. Allow it in the Android settings and try again.</source>
+        <translation>Die App auf dem Handy darf nicht auf die Dateien zugreifen. Erlauben Sie es in den Android-Einstellungen und versuchen Sie es erneut.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/files/TransferQueue.cpp" line="339"/>
+        <source>The phone refused access to this folder. Allow it on the phone and try again.</source>
+        <translation>Das Handy verweigert den Zugriff auf diesen Ordner. Erlauben Sie ihn am Handy und versuchen Sie es erneut.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/files/TransferQueue.cpp" line="341"/>
+        <source>The file or folder is no longer on the phone. Reload the folder.</source>
+        <translation>Die Datei oder der Ordner ist nicht mehr auf dem Handy. Laden Sie den Ordner neu.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/files/TransferQueue.cpp" line="343"/>
+        <source>This name is already taken. Choose another name.</source>
+        <translation>Diesen Namen gibt es schon. Wählen Sie einen anderen.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/files/TransferQueue.cpp" line="345"/>
+        <source>The file cannot be stored. Check the target folder and the free space.</source>
+        <translation>Die Datei lässt sich nicht speichern. Prüfen Sie den Zielordner und den freien Platz.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/files/TransferQueue.cpp" line="347"/>
+        <source>The file is too large.</source>
+        <translation>Die Datei ist zu groß.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/files/TransferQueue.cpp" line="349"/>
+        <source>This needs a connection over Wi-Fi or USB. Connect the phone that way and try again.</source>
+        <translation>Dafür ist eine Verbindung über WLAN oder USB nötig. Verbinden Sie das Handy so und versuchen Sie es erneut.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/files/TransferQueue.cpp" line="352"/>
+        <source>The name cannot be used here. The file was left out.</source>
+        <translation>Der Name ist hier nicht verwendbar. Die Datei wurde ausgelassen.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/files/TransferQueue.cpp" line="354"/>
+        <source>The phone did not answer in time. Try again.</source>
+        <translation>Das Handy hat nicht rechtzeitig geantwortet. Versuchen Sie es erneut.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/files/TransferQueue.cpp" line="356"/>
+        <source>The connection to the phone ended. Connect again and try again.</source>
+        <translation>Die Verbindung zum Handy ist beendet. Verbinden Sie es erneut und versuchen Sie es noch einmal.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/files/TransferQueue.cpp" line="360"/>
+        <source>The phone could not do this. Try again.</source>
+        <translation>Das Handy konnte das nicht ausführen. Versuchen Sie es erneut.</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../../src/ui/files/TransferQueue.cpp" line="601"/>
+        <source>%n entry(s) of the folder %1 were left out, because their name cannot be used here.</source>
+        <translation>
+            <numerusform>%n Eintrag des Ordners %1 wurde ausgelassen, weil sein Name hier nicht verwendbar ist.</numerusform>
+            <numerusform>%n Einträge des Ordners %1 wurden ausgelassen, weil ihre Namen hier nicht verwendbar sind.</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/files/TransferQueue.cpp" line="773"/>
+        <source>No program on this computer opens %1.</source>
+        <translation>Kein Programm auf diesem Rechner öffnet %1.</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../../src/ui/files/TransferQueue.cpp" line="814"/>
+        <source>%n transfer(s) did not work. %1</source>
+        <translation>
+            <numerusform>%n Übertragung hat nicht geklappt. %1</numerusform>
+            <numerusform>%n Übertragungen haben nicht geklappt. %1</numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/files/TransferQueue.cpp" line="853"/>
+        <source>Waiting</source>
+        <translation>Wartet</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/files/TransferQueue.cpp" line="856"/>
+        <source>Reading the folder</source>
+        <translation>Ordner wird gelesen</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/files/TransferQueue.cpp" line="857"/>
+        <source>%1 %</source>
+        <translation>%1 %</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/files/TransferQueue.cpp" line="859"/>
+        <source>Running</source>
+        <translation>Läuft</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/files/TransferQueue.cpp" line="861"/>
+        <source>Waiting for your choice</source>
+        <translation>Wartet auf Ihre Wahl</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/files/TransferQueue.cpp" line="863"/>
+        <source>Done</source>
+        <translation>Fertig</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/files/TransferQueue.cpp" line="865"/>
+        <source>Skipped</source>
+        <translation>Übersprungen</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/files/TransferQueue.cpp" line="869"/>
+        <source>Cancelled</source>
+        <translation>Abgebrochen</translation>
     </message>
 </context>
 </TS>

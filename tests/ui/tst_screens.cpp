@@ -7,6 +7,8 @@
 #include "ui/Settings.h"
 #include "ui/calls/CallsArea.h"
 #include "ui/contacts/ContactsArea.h"
+#include "ui/files/FileBrowserModel.h"
+#include "ui/files/TransferQueue.h"
 #include "ui/messages/MessagesArea.h"
 #include "ui/messages/MessageComposer.h"
 #include "ui/organizer/CalendarArea.h"
@@ -31,6 +33,7 @@
 #include <QTest>
 #include <QTimeZone>
 #include <QTranslator>
+#include <QUrl>
 
 #include <cstdlib>
 #include <memory>
@@ -287,6 +290,9 @@ QList<qpm::test::FakeSyncObject> exampleOrganizer()
     trip.allDay = true;
     trip.start = QDateTime(QDate(2026, 11, 20), QTime(0, 0), QTimeZone::UTC);
     trip.end = QDateTime(QDate(2026, 11, 23), QTime(0, 0), QTimeZone::UTC);
+    CalendarEvent tyres =
+        appointment(0x10000005, QStringLiteral("Winterreifen beim Autohaus am Stadtrand abholen"),
+                    berlin(13, 16), 30, QStringLiteral("Familie"));
     CalendarTask windows;
     windows.luid = 5;
     windows.summary = QStringLiteral("Fenster putzen");
@@ -295,6 +301,7 @@ QList<qpm::test::FakeSyncObject> exampleOrganizer()
     CalendarTask tax;
     tax.luid = 6;
     tax.summary = QStringLiteral("Steuererklärung abgeben");
+    tax.start = QDate(2026, 10, 15);
     tax.due = QDate(2026, 11, 2);
     tax.priority = TaskPriority::High;
     tax.categories = {QStringLiteral("Büro")};
@@ -306,6 +313,7 @@ QList<qpm::test::FakeSyncObject> exampleOrganizer()
             {sport.luid, encodeEventAsPhoneSendsIt(sport)},
             {review.luid, encodeEventAsPhoneSendsIt(review)},
             {trip.luid, encodeEventAsPhoneSendsIt(trip)},
+            {tyres.luid, encodeEventAsPhoneSendsIt(tyres)},
             {windows.luid, encodeTaskAsPhoneSendsIt(windows)},
             {tax.luid, encodeTaskAsPhoneSendsIt(tax)},
             {done.luid, encodeTaskAsPhoneSendsIt(done)}};
@@ -346,6 +354,19 @@ QQuickItem *findVisual(QQuickItem *item, const QString &name)
     const QList<QQuickItem *> children = item->childItems();
     for (QQuickItem *child : children) {
         if (QQuickItem *found = findVisual(child, name))
+            return found;
+    }
+    return nullptr;
+}
+
+// The label below `item` whose text holds `text`.
+QQuickItem *labelWithText(QQuickItem *item, const QString &text)
+{
+    if (item->inherits("QQuickText") && item->property("text").toString().contains(text))
+        return item;
+    const QList<QQuickItem *> children = item->childItems();
+    for (QQuickItem *child : children) {
+        if (QQuickItem *found = labelWithText(child, text))
             return found;
     }
     return nullptr;
@@ -412,6 +433,8 @@ private Q_SLOTS:
     void messageViewsAreGermanAndRenderInBothSchemes();
     void organizerViewsAreGermanAndRenderInBothSchemes_data();
     void organizerViewsAreGermanAndRenderInBothSchemes();
+    void fileViewsAreGermanAndRenderInBothSchemes_data();
+    void fileViewsAreGermanAndRenderInBothSchemes();
 
 private:
     [[nodiscard]] QObject *dialog(const QString &name) const;
@@ -463,6 +486,24 @@ void TestScreens::initTestCase()
     m_phone->setMetadata(QStringLiteral("cal"), calendarMetadata());
     m_phone->setObjects(QStringLiteral("notes"), exampleNotes());
     m_phone->setMetadata(QStringLiteral("notes"), noteMetadata());
+    const QDateTime taken(QDate(2026, 8, 14), QTime(10, 12), QTimeZone::UTC);
+    m_phone->addFolder(QStringLiteral("\\external\\DCIM"));
+    m_phone->addFolder(QStringLiteral("\\sdcard\\Music"));
+    m_phone->addFolder(QStringLiteral("\\sdcard\\DCIM\\Camera\\Urlaub Ostsee"));
+    const QList<std::pair<const char *, QColor>> photos = {
+        {"Strand.jpg", QColor(0, 106, 106)},
+        {"Leuchtturm.jpg", QColor(180, 90, 40)},
+        {"Hafen.jpg", QColor(90, 60, 150)},
+        {"Dünen.jpg", QColor(40, 140, 80)},
+        {"Sonnenuntergang.jpg", QColor(200, 120, 30)}};
+    for (const auto &[name, color] : photos) {
+        m_phone->addFile(QStringLiteral("\\sdcard\\DCIM\\Camera\\") + QString::fromUtf8(name),
+                         portrait(color), taken);
+    }
+    m_phone->addFile(QStringLiteral("\\sdcard\\DCIM\\Camera\\Ausflug.mp4"),
+                     QByteArray(2400000, 'v'), taken);
+    m_phone->addFile(QStringLiteral("\\sdcard\\DCIM\\Camera\\Reiseplan.pdf"),
+                     QByteArray(184320, 'p'), taken);
     m_phone->config().alarms =
         QStringList{QStringLiteral("\"06:30\",1,0,\"Aufstehen\",\"1,2,3,4,5\",1"),
                     QStringLiteral("\"08:00\",2,0,\"Wochenende\",\"6,7\",0")};
@@ -502,8 +543,9 @@ QObject *TestScreens::dialog(const QString &name) const
     if (QObject *found = m_window->findChild<QObject *>(name))
         return found;
     for (const QString &pageName :
-         {QStringLiteral("contactsPage"), QStringLiteral("callsPage"), QStringLiteral("messagesPage"),
-          QStringLiteral("calendarPage"), QStringLiteral("tasksPage"), QStringLiteral("notesPage")}) {
+         {QStringLiteral("contactsPage"), QStringLiteral("callsPage"),
+          QStringLiteral("messagesPage"), QStringLiteral("calendarPage"),
+          QStringLiteral("tasksPage"), QStringLiteral("notesPage"), QStringLiteral("filesPage")}) {
         QQuickItem *page = item(pageName);
         if (QObject *found = page ? page->findChild<QObject *>(name) : nullptr)
             return found;
@@ -1017,6 +1059,20 @@ void TestScreens::organizerViewsAreGermanAndRenderInBothSchemes()
         focusName = view == QLatin1StringView("calendarMonth") || view == QLatin1StringView("calendarWeek")
                         ? QStringLiteral("calendarGrid")
                         : QStringLiteral("eventList");
+        if (view == QLatin1StringView("calendarMonth") ||
+            view == QLatin1StringView("calendarWeek")) {
+            // A week shows a long title on up to three lines, a month on one.
+            const QString longTitle =
+                QStringLiteral("Winterreifen beim Autohaus am Stadtrand abholen");
+            const auto lines = [this, &longTitle]() {
+                const QQuickItem *label = labelWithText(m_window->contentItem(), longTitle);
+                return label ? label->property("lineCount").toInt() : 0;
+            };
+            if (view == QLatin1StringView("calendarWeek"))
+                QTRY_VERIFY2(lines() >= 2 && lines() <= 3, qPrintable(QString::number(lines())));
+            else
+                QTRY_COMPARE(lines(), 1);
+        }
     } else if (view == QLatin1StringView("eventDetail") || view == QLatin1StringView("eventForm")) {
         calendar->setViewMode(qpm::ui::CalendarArea::ViewMode::Day);
         for (int row = 0; row < calendar->list()->rowCount(); ++row) {
@@ -1028,8 +1084,33 @@ void TestScreens::organizerViewsAreGermanAndRenderInBothSchemes()
         const QString heading = view == QLatin1StringView("eventForm") ? QStringLiteral("eventForm")
                                                                         : QStringLiteral("eventTitle");
         QTRY_VERIFY(item(heading));
-        if (view == QLatin1StringView("eventDetail"))
+        if (view == QLatin1StringView("eventDetail")) {
             QTRY_COMPARE(item(heading)->property("text").toString(), germanTitle);
+            // The list marks the appointment the detail shows.
+            QVERIFY(calendar->currentRow() >= 0);
+            QTRY_COMPARE(item(QStringLiteral("eventList"))->property("currentIndex").toInt(),
+                         calendar->currentRow());
+            // The list joined time and place with a call that Qt 6.9 refuses; the line stayed empty.
+            QTRY_VERIFY(
+                labelWithText(m_window->contentItem(), QStringLiteral(", Grundschule am Park")));
+        }
+        if (view == QLatin1StringView("eventForm")) {
+            // Every choice of the form shows its whole text.
+            for (const QString &box :
+                 {QStringLiteral("eventRepeatBox"), QStringLiteral("eventColorBox"),
+                  QStringLiteral("eventAvailabilityBox"), QStringLiteral("eventVisibilityBox")}) {
+                QTRY_VERIFY(item(box));
+                const auto *text = item(box)->property("contentItem").value<QQuickItem *>();
+                QVERIFY(text);
+                QTRY_VERIFY2(text->property("contentWidth").toReal() <=
+                                 text->width() - text->property("leftPadding").toReal() -
+                                     text->property("rightPadding").toReal(),
+                             qPrintable(QStringLiteral("%1: %2 > %3")
+                                            .arg(box)
+                                            .arg(text->property("contentWidth").toReal())
+                                            .arg(text->width())));
+            }
+        }
     } else if (view == QLatin1StringView("tasks") || view == QLatin1StringView("notes")) {
         focusName = tasks ? QStringLiteral("taskList") : QStringLiteral("noteList");
         if (tasks)
@@ -1043,6 +1124,15 @@ void TestScreens::organizerViewsAreGermanAndRenderInBothSchemes()
             m_controller->notes()->setCurrentLuid(1);
         QVERIFY(QMetaObject::invokeMethod(page, "startEdit"));
         QTRY_VERIFY(item(view));
+        if (tasks) {
+            // An empty date field shows the form of a date, not a date that reads as a value.
+            QCOMPARE(item(QStringLiteral("taskStartField"))->property("placeholderText").toString(),
+                     QStringLiteral("TT.MM.JJJJ"));
+            QCOMPARE(item(QStringLiteral("taskReminderTimeField"))
+                         ->property("placeholderText")
+                         .toString(),
+                     QStringLiteral("hh:mm"));
+        }
     } else {
         popup = dialog(view);
         QVERIFY(popup);
@@ -1085,6 +1175,120 @@ void TestScreens::organizerViewsAreGermanAndRenderInBothSchemes()
         QTRY_VERIFY(!popup->property("visible").toBool());
     }
     page->setProperty("editing", false);
+    QVERIFY(m_controller->isConnected());
+}
+
+void TestScreens::fileViewsAreGermanAndRenderInBothSchemes_data()
+{
+    QTest::addColumn<QString>("view");
+    QTest::addColumn<QString>("germanTitle");
+
+    QTest::newRow("storages") << QStringLiteral("filesRoot") << QStringLiteral("Dateien");
+    QTest::newRow("grid") << QStringLiteral("filesGrid") << QStringLiteral("Dateien");
+    QTest::newRow("list") << QStringLiteral("filesList") << QStringLiteral("Dateien");
+    QTest::newRow("menu") << QStringLiteral("fileMenu") << QString();
+    QTest::newRow("new folder") << QStringLiteral("fileNameDialog")
+                                << QStringLiteral("Neuer Ordner");
+    QTest::newRow("delete") << QStringLiteral("deleteFileDialog")
+                            << QStringLiteral("Reiseplan.pdf löschen?");
+    QTest::newRow("conflict") << QStringLiteral("fileConflictDialog")
+                              << QStringLiteral("Reiseplan.pdf gibt es schon");
+    QTest::newRow("transfers") << QStringLiteral("filesTransfers") << QStringLiteral("Dateien");
+}
+
+void TestScreens::fileViewsAreGermanAndRenderInBothSchemes()
+{
+    QFETCH(QString, view);
+    QFETCH(QString, germanTitle);
+    qpm::ui::FileBrowserModel *files = m_controller->files();
+    qpm::ui::TransferQueue *transfers = m_controller->transfers();
+    m_window->setProperty("currentSection", 7);
+    QQuickItem *header = m_window->property("header").value<QQuickItem *>();
+    QCOMPARE(header->property("title").toString(), QStringLiteral("Dateien"));
+    QTRY_VERIFY(item(QStringLiteral("filesPage")));
+    QQuickItem *page = item(QStringLiteral("filesPage"));
+    page->setProperty("showGrid", view != QLatin1StringView("filesList"));
+    const QString folder = view == QLatin1StringView("filesRoot")
+                               ? QString()
+                               : QStringLiteral("\\sdcard\\DCIM\\Camera");
+    QVERIFY(files->open(folder));
+    QTRY_VERIFY_WITH_TIMEOUT(!files->isBusy() && files->count() > 0, connectTimeoutMs);
+    if (view == QLatin1StringView("filesRoot")) {
+        QCOMPARE(files->crumbNames(), QStringList{QStringLiteral("Handy")});
+        QCOMPARE(
+            files->data(files->index(0), qpm::ui::FileBrowserModel::DisplayNameRole).toString(),
+            QStringLiteral("Interner Speicher"));
+    } else {
+        QCOMPARE(files->crumbNames(),
+                 (QStringList{QStringLiteral("Handy"), QStringLiteral("Interner Speicher"),
+                              QStringLiteral("DCIM"), QStringLiteral("Camera")}));
+        // The pictures are shown once their thumbnails are there.
+        const int strand = files->rowOf(QStringLiteral("Strand.jpg"));
+        QTRY_VERIFY_WITH_TIMEOUT(
+            !files->data(files->index(strand), qpm::ui::FileBrowserModel::ThumbnailUrlRole)
+                 .toString()
+                 .isEmpty(),
+            connectTimeoutMs);
+    }
+    page->setProperty("currentRow", files->rowOf(QStringLiteral("Reiseplan.pdf")));
+    m_window->requestActivate();
+    QVERIFY(QTest::qWaitForWindowActive(m_window));
+
+    QObject *popup = nullptr;
+    QTemporaryDir target;
+    QVERIFY(target.isValid());
+    if (view == QLatin1StringView("filesRoot") || view == QLatin1StringView("filesGrid") ||
+        view == QLatin1StringView("filesList")) {
+        QQuickItem *focus =
+            item(view == QLatin1StringView("filesList") ? QStringLiteral("fileList")
+                                                        : QStringLiteral("fileGrid"));
+        QVERIFY(focus);
+        focus->forceActiveFocus(Qt::TabFocusReason);
+        QTRY_VERIFY(focus->hasActiveFocus());
+    } else if (view == QLatin1StringView("filesTransfers")) {
+        QVERIFY(files->download({QStringLiteral("Reiseplan.pdf"), QStringLiteral("Strand.jpg")},
+                                QUrl::fromLocalFile(target.path())));
+        QTRY_VERIFY_WITH_TIMEOUT(!transfers->isActive(), connectTimeoutMs);
+        QTRY_VERIFY(item(QStringLiteral("transferList")) &&
+                    item(QStringLiteral("transferList"))->isVisible());
+        QCOMPARE(item(QStringLiteral("transferSummary"))->property("text").toString(),
+                 QStringLiteral("Übertragungen beendet"));
+    } else if (view == QLatin1StringView("fileConflictDialog")) {
+        QFile existing(target.filePath(QStringLiteral("Reiseplan.pdf")));
+        QVERIFY(existing.open(QIODevice::WriteOnly));
+        existing.close();
+        QVERIFY(
+            files->download({QStringLiteral("Reiseplan.pdf")}, QUrl::fromLocalFile(target.path())));
+        popup = dialog(view);
+        QVERIFY(popup);
+        QTRY_VERIFY_WITH_TIMEOUT(popup->property("opened").toBool(), connectTimeoutMs);
+        QCOMPARE(popup->property("title").toString(), germanTitle);
+    } else {
+        popup = dialog(view);
+        QVERIFY(popup);
+        if (view == QLatin1StringView("fileNameDialog"))
+            QVERIFY(QMetaObject::invokeMethod(page, "startNewFolder"));
+        else if (view == QLatin1StringView("deleteFileDialog"))
+            QVERIFY(QMetaObject::invokeMethod(page, "confirmDelete"));
+        else
+            QVERIFY(QMetaObject::invokeMethod(page, "showMenu"));
+        QTRY_VERIFY(popup->property("opened").toBool());
+        if (!germanTitle.isEmpty())
+            QCOMPARE(popup->property("title").toString(), germanTitle);
+    }
+
+    QVERIFY(saveBothSchemes(view));
+
+    if (popup && view == QLatin1StringView("fileConflictDialog")) {
+        QMetaObject::invokeMethod(popup, "answer",
+                                  Q_ARG(int, int(qpm::ui::TransferQueue::Choice::Skip)));
+        QTRY_VERIFY(!transfers->isActive());
+    }
+    if (popup) {
+        QMetaObject::invokeMethod(popup, "close");
+        QTRY_VERIFY(!popup->property("visible").toBool());
+    }
+    transfers->clearFinished();
     QVERIFY(m_controller->isConnected());
 }
 
