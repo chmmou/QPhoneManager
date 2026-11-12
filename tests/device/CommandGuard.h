@@ -17,7 +17,10 @@ namespace qpm::test {
  * AT+CMGS= except the probe AT+CMGS=?, AT*NOTIACTION, an OBEX
  * PUT whose name contains "/msg" other than telecom/msg/setflags, since the
  * phone hands such a PUT to its message handler, and an OBEX PUT it cannot
- * decode. Each line of a frame is checked after trimming it the way the phone
+ * decode. Of the app commands only three forms pass: AT*EJAVA=1 for the
+ * list, and AT*EJAVA=4,<package> and AT*EJAVA=2,<package> with a valid
+ * package name to start an app and to ask for its removal; every other
+ * AT*EJAVA is refused. Each line of a frame is checked after trimming it the way the phone
  * does, without regard to case. Hanging up with ATH or AT+CHUP passes.
  *
  * Two exceptions come from the environment. AT+CMGS=<number>,<text>,... and

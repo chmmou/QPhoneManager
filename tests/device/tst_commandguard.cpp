@@ -70,6 +70,8 @@ private Q_SLOTS:
     void everythingElseStaysBlockedWithAllowedNumbers();
     void incompleteAllowedNumberAllowsNothing_data();
     void incompleteAllowedNumberAllowsNothing();
+    void appCommandsPassOnlyInTheirThreeForms_data();
+    void appCommandsPassOnlyInTheirThreeForms();
 };
 
 // The allow list comes from the environment; every test starts without it.
@@ -338,6 +340,36 @@ void TestCommandGuard::incompleteAllowedNumberAllowsNothing()
     qputenv("QPM_TEST_CALL_TO", allowed);
 
     QVERIFY(CommandGuard::blockReason(command).has_value());
+}
+
+void TestCommandGuard::appCommandsPassOnlyInTheirThreeForms_data()
+{
+    QTest::addColumn<QString>("command");
+    QTest::addColumn<bool>("passes");
+
+    QTest::newRow("list") << QStringLiteral("AT*EJAVA=1") << true;
+    QTest::newRow("start") << QStringLiteral("AT*EJAVA=4,com.android.settings") << true;
+    QTest::newRow("removal") << QStringLiteral("AT*EJAVA=2,org.example.Test_app2") << true;
+    QTest::newRow("padded list") << QStringLiteral(" at*ejava=1\t") << true;
+    QTest::newRow("bare") << QStringLiteral("AT*EJAVA") << false;
+    QTest::newRow("probe") << QStringLiteral("AT*EJAVA=?") << false;
+    QTest::newRow("other mode") << QStringLiteral("AT*EJAVA=3,com.example") << false;
+    QTest::newRow("list with argument") << QStringLiteral("AT*EJAVA=1,com.example") << false;
+    QTest::newRow("start without package") << QStringLiteral("AT*EJAVA=4,") << false;
+    QTest::newRow("start with two packages") << QStringLiteral("AT*EJAVA=4,a.b,c.d") << false;
+    QTest::newRow("removal with a space") << QStringLiteral("AT*EJAVA=2,org example") << false;
+    QTest::newRow("longer name") << QStringLiteral("AT*EJAVAX=1") << false;
+}
+
+// Only the list, a start and a removal request may reach a phone; any other
+// form of the app command stays out.
+void TestCommandGuard::appCommandsPassOnlyInTheirThreeForms()
+{
+    QFETCH(QString, command);
+    QFETCH(bool, passes);
+
+    QCOMPARE(!CommandGuard::blockReason(command).has_value(), passes);
+    QCOMPARE(!CommandGuard::blockReasonForFrame(command.toUtf8() + "\r\n").has_value(), passes);
 }
 
 QTEST_GUILESS_MAIN(TestCommandGuard)

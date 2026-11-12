@@ -1,5 +1,6 @@
 #include "CommandGuard.h"
 
+#include "core/codec/AppListCodec.h"
 #include "core/protocol/ObexPacket.h"
 
 #include <QLoggingCategory>
@@ -92,6 +93,21 @@ bool isAllowedMessage(const QString &arguments)
     return isAllowedNumber(arguments.first(comma), messageNumberVariable);
 }
 
+// `command` is trimmed like the phone does. The package name keeps its case.
+bool isAllowedAppCommand(const QString &command)
+{
+    static constexpr QLatin1StringView list("AT*EJAVA=1");
+    static constexpr QLatin1StringView start("AT*EJAVA=4,");
+    static constexpr QLatin1StringView remove("AT*EJAVA=2,");
+    if (command.compare(list, Qt::CaseInsensitive) == 0)
+        return true;
+    for (const QLatin1StringView prefix : {start, remove}) {
+        if (command.startsWith(prefix, Qt::CaseInsensitive))
+            return core::codec::isValidPackageName(QStringView(command).sliced(prefix.size()));
+    }
+    return false;
+}
+
 std::optional<QString> blockReasonForPut(const QByteArray &frame)
 {
     const auto packet = core::protocol::ObexPacket::decode(
@@ -178,6 +194,10 @@ std::optional<QString> CommandGuard::blockReason(const QString &command)
     }
     if (upper.startsWith(QLatin1StringView("AT*NOTIACTION")))
         return QStringLiteral("AT*NOTIACTION can reply to a message or call back");
+    if (upper.startsWith(QLatin1StringView("AT*EJAVA")) &&
+        !isAllowedAppCommand(trimmedLikeThePhone(command))) {
+        return QStringLiteral("AT*EJAVA in a form other than the list, a start or a removal");
+    }
     return std::nullopt;
 }
 

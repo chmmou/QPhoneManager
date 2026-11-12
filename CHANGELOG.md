@@ -46,6 +46,11 @@ numbers follow [Semantic Versioning](https://semver.org/).
 - Deleting messages and changing their read state are offered; where the app
   on the phone refuses, the program says so and points to the archive.
 - The sync of all areas includes the messages.
+- Apps: the installed apps with icon, name, package, version, size and date,
+  a search and a filter for your own apps, system apps or all. An app can be
+  opened on the phone, its APK saved on this computer, an APK installed from
+  this computer and an app removed; the phone asks before it installs or
+  removes anything.
 
 ### Changed
 

@@ -131,8 +131,20 @@ public:
     QFuture<Result<QString>> upload(const QString &localPath, const QString &remoteFolder,
                                     const QString &remoteName);
 
+    /**
+     * Hands the local APK `localPath` to the phone as `remoteName`, which
+     * must end in ".apk": it goes to the root of the file browser, where the
+     * phone keeps it to itself and then asks its user whether to install it.
+     * Runs like upload(), with the same repeats; the result says only that
+     * the phone has the file, not that the app is installed.
+     */
+    QFuture<Result<void>> installPackage(const QString &localPath, const QString &remoteName);
+
     /// Ends the running transfer; its future then fails with ErrorCode::Cancelled.
     void cancelTransfer();
+
+    /// Returns true while a download, an upload or an installation runs or waits for its session.
+    [[nodiscard]] bool isTransferRunning() const { return m_transfer != nullptr; }
 
 Q_SIGNALS:
     /// Bytes of the running transfer done so far, of `bytesTotal`.
@@ -145,8 +157,12 @@ private:
                                                        protocol::ObexClient::ListingDepth depth);
     QFuture<Result<void>> moveTo(const QString &path, const QString &targetFolder,
                                  const QString &name);
+    /// Starts an upload whose arguments are checked; an empty `remoteFolder` is the root.
+    QFuture<Result<QString>> startUpload(const QString &localPath, const QString &remoteFolder,
+                                         const QString &remoteName);
     void keepTransfer(const std::shared_ptr<Transfer> &transfer);
-    void finishTransfer(const std::shared_ptr<Transfer> &transfer, const Result<void> &result);
+    /// Settles `ended` once and reports `result` to its caller; `ended` may be m_transfer.
+    void finishTransfer(const std::shared_ptr<Transfer> &ended, const Result<void> &result);
 
     void runSocketDownload(const std::shared_ptr<Transfer> &transfer, protocol::ObexClient &obex);
     void runInlineDownload(const std::shared_ptr<Transfer> &transfer, protocol::ObexClient &obex);

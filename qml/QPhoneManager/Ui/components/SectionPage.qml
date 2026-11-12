@@ -107,6 +107,15 @@ Item {
         }
     }
 
+    Component {
+        id: apps
+
+        AppsPage {
+            emptyText: root.entry.emptyText
+            onConnectRequested: root.connectRequested()
+        }
+    }
+
     Loader {
         anchors.fill: parent
         sourceComponent: {
@@ -126,6 +135,8 @@ Item {
                 return notes;
             if (root.entry.key === "files")
                 return files;
+            if (root.entry.key === "apps")
+                return apps;
             return root.entry.hasList ? listAndDetail : placeholder;
         }
     }

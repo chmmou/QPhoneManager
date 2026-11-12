@@ -71,7 +71,8 @@ QStringList filesDirectlyIn(const QStringList &paths, const QString &folder)
 
 // The file service against the fake phone: listings, both directions of a
 // transfer over the fast channel and inside the OBEX session, cancelling,
-// folders, renaming, moving and deleting.
+// the end of the connection during a transfer, folders, renaming, moving and
+// deleting.
 class TestFiles : public QObject
 {
     Q_OBJECT
@@ -100,6 +101,8 @@ private Q_SLOTS:
     void emptyFileMakesTheRoundTrip();
     void cancelledDownloadKeepsTheOldFile();
     void cancelledUploadLeavesNothingOnThePhone();
+    void endOfTheConnectionEndsTheRunningTransfer_data();
+    void endOfTheConnectionEndsTheRunningTransfer();
     void folderIsCreatedRenamedMovedAndDeleted();
     void takenNameRefusesTheRename();
     void folderCannotMoveIntoItself();
@@ -469,6 +472,51 @@ void TestFiles::cancelledUploadLeavesNothingOnThePhone()
     QCOMPARE(uploaded.result().error().code(), ErrorCode::Cancelled);
     QVERIFY(!m_phone->file(QStringLiteral("\\sdcard\\gross.bin")).has_value());
     QVERIFY(fileRequests().contains(QStringLiteral("OBEX ABORT")));
+}
+
+void TestFiles::endOfTheConnectionEndsTheRunningTransfer_data()
+{
+    QTest::addColumn<bool>("upload");
+
+    QTest::newRow("download") << false;
+    QTest::newRow("upload") << true;
+}
+
+// The end of the connection during a transfer crashed the program: finishing
+// the transfer reset the pointer it was handed and then read the transfer
+// through it.
+void TestFiles::endOfTheConnectionEndsTheRunningTransfer()
+{
+    QFETCH(bool, upload);
+    const QByteArray data = pattern(40 * 1024 * 1024);
+    m_phone->addFile(QStringLiteral("\\sdcard\\video.mp4"), data, summer());
+    const QString local = m_dir->filePath(QStringLiteral("video.mp4"));
+    if (upload)
+        QVERIFY(writeFile(local, data, summer()));
+    connect(m_service.get(), &FileService::transferProgress, this, [this](quint64 done) {
+        if (done > 0)
+            m_phone->dropConnection();
+    });
+
+    ErrorCode code = ErrorCode::None;
+    if (upload) {
+        const QFuture<Result<QString>> uploaded =
+            m_service->upload(local, QStringLiteral("\\sdcard"), QStringLiteral("neu.mp4"));
+        QVERIFY(waitFor(uploaded, timeoutMs));
+        QVERIFY(!uploaded.result().hasValue());
+        code = uploaded.result().error().code();
+    } else {
+        const QFuture<Result<void>> downloaded = m_service->download(
+            {QStringLiteral("\\sdcard\\video.mp4"), quint64(data.size()), summer()}, local);
+        QVERIFY(waitFor(downloaded, timeoutMs));
+        QVERIFY(!downloaded.result().hasValue());
+        code = downloaded.result().error().code();
+        QCOMPARE(QDir(m_dir->path()).entryList(QDir::Files | QDir::Hidden), QStringList());
+    }
+
+    QCOMPARE(code, ErrorCode::ConnectionClosed);
+    QTRY_COMPARE_WITH_TIMEOUT(m_connection->state(), PhoneConnection::State::Lost, timeoutMs);
+    QVERIFY(!m_service->isTransferRunning());
 }
 
 void TestFiles::folderIsCreatedRenamedMovedAndDeleted()

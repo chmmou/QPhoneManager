@@ -47,6 +47,9 @@ qpm_add_core_test(tst_organizerservice)
 qpm_add_core_test(tst_folderlisting)
 qpm_add_core_test(tst_files)
 qpm_add_core_test(tst_thumbnails)
+qpm_add_core_test(tst_applist)
+qpm_add_core_test(tst_appsservice)
+target_link_libraries(tst_appsservice PRIVATE Qt6::Gui)
 qpm_add_core_test(tst_nothirdpartyservices)
 target_compile_definitions(tst_nothirdpartyservices PRIVATE
     "QPM_SOURCE_DIR=\"${PROJECT_SOURCE_DIR}\""
@@ -122,6 +125,12 @@ target_link_libraries(tst_filebrowser PRIVATE qpm_ui qpm_fakephone Qt6::Gui Qt6:
 qpm_set_project_warnings(tst_filebrowser)
 add_test(NAME tst_filebrowser COMMAND tst_filebrowser)
 set_tests_properties(tst_filebrowser PROPERTIES TIMEOUT 120)
+
+qt_add_executable(tst_apps ui/tst_apps.cpp)
+target_link_libraries(tst_apps PRIVATE qpm_ui qpm_fakephone Qt6::Gui Qt6::Test)
+qpm_set_project_warnings(tst_apps)
+add_test(NAME tst_apps COMMAND tst_apps)
+set_tests_properties(tst_apps PROPERTIES TIMEOUT 120)
 
 qt_add_executable(tst_accessibility ui/tst_accessibility.cpp)
 target_link_libraries(tst_accessibility PRIVATE qpm_ui qpm_uiplugin qpm_fakephone Qt6::Quick Qt6::Test)

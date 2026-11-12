@@ -5,6 +5,7 @@
 #include "platform/SecretStore.h"
 #include "ui/AppController.h"
 #include "ui/Settings.h"
+#include "ui/apps/AppListModel.h"
 #include "ui/calls/CallsArea.h"
 #include "ui/contacts/ContactsArea.h"
 #include "ui/files/FileBrowserModel.h"
@@ -16,6 +17,7 @@
 #include "FakePhone.h"
 
 #include <QAccessible>
+#include <QBuffer>
 #include <QColor>
 #include <QFile>
 #include <QImage>
@@ -125,6 +127,26 @@ QByteArray exampleNote()
     note.body = QStringLiteral("Einkaufsliste:\nMilch, Brot");
     note.lastModified = QDateTime(QDate(2026, 11, 10), QTime(8, 0), QTimeZone::UTC);
     return qpm::core::codec::encodeNoteAsPhoneSendsIt(note);
+}
+
+qpm::test::FakeApp fakeApp(const QString &package, const QString &label, bool user)
+{
+    QImage icon(48, 48, QImage::Format_ARGB32);
+    icon.fill(QColor(0, 106, 106));
+    QByteArray png;
+    QBuffer buffer(&png);
+    buffer.open(QIODevice::WriteOnly);
+    icon.save(&buffer, "PNG");
+    qpm::test::FakeApp app;
+    app.package = package;
+    app.label = label;
+    app.version = QStringLiteral("1.0");
+    app.userApp = user;
+    app.sourcePath = QStringLiteral("/data/app/a/%1/base.apk").arg(package);
+    app.installed = QDateTime(QDate(2026, 11, 2), QTime(9, 0), QTimeZone::UTC);
+    app.apk = QByteArray("PK\x03\x04", 4) + QByteArray(2000, 'a');
+    app.icon = png;
+    return app;
 }
 
 bool isControl(const QQuickItem *item)
@@ -280,6 +302,11 @@ private Q_SLOTS:
     void fileDialogsShowTheFocusAndNameTheirControls();
     void filesFocusChainReachesEveryControlOnce();
     void filesAreBrowsedByKeyboard();
+    void appViewControlsHaveANameAndARole();
+    void appDialogsShowTheFocusAndNameTheirControls_data();
+    void appDialogsShowTheFocusAndNameTheirControls();
+    void appsFocusChainReachesEveryControlOnce();
+    void appsAreUsedByKeyboard();
 
 private:
     [[nodiscard]] QList<QQuickItem *> controls() const;
@@ -294,6 +321,8 @@ private:
     [[nodiscard]] bool showOrganizer(int section);
     /// Connects a phone with a few files and shows its internal storage.
     [[nodiscard]] bool showFiles();
+    /// Connects a phone with a few apps and shows them.
+    [[nodiscard]] bool showApps();
     /// Brings the contacts area into the state in which `dialog` has something to show.
     [[nodiscard]] bool prepareContactDialog(const QString &dialog);
     static void announceAccessibility();
@@ -395,10 +424,10 @@ QObject *TestAccessibility::openDialog(const QString &name)
 {
     QObject *dialog = m_window->findChild<QObject *>(name);
     // Dialogs of a page live with the page, which a Loader created.
-    for (const QString &pageName :
-         {QStringLiteral("contactsPage"), QStringLiteral("callsPage"),
-          QStringLiteral("messagesPage"), QStringLiteral("calendarPage"),
-          QStringLiteral("tasksPage"), QStringLiteral("notesPage"), QStringLiteral("filesPage")}) {
+    for (const QString &pageName : {QStringLiteral("contactsPage"), QStringLiteral("callsPage"),
+                                    QStringLiteral("messagesPage"), QStringLiteral("calendarPage"),
+                                    QStringLiteral("tasksPage"), QStringLiteral("notesPage"),
+                                    QStringLiteral("filesPage"), QStringLiteral("appsPage")}) {
         QQuickItem *page = findItem(m_window->contentItem(), pageName);
         if (!dialog && page)
             dialog = page->findChild<QObject *>(name);
@@ -1637,6 +1666,193 @@ void TestAccessibility::filesAreBrowsedByKeyboard()
     QTest::keyClick(m_window, Qt::Key_Escape);
     QTRY_VERIFY(!menu->property("visible").toBool());
     QVERIFY(m_phone->hasFolder(QStringLiteral("\\sdcard\\DCIM")));
+}
+
+bool TestAccessibility::showApps()
+{
+    m_phone = std::make_unique<qpm::test::FakePhone>();
+    if (!m_phone->listen())
+        return false;
+    m_phone->setApps(
+        {fakeApp(QStringLiteral("org.example.notes"), QStringLiteral("Notizen"), true),
+         fakeApp(QStringLiteral("org.example.weather"), QStringLiteral("Wetter"), true),
+         fakeApp(QStringLiteral("com.android.settings"), QStringLiteral("Einstellungen"), false)});
+    auto *controller =
+        m_engine->singletonInstance<AppController *>("QPhoneManager.Ui", "AppController");
+    if (!controller ||
+        !controller->connectAddress(QStringLiteral("127.0.0.1:%1").arg(m_phone->port()))) {
+        return false;
+    }
+    if (!QTest::qWaitFor([controller]() { return controller->isConnected(); }, phoneTimeoutMs))
+        return false;
+    m_window->setProperty("currentSection", 8);
+    qpm::ui::AppListModel *apps = controller->apps();
+    const bool listed = QTest::qWaitFor(
+        [this, apps]() {
+            const QQuickItem *page = findItem(m_window->contentItem(), QStringLiteral("appsPage"));
+            return page && page->isVisible() && !apps->isBusy() && apps->count() == 2;
+        },
+        phoneTimeoutMs);
+    announceAccessibility();
+    return listed;
+}
+
+void TestAccessibility::appViewControlsHaveANameAndARole()
+{
+    QVERIFY(showApps());
+    QQuickItem *list = findItem(m_window->contentItem(), QStringLiteral("appList"));
+    QVERIFY(list);
+    list->setProperty("currentIndex", 0);
+    announceAccessibility();
+
+    const QList<QQuickItem *> found = controls();
+
+    verifyNamesAndRoles(found, {QAccessible::List});
+    const QStringList required = {
+        QStringLiteral("userAppsTab"),      QStringLiteral("systemAppsTab"),
+        QStringLiteral("allAppsTab"),       QStringLiteral("startAppButton"),
+        QStringLiteral("backupAppButton"),  QStringLiteral("uninstallAppButton"),
+        QStringLiteral("installAppButton"), QStringLiteral("refreshAppsButton"),
+        QStringLiteral("appList")};
+    for (const QString &name : required) {
+        QQuickItem *item = findItem(m_window->contentItem(), name);
+        QVERIFY2(item && found.contains(item), qPrintable(name));
+    }
+    for (const QString &name : {QStringLiteral("startAppButton"), QStringLiteral("backupAppButton"),
+                                QStringLiteral("uninstallAppButton")}) {
+        QVERIFY2(findItem(m_window->contentItem(), name)->isEnabled(), qPrintable(name));
+    }
+    for (QQuickItem *item : found) {
+        const bool iconOnly = item->metaObject()->indexOfProperty("display") >= 0 &&
+                              item->property("display").toInt() == 0;
+        if (!iconOnly || item->property("text").toString().isEmpty())
+            continue;
+        QCOMPARE(QAccessible::queryAccessibleInterface(item)->text(QAccessible::Name),
+                 item->property("text").toString());
+    }
+    const QAccessibleInterface *accessible = QAccessible::queryAccessibleInterface(list);
+    QVERIFY(accessible);
+    QCOMPARE(accessible->role(), QAccessible::List);
+    QVERIFY(!accessible->text(QAccessible::Description).isEmpty());
+}
+
+void TestAccessibility::appDialogsShowTheFocusAndNameTheirControls_data()
+{
+    QTest::addColumn<QString>("dialog");
+
+    QTest::newRow("remove") << QStringLiteral("uninstallAppDialog");
+    QTest::newRow("menu") << QStringLiteral("appMenu");
+}
+
+void TestAccessibility::appDialogsShowTheFocusAndNameTheirControls()
+{
+    QFETCH(QString, dialog);
+    QVERIFY(showApps());
+    m_window->requestActivate();
+    QVERIFY(QTest::qWaitForWindowActive(m_window));
+    QQuickItem *page = findItem(m_window->contentItem(), QStringLiteral("appsPage"));
+    QQuickItem *list = findItem(m_window->contentItem(), QStringLiteral("appList"));
+    QVERIFY(page && list);
+    list->setProperty("currentIndex", 1);
+    const QList<QQuickItem *> before = controls();
+
+    QVERIFY(QMetaObject::invokeMethod(
+        page, dialog == QLatin1StringView("appMenu") ? "showMenu" : "confirmUninstall"));
+    QObject *popup = page->findChild<QObject *>(dialog);
+    QVERIFY(popup);
+    QTRY_VERIFY(popup->property("opened").toBool());
+    announceAccessibility();
+
+    QList<QQuickItem *> inDialog = controls();
+    inDialog.removeIf([&before](QQuickItem *control) { return before.contains(control); });
+    QVERIFY(!inDialog.isEmpty());
+    verifyNamesAndRoles(inDialog, {QAccessible::MenuItem});
+    if (dialog != QLatin1StringView("appMenu")) {
+        // The question names the app it is about.
+        QCOMPARE(popup->property("title").toString(), QStringLiteral("Remove Wetter?"));
+        QQuickItem *focused = m_window->activeFocusItem();
+        QVERIFY(focused);
+        QVERIFY2(focusIsShown(focused), qPrintable(describe(focused)));
+    }
+    QMetaObject::invokeMethod(popup, "close");
+    QTRY_VERIFY(!popup->property("visible").toBool());
+    QVERIFY(m_phone->uninstallRequests().isEmpty());
+}
+
+void TestAccessibility::appsFocusChainReachesEveryControlOnce()
+{
+    QVERIFY(showApps());
+    QQuickItem *list = findItem(m_window->contentItem(), QStringLiteral("appList"));
+    QVERIFY(list);
+    list->setProperty("currentIndex", 0);
+    QList<QQuickItem *> chain;
+    QQuickItem *item = m_window->contentItem()->nextItemInFocusChain(true);
+    while (item && !chain.contains(item) && chain.size() < 500) {
+        chain.append(item);
+        item = item->nextItemInFocusChain(true);
+    }
+
+    QVERIFY(item);
+    QCOMPARE(item, chain.constFirst());
+    const QList<QQuickItem *> found = controls();
+    for (QQuickItem *control : found) {
+        if (control->isEnabled() && control->activeFocusOnTab())
+            QVERIFY2(chain.contains(control), qPrintable(describe(control)));
+    }
+    for (const QString &name :
+         {QStringLiteral("appList"), QStringLiteral("userAppsTab"),
+          QStringLiteral("startAppButton"), QStringLiteral("installAppButton")}) {
+        QVERIFY2(chain.contains(findItem(m_window->contentItem(), name)), qPrintable(name));
+    }
+}
+
+// Every action on an app is reached from the keyboard: choosing it, opening
+// it on the phone, the question before its removal and the menu.
+void TestAccessibility::appsAreUsedByKeyboard()
+{
+    QVERIFY(showApps());
+    m_window->requestActivate();
+    QVERIFY(QTest::qWaitForWindowActive(m_window));
+    QQuickItem *page = findItem(m_window->contentItem(), QStringLiteral("appsPage"));
+    QQuickItem *list = findItem(m_window->contentItem(), QStringLiteral("appList"));
+    QVERIFY(page && list);
+    list->forceActiveFocus(Qt::TabFocusReason);
+    QTRY_VERIFY(list->hasActiveFocus());
+    QVERIFY(findItem(m_window->contentItem(), QStringLiteral("appListFocusRing"))->isVisible());
+
+    QTest::keyClick(m_window, Qt::Key_Down);
+    QTest::keyClick(m_window, Qt::Key_Down);
+    QTRY_COMPARE(page->property("currentPackage").toString(),
+                 QStringLiteral("org.example.weather"));
+    QTest::keyClick(m_window, Qt::Key_Up);
+    QTRY_COMPARE(page->property("currentPackage").toString(), QStringLiteral("org.example.notes"));
+
+    QTest::keyClick(m_window, Qt::Key_Return);
+    QTRY_COMPARE_WITH_TIMEOUT(m_phone->startRequests(),
+                              QStringList{QStringLiteral("org.example.notes")}, phoneTimeoutMs);
+
+    QObject *removeDialog = page->findChild<QObject *>(QStringLiteral("uninstallAppDialog"));
+    QTest::keyClick(m_window, Qt::Key_Delete);
+    QTRY_VERIFY(removeDialog->property("opened").toBool());
+    QCOMPARE(removeDialog->property("title").toString(), QStringLiteral("Remove Notizen?"));
+    QTest::keyClick(m_window, Qt::Key_Escape);
+    QTRY_VERIFY(!removeDialog->property("visible").toBool());
+
+    list->forceActiveFocus(Qt::TabFocusReason);
+    QObject *menu = page->findChild<QObject *>(QStringLiteral("appMenu"));
+    QTest::keyClick(m_window, Qt::Key_Menu);
+    QTRY_VERIFY(menu->property("opened").toBool());
+    QTest::keyClick(m_window, Qt::Key_Escape);
+    QTRY_VERIFY(!menu->property("visible").toBool());
+
+    // The filter is chosen from the keyboard as well.
+    QQuickItem *systemTab = findItem(m_window->contentItem(), QStringLiteral("systemAppsTab"));
+    systemTab->forceActiveFocus(Qt::TabFocusReason);
+    QTest::keyClick(m_window, Qt::Key_Space);
+    auto *controller =
+        m_engine->singletonInstance<AppController *>("QPhoneManager.Ui", "AppController");
+    QTRY_COMPARE(controller->apps()->filter(), qpm::ui::AppListModel::Filter::System);
+    QVERIFY(m_phone->uninstallRequests().isEmpty());
 }
 
 QTEST_MAIN(TestAccessibility)

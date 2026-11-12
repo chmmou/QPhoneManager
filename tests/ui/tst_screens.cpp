@@ -5,6 +5,7 @@
 #include "ui/AppController.h"
 #include "ui/DeviceStatusModel.h"
 #include "ui/Settings.h"
+#include "ui/apps/AppListModel.h"
 #include "ui/calls/CallsArea.h"
 #include "ui/contacts/ContactsArea.h"
 #include "ui/files/FileBrowserModel.h"
@@ -333,6 +334,62 @@ QList<qpm::test::FakeSyncObject> exampleNotes()
     return {{1, encodeNoteAsPhoneSendsIt(shopping)}, {2, encodeNoteAsPhoneSendsIt(ideas)}};
 }
 
+QByteArray appIcon(const QColor &color)
+{
+    QImage image(48, 48, QImage::Format_ARGB32);
+    image.fill(Qt::transparent);
+    for (int y = 4; y < 44; ++y) {
+        for (int x = 4; x < 44; ++x)
+            image.setPixelColor(x, y, color);
+    }
+    QByteArray bytes;
+    QBuffer buffer(&bytes);
+    buffer.open(QIODevice::WriteOnly);
+    image.save(&buffer, "PNG");
+    return bytes;
+}
+
+// Made-up apps for the pictures, with plain coloured icons.
+QList<qpm::test::FakeApp> exampleApps()
+{
+    struct App
+    {
+        const char *package;
+        const char *label;
+        const char *version;
+        bool user;
+        qsizetype size;
+        int daysAgo;
+        QColor color;
+    };
+    const QList<App> apps = {
+        {"org.example.wetter", "Wetter am Ort", "4.2.1", true, 1840000, 12, QColor(0, 106, 106)},
+        {"org.example.rezepte", "Rezepte", "2.0", true, 730000, 40, QColor(200, 120, 30)},
+        {"org.example.fahrplan", "Fahrplan Nord", "11.3", true, 3210000, 3, QColor(90, 60, 150)},
+        {"org.example.uebung", "Übungen für den Rücken", "1.0.7", true, 210000, 90,
+         QColor(40, 140, 80)},
+        {"com.android.settings", "Einstellungen", "16", false, 4100000, 300, QColor(70, 70, 70)},
+        {"com.android.deskclock", "Uhr", "16.1", false, 620000, 300, QColor(30, 90, 180)},
+    };
+    QList<qpm::test::FakeApp> result;
+    for (const App &app : apps) {
+        qpm::test::FakeApp fake;
+        fake.package = QString::fromLatin1(app.package);
+        fake.label = QString::fromUtf8(app.label);
+        fake.version = QString::fromLatin1(app.version);
+        fake.userApp = app.user;
+        fake.sourcePath =
+            app.user ? QStringLiteral("/data/app/~~a1==/%1-b2==/base.apk").arg(fake.package)
+                     : QStringLiteral("/system/app/%1/base.apk").arg(fake.package);
+        fake.installed =
+            QDateTime(QDate(2026, 11, 10).addDays(-app.daysAgo), QTime(9, 0), QTimeZone::UTC);
+        fake.apk = QByteArray("PK\x03\x04", 4) + QByteArray(app.size - 4, 'a');
+        fake.icon = appIcon(app.color);
+        result.append(fake);
+    }
+    return result;
+}
+
 QByteArray noteMetadata()
 {
     return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<metadata version=\"1.0\"><note_categories>\r\n"
@@ -435,6 +492,8 @@ private Q_SLOTS:
     void organizerViewsAreGermanAndRenderInBothSchemes();
     void fileViewsAreGermanAndRenderInBothSchemes_data();
     void fileViewsAreGermanAndRenderInBothSchemes();
+    void appViewsAreGermanAndRenderInBothSchemes_data();
+    void appViewsAreGermanAndRenderInBothSchemes();
 
 private:
     [[nodiscard]] QObject *dialog(const QString &name) const;
@@ -504,6 +563,7 @@ void TestScreens::initTestCase()
                      QByteArray(2400000, 'v'), taken);
     m_phone->addFile(QStringLiteral("\\sdcard\\DCIM\\Camera\\Reiseplan.pdf"),
                      QByteArray(184320, 'p'), taken);
+    m_phone->setApps(exampleApps());
     m_phone->config().alarms =
         QStringList{QStringLiteral("\"06:30\",1,0,\"Aufstehen\",\"1,2,3,4,5\",1"),
                     QStringLiteral("\"08:00\",2,0,\"Wochenende\",\"6,7\",0")};
@@ -542,10 +602,10 @@ QObject *TestScreens::dialog(const QString &name) const
 {
     if (QObject *found = m_window->findChild<QObject *>(name))
         return found;
-    for (const QString &pageName :
-         {QStringLiteral("contactsPage"), QStringLiteral("callsPage"),
-          QStringLiteral("messagesPage"), QStringLiteral("calendarPage"),
-          QStringLiteral("tasksPage"), QStringLiteral("notesPage"), QStringLiteral("filesPage")}) {
+    for (const QString &pageName : {QStringLiteral("contactsPage"), QStringLiteral("callsPage"),
+                                    QStringLiteral("messagesPage"), QStringLiteral("calendarPage"),
+                                    QStringLiteral("tasksPage"), QStringLiteral("notesPage"),
+                                    QStringLiteral("filesPage"), QStringLiteral("appsPage")}) {
         QQuickItem *page = item(pageName);
         if (QObject *found = page ? page->findChild<QObject *>(name) : nullptr)
             return found;
@@ -1289,6 +1349,94 @@ void TestScreens::fileViewsAreGermanAndRenderInBothSchemes()
         QTRY_VERIFY(!popup->property("visible").toBool());
     }
     transfers->clearFinished();
+    QVERIFY(m_controller->isConnected());
+}
+
+void TestScreens::appViewsAreGermanAndRenderInBothSchemes_data()
+{
+    QTest::addColumn<QString>("view");
+    QTest::addColumn<QString>("germanTitle");
+
+    QTest::newRow("own apps") << QStringLiteral("apps") << QStringLiteral("Apps");
+    QTest::newRow("system apps") << QStringLiteral("appsSystem") << QStringLiteral("Apps");
+    QTest::newRow("menu") << QStringLiteral("appMenu") << QString();
+    QTest::newRow("remove") << QStringLiteral("uninstallAppDialog")
+                            << QStringLiteral("Wetter am Ort entfernen?");
+    QTest::newRow("install") << QStringLiteral("appsTransfer") << QStringLiteral("Apps");
+}
+
+void TestScreens::appViewsAreGermanAndRenderInBothSchemes()
+{
+    QFETCH(QString, view);
+    QFETCH(QString, germanTitle);
+    qpm::ui::AppListModel *apps = m_controller->apps();
+    m_window->setProperty("currentSection", 8);
+    QQuickItem *header = m_window->property("header").value<QQuickItem *>();
+    QCOMPARE(header->property("title").toString(), QStringLiteral("Apps"));
+    QTRY_VERIFY(item(QStringLiteral("appsPage")));
+    QQuickItem *page = item(QStringLiteral("appsPage"));
+    QTRY_VERIFY_WITH_TIMEOUT(!apps->isBusy() && apps->totalCount() > 0, connectTimeoutMs);
+    apps->setFilter(view == QLatin1StringView("appsSystem") ? qpm::ui::AppListModel::Filter::System
+                                                            : qpm::ui::AppListModel::Filter::User);
+    // The rows show their icons once these are there.
+    const QString shown = view == QLatin1StringView("appsSystem")
+                              ? QStringLiteral("com.android.settings")
+                              : QStringLiteral("org.example.wetter");
+    QTRY_VERIFY_WITH_TIMEOUT(
+        !apps->data(apps->index(apps->rowOf(shown)), qpm::ui::AppListModel::IconUrlRole)
+             .toString()
+             .isEmpty(),
+        connectTimeoutMs);
+    QQuickItem *list = item(QStringLiteral("appList"));
+    QVERIFY(list);
+    list->setProperty("currentIndex", apps->rowOf(shown));
+    QCOMPARE(page->property("currentPackage").toString(), shown);
+    m_window->requestActivate();
+    QVERIFY(QTest::qWaitForWindowActive(m_window));
+
+    QObject *popup = nullptr;
+    QTemporaryDir local;
+    QVERIFY(local.isValid());
+    if (view == QLatin1StringView("apps") || view == QLatin1StringView("appsSystem")) {
+        list->forceActiveFocus(Qt::TabFocusReason);
+        QTRY_VERIFY(list->hasActiveFocus());
+    } else if (view == QLatin1StringView("appsTransfer")) {
+        // The phone reads the APK late, so the copy is still under way in the picture.
+        m_phone->config().uploadReadDelay = std::chrono::milliseconds(4000);
+        const QString source = local.filePath(QStringLiteral("Würfelspiel-1.4.apk"));
+        QFile file(source);
+        QVERIFY(file.open(QIODevice::WriteOnly));
+        file.write(QByteArray("PK\x03\x04", 4) + QByteArray(3000000, 'w'));
+        file.close();
+        QVERIFY(apps->install(QUrl::fromLocalFile(source)));
+        QTRY_VERIFY(item(QStringLiteral("appTransfer")) &&
+                    item(QStringLiteral("appTransfer"))->isVisible());
+        QVERIFY(item(QStringLiteral("appTransferText"))
+                    ->property("text")
+                    .toString()
+                    .startsWith(QStringLiteral("Würfelspiel-1.4.apk wird an das Handy gesendet")));
+    } else {
+        popup = dialog(view);
+        QVERIFY(popup);
+        QVERIFY(QMetaObject::invokeMethod(
+            page, view == QLatin1StringView("appMenu") ? "showMenu" : "confirmUninstall"));
+        QTRY_VERIFY(popup->property("opened").toBool());
+        if (!germanTitle.isEmpty())
+            QCOMPARE(popup->property("title").toString(), germanTitle);
+    }
+
+    QVERIFY(saveBothSchemes(view));
+
+    if (popup) {
+        QMetaObject::invokeMethod(popup, "close");
+        QTRY_VERIFY(!popup->property("visible").toBool());
+    }
+    if (view == QLatin1StringView("appsTransfer")) {
+        QTRY_VERIFY_WITH_TIMEOUT(!apps->isTransferActive(), connectTimeoutMs);
+        m_phone->config().uploadReadDelay = std::chrono::milliseconds(0);
+        QCOMPARE(m_phone->installRequests().size(), 1);
+    }
+    QVERIFY(m_phone->uninstallRequests().isEmpty());
     QVERIFY(m_controller->isConnected());
 }
 

@@ -153,7 +153,8 @@ QFuture<Result<void>> ObexClient::connectTarget(Target target)
 }
 
 QFuture<Result<ObexResponse>> ObexClient::get(const QString &name, const QByteArray &type,
-                                              std::chrono::milliseconds timeout)
+                                              std::chrono::milliseconds timeout,
+                                              std::optional<quint64> maxBodyBytes)
 {
     ObexPacket packet;
     packet.code = obex::opGetFinal;
@@ -161,8 +162,8 @@ QFuture<Result<ObexResponse>> ObexClient::get(const QString &name, const QByteAr
         packet.name = name;
     packet.type = type;
     std::unique_ptr<Request> request = makeRequest(packet, timeout);
-    request->maxBodyBytes =
-        m_target == Target::IrmcSync ? limits::maxObexSyncBytes : limits::maxObexFileBytes;
+    request->maxBodyBytes = maxBodyBytes.value_or(
+        m_target == Target::IrmcSync ? limits::maxObexSyncBytes : limits::maxObexFileBytes);
     request->progressBodies = name.endsWith(QLatin1StringView("/initsync"));
     return enqueueForResponse(std::move(request));
 }
