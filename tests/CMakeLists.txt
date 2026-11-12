@@ -36,6 +36,14 @@ qpm_add_core_test(tst_vmessage)
 qpm_add_core_test(tst_messages)
 target_link_libraries(tst_messages PRIVATE Qt6::Sql)
 qpm_add_core_test(tst_messageexport)
+qpm_add_core_test(tst_phonevcal)
+qpm_add_core_test(tst_recurrence)
+qpm_add_core_test(tst_icalendar)
+qpm_add_core_test(tst_calmetadata)
+qpm_add_core_test(tst_vnote)
+qpm_add_core_test(tst_holidays)
+qpm_add_core_test(tst_alarms)
+qpm_add_core_test(tst_organizerservice)
 qpm_add_core_test(tst_nothirdpartyservices)
 target_compile_definitions(tst_nothirdpartyservices PRIVATE
     "QPM_SOURCE_DIR=\"${PROJECT_SOURCE_DIR}\""
@@ -76,6 +84,17 @@ target_link_libraries(tst_calls PRIVATE qpm_ui qpm_fakephone Qt6::Test)
 qpm_set_project_warnings(tst_calls)
 add_test(NAME tst_calls COMMAND tst_calls)
 set_tests_properties(tst_calls PROPERTIES TIMEOUT 120)
+
+qt_add_executable(tst_organizer ui/tst_organizer.cpp)
+target_link_libraries(tst_organizer PRIVATE qpm_ui qpm_fakephone Qt6::Test)
+# The English catalogue is built along with the program.
+add_dependencies(tst_organizer qphonemanager)
+target_compile_definitions(tst_organizer PRIVATE
+    "QPM_TRANSLATIONS_DIR=\"${PROJECT_BINARY_DIR}/src\""
+)
+qpm_set_project_warnings(tst_organizer)
+add_test(NAME tst_organizer COMMAND tst_organizer)
+set_tests_properties(tst_organizer PROPERTIES TIMEOUT 180)
 
 # The core test of the message service has the name tst_messages already.
 qt_add_executable(tst_messagearea ui/tst_messages.cpp)

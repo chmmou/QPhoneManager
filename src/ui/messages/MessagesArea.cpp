@@ -7,6 +7,7 @@
 #include "core/service/DeviceStatusService.h"
 #include "core/store/ContactStore.h"
 #include "core/store/ProfileStore.h"
+#include "ui/PhoneNumberText.h"
 
 #include <QDir>
 #include <QFile>
@@ -216,7 +217,7 @@ QString MessagesArea::currentTitle() const
 QString MessagesArea::currentAddress() const
 {
     const core::store::ConversationSummary *found = m_conversations->find(m_currentThread);
-    return found ? found->address.trimmed() : QString();
+    return found ? PhoneNumberText::display(found->address) : QString();
 }
 
 QString MessagesArea::currentNumber() const

@@ -97,10 +97,6 @@ Item {
                             Accessible.name: qsTr("Add a recipient")
                             onTextEdited: root.composer.recipientText = numberField.text
                             onAccepted: root.composer.addRecipient()
-
-                            FocusRing {
-                                shown: numberField.activeFocus
-                            }
                         }
 
                         Button {
@@ -118,6 +114,8 @@ Item {
                         }
                     }
 
+                    // The outlined fields show their focus themselves; a ring on top
+                    // would cross the floating label.
                     TextArea {
                         id: textArea
 
@@ -131,10 +129,6 @@ Item {
                         onTextChanged: {
                             if (textArea.text !== root.composer.text)
                                 root.composer.text = textArea.text;
-                        }
-
-                        FocusRing {
-                            shown: textArea.activeFocus
                         }
                     }
 
@@ -229,10 +223,6 @@ Item {
                             text: root.composer.scheduleDate
                             Accessible.name: qsTr("Date to send")
                             onTextEdited: root.composer.scheduleDate = dateField.text
-
-                            FocusRing {
-                                shown: dateField.activeFocus
-                            }
                         }
 
                         Label {
@@ -247,10 +237,6 @@ Item {
                             text: root.composer.scheduleTime
                             Accessible.name: qsTr("Time to send")
                             onTextEdited: root.composer.scheduleTime = timeField.text
-
-                            FocusRing {
-                                shown: timeField.activeFocus
-                            }
                         }
                     }
 

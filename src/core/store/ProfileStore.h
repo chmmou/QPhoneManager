@@ -55,7 +55,7 @@ class ProfileStore : public sync::SyncStoreAdapter
 {
 public:
     /// The version open() migrates to.
-    static constexpr int schemaVersion = 4;
+    static constexpr int schemaVersion = 5;
 
     /// Work that runs inside the transaction of applyWith(), on the store's connection.
     using ExtraStep = std::function<Result<void>(const QString &connectionName)>;

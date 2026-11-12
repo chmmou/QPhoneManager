@@ -617,7 +617,9 @@ void TestContacts::syncAllReportsTheContactChanges()
     QCOMPARE(finished.first().first().toString(),
              QStringLiteral("Contacts: 0 new, 1 changed, 1 deleted\n"
                             "Calls: 0 new, 0 changed, 0 deleted\n"
-                            "Messages: 0 new, 0 changed, 0 deleted"));
+                            "Messages: 0 new, 0 changed, 0 deleted\n"
+                            "Calendar and tasks: 0 new, 0 changed, 0 deleted\n"
+                            "Notes: 0 new, 0 changed, 0 deleted"));
     QCOMPARE(area()->list()->totalCount(), 2);
 }
 

@@ -121,6 +121,7 @@ private Q_SLOTS:
     void versionOneDatabaseGetsTheContactTablesAndLoadsThePhonebookAgain();
     void versionTwoDatabaseGetsTheCallTableAndKeepsTheContacts();
     void versionThreeDatabaseGetsTheMessageTablesAndLoadsTheMessagesAgain();
+    void versionFourDatabaseGetsTheOrganizerTablesAndLoadsCalendarAndNotesAgain();
     void profileFieldsSurviveAReopen();
     void profileValuesAreBoundNotInterpolated();
     void invalidDisplayNameIsRejected_data();
@@ -309,8 +310,9 @@ void TestProfileStore::versionOneDatabaseGetsTheContactTablesAndLoadsThePhoneboo
     }
     QVERIFY(!store->changeCounter(IrmcDomain::Contacts));
     QVERIFY(!store->objectHash(IrmcDomain::Contacts, 1));
-    QCOMPARE(store->changeCounter(IrmcDomain::Notes), std::optional<quint64>(7));
-    QVERIFY(store->objectHash(IrmcDomain::Notes, 2));
+    // The later step for the organizer tables forgets the notes as well.
+    QVERIFY(!store->changeCounter(IrmcDomain::Notes));
+    QVERIFY(!store->objectHash(IrmcDomain::Notes, 2));
 }
 
 // A database of the contacts version keeps everything it holds; only the
@@ -371,7 +373,7 @@ void TestProfileStore::versionThreeDatabaseGetsTheMessageTablesAndLoadsTheMessag
     const std::unique_ptr<ProfileStore> store = openStore(QStringLiteral("dev-1"));
 
     QVERIFY(store);
-    QCOMPARE(userVersion(path), 4);
+    QCOMPARE(userVersion(path), ProfileStore::schemaVersion);
     QCOMPARE(userVersion(path + QStringLiteral(".bak")), 3);
     for (const QString &table : {QStringLiteral("messages"), QStringLiteral("attachments"),
                                  QStringLiteral("messages_fts")}) {
@@ -385,6 +387,51 @@ void TestProfileStore::versionThreeDatabaseGetsTheMessageTablesAndLoadsTheMessag
     QVERIFY(query.exec(QStringLiteral("SELECT number FROM calls WHERE id = 5")));
     QVERIFY(query.next());
     QCOMPARE(query.value(0).toString(), QStringLiteral("0301234"));
+}
+
+// The calendar and the notes were kept in sync_objects only before; the
+// migration forgets them so that the next pull fills the new tables, and
+// keeps every other area.
+void TestProfileStore::versionFourDatabaseGetsTheOrganizerTablesAndLoadsCalendarAndNotesAgain()
+{
+    const QString path = databasePath(QStringLiteral("dev-1"));
+    QVERIFY(QDir().mkpath(QFileInfo(path).path()));
+    QVERIFY(runSql(
+        path,
+        {QStringLiteral("CREATE TABLE meta (key TEXT PRIMARY KEY NOT NULL, value TEXT)"),
+         QStringLiteral("CREATE TABLE sync_objects (domain TEXT NOT NULL, luid INTEGER NOT NULL, "
+                        "hash BLOB NOT NULL, raw BLOB NOT NULL, PRIMARY KEY (domain, luid))"),
+         QStringLiteral("CREATE TABLE messages (luid INTEGER PRIMARY KEY NOT NULL, body TEXT)"),
+         QStringLiteral("INSERT INTO messages VALUES (7, 'Bis morgen')"),
+         QStringLiteral("INSERT INTO meta VALUES ('counter.cal', '40')"),
+         QStringLiteral("INSERT INTO meta VALUES ('counter.notes', '3')"),
+         QStringLiteral("INSERT INTO meta VALUES ('counter.msg', '12')"),
+         QStringLiteral("INSERT INTO sync_objects VALUES ('cal', 268435457, x'00', x'00')"),
+         QStringLiteral("INSERT INTO sync_objects VALUES ('notes', 1, x'00', x'00')"),
+         QStringLiteral("INSERT INTO sync_objects VALUES ('msg', 7, x'01', x'00')"),
+         QStringLiteral("PRAGMA user_version = 4")}));
+
+    const std::unique_ptr<ProfileStore> store = openStore(QStringLiteral("dev-1"));
+
+    QVERIFY(store);
+    QCOMPARE(userVersion(path), 5);
+    QCOMPARE(userVersion(path + QStringLiteral(".bak")), 4);
+    for (const QString &table : {QStringLiteral("calendars"), QStringLiteral("events"),
+                                 QStringLiteral("tasks"), QStringLiteral("notes"),
+                                 QStringLiteral("categories")}) {
+        QVERIFY2(hasTable(path, table), qPrintable(table));
+        QVERIFY2(!hasTable(path + QStringLiteral(".bak"), table), qPrintable(table));
+    }
+    QVERIFY(!store->changeCounter(IrmcDomain::Calendar));
+    QVERIFY(!store->changeCounter(IrmcDomain::Notes));
+    QVERIFY(!store->objectHash(IrmcDomain::Calendar, 268435457));
+    QVERIFY(!store->objectHash(IrmcDomain::Notes, 1));
+    QCOMPARE(store->changeCounter(IrmcDomain::Messages), std::optional<quint64>(12));
+    QCOMPARE(store->objectHash(IrmcDomain::Messages, 7), std::optional<QByteArray>("\x01"));
+    QSqlQuery query(QSqlDatabase::database(store->connectionName(), false));
+    QVERIFY(query.exec(QStringLiteral("SELECT body FROM messages WHERE luid = 7")));
+    QVERIFY(query.next());
+    QCOMPARE(query.value(0).toString(), QStringLiteral("Bis morgen"));
 }
 
 void TestProfileStore::profileFieldsSurviveAReopen()

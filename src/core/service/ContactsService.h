@@ -2,6 +2,7 @@
 
 #include "core/Error.h"
 #include "core/codec/PhoneVCard.h"
+#include "core/service/SaveMode.h"
 #include "core/store/ContactStore.h"
 #include "core/sync/SyncStoreAdapter.h"
 
@@ -29,14 +30,6 @@ struct DuplicatePair
     Reason reason = Reason::Name;
 
     bool operator==(const DuplicatePair &other) const = default;
-};
-
-/// How a save treats a contact that changed on the phone since it was loaded.
-enum class SaveMode {
-    /// Stop and report both versions.
-    CheckConflict,
-    /// Write the edited version over the phone's.
-    Overwrite,
 };
 
 /// The result of a save.

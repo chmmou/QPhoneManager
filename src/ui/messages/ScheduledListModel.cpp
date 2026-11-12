@@ -1,5 +1,7 @@
 #include "ui/messages/ScheduledListModel.h"
 
+#include "ui/PhoneNumberText.h"
+
 #include <QLocale>
 
 namespace qpm::ui {
@@ -112,7 +114,7 @@ QString ScheduledListModel::recipientsText(const StoredMessage &message) const
         QString name = m_names ? m_names(recipient.number) : QString();
         if (name.isEmpty())
             name = recipient.name.trimmed();
-        names.append(name.isEmpty() ? recipient.number : name);
+        names.append(name.isEmpty() ? PhoneNumberText::display(recipient.number) : name);
     }
     return names.join(QLatin1StringView(", "));
 }

@@ -4,6 +4,7 @@
 #include "core/service/ContactsService.h"
 #include "core/store/ContactStore.h"
 #include "core/store/ProfileStore.h"
+#include "ui/PhoneNumberText.h"
 
 #include <QLocale>
 #include <QSaveFile>
@@ -125,7 +126,7 @@ QString CallsArea::currentTitle() const
 
 QString CallsArea::currentNumber() const
 {
-    return m_current ? m_current->number : QString();
+    return m_current ? PhoneNumberText::display(m_current->number) : QString();
 }
 
 CallListModel::Kind CallsArea::currentKind() const

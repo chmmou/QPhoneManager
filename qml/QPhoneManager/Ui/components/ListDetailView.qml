@@ -8,14 +8,35 @@ Item {
     property Component listComponent
     property Component detailComponent
     property bool detailOpen: false
-    readonly property bool narrow: root.width < Theme.narrowContentWidth
+    // Part of the width the list takes at first.
+    property real listShare: 0.4
+    // Not narrow before the first layout, so the views are not built twice.
+    readonly property bool narrow: root.width > 0 && root.width < Theme.narrowContentWidth
 
     SplitView {
+        id: split
+
+        objectName: "listDetailSplit"
         anchors.fill: parent
         visible: !root.narrow
 
+        // A thin line over the full height; the style's own handle draws a short
+        // grip mark that reads as a stray stroke between list and detail.
+        handle: Item {
+            id: splitHandle
+
+            implicitWidth: Theme.gridUnit
+
+            Rectangle {
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: 1
+                height: parent.height
+                color: splitHandle.SplitHandle.hovered || splitHandle.SplitHandle.pressed ? Theme.primary : Theme.outline
+            }
+        }
+
         Loader {
-            SplitView.preferredWidth: root.width * 0.4
+            SplitView.preferredWidth: root.width * root.listShare
             SplitView.minimumWidth: TypeScale.body * 16
             active: !root.narrow
             sourceComponent: root.listComponent

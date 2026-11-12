@@ -1,11 +1,18 @@
 #include "core/codec/PhoneTime.h"
+#include "core/codec/PhoneVCal.h"
 #include "core/codec/PhoneVCard.h"
+#include "core/codec/VNote.h"
 #include "ui/AppController.h"
 #include "ui/DeviceStatusModel.h"
 #include "ui/Settings.h"
 #include "ui/calls/CallsArea.h"
 #include "ui/contacts/ContactsArea.h"
 #include "ui/messages/MessagesArea.h"
+#include "ui/messages/MessageComposer.h"
+#include "ui/organizer/CalendarArea.h"
+#include "ui/organizer/NotesArea.h"
+#include "ui/organizer/TaskListModel.h"
+#include "ui/organizer/TasksArea.h"
 
 #include "FakePhone.h"
 
@@ -22,8 +29,10 @@
 #include <QQuickWindow>
 #include <QTemporaryDir>
 #include <QTest>
+#include <QTimeZone>
 #include <QTranslator>
 
+#include <cstdlib>
 #include <memory>
 
 Q_IMPORT_QML_PLUGIN(QPhoneManager_UiPlugin)
@@ -222,6 +231,163 @@ QByteArray exampleMetadata()
 }
 } // namespace
 
+QByteArray calendarMetadata()
+{
+    return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<metadata version=\"1.0\">\r\n"
+           "<calendars filter_disabled=\"0\">\r\n"
+           "<calendar selected=\"1\" default=\"1\" url=\"anna@example.org@com.google/NULL\" "
+           "title=\"Familie\" color=\"FF33B679\" hidden=\"0\" timezone=\"Europe/Berlin\" "
+           "access_level=\"700\"/>\r\n"
+           "<calendar selected=\"1\" url=\"anna@example.org@com.google/NULL\" title=\"Arbeit\" "
+           "color=\"FF4285F4\" hidden=\"0\" timezone=\"Europe/Berlin\" access_level=\"700\"/>\r\n"
+           "<calendar selected=\"0\" url=\"anna@example.org@com.google/NULL\" title=\"Feiertage\" "
+           "color=\"FF0B8043\" hidden=\"0\" timezone=\"Europe/Berlin\" access_level=\"200\"/>\r\n"
+           "</calendars>\r\n<tasksupport>1</tasksupport>\r\n<task_categories>\r\n"
+           "<category name=\"Haushalt\" color=\"FF8800\" id=\"1\"/>\r\n"
+           "<category name=\"Büro\" color=\"4285F4\" id=\"2\"/>\r\n"
+           "</task_categories>\r\n</metadata>";
+}
+
+CalendarEvent appointment(quint32 luid, const QString &summary, const QDateTime &start, int minutes,
+                          const QString &calendar)
+{
+    CalendarEvent event;
+    event.luid = luid;
+    event.summary = summary;
+    event.start = start;
+    event.end = start.addSecs(minutes * 60LL);
+    event.calendarUrl = QStringLiteral("anna@example.org@com.google/NULL");
+    event.calendarTitle = calendar;
+    return event;
+}
+
+QDateTime berlin(int day, int hour, int minute = 0)
+{
+    return QDateTime(QDate(2026, 11, day), QTime(hour, minute),
+                     QTimeZone(QByteArrayLiteral("Europe/Berlin")))
+        .toUTC();
+}
+
+// Made-up appointments, tasks and notes for the pictures.
+QList<qpm::test::FakeSyncObject> exampleOrganizer()
+{
+    CalendarEvent meeting = appointment(0x10000001, QStringLiteral("Elternabend"), berlin(12, 19),
+                                        90, QStringLiteral("Familie"));
+    meeting.location = QStringLiteral("Grundschule am Park");
+    meeting.description = QStringLiteral("Bitte die Unterlagen zur Klassenfahrt mitbringen.");
+    meeting.alarms = {meeting.start.addSecs(-1800)};
+    CalendarEvent sport = appointment(0x10000002, QStringLiteral("Lauftreff"), berlin(3, 18), 60,
+                                      QStringLiteral("Familie"));
+    sport.rrule = QStringLiteral("FREQ=WEEKLY;BYDAY=TU");
+    CalendarEvent review = appointment(0x10000003, QStringLiteral("Quartalsbericht"),
+                                       berlin(12, 9, 30), 60, QStringLiteral("Arbeit"));
+    review.color = 0xFFE67C73;
+    CalendarEvent trip = appointment(0x10000004, QStringLiteral("Kurzurlaub Ostsee"), berlin(20, 0),
+                                     0, QStringLiteral("Familie"));
+    trip.allDay = true;
+    trip.start = QDateTime(QDate(2026, 11, 20), QTime(0, 0), QTimeZone::UTC);
+    trip.end = QDateTime(QDate(2026, 11, 23), QTime(0, 0), QTimeZone::UTC);
+    CalendarTask windows;
+    windows.luid = 5;
+    windows.summary = QStringLiteral("Fenster putzen");
+    windows.due = QDate(2026, 11, 20);
+    windows.categories = {QStringLiteral("Haushalt")};
+    CalendarTask tax;
+    tax.luid = 6;
+    tax.summary = QStringLiteral("Steuererklärung abgeben");
+    tax.due = QDate(2026, 11, 2);
+    tax.priority = TaskPriority::High;
+    tax.categories = {QStringLiteral("Büro")};
+    CalendarTask done;
+    done.luid = 7;
+    done.summary = QStringLiteral("Winterreifen aufziehen");
+    done.completed = true;
+    return {{meeting.luid, encodeEventAsPhoneSendsIt(meeting)},
+            {sport.luid, encodeEventAsPhoneSendsIt(sport)},
+            {review.luid, encodeEventAsPhoneSendsIt(review)},
+            {trip.luid, encodeEventAsPhoneSendsIt(trip)},
+            {windows.luid, encodeTaskAsPhoneSendsIt(windows)},
+            {tax.luid, encodeTaskAsPhoneSendsIt(tax)},
+            {done.luid, encodeTaskAsPhoneSendsIt(done)}};
+}
+
+QList<qpm::test::FakeSyncObject> exampleNotes()
+{
+    Note shopping;
+    shopping.luid = 1;
+    shopping.body = QStringLiteral("Einkaufsliste\nMilch, Brot, Äpfel, Kaffee");
+    shopping.lastModified = berlin(10, 8);
+    shopping.categories = {QStringLiteral("Privat")};
+    Note ideas;
+    ideas.luid = 2;
+    ideas.body = QStringLiteral("Geschenkideen\nBuch über Gartenpflege, Konzertkarten");
+    ideas.lastModified = berlin(11, 20);
+    return {{1, encodeNoteAsPhoneSendsIt(shopping)}, {2, encodeNoteAsPhoneSendsIt(ideas)}};
+}
+
+QByteArray noteMetadata()
+{
+    return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<metadata version=\"1.0\"><note_categories>\r\n"
+           "<category name=\"Privat\" color=\"33B679\" id=\"1\"/>\r\n</note_categories>\r\n</metadata>";
+}
+
+bool similar(const QColor &a, const QColor &b)
+{
+    constexpr int tolerance = 24;
+    return std::abs(a.red() - b.red()) <= tolerance && std::abs(a.green() - b.green()) <= tolerance &&
+           std::abs(a.blue() - b.blue()) <= tolerance;
+}
+
+// The visual tree, which also holds what a Loader created.
+QQuickItem *findVisual(QQuickItem *item, const QString &name)
+{
+    if (item->objectName() == name)
+        return item;
+    const QList<QQuickItem *> children = item->childItems();
+    for (QQuickItem *child : children) {
+        if (QQuickItem *found = findVisual(child, name))
+            return found;
+    }
+    return nullptr;
+}
+
+// The software scene graph cannot draw a layer effect, so a raised Material
+// button would show no fill at all. Without its layer the fill shows, only
+// the shadow is missing.
+void dropLayerEffects(QQuickItem *item)
+{
+    const auto *background = item->inherits("QQuickControl")
+                                 ? item->property("background").value<QQuickItem *>()
+                                 : nullptr;
+    if (QObject *layer = background ? background->property("layer").value<QObject *>() : nullptr) {
+        if (layer->property("enabled").toBool() && layer->property("effect").value<QObject *>())
+            layer->setProperty("enabled", false);
+    }
+    const QList<QQuickItem *> children = item->childItems();
+    for (QQuickItem *child : children)
+        dropLayerEffects(child);
+}
+
+// A grab once the picture has stopped changing, so no transition is caught halfway.
+QImage settledGrab(QQuickWindow *window)
+{
+    if (window->rendererInterface()->graphicsApi() == QSGRendererInterface::Software) {
+        QQuickItem *root = window->contentItem();
+        dropLayerEffects(root->parentItem() ? root->parentItem() : root);
+    }
+    constexpr int attempts = 40;
+    constexpr int pauseMs = 50;
+    QImage last = window->grabWindow();
+    for (int attempt = 0; attempt < attempts; ++attempt) {
+        QTest::qWait(pauseMs);
+        const QImage next = window->grabWindow();
+        if (next == last)
+            return next;
+        last = next;
+    }
+    return last;
+}
+
 // The main views and dialogs in German, light and dark, against the fake
 // phone. With QPM_SCREENSHOT_DIR set, the pictures are kept there for a look
 // at contrast and focus.
@@ -244,6 +410,8 @@ private Q_SLOTS:
     void callViewsAreGermanAndRenderInBothSchemes();
     void messageViewsAreGermanAndRenderInBothSchemes_data();
     void messageViewsAreGermanAndRenderInBothSchemes();
+    void organizerViewsAreGermanAndRenderInBothSchemes_data();
+    void organizerViewsAreGermanAndRenderInBothSchemes();
 
 private:
     [[nodiscard]] QObject *dialog(const QString &name) const;
@@ -291,6 +459,13 @@ void TestScreens::initTestCase()
     m_phone->setMetadata(QStringLiteral("pb"), exampleMetadata());
     m_phone->setCalls(exampleCalls());
     m_phone->setObjects(QStringLiteral("msg"), exampleMessages());
+    m_phone->setObjects(QStringLiteral("cal"), exampleOrganizer());
+    m_phone->setMetadata(QStringLiteral("cal"), calendarMetadata());
+    m_phone->setObjects(QStringLiteral("notes"), exampleNotes());
+    m_phone->setMetadata(QStringLiteral("notes"), noteMetadata());
+    m_phone->config().alarms =
+        QStringList{QStringLiteral("\"06:30\",1,0,\"Aufstehen\",\"1,2,3,4,5\",1"),
+                    QStringLiteral("\"08:00\",2,0,\"Wochenende\",\"6,7\",0")};
 
     m_engine = std::make_unique<QQmlApplicationEngine>();
     m_engine->loadFromModule("QPhoneManager.Ui", "Main");
@@ -322,29 +497,13 @@ void TestScreens::cleanupTestCase()
         qInfo() << "Screenshots kept in" << m_shotDir;
 }
 
-namespace {
-
-// The visual tree, which also holds what a Loader created.
-QQuickItem *findVisual(QQuickItem *item, const QString &name)
-{
-    if (item->objectName() == name)
-        return item;
-    const QList<QQuickItem *> children = item->childItems();
-    for (QQuickItem *child : children) {
-        if (QQuickItem *found = findVisual(child, name))
-            return found;
-    }
-    return nullptr;
-}
-
-} // namespace
-
 QObject *TestScreens::dialog(const QString &name) const
 {
     if (QObject *found = m_window->findChild<QObject *>(name))
         return found;
-    for (const QString &pageName : {QStringLiteral("contactsPage"), QStringLiteral("callsPage"),
-                                    QStringLiteral("messagesPage")}) {
+    for (const QString &pageName :
+         {QStringLiteral("contactsPage"), QStringLiteral("callsPage"), QStringLiteral("messagesPage"),
+          QStringLiteral("calendarPage"), QStringLiteral("tasksPage"), QStringLiteral("notesPage")}) {
         QQuickItem *page = item(pageName);
         if (QObject *found = page ? page->findChild<QObject *>(name) : nullptr)
             return found;
@@ -378,7 +537,7 @@ bool TestScreens::save(const QString &name)
         if (quickWindow && quickWindow != m_window && quickWindow->isVisible())
             shown = quickWindow;
     }
-    const QImage image = shown->grabWindow();
+    const QImage image = settledGrab(shown);
     return !image.isNull() && image.save(QDir(m_shotDir).filePath(name + QStringLiteral(".png")));
 }
 
@@ -669,6 +828,31 @@ void TestScreens::messageViewsAreGermanAndRenderInBothSchemes()
                         germanTitle);
         QCOMPARE(item(QStringLiteral("partsText"))->property("text").toString(),
                  QStringLiteral("1 SMS"));
+        QCOMPARE(item(QStringLiteral("recipientChip0"))->property("text").toString(),
+                 QStringLiteral("Bernd Albrecht (+49 30 2000002)"));
+        if (view == QLatin1StringView("composeScheduled")) {
+            // The form was right, the picture showed the box unticked and the
+            // button greyed: it was taken before the tick had been drawn, and
+            // the button's fill is a layer effect the software renderer skips.
+            QQuickItem *later = item(QStringLiteral("scheduleBox"));
+            QQuickItem *submit = item(QStringLiteral("submitMessageButton"));
+            QVERIFY(later->property("checked").toBool());
+            QVERIFY(area->composer()->canSubmit());
+            QVERIFY(submit->isEnabled());
+            m_settings->setColorScheme(Settings::ColorScheme::Light);
+            const QImage shot = settledGrab(m_window);
+            const auto *box = later->property("indicator").value<QQuickItem *>();
+            const auto *fill = submit->property("background").value<QQuickItem *>();
+            QVERIFY(box && fill);
+            const QColor tick = shot.pixelColor(box->mapToScene(QPointF(4, 4)).toPoint());
+            const QColor button =
+                shot.pixelColor(fill->mapToScene(QPointF(8, fill->height() / 2)).toPoint());
+            // A ticked box and the raised button are both filled with the accent colour.
+            const QColor accent = fill->property("color").value<QColor>();
+            QVERIFY2(similar(tick, accent), qPrintable(tick.name()));
+            QVERIFY2(similar(button, accent), qPrintable(button.name()));
+            m_settings->setColorScheme(Settings::ColorScheme::System);
+        }
     } else if (view == QLatin1StringView("scheduled")) {
         QVERIFY(area->editScheduled(area->scheduled()->luidAt(0)));
         QTRY_VERIFY(item(QStringLiteral("composeTitle")) &&
@@ -687,6 +871,33 @@ void TestScreens::messageViewsAreGermanAndRenderInBothSchemes()
         QVERIFY(list);
         list->forceActiveFocus(Qt::TabFocusReason);
         QTRY_VERIFY(list->hasActiveFocus());
+        // The line between list and detail runs the full height; the style's
+        // own handle drew a short grip that read as a stray stroke.
+        QQuickItem *split = findVisual(page, QStringLiteral("listDetailSplit"));
+        QVERIFY(split);
+        const QQuickItem *line = nullptr;
+        QList<QQuickItem *> pending = {split};
+        while (!pending.isEmpty() && !line) {
+            QQuickItem *next = pending.takeLast();
+            if (next->inherits("QQuickRectangle") && next->isVisible() && next->width() == 1 &&
+                next->height() >= split->height() - 1) {
+                line = next;
+            }
+            pending.append(next->childItems());
+        }
+        QVERIFY(line);
+        m_settings->setColorScheme(Settings::ColorScheme::Light);
+        const QImage shot = settledGrab(m_window);
+        const QPointF top = line->mapToScene(QPointF(0, 0));
+        const QColor lineColor = line->property("color").value<QColor>();
+        int drawn = 0;
+        const int rows = int(line->height());
+        for (int y = 0; y < rows; ++y) {
+            if (similar(shot.pixelColor(int(top.x()), int(top.y()) + y), lineColor))
+                ++drawn;
+        }
+        QVERIFY2(drawn >= rows * 95 / 100, qPrintable(QStringLiteral("%1 of %2").arg(drawn).arg(rows)));
+        m_settings->setColorScheme(Settings::ColorScheme::System);
     } else {
         QTRY_VERIFY(item(QStringLiteral("conversationTitle")));
         popup = dialog(view);
@@ -722,6 +933,158 @@ void TestScreens::messageViewsAreGermanAndRenderInBothSchemes()
         QTRY_VERIFY(!popup->property("visible").toBool());
     }
     area->setComposing(false);
+    QVERIFY(m_controller->isConnected());
+}
+
+void TestScreens::organizerViewsAreGermanAndRenderInBothSchemes_data()
+{
+    QTest::addColumn<QString>("view");
+    QTest::addColumn<QString>("germanTitle");
+
+    QTest::newRow("month") << QStringLiteral("calendarMonth") << QStringLiteral("November 2026");
+    QTest::newRow("week") << QStringLiteral("calendarWeek")
+                          << QStringLiteral("KW 46: 09.11.2026 bis 15.11.2026");
+    QTest::newRow("day") << QStringLiteral("calendarDay")
+                         << QStringLiteral("Donnerstag, 12. November 2026");
+    QTest::newRow("list") << QStringLiteral("calendarList") << QStringLiteral("November 2026");
+    QTest::newRow("detail") << QStringLiteral("eventDetail") << QStringLiteral("Elternabend");
+    QTest::newRow("event form") << QStringLiteral("eventForm")
+                                << QStringLiteral("Termin bearbeiten");
+    QTest::newRow("calendars") << QStringLiteral("calendarsDialog")
+                               << QStringLiteral("Kalender auf dem Handy");
+    QTest::newRow("alarms") << QStringLiteral("alarmsDialog")
+                            << QStringLiteral("Wecker auf dem Handy");
+    QTest::newRow("delete") << QStringLiteral("deleteEventDialog")
+                            << QStringLiteral("Termin Elternabend löschen?");
+    QTest::newRow("tasks") << QStringLiteral("tasks") << QStringLiteral("Aufgaben");
+    QTest::newRow("task form") << QStringLiteral("taskForm")
+                               << QStringLiteral("Aufgabe bearbeiten");
+    QTest::newRow("task categories") << QStringLiteral("taskCategoriesDialog")
+                                     << QStringLiteral("Kategorien für Aufgaben");
+    QTest::newRow("notes") << QStringLiteral("notes") << QStringLiteral("Notizen");
+    QTest::newRow("note form") << QStringLiteral("noteForm") << QStringLiteral("Notiz bearbeiten");
+    QTest::newRow("note categories") << QStringLiteral("noteCategoriesDialog")
+                                     << QStringLiteral("Kategorien für Notizen");
+}
+
+void TestScreens::organizerViewsAreGermanAndRenderInBothSchemes()
+{
+    QFETCH(QString, view);
+    QFETCH(QString, germanTitle);
+    qpm::ui::CalendarArea *calendar = m_controller->calendar();
+    if (m_controller->tasks()->list()->totalCount() == 0) {
+        const QFuture<qpm::core::Result<qpm::core::store::OrganizerChanges>> events = calendar->sync();
+        QTRY_VERIFY_WITH_TIMEOUT(events.isFinished(), connectTimeoutMs);
+        QVERIFY(events.result().hasValue());
+    }
+    if (m_controller->notes()->list()->totalCount() == 0) {
+        const QFuture<qpm::core::Result<qpm::core::store::OrganizerChanges>> notes =
+            m_controller->notes()->sync();
+        QTRY_VERIFY_WITH_TIMEOUT(notes.isFinished(), connectTimeoutMs);
+        QVERIFY(notes.result().hasValue());
+    }
+    m_settings->setHolidayRegion(QStringLiteral("de"));
+    calendar->setCurrentDate(QDate(2026, 11, 12));
+    calendar->selectEvent(0, 0);
+    const bool tasks = view.startsWith(QLatin1StringView("task"));
+    const bool notes = view.startsWith(QLatin1StringView("note"));
+    const int section = tasks ? 5 : notes ? 6 : 4;
+    const QString pageName = tasks   ? QStringLiteral("tasksPage")
+                             : notes ? QStringLiteral("notesPage")
+                                     : QStringLiteral("calendarPage");
+    const QString sectionTitle = tasks   ? QStringLiteral("Aufgaben")
+                                 : notes ? QStringLiteral("Notizen")
+                                         : QStringLiteral("Kalender");
+    m_window->setProperty("currentSection", section);
+    QQuickItem *header = m_window->property("header").value<QQuickItem *>();
+    QCOMPARE(header->property("title").toString(), sectionTitle);
+    QTRY_VERIFY(item(pageName));
+    QQuickItem *page = item(pageName);
+    page->setProperty("editing", false);
+    m_window->requestActivate();
+    QVERIFY(QTest::qWaitForWindowActive(m_window));
+
+    QObject *popup = nullptr;
+    QString focusName;
+    if (view == QLatin1StringView("calendarMonth") || view == QLatin1StringView("calendarList") ||
+        view == QLatin1StringView("calendarWeek") || view == QLatin1StringView("calendarDay")) {
+        calendar->setViewMode(view == QLatin1StringView("calendarMonth")  ? qpm::ui::CalendarArea::ViewMode::Month
+                              : view == QLatin1StringView("calendarWeek") ? qpm::ui::CalendarArea::ViewMode::Week
+                              : view == QLatin1StringView("calendarDay")  ? qpm::ui::CalendarArea::ViewMode::Day
+                                                                          : qpm::ui::CalendarArea::ViewMode::List);
+        QTRY_COMPARE(item(QStringLiteral("calendarPeriodTitle"))->property("text").toString(),
+                     germanTitle);
+        focusName = view == QLatin1StringView("calendarMonth") || view == QLatin1StringView("calendarWeek")
+                        ? QStringLiteral("calendarGrid")
+                        : QStringLiteral("eventList");
+    } else if (view == QLatin1StringView("eventDetail") || view == QLatin1StringView("eventForm")) {
+        calendar->setViewMode(qpm::ui::CalendarArea::ViewMode::Day);
+        for (int row = 0; row < calendar->list()->rowCount(); ++row) {
+            if (calendar->list()->luidAt(row) == 0x10000001)
+                calendar->selectRow(row);
+        }
+        if (view == QLatin1StringView("eventForm"))
+            QVERIFY(QMetaObject::invokeMethod(page, "startEdit"));
+        const QString heading = view == QLatin1StringView("eventForm") ? QStringLiteral("eventForm")
+                                                                        : QStringLiteral("eventTitle");
+        QTRY_VERIFY(item(heading));
+        if (view == QLatin1StringView("eventDetail"))
+            QTRY_COMPARE(item(heading)->property("text").toString(), germanTitle);
+    } else if (view == QLatin1StringView("tasks") || view == QLatin1StringView("notes")) {
+        focusName = tasks ? QStringLiteral("taskList") : QStringLiteral("noteList");
+        if (tasks)
+            m_controller->tasks()->setCurrentLuid(6);
+        else
+            m_controller->notes()->setCurrentLuid(1);
+    } else if (view == QLatin1StringView("taskForm") || view == QLatin1StringView("noteForm")) {
+        if (tasks)
+            m_controller->tasks()->setCurrentLuid(5);
+        else
+            m_controller->notes()->setCurrentLuid(1);
+        QVERIFY(QMetaObject::invokeMethod(page, "startEdit"));
+        QTRY_VERIFY(item(view));
+    } else {
+        popup = dialog(view);
+        QVERIFY(popup);
+        if (view == QLatin1StringView("deleteEventDialog")) {
+            QVERIFY(QMetaObject::invokeMethod(page, "confirmDelete", Q_ARG(int, 0x10000001)));
+        } else {
+            QMetaObject::invokeMethod(popup, "open");
+        }
+        const bool hasOpened = popup->metaObject()->indexOfProperty("opened") >= 0;
+        QTRY_VERIFY(popup->property(hasOpened ? "opened" : "visible").toBool());
+        QCOMPARE(popup->property("title").toString(), germanTitle);
+        if (view == QLatin1StringView("alarmsDialog")) {
+            QTRY_VERIFY(item(QStringLiteral("alarmList")) &&
+                        item(QStringLiteral("alarmList"))->property("count").toInt() == 2);
+        }
+    }
+    if (view.endsWith(QLatin1StringView("Form"))) {
+        // The heading of a form is a label inside it.
+        QQuickItem *form = item(view);
+        bool headingFound = false;
+        QList<QQuickItem *> pending = {form};
+        while (!pending.isEmpty() && !headingFound) {
+            QQuickItem *next = pending.takeLast();
+            headingFound = next->property("text").toString() == germanTitle;
+            pending.append(next->childItems());
+        }
+        QVERIFY(headingFound);
+    }
+    if (!focusName.isEmpty()) {
+        QQuickItem *focus = item(focusName);
+        QVERIFY(focus);
+        focus->forceActiveFocus(Qt::TabFocusReason);
+        QTRY_VERIFY(focus->hasActiveFocus());
+    }
+
+    QVERIFY(saveBothSchemes(view));
+
+    if (popup) {
+        QMetaObject::invokeMethod(popup, "close");
+        QTRY_VERIFY(!popup->property("visible").toBool());
+    }
+    page->setProperty("editing", false);
     QVERIFY(m_controller->isConnected());
 }
 

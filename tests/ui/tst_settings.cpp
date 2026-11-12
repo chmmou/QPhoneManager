@@ -30,6 +30,7 @@ private Q_SLOTS:
     void connectionOrderIsAlwaysAPermutation_data();
     void connectionOrderIsAlwaysAPermutation();
     void unknownLanguageIsIgnored();
+    void holidayRegionIsStoredAndUnknownOnesAreIgnored();
     void malformedFileValuesFallBackToDefaults();
     void settingsFileHoldsNoPin();
 
@@ -202,6 +203,29 @@ void TestSettings::unknownLanguageIsIgnored()
     settings.setLanguage(QStringLiteral("../de"));
 
     QCOMPARE(settings.language(), QStringLiteral("de"));
+}
+
+void TestSettings::holidayRegionIsStoredAndUnknownOnesAreIgnored()
+{
+    {
+        Settings settings(fileName());
+        QCOMPARE(settings.holidayRegion(), QString());
+        QSignalSpy changed(&settings, &Settings::holidayRegionChanged);
+
+        settings.setHolidayRegion(QStringLiteral("ch"));
+        settings.setHolidayRegion(QStringLiteral("ch"));
+        settings.setHolidayRegion(QStringLiteral("fr"));
+
+        QCOMPARE(settings.holidayRegion(), QStringLiteral("ch"));
+        QCOMPARE(changed.count(), 1);
+    }
+    {
+        QSettings raw(fileName(), QSettings::IniFormat);
+        QCOMPARE(raw.value(QStringLiteral("calendar/holidayRegion")).toString(), QStringLiteral("ch"));
+        raw.setValue(QStringLiteral("calendar/holidayRegion"), QStringLiteral("../de"));
+    }
+    const Settings settings(fileName());
+    QCOMPARE(settings.holidayRegion(), QString());
 }
 
 void TestSettings::malformedFileValuesFallBackToDefaults()

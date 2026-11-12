@@ -1,15 +1,23 @@
 qt_add_library(qpm_core STATIC
     core/Error.h
+    core/Holidays.h
+    core/Holidays.cpp
     core/Logging.h
     core/Logging.cpp
     core/Version.h
     core/Version.cpp
     core/codec/AtText.h
     core/codec/AtText.cpp
+    core/codec/CalMetadata.h
+    core/codec/CalMetadata.cpp
     core/codec/CallLogCodec.h
     core/codec/CallLogCodec.cpp
+    core/codec/ContentLines.h
+    core/codec/ContentLines.cpp
     core/codec/CsvTable.h
     core/codec/CsvTable.cpp
+    core/codec/ICalendar.h
+    core/codec/ICalendar.cpp
     core/codec/Limits.h
     core/codec/Limits.cpp
     core/codec/MessageExport.h
@@ -18,8 +26,12 @@ qt_add_library(qpm_core STATIC
     core/codec/PbMetadata.cpp
     core/codec/PhoneTime.h
     core/codec/PhoneTime.cpp
+    core/codec/PhoneVCal.h
+    core/codec/PhoneVCal.cpp
     core/codec/PhoneVCard.h
     core/codec/PhoneVCard.cpp
+    core/codec/Recurrence.h
+    core/codec/Recurrence.cpp
     core/codec/SafeXml.h
     core/codec/SafeXml.cpp
     core/codec/SmsLength.h
@@ -28,6 +40,8 @@ qt_add_library(qpm_core STATIC
     core/codec/VCardInterchange.cpp
     core/codec/VMessage.h
     core/codec/VMessage.cpp
+    core/codec/VNote.h
+    core/codec/VNote.cpp
     core/protocol/AdbBridge.h
     core/protocol/AdbBridge.cpp
     core/protocol/AtSession.h
@@ -45,6 +59,10 @@ qt_add_library(qpm_core STATIC
     core/protocol/TcpTransport.h
     core/protocol/TcpTransport.cpp
     core/protocol/Transport.h
+    core/service/AlarmService.h
+    core/service/AlarmService.cpp
+    core/service/CalendarService.h
+    core/service/CalendarService.cpp
     core/service/CallLogService.h
     core/service/CallLogService.cpp
     core/service/ContactsService.h
@@ -53,6 +71,11 @@ qt_add_library(qpm_core STATIC
     core/service/DeviceStatusService.cpp
     core/service/MessagesService.h
     core/service/MessagesService.cpp
+    core/service/NotesService.h
+    core/service/NotesService.cpp
+    core/service/OrganizerSession.h
+    core/service/OrganizerSession.cpp
+    core/service/SaveMode.h
     core/sync/IrmcSync.h
     core/sync/IrmcSync.cpp
     core/store/CallStore.h
@@ -61,6 +84,8 @@ qt_add_library(qpm_core STATIC
     core/store/ContactStore.cpp
     core/store/MessageStore.h
     core/store/MessageStore.cpp
+    core/store/OrganizerStore.h
+    core/store/OrganizerStore.cpp
     core/store/ProfileStore.h
     core/store/ProfileStore.cpp
     core/sync/SyncStoreAdapter.h
@@ -137,6 +162,10 @@ set(qpm_ui_qml_files
     components/Sidebar.qml
     components/SidebarButton.qml
     components/StatusBar.qml
+    dialogs/AlarmsDialog.qml
+    dialogs/CalendarsDialog.qml
+    dialogs/CategoriesDialog.qml
+    dialogs/ConfirmDeleteDialog.qml
     dialogs/ConflictDialog.qml
     dialogs/ConnectDialog.qml
     dialogs/DuplicatesDialog.qml
@@ -145,6 +174,7 @@ set(qpm_ui_qml_files
     dialogs/ProfilesDialog.qml
     dialogs/QrConnectDialog.qml
     dialogs/SettingsDialog.qml
+    dialogs/VersionConflictDialog.qml
     pages/OverviewPage.qml
     pages/calls/CallDetail.qml
     pages/calls/CallList.qml
@@ -159,6 +189,17 @@ set(qpm_ui_qml_files
     pages/messages/ConversationView.qml
     pages/messages/MessagesPage.qml
     pages/messages/ScheduledList.qml
+    pages/organizer/CalendarGrid.qml
+    pages/organizer/CalendarPage.qml
+    pages/organizer/EventDetail.qml
+    pages/organizer/EventForm.qml
+    pages/organizer/EventList.qml
+    pages/organizer/NoteForm.qml
+    pages/organizer/NoteList.qml
+    pages/organizer/NotesPage.qml
+    pages/organizer/TaskForm.qml
+    pages/organizer/TaskList.qml
+    pages/organizer/TasksPage.qml
 )
 set(qpm_ui_qml_sources "")
 foreach(file IN LISTS qpm_ui_qml_files)
@@ -186,6 +227,8 @@ qt_add_qml_module(qpm_ui
         ui/DeviceStatusModel.cpp
         ui/FoundPhoneModel.h
         ui/FoundPhoneModel.cpp
+        ui/PhoneNumberText.h
+        ui/PhoneNumberText.cpp
         ui/ProfileListModel.h
         ui/ProfileListModel.cpp
         ui/QrCodeImage.h
@@ -226,6 +269,34 @@ qt_add_qml_module(qpm_ui
         ui/messages/MessagesArea.cpp
         ui/messages/ScheduledListModel.h
         ui/messages/ScheduledListModel.cpp
+        ui/organizer/AlarmListModel.h
+        ui/organizer/AlarmListModel.cpp
+        ui/organizer/CalendarArea.h
+        ui/organizer/CalendarArea.cpp
+        ui/organizer/CalendarDaysModel.h
+        ui/organizer/CalendarDaysModel.cpp
+        ui/organizer/CalendarListModel.h
+        ui/organizer/CalendarListModel.cpp
+        ui/organizer/CalendarModel.h
+        ui/organizer/CalendarModel.cpp
+        ui/organizer/CategoryModel.h
+        ui/organizer/CategoryModel.cpp
+        ui/organizer/EventEditor.h
+        ui/organizer/EventEditor.cpp
+        ui/organizer/NoteEditor.h
+        ui/organizer/NoteEditor.cpp
+        ui/organizer/NoteListModel.h
+        ui/organizer/NoteListModel.cpp
+        ui/organizer/NotesArea.h
+        ui/organizer/NotesArea.cpp
+        ui/organizer/OrganizerText.h
+        ui/organizer/OrganizerText.cpp
+        ui/organizer/TaskEditor.h
+        ui/organizer/TaskEditor.cpp
+        ui/organizer/TaskListModel.h
+        ui/organizer/TaskListModel.cpp
+        ui/organizer/TasksArea.h
+        ui/organizer/TasksArea.cpp
 )
 
 set(qpm_ui_icons
@@ -243,6 +314,7 @@ set(qpm_ui_icons
     tabler/check.svg
     tabler/checklist.svg
     tabler/chevron-left.svg
+    tabler/chevron-right.svg
     tabler/clock.svg
     tabler/copy.svg
     tabler/cpu.svg
@@ -250,11 +322,14 @@ set(qpm_ui_icons
     tabler/device-mobile.svg
     tabler/download.svg
     tabler/edit.svg
+    tabler/filter.svg
     tabler/file.svg
     tabler/folder.svg
     tabler/help.svg
     tabler/home.svg
     tabler/info-circle.svg
+    tabler/layout-grid.svg
+    tabler/list.svg
     tabler/message.svg
     tabler/messages.svg
     tabler/notes.svg
@@ -293,6 +368,7 @@ target_include_directories(qpm_ui
         ${CMAKE_CURRENT_SOURCE_DIR}/ui/calls
         ${CMAKE_CURRENT_SOURCE_DIR}/ui/contacts
         ${CMAKE_CURRENT_SOURCE_DIR}/ui/messages
+        ${CMAKE_CURRENT_SOURCE_DIR}/ui/organizer
 )
 target_link_libraries(qpm_ui
     PUBLIC

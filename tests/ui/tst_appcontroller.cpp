@@ -523,7 +523,9 @@ void TestAppController::syncNeedsAConnectionAndAlwaysCoversTheContacts()
     QCOMPARE(finished.first().first().toString(),
              QStringLiteral("Contacts: 0 new, 0 changed, 0 deleted\n"
                             "Calls: 0 new, 0 changed, 0 deleted\n"
-                            "Messages: 0 new, 0 changed, 0 deleted"));
+                            "Messages: 0 new, 0 changed, 0 deleted\n"
+                            "Calendar and tasks: 0 new, 0 changed, 0 deleted\n"
+                            "Notes: 0 new, 0 changed, 0 deleted"));
 }
 
 void TestAppController::syncReportsTheChangesOfEachArea()
@@ -545,12 +547,14 @@ void TestAppController::syncReportsTheChangesOfEachArea()
 
     QTRY_COMPARE(finished.count(), 1);
     const QStringList lines = finished.first().first().toString().split(u'\n');
-    QCOMPARE(lines.size(), 5);
+    QCOMPARE(lines.size(), 7);
     QCOMPARE(lines.at(0), QStringLiteral("Contacts: 0 new, 0 changed, 0 deleted"));
     QCOMPARE(lines.at(1), QStringLiteral("Calls: 0 new, 0 changed, 0 deleted"));
     QCOMPARE(lines.at(2), QStringLiteral("Messages: 0 new, 0 changed, 0 deleted"));
-    QCOMPARE(lines.at(3), QStringLiteral("Calendar: 1 new, 2 changed, 3 deleted"));
-    QVERIFY(lines.at(4).startsWith(QStringLiteral("Notes: not synced.")));
+    QCOMPARE(lines.at(3), QStringLiteral("Calendar and tasks: 0 new, 0 changed, 0 deleted"));
+    QCOMPARE(lines.at(4), QStringLiteral("Notes: 0 new, 0 changed, 0 deleted"));
+    QCOMPARE(lines.at(5), QStringLiteral("Calendar: 1 new, 2 changed, 3 deleted"));
+    QVERIFY(lines.at(6).startsWith(QStringLiteral("Notes: not synced.")));
     QVERIFY(!controller->isSyncing());
 }
 

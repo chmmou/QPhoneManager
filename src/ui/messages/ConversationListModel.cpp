@@ -1,6 +1,7 @@
 #include "ui/messages/ConversationListModel.h"
 
 #include "core/store/ContactStore.h"
+#include "ui/PhoneNumberText.h"
 
 #include <QLocale>
 #include <QStringList>
@@ -163,7 +164,7 @@ QString ConversationListModel::titleFor(const QString &address) const
     if (!contact.isEmpty())
         return contact;
     if (!address.trimmed().isEmpty())
-        return address.trimmed();
+        return PhoneNumberText::display(address);
     return tr("Unknown sender");
 }
 

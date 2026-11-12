@@ -127,6 +127,15 @@ struct FakePhoneConfig
     bool smsWriteDenied = true;
     /// Final line for every AT+CMGS send instead of OK, for example "+CMS ERROR: 38".
     QByteArray smsSendFailure;
+    /// Answer every request below "telecom/cal" with "unauthorized", as a client without
+    /// the calendar permission does.
+    bool calendarDenied = false;
+    /**
+     * The "+CALA:" lines of the clock app without the prefix, for example
+     * `"07:30",1,0,"Wake up","1,2,3,4,5",1`. Nothing means a phone whose clock
+     * app the client cannot reach: AT+CALA then fails.
+     */
+    std::optional<QStringList> alarms;
 };
 
 /**
@@ -152,6 +161,15 @@ struct FakePhoneConfig
  * FakePhoneConfig::smsWriteDenied is false. A PUT below "telecom/msg" takes
  * scheduled messages only, gives them a LUID with bit 0x20000000 and keeps
  * them in the form the client sends them back in.
+ *
+ * The calendar and the notes take changes only after "initsync" was read in
+ * the same OBEX session, as the client does. A new event gets a LUID with bit
+ * 0x10000000 and goes to the calendar its X-CALENDAR names, a task or a note
+ * a small LUID; both come back in the form the client sends. A change of an
+ * event keeps its calendar. Categories named in a task or a note that the
+ * phone does not know yet are added to its metadata, and metadata.xml takes
+ * the choice of calendars and changes of categories. AT+CALA answers from
+ * FakePhoneConfig::alarms.
  *
  * Never sends text messages or places calls: there is nothing behind it.
  */
@@ -243,6 +261,10 @@ private:
     void handleSyncGet(const QString &name);
     void handleSyncPut(const QString &name, const QByteArray &body, bool hasBody);
     void handleContactPut(const QString &rest, const QByteArray &body);
+    void handleCalendarPut(const QString &rest, const QByteArray &body, bool hasBody);
+    void handleNotePut(const QString &rest, const QByteArray &body, bool hasBody);
+    /// Answers AT+CALA; returns false for any other command.
+    bool handleAlarms(const QString &command, const QString &name);
     void handleFileRequest(const qpm::core::protocol::ObexPacket &request);
     void sendPacket(const QByteArray &packet);
     void sendFirst(const QByteArray &packet);
@@ -280,6 +302,8 @@ private:
     bool m_obexMode = false;
     bool m_dropAfterStream = false;
     QByteArray m_target;
+    /// Areas whose "initsync" was read in the running OBEX session.
+    QSet<QString> m_loadedAreas;
     QString m_currentFolder;
     quint16 m_maxPacket = 0xFFFF;
     qsizetype m_discard = 0;

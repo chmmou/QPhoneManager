@@ -10,7 +10,7 @@ ApplicationWindow {
 
     readonly property bool connected: AppController.connected
     readonly property string currentKey: sectionCatalog.all[root.currentSection].key
-    readonly property bool hasData: (root.currentKey === "contacts" && AppController.contacts.hasPhone) || (root.currentKey === "calls" && AppController.calls.hasPhone) || (root.currentKey === "messages" && AppController.messages.hasPhone)
+    readonly property bool hasData: (root.currentKey === "contacts" && AppController.contacts.hasPhone) || (root.currentKey === "calls" && AppController.calls.hasPhone) || (root.currentKey === "messages" && AppController.messages.hasPhone) || (root.currentKey === "calendar" && AppController.calendar.hasPhone) || (root.currentKey === "tasks" && AppController.tasks.hasPhone) || (root.currentKey === "notes" && AppController.notes.hasPhone)
     property int currentSection: 0
 
     signal connectRequested
@@ -105,6 +105,60 @@ ApplicationWindow {
 
     Connections {
         target: AppController.messages
+
+        function onErrorOccurred(message: string): void {
+            messageBar.show(message, true);
+        }
+
+        function onInfoMessage(message: string): void {
+            messageBar.show(message, false);
+        }
+    }
+
+    Binding {
+        target: AppController.calendar
+        property: "searchText"
+        value: root.currentKey === "calendar" ? appHeader.searchText : ""
+    }
+
+    Connections {
+        target: AppController.calendar
+
+        function onErrorOccurred(message: string): void {
+            messageBar.show(message, true);
+        }
+
+        function onInfoMessage(message: string): void {
+            messageBar.show(message, false);
+        }
+    }
+
+    Binding {
+        target: AppController.tasks
+        property: "searchText"
+        value: root.currentKey === "tasks" ? appHeader.searchText : ""
+    }
+
+    Connections {
+        target: AppController.tasks
+
+        function onErrorOccurred(message: string): void {
+            messageBar.show(message, true);
+        }
+
+        function onInfoMessage(message: string): void {
+            messageBar.show(message, false);
+        }
+    }
+
+    Binding {
+        target: AppController.notes
+        property: "searchText"
+        value: root.currentKey === "notes" ? appHeader.searchText : ""
+    }
+
+    Connections {
+        target: AppController.notes
 
         function onErrorOccurred(message: string): void {
             messageBar.show(message, true);

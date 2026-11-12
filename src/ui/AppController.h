@@ -9,6 +9,9 @@
 #include "ui/calls/CallsArea.h"
 #include "ui/contacts/ContactsArea.h"
 #include "ui/messages/MessagesArea.h"
+#include "ui/organizer/CalendarArea.h"
+#include "ui/organizer/NotesArea.h"
+#include "ui/organizer/TasksArea.h"
 
 #include <QFuture>
 #include <QHostAddress>
@@ -56,8 +59,8 @@ class Settings;
  * connection, failed attempts stay quiet.
  *
  * The object owns the connection, the models, the areas and the profile
- * store of the current phone. The contacts, the call log and the messages
- * are part of syncAll(), in that order. `settings` must outlive it or be destroyed with
+ * store of the current phone. The contacts, the call log, the messages, the
+ * calendar with the tasks and the notes are part of syncAll(), in that order. `settings` must outlive it or be destroyed with
  * the engine first; the object never uses it after that.
  */
 class AppController : public QObject
@@ -100,6 +103,9 @@ class AppController : public QObject
     Q_PROPERTY(qpm::ui::ContactsArea *contacts READ contacts CONSTANT FINAL)
     Q_PROPERTY(qpm::ui::CallsArea *calls READ calls CONSTANT FINAL)
     Q_PROPERTY(qpm::ui::MessagesArea *messages READ messages CONSTANT FINAL)
+    Q_PROPERTY(qpm::ui::CalendarArea *calendar READ calendar CONSTANT FINAL)
+    Q_PROPERTY(qpm::ui::TasksArea *tasks READ tasks CONSTANT FINAL)
+    Q_PROPERTY(qpm::ui::NotesArea *notes READ notes CONSTANT FINAL)
 
 public:
     enum class ConnectionState {
@@ -172,6 +178,9 @@ public:
     [[nodiscard]] ContactsArea *contacts() const { return m_contacts; }
     [[nodiscard]] CallsArea *calls() const { return m_calls; }
     [[nodiscard]] MessagesArea *messages() const { return m_messages; }
+    [[nodiscard]] CalendarArea *calendar() const { return m_calendar; }
+    [[nodiscard]] TasksArea *tasks() const { return m_tasks; }
+    [[nodiscard]] NotesArea *notes() const { return m_notes; }
     /// The pictures behind "image://qpm/", for the image provider of the engine.
     [[nodiscard]] std::shared_ptr<PhotoSource> photoSource() const { return m_photos; }
 
@@ -294,6 +303,9 @@ private:
     ContactsArea *m_contacts = nullptr;
     CallsArea *m_calls = nullptr;
     MessagesArea *m_messages = nullptr;
+    CalendarArea *m_calendar = nullptr;
+    TasksArea *m_tasks = nullptr;
+    NotesArea *m_notes = nullptr;
     core::protocol::Discovery *m_discovery = nullptr;
     BluetoothDeviceFinder *m_bluetoothFinder = nullptr;
     std::unique_ptr<core::protocol::AdbBridge> m_listAdb;
