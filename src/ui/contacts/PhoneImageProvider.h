@@ -34,8 +34,9 @@ inline constexpr int maxContactPhotoSide = 480;
  * The pictures the image provider hands out, shared between the main thread
  * and the threads the QML engine loads images on: the folder of the photo
  * blobs of the current phone, the photo being edited, the picture being
- * cropped and the thumbnails of phone files, which are kept in memory only.
- * Every member may be called from any thread.
+ * cropped, the thumbnails of phone files and the icons of the phone's apps;
+ * thumbnails and icons are kept in memory only. Every member may be called
+ * from any thread.
  */
 class PhotoSource
 {
@@ -61,6 +62,12 @@ public:
     [[nodiscard]] QImage thumbnail(quint64 id) const;
     void clearThumbnails();
 
+    /// Keeps the icon of the app `package`, replacing an earlier one.
+    void setAppIcon(const QString &package, const QImage &image);
+    /// The icon of the app `package`, or a null image when none is kept.
+    [[nodiscard]] QImage appIcon(const QString &package) const;
+    void clearAppIcons();
+
 private:
     mutable QMutex m_mutex;
     QString m_blobDirectory;
@@ -68,6 +75,7 @@ private:
     QImage m_candidate;
     QHash<quint64, QImage> m_thumbnails;
     QList<quint64> m_thumbnailOrder;
+    QHash<QString, QImage> m_appIcons;
     quint64 m_serial = 0;
 };
 
@@ -75,7 +83,8 @@ private:
  * Hands out the program's pictures under "image://qpm/": "photo/<luid>/<blob>"
  * for a stored contact photo, "part/<blob>" for a picture sent in a message,
  * "draft/<n>" for the photo being edited, "candidate/<n>" for the picture
- * being cropped and "thumb/<n>" for the thumbnail of a phone file. Stored pictures are read with
+ * being cropped, "thumb/<n>" for the thumbnail of a phone file and
+ * "app/<package>" for the icon of an app on the phone. Stored pictures are read with
  * readImageSafely(). An unknown or malformed id, and a blob that is no picture, yield an empty
  * image. requestImage() may run on a loader thread of the engine.
  */

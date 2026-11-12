@@ -10,7 +10,7 @@ ApplicationWindow {
 
     readonly property bool connected: AppController.connected
     readonly property string currentKey: sectionCatalog.all[root.currentSection].key
-    readonly property bool hasData: (root.currentKey === "contacts" && AppController.contacts.hasPhone) || (root.currentKey === "calls" && AppController.calls.hasPhone) || (root.currentKey === "messages" && AppController.messages.hasPhone) || (root.currentKey === "calendar" && AppController.calendar.hasPhone) || (root.currentKey === "tasks" && AppController.tasks.hasPhone) || (root.currentKey === "notes" && AppController.notes.hasPhone)
+    readonly property bool hasData: (root.currentKey === "contacts" && AppController.contacts.hasPhone) || (root.currentKey === "calls" && AppController.calls.hasPhone) || (root.currentKey === "messages" && AppController.messages.hasPhone) || (root.currentKey === "calendar" && AppController.calendar.hasPhone) || (root.currentKey === "tasks" && AppController.tasks.hasPhone) || (root.currentKey === "notes" && AppController.notes.hasPhone) || (root.currentKey === "apps" && AppController.apps.totalCount > 0)
     property int currentSection: 0
 
     signal connectRequested
@@ -171,6 +171,24 @@ ApplicationWindow {
 
     Connections {
         target: AppController.files
+
+        function onErrorOccurred(message: string): void {
+            messageBar.show(message, true);
+        }
+
+        function onInfoMessage(message: string): void {
+            messageBar.show(message, false);
+        }
+    }
+
+    Binding {
+        target: AppController.apps
+        property: "searchText"
+        value: root.currentKey === "apps" ? appHeader.searchText : ""
+    }
+
+    Connections {
+        target: AppController.apps
 
         function onErrorOccurred(message: string): void {
             messageBar.show(message, true);

@@ -1,6 +1,7 @@
 #include "ui/contacts/PhoneImageProvider.h"
 
 #include "core/Logging.h"
+#include "core/codec/AppListCodec.h"
 #include "core/codec/Limits.h"
 
 #include <QDir>
@@ -132,6 +133,24 @@ void PhotoSource::clearThumbnails()
     m_thumbnailOrder.clear();
 }
 
+void PhotoSource::setAppIcon(const QString &package, const QImage &image)
+{
+    const QMutexLocker locker(&m_mutex);
+    m_appIcons.insert(package, image);
+}
+
+QImage PhotoSource::appIcon(const QString &package) const
+{
+    const QMutexLocker locker(&m_mutex);
+    return m_appIcons.value(package);
+}
+
+void PhotoSource::clearAppIcons()
+{
+    const QMutexLocker locker(&m_mutex);
+    m_appIcons.clear();
+}
+
 PhoneImageProvider::PhoneImageProvider(std::shared_ptr<PhotoSource> source, QObject *parent)
     : QQuickImageProvider(QQmlImageProviderBase::Image), m_source(std::move(source))
 {
@@ -151,6 +170,9 @@ QImage PhoneImageProvider::requestImage(const QString &id, QSize *size, const QS
         const quint64 thumb = parts.at(1).toULongLong(&ok);
         if (ok)
             image = fitted(m_source->thumbnail(thumb), requestedSize);
+    } else if (parts.size() == 2 && parts.at(0) == QLatin1StringView("app") &&
+               core::codec::isValidPackageName(parts.at(1))) {
+        image = fitted(m_source->appIcon(parts.at(1)), requestedSize);
     } else if ((parts.size() == 3 && parts.at(0) == QLatin1StringView("photo") &&
                 isBlobName(parts.at(2))) ||
                (parts.size() == 2 && parts.at(0) == QLatin1StringView("part") &&

@@ -141,6 +141,15 @@ the storages and the top level of the internal storage. The app on the phone
 needs access to all files; where the phone has not granted it, the test is
 skipped rather than the permission asked for on the phone.
 
+The apps test counts the apps on every phone, checks their form and reads the
+icon of MyPhoneExplorer Client. On an emulator it also opens Settings, saves
+the APK of the smallest preinstalled app and compares it with the file on the
+phone, and installs and removes a test app `org.qphonemanager.devicetest`,
+confirmed on the emulator's screen through adb. It builds that app with the
+build tools and a platform of the Android SDK next to `adb`; without them it
+skips installing and removing. On any other phone it opens, saves, installs
+and removes nothing and prints only counts.
+
 All traffic of these tests goes through a guard. It lets a text message
 through only to the number in `QPM_TEST_SMS_TO` and a call only to the number
 in `QPM_TEST_CALL_TO`. Without these variables, every message and every call

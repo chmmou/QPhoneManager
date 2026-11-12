@@ -433,6 +433,8 @@ QDateTime nowToTheSecond()
 struct FakePhone::Transfer
 {
     bool upload = false;
+    /// An APK written to the root, which the phone keeps to install it.
+    bool install = false;
     QString path;
     QByteArray data;
     quint64 length = 0;
@@ -576,6 +578,90 @@ std::optional<FakeFile> FakePhone::file(const QString &path) const
     return it.value();
 }
 
+void FakePhone::setApps(const QList<FakeApp> &apps)
+{
+    m_apps = apps;
+    for (const FakeApp &app : apps) {
+        if (!app.sourcePath.isEmpty()) {
+            addFile(QStringLiteral("\\phone") + QString(app.sourcePath).replace(u'/', u'\\'),
+                    app.apk, app.installed);
+        }
+    }
+}
+
+void FakePhone::confirmUninstall(const QString &package)
+{
+    m_apps.removeIf([&package](const FakeApp &app) { return app.package == package; });
+    sendUnsolicited("*EJAVA: \"\",\"\",\"\",0," + core::codec::encodeQp(package).toUtf8());
+}
+
+void FakePhone::confirmInstall(const FakeApp &app)
+{
+    m_apps.removeIf([&app](const FakeApp &known) { return known.package == app.package; });
+    m_apps.append(app);
+    if (!app.sourcePath.isEmpty()) {
+        addFile(QStringLiteral("\\phone") + QString(app.sourcePath).replace(u'/', u'\\'), app.apk,
+                app.installed);
+    }
+    sendUnsolicited(appLine(app));
+}
+
+QByteArray FakePhone::appLine(const FakeApp &app) const
+{
+    QString line = QStringLiteral("*EJAVA: \"") + core::codec::encodeQp(app.label) +
+                   QStringLiteral("\",\"\",\"") +
+                   (app.version.isEmpty() ? QStringLiteral("null") : app.version) +
+                   QStringLiteral("\",") + (app.userApp ? u'1' : u'0') + u',' +
+                   core::codec::encodeQp(app.package);
+    if (!app.sourcePath.isEmpty()) {
+        line += u',' + core::codec::encodeQp(app.sourcePath) + u',' +
+                core::codec::formatUtcStamp(app.installed) + u',' + QString::number(app.apk.size());
+    }
+    return line.toUtf8();
+}
+
+bool FakePhone::handleApps(const QString &command, const QString &name)
+{
+    if (name != QLatin1StringView("AT*EJAVA"))
+        return false;
+    const QByteArray echo = command.toUtf8() + "\r\n";
+    const QString argument = command.section(u'=', 1);
+    if (argument == QLatin1StringView("1")) {
+        // Like the client: the echo first, then blocks of ten lines, the last with OK.
+        writeAt(echo);
+        QByteArray block = "*EJAVACOUNT: " + QByteArray::number(m_apps.size()) + "\r\n";
+        int lines = 0;
+        for (const FakeApp &app : std::as_const(m_apps)) {
+            block += appLine(app) + "\r\n";
+            if (++lines == 10) {
+                writeAt(block);
+                block.clear();
+                lines = 0;
+            }
+        }
+        writeAt(block + "OK\r\n");
+        return true;
+    }
+    const QString package = argument.mid(2);
+    if (argument.startsWith(QLatin1StringView("4,"))) {
+        m_startRequests.append(package);
+        const bool launchable =
+            std::any_of(m_apps.cbegin(), m_apps.cend(), [&package](const FakeApp &app) {
+                return app.package == package && app.launchable;
+            });
+        writeAt(echo + (launchable ? "OK\r\n" : "ERROR\r\n"));
+        return true;
+    }
+    if (argument.startsWith(QLatin1StringView("2,"))) {
+        // The client starts the question on the phone and answers at once.
+        m_uninstallRequests.append(package);
+        writeAt(echo + "OK\r\n");
+        return true;
+    }
+    writeAt(echo + "ERROR\r\n");
+    return true;
+}
+
 void FakePhone::sendUnsolicited(const QByteArray &line)
 {
     if (isConnected() && !m_obexMode) {
@@ -697,6 +783,8 @@ void FakePhone::handleAt(const QString &command)
     if (handleMessaging(command, name))
         return;
     if (handleAlarms(command, name))
+        return;
+    if (handleApps(command, name))
         return;
 
     if (command == QLatin1StringView("AT+CPROT=0")) {
@@ -1719,6 +1807,17 @@ void FakePhone::handleFileRequest(const ObexPacket &request)
     case obex::opGetFinal:
         if (request.type == "x-obex/folder-listing") {
             sendBody(folderListing(request.targetName == QStringLiteral("/*")));
+        } else if (name.startsWith(QLatin1StringView("\\appicon\\"))) {
+            const QString package = name.section(u'\\', 2, 2);
+            const auto app =
+                std::find_if(m_apps.cbegin(), m_apps.cend(), [&package](const FakeApp &candidate) {
+                    return candidate.package == package;
+                });
+            // The client fails with an exception for an unknown package.
+            if (app != m_apps.cend() && !app->icon.isEmpty())
+                sendBody(app->icon);
+            else
+                sendFirst(codeOnly(obex::rspInternalServerError));
         } else if (const auto file = this->file(resolve(name))) {
             sendBody(file->data);
         } else {
@@ -1731,7 +1830,11 @@ void FakePhone::handleFileRequest(const ObexPacket &request)
             return;
         }
         const QString path = resolve(name);
-        if (request.bodyKind != ObexPacket::BodyKind::None) {
+        if (request.bodyKind != ObexPacket::BodyKind::None && m_currentFolder.isEmpty() &&
+            name.endsWith(QLatin1StringView(".apk"), Qt::CaseInsensitive)) {
+            m_installRequests.append({name, request.body});
+            sendFirst(codeOnly(obex::rspOk));
+        } else if (request.bodyKind != ObexPacket::BodyKind::None) {
             QDateTime modified = QDateTime::currentDateTimeUtc();
             if (const auto time = core::codec::parseUtcStamp(QString::fromLatin1(request.time)))
                 modified = *time;
@@ -1780,7 +1883,10 @@ void FakePhone::handleFileRequest(const ObexPacket &request)
             }
             transfer->length =
                 request.lengthBig.value_or(0) > 0 ? *request.lengthBig : request.length.value_or(0);
-            transfer->path = uniqueName(resolve(name));
+            // The client keeps an APK sent to the root under its name, replacing an older one.
+            transfer->install = m_currentFolder.isEmpty() &&
+                                name.endsWith(QLatin1StringView(".apk"), Qt::CaseInsensitive);
+            transfer->path = transfer->install ? resolve(name) : uniqueName(resolve(name));
             transfer->modified = core::codec::parseUtcStamp(QString::fromLatin1(request.time))
                                      .value_or(QDateTime::currentDateTimeUtc());
         } else {
@@ -1829,7 +1935,7 @@ void FakePhone::handleFileRequest(const ObexPacket &request)
                 raw->data += side->readAll();
                 if (quint64(raw->data.size()) >= raw->length && !raw->done) {
                     raw->done = true;
-                    addFile(raw->path, raw->data.left(qsizetype(raw->length)), raw->modified);
+                    keepUpload(*raw, raw->data.left(qsizetype(raw->length)));
                     side->disconnectFromHost();
                     if (raw->statusPending)
                         finishTransfer();
@@ -1857,7 +1963,7 @@ void FakePhone::handleFileRequest(const ObexPacket &request)
                     return;
                 }
                 raw->done = true;
-                addFile(raw->path, QByteArray(), raw->modified);
+                keepUpload(*raw, QByteArray());
                 if (raw->statusPending)
                     finishTransfer();
             });
@@ -1878,7 +1984,7 @@ void FakePhone::handleFileRequest(const ObexPacket &request)
         } else if (m_transfer->missed && !m_transfer->done) {
             // The client closes the file also when it answers "timeout".
             m_transfer->done = true;
-            addFile(m_transfer->path, QByteArray(), m_transfer->modified);
+            keepUpload(*m_transfer, QByteArray());
             sendFirst(codeOnly(obex::rspRequestTimeout));
         } else if (m_transfer->done) {
             finishTransfer();
@@ -1890,6 +1996,14 @@ void FakePhone::handleFileRequest(const ObexPacket &request)
         break;
     }
     sendFirst(codeOnly(obex::rspNotAcceptable));
+}
+
+void FakePhone::keepUpload(const Transfer &transfer, const QByteArray &data)
+{
+    if (transfer.install)
+        m_installRequests.append({leafOf(transfer.path), data});
+    else
+        addFile(transfer.path, data, transfer.modified);
 }
 
 void FakePhone::finishTransfer()

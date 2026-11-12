@@ -139,6 +139,109 @@
     </message>
 </context>
 <context>
+    <name>AppsPage</name>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="49"/>
+        <source>Show apps</source>
+        <translation>Apps zeigen</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="57"/>
+        <source>Your apps</source>
+        <translation>Eigene Apps</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="69"/>
+        <source>System apps</source>
+        <translation>System-Apps</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="81"/>
+        <source>All</source>
+        <translation>Alle</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="97"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="419"/>
+        <source>Open on the phone</source>
+        <translation>Auf dem Handy öffnen</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="115"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="425"/>
+        <source>Save the APK on this computer</source>
+        <translation>APK auf diesem Rechner speichern</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="133"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="431"/>
+        <source>Remove from the phone</source>
+        <translation>Vom Handy entfernen</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="153"/>
+        <source>Install an APK from this computer</source>
+        <translation>APK von diesem Rechner installieren</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="171"/>
+        <source>Load the apps again</source>
+        <translation>Apps neu laden</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="213"/>
+        <source>Apps</source>
+        <translation>Apps</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="214"/>
+        <source>Enter opens the app on the phone, Delete removes it, the menu key shows more</source>
+        <translation>Eingabe öffnet die App auf dem Handy, Entf entfernt sie, die Menütaste zeigt mehr</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="389"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="464"/>
+        <source>Cancel</source>
+        <translation>Abbrechen</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="405"/>
+        <source>Connect</source>
+        <translation>Verbinden</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="447"/>
+        <source>Remove %1?</source>
+        <translation>%1 entfernen?</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="453"/>
+        <source>Remove</source>
+        <translation>Entfernen</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="484"/>
+        <source>The phone then asks you to confirm. After that, the app and its data are deleted from the phone.</source>
+        <translation>Das Handy fragt dann nach einer Bestätigung. Danach werden die App und ihre Daten vom Handy gelöscht.</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="493"/>
+        <source>Save the APK</source>
+        <translation>APK speichern</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="495"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="506"/>
+        <source>Android apps (*.apk)</source>
+        <translation>Android-Apps (*.apk)</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="504"/>
+        <source>Install an APK on the phone</source>
+        <translation>APK auf dem Handy installieren</translation>
+    </message>
+</context>
+<context>
     <name>CalendarGrid</name>
     <message>
         <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarGrid.qml" line="54"/>
@@ -146,7 +249,7 @@
         <translation>Tage im %1</translation>
     </message>
     <message numerus="yes">
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarGrid.qml" line="160"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarGrid.qml" line="132"/>
         <source>%n more</source>
         <translation>
             <numerusform>%n weiterer</numerusform>
@@ -2199,20 +2302,20 @@
     </message>
     <message>
         <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="144"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="505"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="512"/>
         <source>Copy files from this computer</source>
         <translation>Dateien von diesem Rechner kopieren</translation>
     </message>
     <message>
         <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="162"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="588"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="739"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="597"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="748"/>
         <source>Save on this computer</source>
         <translation>Auf diesem Rechner speichern</translation>
     </message>
     <message>
         <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="180"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="606"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="615"/>
         <source>Paste here</source>
         <translation>Hier einfügen</translation>
     </message>
@@ -2233,7 +2336,7 @@
     </message>
     <message>
         <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="263"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="387"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="394"/>
         <source>Files</source>
         <translation>Dateien</translation>
     </message>
@@ -2243,73 +2346,73 @@
         <translation>Eingabe öffnet, Rücktaste geht nach oben, F2 benennt um, Entf löscht, die Menütaste zeigt mehr</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="554"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="561"/>
         <source>Connect</source>
         <translation>Verbinden</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="566"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="573"/>
         <source>Copy files</source>
         <translation>Dateien kopieren</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="571"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="578"/>
         <source>Copy a folder</source>
         <translation>Ordner kopieren</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="582"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="591"/>
         <source>Open</source>
         <translation>Öffnen</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="582"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="591"/>
         <source>Open on this computer</source>
         <translation>Auf diesem Rechner öffnen</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="594"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="603"/>
         <source>Rename</source>
         <translation>Umbenennen</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="600"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="609"/>
         <source>Cut</source>
         <translation>Ausschneiden</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="612"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="647"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="621"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="656"/>
         <source>Delete</source>
         <translation>Löschen</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="641"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="650"/>
         <source>Delete %1?</source>
         <translation>%1 löschen?</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="658"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="667"/>
         <source>Cancel</source>
         <translation>Abbrechen</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="675"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="684"/>
         <source>The folder is deleted on the phone with everything in it. This cannot be undone.</source>
         <translation>Der Ordner wird mit allem Inhalt auf dem Handy gelöscht. Das lässt sich nicht rückgängig machen.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="675"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="684"/>
         <source>The file is deleted on the phone. This cannot be undone.</source>
         <translation>Die Datei wird auf dem Handy gelöscht. Das lässt sich nicht rückgängig machen.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="722"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="731"/>
         <source>Copy files to the phone</source>
         <translation>Dateien auf das Handy kopieren</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="731"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="740"/>
         <source>Copy a folder to the phone</source>
         <translation>Ordner auf das Handy kopieren</translation>
     </message>
@@ -4148,249 +4251,402 @@
 <context>
     <name>qpm::ui::AppController</name>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="138"/>
+        <location filename="../../src/ui/AppController.cpp" line="142"/>
         <source>Calls</source>
         <translation>Anrufe</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="129"/>
+        <location filename="../../src/ui/AppController.cpp" line="133"/>
         <source>Contacts</source>
         <translation>Kontakte</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="147"/>
+        <location filename="../../src/ui/AppController.cpp" line="151"/>
         <source>Messages</source>
         <translation>Nachrichten</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="156"/>
+        <location filename="../../src/ui/AppController.cpp" line="160"/>
         <source>Calendar and tasks</source>
         <translation>Kalender und Aufgaben</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="165"/>
+        <location filename="../../src/ui/AppController.cpp" line="169"/>
         <source>Notes</source>
         <translation>Notizen</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="256"/>
+        <location filename="../../src/ui/AppController.cpp" line="260"/>
         <source>Wi-Fi</source>
         <translation>WLAN</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="258"/>
+        <location filename="../../src/ui/AppController.cpp" line="262"/>
         <source>USB</source>
         <translation>USB</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="260"/>
+        <location filename="../../src/ui/AppController.cpp" line="264"/>
         <source>Bluetooth</source>
         <translation>Bluetooth</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="305"/>
-        <location filename="../../src/ui/AppController.cpp" line="1030"/>
+        <location filename="../../src/ui/AppController.cpp" line="309"/>
+        <location filename="../../src/ui/AppController.cpp" line="1035"/>
         <source>Enter the IP address of the phone, for example 192.168.1.20. MyPhoneExplorer Client shows it on the phone.</source>
         <translation>Geben Sie die IP-Adresse des Handys ein, zum Beispiel 192.168.1.20. MyPhoneExplorer Client zeigt sie auf dem Handy an.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="328"/>
+        <location filename="../../src/ui/AppController.cpp" line="332"/>
         <source>Choose a paired phone from the list.</source>
         <translation>Wählen Sie ein gekoppeltes Handy aus der Liste.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="358"/>
+        <location filename="../../src/ui/AppController.cpp" line="362"/>
         <source>This phone was not connected in a way that can be repeated. Choose Connect and pick how to connect.</source>
         <translation>Für dieses Handy ist kein Verbindungsweg gespeichert. Wählen Sie Verbinden und dann, wie verbunden werden soll.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="551"/>
+        <location filename="../../src/ui/AppController.cpp" line="556"/>
         <source>The data of this phone cannot be saved on this computer. Check the storage folder in the settings.</source>
         <translation>Die Daten dieses Handys lassen sich auf diesem Rechner nicht speichern. Prüfen Sie den Ablageordner in den Einstellungen.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="572"/>
+        <location filename="../../src/ui/AppController.cpp" line="577"/>
         <source>The PIN could not be saved, because the keyring of the system is not available. You will be asked for it next time.</source>
         <translation>Die PIN wurde nicht gespeichert, weil der Schlüsselbund des Systems nicht erreichbar ist. Sie werden beim nächsten Mal wieder danach gefragt.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="593"/>
+        <location filename="../../src/ui/AppController.cpp" line="598"/>
         <source>The connection to the phone was lost. QPhoneManager connects again as soon as the phone can be reached.</source>
         <translation>Die Verbindung zum Handy ist unterbrochen. QPhoneManager verbindet sich wieder, sobald das Handy erreichbar ist.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="621"/>
+        <location filename="../../src/ui/AppController.cpp" line="626"/>
         <source>This computer cannot wait for the phone, because port %1 is in use. Close the program that uses it, then try again.</source>
         <translation>Dieser Rechner kann nicht auf das Handy warten, weil Port %1 belegt ist. Schließen Sie das Programm, das ihn nutzt, und versuchen Sie es erneut.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="656"/>
+        <location filename="../../src/ui/AppController.cpp" line="661"/>
         <source>This computer cannot search the network right now. Enter the address of the phone instead.</source>
         <translation>Dieser Rechner kann das Netz gerade nicht durchsuchen. Geben Sie stattdessen die Adresse des Handys ein.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="663"/>
-        <location filename="../../src/ui/AppController.cpp" line="1027"/>
+        <location filename="../../src/ui/AppController.cpp" line="668"/>
+        <location filename="../../src/ui/AppController.cpp" line="1032"/>
         <source>adb was not found. Install the Android platform tools or choose adb in the settings.</source>
         <translation>adb wurde nicht gefunden. Installieren Sie die Android Platform Tools oder wählen Sie adb in den Einstellungen aus.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="672"/>
+        <location filename="../../src/ui/AppController.cpp" line="677"/>
         <source>adb did not work. Check the adb path in the settings.</source>
         <translation>adb hat nicht funktioniert. Prüfen Sie den Pfad zu adb in den Einstellungen.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="680"/>
+        <location filename="../../src/ui/AppController.cpp" line="685"/>
         <source>Allow USB debugging on the phone, then search again.</source>
         <translation>Erlauben Sie USB-Debugging auf dem Handy und suchen Sie dann erneut.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="682"/>
+        <location filename="../../src/ui/AppController.cpp" line="687"/>
         <source>The phone is not ready yet. Unlock it and search again.</source>
         <translation>Das Handy ist noch nicht bereit. Entsperren Sie es und suchen Sie erneut.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="687"/>
+        <location filename="../../src/ui/AppController.cpp" line="692"/>
         <source>No phone found at USB. Connect the cable and allow USB debugging on the phone.</source>
         <translation>Kein Handy an USB gefunden. Schließen Sie das Kabel an und erlauben Sie USB-Debugging auf dem Handy.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="708"/>
-        <location filename="../../src/ui/AppController.cpp" line="1014"/>
+        <location filename="../../src/ui/AppController.cpp" line="713"/>
+        <location filename="../../src/ui/AppController.cpp" line="1019"/>
         <source>This computer has no Bluetooth, or it is turned off. Turn Bluetooth on, or connect over Wi-Fi or USB.</source>
         <translation>Dieser Rechner hat kein Bluetooth, oder es ist ausgeschaltet. Schalten Sie Bluetooth ein oder verbinden Sie über WLAN oder USB.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="710"/>
+        <location filename="../../src/ui/AppController.cpp" line="715"/>
         <source>The Bluetooth search failed. Turn Bluetooth on and try again.</source>
         <translation>Die Suche über Bluetooth hat nicht geklappt. Schalten Sie Bluetooth ein und versuchen Sie es erneut.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="716"/>
+        <location filename="../../src/ui/AppController.cpp" line="721"/>
         <source>No paired phone found. Pair the phone in the system settings first.</source>
         <translation>Kein gekoppeltes Handy gefunden. Koppeln Sie das Handy zuerst in den Systemeinstellungen.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="771"/>
+        <location filename="../../src/ui/AppController.cpp" line="776"/>
         <source>Enter a name with 1 to 64 characters.</source>
         <translation>Geben Sie einen Namen mit 1 bis 64 Zeichen ein.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="779"/>
-        <location filename="../../src/ui/AppController.cpp" line="788"/>
-        <location filename="../../src/ui/AppController.cpp" line="795"/>
+        <location filename="../../src/ui/AppController.cpp" line="784"/>
+        <location filename="../../src/ui/AppController.cpp" line="793"/>
+        <location filename="../../src/ui/AppController.cpp" line="800"/>
         <source>The name could not be saved. Check the storage folder in the settings.</source>
         <translation>Der Name wurde nicht gespeichert. Prüfen Sie den Ablageordner in den Einstellungen.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="813"/>
+        <location filename="../../src/ui/AppController.cpp" line="818"/>
         <source>The phone could not be removed from this computer. Check the storage folder in the settings, then try again.</source>
         <translation>Das Handy ließ sich nicht von diesem Rechner entfernen. Prüfen Sie den Ablageordner in den Einstellungen und versuchen Sie es erneut.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="845"/>
+        <location filename="../../src/ui/AppController.cpp" line="850"/>
         <source>Connect the phone first, then sync.</source>
         <translation>Verbinden Sie zuerst das Handy, dann können Sie abgleichen.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="849"/>
+        <location filename="../../src/ui/AppController.cpp" line="854"/>
         <source>There is nothing to sync yet.</source>
         <translation>Es gibt noch nichts abzugleichen.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="869"/>
+        <location filename="../../src/ui/AppController.cpp" line="874"/>
         <source>%1: not synced. %2</source>
         <translation>%1: nicht abgeglichen. %2</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="873"/>
+        <location filename="../../src/ui/AppController.cpp" line="878"/>
         <source>%1: %2 new, %3 changed, %4 deleted</source>
         <translation>%1: %2 neu, %3 geändert, %4 gelöscht</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="918"/>
+        <location filename="../../src/ui/AppController.cpp" line="923"/>
         <source>Phone</source>
         <translation>Handy</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="942"/>
+        <location filename="../../src/ui/AppController.cpp" line="947"/>
         <source>The data of this phone cannot be opened on this computer. Check the storage folder in the settings.</source>
         <translation>Die Daten dieses Handys lassen sich auf diesem Rechner nicht öffnen. Prüfen Sie den Ablageordner in den Einstellungen.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="985"/>
+        <location filename="../../src/ui/AppController.cpp" line="990"/>
         <source>The phone does not answer over Bluetooth. Turn Bluetooth on at the phone, keep it close and try again.</source>
         <translation>Das Handy antwortet nicht über Bluetooth. Schalten Sie Bluetooth am Handy ein, halten Sie es in der Nähe und versuchen Sie es erneut.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="988"/>
+        <location filename="../../src/ui/AppController.cpp" line="993"/>
         <source>The phone does not answer. Check that MyPhoneExplorer Client is open on the phone, then try again.</source>
         <translation>Das Handy antwortet nicht. Prüfen Sie, ob MyPhoneExplorer Client auf dem Handy geöffnet ist, und versuchen Sie es erneut.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="992"/>
+        <location filename="../../src/ui/AppController.cpp" line="997"/>
         <source>The phone cannot be reached over Wi-Fi. Check that it is in the same network and that MyPhoneExplorer Client is open, then try again.</source>
         <translation>Das Handy ist über WLAN nicht erreichbar. Prüfen Sie, ob es im selben Netz ist und MyPhoneExplorer Client geöffnet ist, und versuchen Sie es erneut.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="995"/>
+        <location filename="../../src/ui/AppController.cpp" line="1000"/>
         <source>The connection to the phone ended. Open MyPhoneExplorer Client on the phone, then connect again.</source>
         <translation>Die Verbindung zum Handy wurde beendet. Öffnen Sie MyPhoneExplorer Client auf dem Handy und verbinden Sie erneut.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="998"/>
+        <location filename="../../src/ui/AppController.cpp" line="1003"/>
         <source>The phone is connected to another computer. End that connection first, then try again.</source>
         <translation>Das Handy ist mit einem anderen Rechner verbunden. Beenden Sie zuerst diese Verbindung und versuchen Sie es dann erneut.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1001"/>
+        <location filename="../../src/ui/AppController.cpp" line="1006"/>
         <source>MyPhoneExplorer Client does not allow Wi-Fi connections. Allow them in the app settings on the phone, or connect over USB.</source>
         <translation>MyPhoneExplorer Client lässt keine WLAN-Verbindungen zu. Erlauben Sie sie in den Einstellungen der App oder verbinden Sie über USB.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1004"/>
+        <location filename="../../src/ui/AppController.cpp" line="1009"/>
         <source>The phone asks for a PIN. Connect again and enter the PIN you set in MyPhoneExplorer Client.</source>
         <translation>Das Handy verlangt eine PIN. Verbinden Sie erneut und geben Sie die PIN ein, die Sie in MyPhoneExplorer Client festgelegt haben.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1007"/>
+        <location filename="../../src/ui/AppController.cpp" line="1012"/>
         <source>MyPhoneExplorer Client stopped after too many wrong PINs. Open the app on the phone again, then connect.</source>
         <translation>MyPhoneExplorer Client hat sich nach zu vielen falschen PINs beendet. Öffnen Sie die App auf dem Handy erneut und verbinden Sie dann.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1010"/>
+        <location filename="../../src/ui/AppController.cpp" line="1015"/>
         <source>MyPhoneExplorer Client lacks a permission on the phone. Allow it in the Android settings under Apps.</source>
         <translation>MyPhoneExplorer Client fehlt eine Berechtigung auf dem Handy. Erlauben Sie sie in den Android-Einstellungen unter Apps.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1017"/>
+        <location filename="../../src/ui/AppController.cpp" line="1022"/>
         <source>The phone does not support this. Update MyPhoneExplorer Client on the phone.</source>
         <translation>Das Handy unterstützt das nicht. Aktualisieren Sie MyPhoneExplorer Client auf dem Handy.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1021"/>
+        <location filename="../../src/ui/AppController.cpp" line="1026"/>
         <source>MyPhoneExplorer Client is not installed on the phone. Install it from Google Play, then try again.</source>
         <translation>MyPhoneExplorer Client ist auf dem Handy nicht installiert. Installieren Sie die App aus Google Play und versuchen Sie es erneut.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1024"/>
+        <location filename="../../src/ui/AppController.cpp" line="1029"/>
         <source>The phone did not find what was asked for. Sync again.</source>
         <translation>Das Handy hat das Angefragte nicht gefunden. Gleichen Sie erneut ab.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1034"/>
+        <location filename="../../src/ui/AppController.cpp" line="1039"/>
         <source>adb cannot reach the phone. Check the USB cable and allow USB debugging on the phone, then try again.</source>
         <translation>adb erreicht das Handy nicht. Prüfen Sie das USB-Kabel, erlauben Sie USB-Debugging auf dem Handy und versuchen Sie es erneut.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1037"/>
+        <location filename="../../src/ui/AppController.cpp" line="1042"/>
         <source>This computer could not open the connection. Try again, or restart the computer if it keeps failing.</source>
         <translation>Dieser Rechner konnte die Verbindung nicht öffnen. Versuchen Sie es erneut oder starten Sie den Rechner neu, wenn es weiter scheitert.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1044"/>
+        <location filename="../../src/ui/AppController.cpp" line="1049"/>
         <source>The phone sent an answer QPhoneManager does not understand. Update MyPhoneExplorer Client on the phone, then try again.</source>
         <translation>Das Handy hat eine Antwort gesendet, die QPhoneManager nicht versteht. Aktualisieren Sie MyPhoneExplorer Client auf dem Handy und versuchen Sie es erneut.</translation>
+    </message>
+</context>
+<context>
+    <name>qpm::ui::AppListModel</name>
+    <message>
+        <location filename="../../src/ui/apps/AppListModel.cpp" line="128"/>
+        <source>Version %1</source>
+        <translation>Version %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/apps/AppListModel.cpp" line="179"/>
+        <source>Connect your phone to see its apps.</source>
+        <translation>Verbinden Sie Ihr Handy, um seine Apps zu sehen.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/apps/AppListModel.cpp" line="185"/>
+        <source>The phone lists no apps.</source>
+        <translation>Das Handy meldet keine Apps.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/apps/AppListModel.cpp" line="189"/>
+        <source>No apps of your own are installed. Choose System apps or All to see the others.</source>
+        <translation>Es sind keine eigenen Apps installiert. Wählen Sie System-Apps oder Alle, um die übrigen zu sehen.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/apps/AppListModel.cpp" line="192"/>
+        <source>No app matches the search or filter.</source>
+        <translation>Keine App passt zur Suche oder zum Filter.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/apps/AppListModel.cpp" line="207"/>
+        <source>Saving the APK of %1: %2 %</source>
+        <translation>APK von %1 wird gespeichert: %2 %</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/apps/AppListModel.cpp" line="209"/>
+        <source>Sending %1 to the phone: %2 %</source>
+        <translation>%1 wird an das Handy gesendet: %2 %</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/apps/AppListModel.cpp" line="259"/>
+        <source>%1 opens on the phone.</source>
+        <translation>%1 wird auf dem Handy geöffnet.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/apps/AppListModel.cpp" line="262"/>
+        <source>The phone cannot open %1. The app has no window of its own.</source>
+        <translation>Das Handy kann %1 nicht öffnen. Die App hat kein eigenes Fenster.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/apps/AppListModel.cpp" line="287"/>
+        <source>The phone asks whether to remove %1. Confirm it on the phone.</source>
+        <translation>Das Handy fragt, ob %1 entfernt werden soll. Bestätigen Sie es auf dem Handy.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/apps/AppListModel.cpp" line="299"/>
+        <source>Choose a file on this computer.</source>
+        <translation>Wählen Sie eine Datei auf diesem Rechner.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/apps/AppListModel.cpp" line="309"/>
+        <source>The APK of %1 is saved.</source>
+        <translation>Die APK von %1 ist gespeichert.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/apps/AppListModel.cpp" line="311"/>
+        <source>Saving the APK was cancelled.</source>
+        <translation>Das Speichern der APK wurde abgebrochen.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/apps/AppListModel.cpp" line="325"/>
+        <source>Choose an APK file on this computer.</source>
+        <translation>Wählen Sie eine APK-Datei auf diesem Rechner.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/apps/AppListModel.cpp" line="339"/>
+        <source>The phone asks whether to install %1. Confirm it on the phone.</source>
+        <translation>Das Handy fragt, ob %1 installiert werden soll. Bestätigen Sie es auf dem Handy.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/apps/AppListModel.cpp" line="344"/>
+        <source>Sending the APK was cancelled.</source>
+        <translation>Das Senden der APK wurde abgebrochen.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/apps/AppListModel.cpp" line="348"/>
+        <source>%1 is no Android app. Choose an APK file that is not empty.</source>
+        <translation>%1 ist keine Android-App. Wählen Sie eine APK-Datei, die nicht leer ist.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/apps/AppListModel.cpp" line="351"/>
+        <source>%1 cannot be read. Check the file and try again.</source>
+        <translation>%1 lässt sich nicht lesen. Prüfen Sie die Datei und versuchen Sie es erneut.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/apps/AppListModel.cpp" line="416"/>
+        <source>The connection to the phone ended. Connect again and try again.</source>
+        <translation>Die Verbindung zum Handy ist beendet. Verbinden Sie es erneut und versuchen Sie es noch einmal.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/apps/AppListModel.cpp" line="418"/>
+        <source>The phone did not answer in time. Try again.</source>
+        <translation>Das Handy hat nicht rechtzeitig geantwortet. Versuchen Sie es erneut.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/apps/AppListModel.cpp" line="420"/>
+        <source>The app on the phone may not do this. Allow it in the Android settings and try again.</source>
+        <translation>Die App auf dem Handy darf das nicht. Erlauben Sie es in den Android-Einstellungen und versuchen Sie es erneut.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/apps/AppListModel.cpp" line="423"/>
+        <source>The app or its APK is no longer on the phone. Load the list again.</source>
+        <translation>Die App oder ihre APK ist nicht mehr auf dem Handy. Laden Sie die Liste neu.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/apps/AppListModel.cpp" line="425"/>
+        <source>This needs a connection over Wi-Fi or USB. Connect the phone that way and try again.</source>
+        <translation>Dafür ist eine Verbindung über WLAN oder USB nötig. Verbinden Sie das Handy so und versuchen Sie es erneut.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/apps/AppListModel.cpp" line="428"/>
+        <source>The file cannot be stored. Check the target folder and the free space.</source>
+        <translation>Die Datei lässt sich nicht speichern. Prüfen Sie den Zielordner und den freien Platz.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/apps/AppListModel.cpp" line="430"/>
+        <source>The phone sent more than this program reads.</source>
+        <translation>Das Handy hat mehr gesendet, als dieses Programm liest.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/apps/AppListModel.cpp" line="434"/>
+        <source>The phone could not do this. Try again.</source>
+        <translation>Das Handy konnte das nicht ausführen. Versuchen Sie es erneut.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/apps/AppListModel.cpp" line="448"/>
+        <source>The apps cannot be shown.</source>
+        <translation>Die Apps lassen sich nicht anzeigen.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/apps/AppListModel.cpp" line="535"/>
+        <source>%1 is installed on the phone.</source>
+        <translation>%1 ist auf dem Handy installiert.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/apps/AppListModel.cpp" line="553"/>
+        <source>%1 is removed from the phone.</source>
+        <translation>%1 ist vom Handy entfernt.</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/apps/AppListModel.cpp" line="611"/>
+        <source>Another transfer is running. Try again when it is done.</source>
+        <translation>Es läuft schon eine Übertragung. Versuchen Sie es erneut, wenn sie beendet ist.</translation>
     </message>
 </context>
 <context>
@@ -5003,73 +5259,73 @@
 <context>
     <name>qpm::ui::FileBrowserModel</name>
     <message>
-        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="131"/>
-        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="256"/>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="127"/>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="259"/>
         <source>Connect your phone to browse its files.</source>
         <translation>Verbinden Sie Ihr Handy, um seine Dateien zu sehen.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="176"/>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="174"/>
         <source>Storage</source>
         <translation>Speicher</translation>
     </message>
     <message>
-        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="176"/>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="174"/>
         <source>Folder</source>
         <translation>Ordner</translation>
     </message>
     <message>
-        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="177"/>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="175"/>
         <source>%1, %2</source>
         <translation>%1, %2</translation>
     </message>
     <message>
-        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="209"/>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="212"/>
         <source>Phone</source>
         <translation>Handy</translation>
     </message>
     <message>
-        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="231"/>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="234"/>
         <source>Internal storage</source>
         <translation>Interner Speicher</translation>
     </message>
     <message>
-        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="233"/>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="236"/>
         <source>Memory card</source>
         <translation>Speicherkarte</translation>
     </message>
     <message>
-        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="235"/>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="238"/>
         <source>Phone storage</source>
         <translation>Telefonspeicher</translation>
     </message>
     <message>
-        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="237"/>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="240"/>
         <source>Second profile</source>
         <translation>Zweitprofil</translation>
     </message>
     <message>
-        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="315"/>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="318"/>
         <source>Choose a folder on this computer.</source>
         <translation>Wählen Sie einen Ordner auf diesem Rechner.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="327"/>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="330"/>
         <source>Open a folder on the phone first, then copy into it.</source>
         <translation>Öffnen Sie zuerst einen Ordner auf dem Handy und kopieren Sie dann hinein.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="337"/>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="340"/>
         <source>Only files and folders on this computer can be copied.</source>
         <translation>Nur Dateien und Ordner auf diesem Rechner lassen sich kopieren.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="359"/>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="362"/>
         <source>The folder %1 is created.</source>
         <translation>Der Ordner %1 ist angelegt.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="396"/>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="399"/>
         <source>%n entry(s) deleted on the phone.</source>
         <translation>
             <numerusform>%n Eintrag auf dem Handy gelöscht.</numerusform>
@@ -5077,7 +5333,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="418"/>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="422"/>
         <source>%n entry(s) cut. Open the target folder and paste them there.</source>
         <translation>
             <numerusform>%n Eintrag ausgeschnitten. Öffnen Sie den Zielordner und fügen Sie ihn dort ein.</numerusform>
@@ -5085,7 +5341,7 @@
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="439"/>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="442"/>
         <source>%n entry(s) moved.</source>
         <translation>
             <numerusform>%n Eintrag verschoben.</numerusform>
@@ -5093,37 +5349,37 @@
         </translation>
     </message>
     <message>
-        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="475"/>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="478"/>
         <source>Enter a name.</source>
         <translation>Geben Sie einen Namen ein.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="477"/>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="480"/>
         <source>A name cannot start or end with a space.</source>
         <translation>Ein Name darf nicht mit einem Leerzeichen beginnen oder enden.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="479"/>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="482"/>
         <source>Use a name without / or \ and without control characters.</source>
         <translation>Verwenden Sie einen Namen ohne / oder \ und ohne Steuerzeichen.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="484"/>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="487"/>
         <source>There is already an entry named %1 here.</source>
         <translation>Hier gibt es schon einen Eintrag mit dem Namen %1.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="502"/>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="505"/>
         <source>This folder cannot be shown.</source>
         <translation>Dieser Ordner lässt sich nicht anzeigen.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="516"/>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="520"/>
         <source>The phone shows no storage.</source>
         <translation>Das Handy zeigt keinen Speicher.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="516"/>
+        <location filename="../../src/ui/files/FileBrowserModel.cpp" line="520"/>
         <source>This folder is empty.</source>
         <translation>Dieser Ordner ist leer.</translation>
     </message>
@@ -5688,67 +5944,67 @@
 <context>
     <name>qpm::ui::TransferQueue</name>
     <message>
-        <location filename="../../src/ui/files/TransferQueue.cpp" line="148"/>
+        <location filename="../../src/ui/files/TransferQueue.cpp" line="147"/>
         <source>Transfer %1 of %2, %3 %</source>
         <translation>Übertragung %1 von %2, %3 %</translation>
     </message>
     <message>
-        <location filename="../../src/ui/files/TransferQueue.cpp" line="336"/>
+        <location filename="../../src/ui/files/TransferQueue.cpp" line="335"/>
         <source>The app on the phone may not access the files. Allow it in the Android settings and try again.</source>
         <translation>Die App auf dem Handy darf nicht auf die Dateien zugreifen. Erlauben Sie es in den Android-Einstellungen und versuchen Sie es erneut.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/files/TransferQueue.cpp" line="339"/>
+        <location filename="../../src/ui/files/TransferQueue.cpp" line="338"/>
         <source>The phone refused access to this folder. Allow it on the phone and try again.</source>
         <translation>Das Handy verweigert den Zugriff auf diesen Ordner. Erlauben Sie ihn am Handy und versuchen Sie es erneut.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/files/TransferQueue.cpp" line="341"/>
+        <location filename="../../src/ui/files/TransferQueue.cpp" line="340"/>
         <source>The file or folder is no longer on the phone. Reload the folder.</source>
         <translation>Die Datei oder der Ordner ist nicht mehr auf dem Handy. Laden Sie den Ordner neu.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/files/TransferQueue.cpp" line="343"/>
+        <location filename="../../src/ui/files/TransferQueue.cpp" line="342"/>
         <source>This name is already taken. Choose another name.</source>
         <translation>Diesen Namen gibt es schon. Wählen Sie einen anderen.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/files/TransferQueue.cpp" line="345"/>
+        <location filename="../../src/ui/files/TransferQueue.cpp" line="344"/>
         <source>The file cannot be stored. Check the target folder and the free space.</source>
         <translation>Die Datei lässt sich nicht speichern. Prüfen Sie den Zielordner und den freien Platz.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/files/TransferQueue.cpp" line="347"/>
+        <location filename="../../src/ui/files/TransferQueue.cpp" line="346"/>
         <source>The file is too large.</source>
         <translation>Die Datei ist zu groß.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/files/TransferQueue.cpp" line="349"/>
+        <location filename="../../src/ui/files/TransferQueue.cpp" line="348"/>
         <source>This needs a connection over Wi-Fi or USB. Connect the phone that way and try again.</source>
         <translation>Dafür ist eine Verbindung über WLAN oder USB nötig. Verbinden Sie das Handy so und versuchen Sie es erneut.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/files/TransferQueue.cpp" line="352"/>
+        <location filename="../../src/ui/files/TransferQueue.cpp" line="351"/>
         <source>The name cannot be used here. The file was left out.</source>
         <translation>Der Name ist hier nicht verwendbar. Die Datei wurde ausgelassen.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/files/TransferQueue.cpp" line="354"/>
+        <location filename="../../src/ui/files/TransferQueue.cpp" line="353"/>
         <source>The phone did not answer in time. Try again.</source>
         <translation>Das Handy hat nicht rechtzeitig geantwortet. Versuchen Sie es erneut.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/files/TransferQueue.cpp" line="356"/>
+        <location filename="../../src/ui/files/TransferQueue.cpp" line="355"/>
         <source>The connection to the phone ended. Connect again and try again.</source>
         <translation>Die Verbindung zum Handy ist beendet. Verbinden Sie es erneut und versuchen Sie es noch einmal.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/files/TransferQueue.cpp" line="360"/>
+        <location filename="../../src/ui/files/TransferQueue.cpp" line="359"/>
         <source>The phone could not do this. Try again.</source>
         <translation>Das Handy konnte das nicht ausführen. Versuchen Sie es erneut.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/ui/files/TransferQueue.cpp" line="601"/>
+        <location filename="../../src/ui/files/TransferQueue.cpp" line="600"/>
         <source>%n entry(s) of the folder %1 were left out, because their name cannot be used here.</source>
         <translation>
             <numerusform>%n Eintrag des Ordners %1 wurde ausgelassen, weil sein Name hier nicht verwendbar ist.</numerusform>
@@ -5779,7 +6035,7 @@
         <translation>Ordner wird gelesen</translation>
     </message>
     <message>
-        <location filename="../../src/ui/files/TransferQueue.cpp" line="857"/>
+        <location filename="../../src/ui/files/TransferQueue.cpp" line="858"/>
         <source>%1 %</source>
         <translation>%1 %</translation>
     </message>

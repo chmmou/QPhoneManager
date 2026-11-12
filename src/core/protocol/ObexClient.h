@@ -96,10 +96,12 @@ public:
     /**
      * Reads the object `name`, or the current folder listing when `name` is
      * empty and `type` is "x-obex/folder-listing". Every received chunk
-     * restarts `timeout`.
+     * restarts `timeout`. With `maxBodyBytes`, a body above it is aborted
+     * with ErrorCode::LimitExceeded instead of the limit of the target.
      */
     QFuture<Result<ObexResponse>> get(const QString &name, const QByteArray &type = {},
-                                      std::chrono::milliseconds timeout = std::chrono::seconds(90));
+                                      std::chrono::milliseconds timeout = std::chrono::seconds(90),
+                                      std::optional<quint64> maxBodyBytes = std::nullopt);
 
     /**
      * Reads the listing of the current Filebrowser folder as the phone sends

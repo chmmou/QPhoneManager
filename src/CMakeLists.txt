@@ -6,6 +6,8 @@ qt_add_library(qpm_core STATIC
     core/Logging.cpp
     core/Version.h
     core/Version.cpp
+    core/codec/AppListCodec.h
+    core/codec/AppListCodec.cpp
     core/codec/AtText.h
     core/codec/AtText.cpp
     core/codec/CalMetadata.h
@@ -63,6 +65,8 @@ qt_add_library(qpm_core STATIC
     core/protocol/Transport.h
     core/service/AlarmService.h
     core/service/AlarmService.cpp
+    core/service/AppsService.h
+    core/service/AppsService.cpp
     core/service/CalendarService.h
     core/service/CalendarService.cpp
     core/service/CallLogService.h
@@ -182,6 +186,7 @@ set(qpm_ui_qml_files
     dialogs/SettingsDialog.qml
     dialogs/VersionConflictDialog.qml
     pages/OverviewPage.qml
+    pages/apps/AppsPage.qml
     pages/calls/CallDetail.qml
     pages/calls/CallList.qml
     pages/calls/CallsPage.qml
@@ -249,6 +254,8 @@ qt_add_qml_module(qpm_ui
         ui/Settings.cpp
         ui/TintedIcon.h
         ui/TintedIcon.cpp
+        ui/apps/AppListModel.h
+        ui/apps/AppListModel.cpp
         ui/calls/CallListModel.h
         ui/calls/CallListModel.cpp
         ui/calls/CallsArea.h
@@ -357,6 +364,7 @@ set(qpm_ui_icons
     tabler/photo.svg
     tabler/plug-connected-x.svg
     tabler/plug-connected.svg
+    tabler/player-play.svg
     tabler/plus.svg
     tabler/qrcode.svg
     tabler/refresh.svg
@@ -382,6 +390,7 @@ target_include_directories(qpm_ui
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/ui
+        ${CMAKE_CURRENT_SOURCE_DIR}/ui/apps
         ${CMAKE_CURRENT_SOURCE_DIR}/ui/calls
         ${CMAKE_CURRENT_SOURCE_DIR}/ui/contacts
         ${CMAKE_CURRENT_SOURCE_DIR}/ui/files

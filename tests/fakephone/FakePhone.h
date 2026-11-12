@@ -85,6 +85,26 @@ struct FakeFile
     QDateTime modified;
 };
 
+/// An app installed on the fake phone.
+struct FakeApp
+{
+    QString package;
+    QString label;
+    /// Empty: the app has no version name, which the phone writes as "null".
+    QString version;
+    bool userApp = true;
+    /// Path of the APK on the phone such as "/data/app/a/base.apk"; empty when the phone gives
+    /// none.
+    QString sourcePath;
+    QDateTime installed;
+    /// The APK, kept as a file below "\phone" at sourcePath.
+    QByteArray apk;
+    /// PNG of the icon; empty when the phone cannot give one.
+    QByteArray icon;
+    /// The phone has a window to open for the app.
+    bool launchable = true;
+};
+
 /// Behaviour of the fake phone; tests change it before or during a session.
 struct FakePhoneConfig
 {
@@ -194,6 +214,13 @@ struct FakePhoneConfig
  * the choice of calendars and changes of categories. AT+CALA answers from
  * FakePhoneConfig::alarms.
  *
+ * The apps answer AT*EJAVA like the client, the list in blocks of ten lines.
+ * Starting an app and asking for its removal are only recorded; the removal
+ * and an installation happen when the test confirms them, as the user does on
+ * the phone, and are then reported with an unsolicited line. The icons come
+ * from "\appicon\<package>\<size>", and an APK written to the root of the
+ * file browser is taken as an installation request instead of a file.
+ *
  * The file browser lists a folder, and when asked for the subfolders also
  * every folder below it, one block each. Uploads to a name that exists get a free
  * name like "a (1).txt", as on the client. ABORT drops a running socket
@@ -259,6 +286,23 @@ public:
     /// The body of every PUT of "\getthumbnail", in order.
     [[nodiscard]] QList<QByteArray> thumbnailRequests() const { return m_thumbnailRequests; }
 
+    /// Replaces the apps; the APK of each is kept as a file at its path below "\phone".
+    void setApps(const QList<FakeApp> &apps);
+    [[nodiscard]] QList<FakeApp> apps() const { return m_apps; }
+    /// The packages of every start request, in order.
+    [[nodiscard]] QStringList startRequests() const { return m_startRequests; }
+    /// The packages of every removal request, in order.
+    [[nodiscard]] QStringList uninstallRequests() const { return m_uninstallRequests; }
+    /// Name and content of every APK written to the root of the file browser.
+    [[nodiscard]] QList<std::pair<QString, QByteArray>> installRequests() const
+    {
+        return m_installRequests;
+    }
+    /// Removes the app as the user's confirmation on the phone does, and reports it.
+    void confirmUninstall(const QString &package);
+    /// Installs or updates the app as the user's confirmation on the phone does, and reports it.
+    void confirmInstall(const FakeApp &app);
+
     /**
      * Answers the next OBEX request other than CONNECT and DISCONNECT with
      * `code`, and with `appParameters` as App-Parameters when not empty.
@@ -301,6 +345,11 @@ private:
     void handleNotePut(const QString &rest, const QByteArray &body, bool hasBody);
     /// Answers AT+CALA; returns false for any other command.
     bool handleAlarms(const QString &command, const QString &name);
+    /// Answers AT*EJAVA; returns false for any other command.
+    bool handleApps(const QString &command, const QString &name);
+    [[nodiscard]] QByteArray appLine(const FakeApp &app) const;
+    /// Keeps what an upload delivered: a file, or an installation request at the root.
+    void keepUpload(const Transfer &transfer, const QByteArray &data);
     void handleFileRequest(const qpm::core::protocol::ObexPacket &request);
     void sendPacket(const QByteArray &packet);
     void sendFirst(const QByteArray &packet);
@@ -333,6 +382,10 @@ private:
     QString m_callStorage = QStringLiteral("ALL");
     quint32 m_nextCallId = 5000;
     QList<FakeSentMessage> m_sentMessages;
+    QList<FakeApp> m_apps;
+    QStringList m_startRequests;
+    QStringList m_uninstallRequests;
+    QList<std::pair<QString, QByteArray>> m_installRequests;
     QMap<QString, FakeFile> m_files;
     QSet<QString> m_folders;
     std::optional<quint8> m_failNext;

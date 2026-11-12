@@ -374,6 +374,28 @@ QFuture<Result<QString>> FileService::upload(const QString &localPath, const QSt
         !codec::isUsableFileName(remoteName)) {
         return failed<QString>(unusableName());
     }
+    return startUpload(localPath, remoteFolder, remoteName);
+}
+
+QFuture<Result<void>> FileService::installPackage(const QString &localPath,
+                                                  const QString &remoteName)
+{
+    if (!codec::isUsableFileName(remoteName) ||
+        !remoteName.endsWith(QLatin1StringView(".apk"), Qt::CaseInsensitive)) {
+        return failed<void>(unusableName());
+    }
+    return startUpload(localPath, QString(), remoteName)
+        .then(this, [](const Result<QString> &sent) -> Result<void> {
+            if (!sent.hasValue())
+                return sent.error();
+            return {};
+        });
+}
+
+QFuture<Result<QString>> FileService::startUpload(const QString &localPath,
+                                                  const QString &remoteFolder,
+                                                  const QString &remoteName)
+{
     if (!m_connection->session())
         return failed<QString>(notConnected());
     if (m_transfer)

@@ -6,6 +6,7 @@
 #include "core/protocol/AdbBridge.h"
 #include "core/protocol/Discovery.h"
 #include "core/protocol/PhoneConnection.h"
+#include "core/service/AppsService.h"
 #include "core/service/DeviceStatusService.h"
 #include "core/service/FileService.h"
 #include "core/service/ThumbnailChannel.h"
@@ -115,7 +116,9 @@ AppController::AppController(Settings *settings, std::unique_ptr<SecretStore> se
       m_fileService(new core::service::FileService(m_connection, this)),
       m_thumbnailChannel(new core::service::ThumbnailChannel(m_connection, this)),
       m_transfers(new TransferQueue(m_fileService, this)),
-      m_files(new FileBrowserModel(m_fileService, m_thumbnailChannel, m_transfers, m_photos, this))
+      m_files(new FileBrowserModel(m_fileService, m_thumbnailChannel, m_transfers, m_photos, this)),
+      m_appsService(new core::service::AppsService(m_connection, m_fileService, this)),
+      m_apps(new AppListModel(m_appsService, m_fileService, m_photos, this))
 {
     Q_ASSERT(settings);
     const QString configured = settings->dataDirectory();
@@ -455,6 +458,7 @@ void AppController::onStateChanged()
     m_notes->setConnected(isConnected());
     m_transfers->setConnected(isConnected());
     m_files->setConnected(isConnected());
+    m_apps->setConnected(isConnected());
     Q_EMIT connectionStateChanged();
 }
 
