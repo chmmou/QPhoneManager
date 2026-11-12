@@ -9,6 +9,8 @@
 #include "ui/apps/AppListModel.h"
 #include "ui/calls/CallsArea.h"
 #include "ui/contacts/ContactsArea.h"
+#include "ui/desktop/CallControl.h"
+#include "ui/desktop/NotificationListModel.h"
 #include "ui/files/FileBrowserModel.h"
 #include "ui/messages/MessagesArea.h"
 #include "ui/organizer/CalendarArea.h"
@@ -314,6 +316,10 @@ private Q_SLOTS:
     void screenViewControlsHaveANameAndARole();
     void screenFocusChainReachesEveryControlOnce();
     void screenIsUsedByKeyboard();
+    void notificationViewControlsHaveANameAndARole();
+    void notificationsFocusChainReachesEveryControlOnce();
+    void notificationsAreUsedByKeyboard();
+    void callWindowNamesItsControlsAndShowsItsFocus();
 
 private:
     [[nodiscard]] QList<QQuickItem *> controls() const;
@@ -332,6 +338,8 @@ private:
     [[nodiscard]] bool showApps();
     /// Connects a phone and shows its mirrored screen; `control` is its accessibility service.
     [[nodiscard]] bool showScreen(bool control);
+    /// Connects a phone with three notifications and shows them, the first one chosen.
+    [[nodiscard]] bool showNotifications();
     /// Brings the contacts area into the state in which `dialog` has something to show.
     [[nodiscard]] bool prepareContactDialog(const QString &dialog);
     static void announceAccessibility();
@@ -437,7 +445,8 @@ QObject *TestAccessibility::openDialog(const QString &name)
          {QStringLiteral("contactsPage"), QStringLiteral("callsPage"),
           QStringLiteral("messagesPage"), QStringLiteral("calendarPage"),
           QStringLiteral("tasksPage"), QStringLiteral("notesPage"), QStringLiteral("filesPage"),
-          QStringLiteral("appsPage"), QStringLiteral("screenPage")}) {
+          QStringLiteral("appsPage"), QStringLiteral("screenPage"),
+          QStringLiteral("notificationsPage")}) {
         QQuickItem *page = findItem(m_window->contentItem(), pageName);
         if (!dialog && page)
             dialog = page->findChild<QObject *>(name);
@@ -2022,6 +2031,178 @@ void TestAccessibility::screenIsUsedByKeyboard()
 
     QTest::keyClick(m_window, Qt::Key_Tab);
     QTRY_VERIFY(!view->hasActiveFocus());
+}
+
+bool TestAccessibility::showNotifications()
+{
+    m_phone = std::make_unique<qpm::test::FakePhone>();
+    if (!m_phone->listen())
+        return false;
+    QList<qpm::test::FakeNotification> shown;
+    for (int id = 1; id <= 3; ++id) {
+        qpm::test::FakeNotification notification;
+        notification.id = id;
+        notification.title = QStringLiteral("Nachricht %1").arg(id);
+        notification.text = QStringLiteral("Text %1").arg(id);
+        notification.actions = {QStringLiteral("Antworten"), QStringLiteral("Gelesen")};
+        notification.posted =
+            QDateTime(QDate(2026, 11, 12), QTime(9, 0), QTimeZone::UTC).addSecs(-60 * id);
+        shown.append(notification);
+    }
+    m_phone->setNotifications(shown);
+    auto *controller =
+        m_engine->singletonInstance<AppController *>("QPhoneManager.Ui", "AppController");
+    if (!controller ||
+        !controller->connectAddress(QStringLiteral("127.0.0.1:%1").arg(m_phone->port()))) {
+        return false;
+    }
+    if (!QTest::qWaitFor([controller]() { return controller->isConnected(); }, phoneTimeoutMs))
+        return false;
+    m_window->setProperty("currentSection", 10);
+    qpm::ui::NotificationListModel *notifications = controller->notifications();
+    const bool listed = QTest::qWaitFor(
+        [this, notifications]() {
+            const QQuickItem *page =
+                findItem(m_window->contentItem(), QStringLiteral("notificationsPage"));
+            return page && page->isVisible() && notifications->count() == 3;
+        },
+        phoneTimeoutMs);
+    QQuickItem *list = findItem(m_window->contentItem(), QStringLiteral("notificationList"));
+    if (!listed || !list)
+        return false;
+    list->setProperty("currentIndex", 0);
+    announceAccessibility();
+    return true;
+}
+
+void TestAccessibility::notificationViewControlsHaveANameAndARole()
+{
+    QVERIFY(showNotifications());
+
+    const QList<QQuickItem *> found = controls();
+
+    verifyNamesAndRoles(found, {QAccessible::List});
+    for (const QString &name :
+         {QStringLiteral("notificationList"), QStringLiteral("openNotificationButton"),
+          QStringLiteral("dismissNotificationButton"),
+          QStringLiteral("refreshNotificationsButton")}) {
+        QQuickItem *item = findItem(m_window->contentItem(), name);
+        QVERIFY2(item && found.contains(item), qPrintable(name));
+        QVERIFY2(item->isEnabled(), qPrintable(name));
+    }
+    QStringList actions;
+    for (QQuickItem *item : found) {
+        if (item->parentItem() &&
+            item->parentItem()->objectName() == QLatin1StringView("notificationActions"))
+            actions.append(item->property("text").toString());
+    }
+    QCOMPARE(actions, (QStringList{QStringLiteral("Antworten"), QStringLiteral("Gelesen")}));
+    QQuickItem *list = findItem(m_window->contentItem(), QStringLiteral("notificationList"));
+    QCOMPARE(QAccessible::queryAccessibleInterface(list)->role(), QAccessible::List);
+}
+
+void TestAccessibility::notificationsFocusChainReachesEveryControlOnce()
+{
+    QVERIFY(showNotifications());
+    QList<QQuickItem *> chain;
+    QQuickItem *item = m_window->contentItem()->nextItemInFocusChain(true);
+    while (item && !chain.contains(item) && chain.size() < 500) {
+        chain.append(item);
+        item = item->nextItemInFocusChain(true);
+    }
+
+    QVERIFY(item);
+    QCOMPARE(item, chain.constFirst());
+    const QList<QQuickItem *> found = controls();
+    for (QQuickItem *control : found) {
+        if (control->isEnabled() && control->activeFocusOnTab())
+            QVERIFY2(chain.contains(control), qPrintable(describe(control)));
+    }
+    for (const QString &name :
+         {QStringLiteral("notificationList"), QStringLiteral("dismissNotificationButton")}) {
+        QVERIFY2(chain.contains(findItem(m_window->contentItem(), name)), qPrintable(name));
+    }
+}
+
+// Choosing a notification, opening it on the phone, dismissing it and its
+// actions all work from the keyboard, and the list shows its focus.
+void TestAccessibility::notificationsAreUsedByKeyboard()
+{
+    QVERIFY(showNotifications());
+    m_window->requestActivate();
+    QVERIFY(QTest::qWaitForWindowActive(m_window));
+    QQuickItem *page = findItem(m_window->contentItem(), QStringLiteral("notificationsPage"));
+    QQuickItem *list = findItem(m_window->contentItem(), QStringLiteral("notificationList"));
+    QVERIFY(page && list);
+    list->forceActiveFocus(Qt::TabFocusReason);
+    QTRY_VERIFY(list->hasActiveFocus());
+    QVERIFY(findItem(m_window->contentItem(), QStringLiteral("notificationListFocusRing"))
+                ->isVisible());
+
+    QTest::keyClick(m_window, Qt::Key_Down);
+    QTRY_COMPARE(page->property("currentKey").toString(), QStringLiteral("org.example.chat|2|"));
+    QTest::keyClick(m_window, Qt::Key_Return);
+    QTRY_COMPARE_WITH_TIMEOUT(m_phone->notificationActions().size(), 1, phoneTimeoutMs);
+    QCOMPARE(m_phone->notificationActions().constFirst(),
+             (std::pair<QString, QString>{QStringLiteral("org.example.chat|2|"), QString()}));
+    QTest::keyClick(m_window, Qt::Key_Delete);
+    QTRY_COMPARE_WITH_TIMEOUT(m_phone->notifications().size(), 2, phoneTimeoutMs);
+    auto *controller =
+        m_engine->singletonInstance<AppController *>("QPhoneManager.Ui", "AppController");
+    QTRY_COMPARE_WITH_TIMEOUT(controller->notifications()->count(), 2, phoneTimeoutMs);
+    QTRY_COMPARE(page->property("currentKey").toString(), QStringLiteral("org.example.chat|3|"));
+
+    // The actions of the chosen notification are reached with Tab.
+    QQuickItem *actions = findItem(m_window->contentItem(), QStringLiteral("notificationActions"));
+    QTRY_VERIFY(actions && actions->isVisible());
+    QList<QQuickItem *> buttons;
+    collectControls(actions, buttons);
+    QQuickItem *first = buttons.value(0);
+    QVERIFY(first);
+    first->forceActiveFocus(Qt::TabFocusReason);
+    QVERIFY(focusIsShown(first));
+    QTest::keyClick(m_window, Qt::Key_Space);
+    QTRY_COMPARE_WITH_TIMEOUT(m_phone->notificationActions().size(), 2, phoneTimeoutMs);
+    QVERIFY(!m_phone->notificationActions().constLast().second.isEmpty());
+}
+
+// The call window is a window of its own; its buttons are named, those that
+// do not apply are switched off rather than hidden, and the focus starts on
+// the button that fits the call.
+void TestAccessibility::callWindowNamesItsControlsAndShowsItsFocus()
+{
+    QVERIFY(showNotifications());
+    auto *controller =
+        m_engine->singletonInstance<AppController *>("QPhoneManager.Ui", "AppController");
+    auto *callWindow = m_window->findChild<QQuickWindow *>(QStringLiteral("callWindow"));
+    QVERIFY(callWindow);
+
+    m_phone->setCallState(6, QStringLiteral("+4930999999"));
+    QTRY_VERIFY_WITH_TIMEOUT(callWindow->isVisible(), phoneTimeoutMs);
+    callWindow->requestActivate();
+    QVERIFY(QTest::qWaitForWindowActive(callWindow));
+    announceAccessibility();
+    QList<QQuickItem *> found;
+    collectControls(callWindow->contentItem(), found);
+
+    verifyNamesAndRoles(found);
+    QStringList names;
+    for (const QQuickItem *control : std::as_const(found))
+        names.append(control->objectName());
+    QCOMPARE(names,
+             (QStringList{QStringLiteral("callAnswerButton"), QStringLiteral("callHangUpButton"),
+                          QStringLiteral("callMuteButton"), QStringLiteral("callSpeakerButton")}));
+    QQuickItem *answer = found.at(0);
+    QVERIFY(answer->isEnabled());
+    QVERIFY(!found.at(2)->isEnabled());
+    QVERIFY(!found.at(3)->isEnabled());
+    QTRY_VERIFY(answer->hasActiveFocus());
+    QVERIFY(focusIsShown(answer));
+    QCOMPARE(found.at(1)->property("text").toString(), QStringLiteral("Decline"));
+
+    QVERIFY(controller->call()->hangUp());
+    QTRY_VERIFY_WITH_TIMEOUT(!callWindow->isVisible(), phoneTimeoutMs);
+    QVERIFY(m_phone->receivedCommands().contains(QStringLiteral("ATH")));
 }
 
 QTEST_MAIN(TestAccessibility)

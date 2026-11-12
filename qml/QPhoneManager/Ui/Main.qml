@@ -212,6 +212,26 @@ ApplicationWindow {
     }
 
     Connections {
+        target: AppController.notifications
+
+        function onErrorOccurred(message: string): void {
+            messageBar.show(message, true);
+        }
+
+        function onInfoMessage(message: string): void {
+            messageBar.show(message, false);
+        }
+    }
+
+    Connections {
+        target: AppController.call
+
+        function onErrorOccurred(message: string): void {
+            messageBar.show(message, true);
+        }
+    }
+
+    Connections {
         target: AppController.transfers
 
         function onErrorOccurred(message: string): void {
@@ -245,6 +265,17 @@ ApplicationWindow {
                 pinDialog.close();
             if (AppController.connected && messageBar.isError)
                 messageBar.text = "";
+        }
+
+        function onNewMessageRequested(): void {
+            root.bringToFront();
+            root.showSection("messages");
+            AppController.messages.composeNew();
+        }
+
+        function onNotificationsRequested(): void {
+            root.bringToFront();
+            root.showSection("notifications");
         }
     }
 
@@ -359,6 +390,16 @@ ApplicationWindow {
         id: profilesDialog
 
         objectName: "profilesDialog"
+    }
+
+    CallWindow {
+        objectName: "callWindow"
+    }
+
+    function bringToFront(): void {
+        root.show();
+        root.raise();
+        root.requestActivate();
     }
 
     function showSection(key: string): void {

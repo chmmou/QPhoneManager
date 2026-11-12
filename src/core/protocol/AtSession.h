@@ -104,6 +104,14 @@ public:
     void writeRaw(const QByteArray &bytes);
 
     /**
+     * Reads `line`, a line the client sent on its own that arrived inside the
+     * OBEX stream, the way a line in line mode is read: unsolicited() and the
+     * connection-level answers take effect, anything else is dropped. A
+     * trailing CR is ignored. Does nothing once the session has ended.
+     */
+    void takeLateLine(const QByteArray &line);
+
+    /**
      * Ends the session because the link can no longer be trusted: fatal()
      * carries `error`, every open command completes with status Closed and
      * the transport is closed. Does nothing once the session has ended.

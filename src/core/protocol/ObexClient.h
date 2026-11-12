@@ -56,6 +56,14 @@ struct ObexResponse
  * the AT session through AtSession::terminate(), which closes the transport;
  * the requests waiting behind it fail with ErrorCode::ConnectionClosed.
  *
+ * The client can send a line of text, such as "+CMTI: ...", after it has
+ * switched to OBEX mode, between two of its answers. Such a line is passed to
+ * AtSession::takeLateLine(), so that its notice still takes effect, and the
+ * answers around it are read as usual. A line longer than
+ * limits::maxAtLineBytes ends the AT session with ErrorCode::LimitExceeded,
+ * which the running request gets; the requests waiting behind it fail with
+ * ErrorCode::ConnectionClosed.
+ *
  * The client does not own the session; the session must outlive it.
  */
 class ObexClient : public QObject
@@ -196,6 +204,11 @@ private:
     void startNext();
     void writePacket(const QByteArray &bytes);
     void onRawData(const QByteArray &chunk);
+    /**
+     * Hands the line at the start of the buffer to the session. Returns false
+     * while the line is incomplete or when the session has ended.
+     */
+    bool takeLateLine();
     void handlePacket(const QByteArray &bytes);
     void startAbort(const Error &reason);
     void finishCurrent(const Result<ObexPacket> &result);

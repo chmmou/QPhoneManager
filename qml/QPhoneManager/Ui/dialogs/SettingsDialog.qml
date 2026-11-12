@@ -11,7 +11,8 @@ Dialog {
 
     parent: Overlay.overlay
     anchors.centerIn: parent
-    width: Math.min(TypeScale.body * 40, parent ? parent.width - Theme.gridUnit * 8 : TypeScale.body * 40)
+    // Wide enough for the four tab labels in both languages.
+    width: Math.min(TypeScale.body * 46, parent ? parent.width - Theme.gridUnit * 8 : TypeScale.body * 46)
     height: Math.min(TypeScale.body * 38, parent ? parent.height - Theme.gridUnit * 8 : TypeScale.body * 38)
     modal: true
     Overlay.modal: Scrim {}
@@ -53,6 +54,7 @@ Dialog {
             TabButton {
                 id: connectionTab
 
+                width: implicitWidth
                 text: qsTr("Connection")
 
                 FocusRing {
@@ -63,6 +65,7 @@ Dialog {
             TabButton {
                 id: appearanceTab
 
+                width: implicitWidth
                 text: qsTr("Appearance")
 
                 FocusRing {
@@ -73,10 +76,23 @@ Dialog {
             TabButton {
                 id: storageTab
 
+                width: implicitWidth
                 text: qsTr("Language and storage")
 
                 FocusRing {
                     shown: storageTab.visualFocus
+                }
+            }
+
+            TabButton {
+                id: notificationsTab
+
+                objectName: "settingsNotificationsTab"
+                width: implicitWidth
+                text: qsTr("Notifications")
+
+                FocusRing {
+                    shown: notificationsTab.visualFocus
                 }
             }
         }
@@ -354,6 +370,65 @@ Dialog {
                 Label {
                     Layout.fillWidth: true
                     text: qsTr("Data that is already stored stays in the old folder.")
+                    font.pixelSize: TypeScale.hint
+                    color: Theme.foregroundOnSurfaceVariant
+                    wrapMode: Text.Wrap
+                }
+
+                Item {
+                    Layout.fillHeight: true
+                }
+            }
+
+            ColumnLayout {
+                objectName: "settingsNotificationsPage"
+                spacing: Theme.gridUnit * 3
+
+                Label {
+                    text: qsTr("Phone and desktop")
+                    font.pixelSize: TypeScale.section
+                }
+
+                CheckBox {
+                    objectName: "desktopNotificationsBox"
+                    Layout.fillWidth: true
+                    text: qsTr("Show new notifications of the phone on this computer")
+                    checked: Settings.notificationsEnabled
+                    onToggled: Settings.notificationsEnabled = checked
+                }
+
+                CheckBox {
+                    objectName: "clipboardSyncBox"
+                    Layout.fillWidth: true
+                    text: qsTr("Share the clipboard between the phone and this computer")
+                    checked: Settings.clipboardSync
+                    onToggled: Settings.clipboardSync = checked
+                }
+
+                Label {
+                    Layout.fillWidth: true
+                    text: qsTr("Text you copy on this computer goes to the phone. Android passes on text copied on the phone only while MyPhoneExplorer Client is open there.")
+                    font.pixelSize: TypeScale.hint
+                    color: Theme.foregroundOnSurfaceVariant
+                    wrapMode: Text.Wrap
+                }
+
+                Label {
+                    text: qsTr("Start")
+                    font.pixelSize: TypeScale.section
+                }
+
+                CheckBox {
+                    objectName: "startMinimizedBox"
+                    Layout.fillWidth: true
+                    text: qsTr("Start in the notification area, without the window")
+                    checked: Settings.startMinimized
+                    onToggled: Settings.startMinimized = checked
+                }
+
+                Label {
+                    Layout.fillWidth: true
+                    text: qsTr("If the desktop has no notification area, the window opens anyway. This applies from the next start.")
                     font.pixelSize: TypeScale.hint
                     color: Theme.foregroundOnSurfaceVariant
                     wrapMode: Text.Wrap

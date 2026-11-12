@@ -18,6 +18,8 @@ namespace {
 constexpr std::chrono::seconds smallTimeout{20};
 constexpr std::chrono::seconds controlTimeout{10};
 constexpr quint16 minPacketSize = 255;
+// The final bit, which every OBEX response code carries.
+constexpr quint8 lowestResponseCode = 0x80;
 constexpr int luidHexDigits = 12;
 
 QByteArray targetBytes(ObexClient::Target target)
@@ -429,7 +431,14 @@ void ObexClient::writePacket(const QByteArray &bytes)
 void ObexClient::onRawData(const QByteArray &chunk)
 {
     m_buffer += chunk;
-    while (true) {
+    while (!m_buffer.isEmpty()) {
+        // Every answer of the phone starts with a response code; a line of
+        // text never does.
+        if (quint8(m_buffer.front()) < lowestResponseCode) {
+            if (!takeLateLine())
+                return;
+            continue;
+        }
         const std::optional<quint16> length = ObexPacket::declaredLength(m_buffer);
         if (!length || m_buffer.size() < *length)
             return;
@@ -442,6 +451,32 @@ void ObexClient::onRawData(const QByteArray &chunk)
         m_buffer.remove(0, *length);
         handlePacket(bytes);
     }
+}
+
+bool ObexClient::takeLateLine()
+{
+    const qsizetype end = m_buffer.indexOf('\n');
+    if ((end < 0 ? m_buffer.size() : end) > limits::maxAtLineBytes) {
+        const Error error(ErrorCode::LimitExceeded,
+                          QStringLiteral("AT line inside the OBEX session longer than %1 bytes")
+                              .arg(limits::maxAtLineBytes));
+        qCWarning(lcProtocol) << error.message();
+        std::unique_ptr<Request> request = std::move(m_current);
+        m_session->terminate(error);
+        if (request) {
+            if (request->abortDone)
+                request->abortDone(error);
+            request->done(error);
+        }
+        return false;
+    }
+    if (end < 0)
+        return false;
+    const QByteArray line = m_buffer.left(end);
+    m_buffer.remove(0, end + 1);
+    qCDebug(lcProtocol) << "AT line inside the OBEX session passed on";
+    m_session->takeLateLine(line);
+    return !m_session->isEnded();
 }
 
 void ObexClient::handlePacket(const QByteArray &bytes)

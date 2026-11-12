@@ -25,6 +25,10 @@ namespace qpm::core::protocol {
 struct ObexPacket;
 }
 
+namespace qpm::core::codec {
+struct PhoneNotification;
+}
+
 namespace qpm::test {
 
 /// One object of a sync area, with its complete text including X-IRMC-LUID.
@@ -105,6 +109,27 @@ struct FakeApp
     bool launchable = true;
 };
 
+/// A notification shown on the fake phone.
+struct FakeNotification
+{
+    int id = 0;
+    QString tag;
+    QString package = QStringLiteral("org.example.chat");
+    QString appLabel = QStringLiteral("Chat");
+    QString title;
+    QString text;
+    QStringList actions;
+    QDateTime posted;
+    /// Android notification flags; 0x02 marks an ongoing one.
+    int flags = 0;
+    /// A text for the status bar; without it the phone reports a new one only in detail mode.
+    QString ticker = QStringLiteral("ticker");
+    /// JPEG of its picture; empty for none.
+    QByteArray picture;
+
+    [[nodiscard]] QString key() const;
+};
+
 /// Behaviour of the fake phone; tests change it before or during a session.
 struct FakePhoneConfig
 {
@@ -135,6 +160,19 @@ struct FakePhoneConfig
     quint8 connectRefusal = 0;
     /// Bytes written right behind the answer to DISCONNECT, in the same write.
     QByteArray afterDisconnect;
+    /**
+     * A line such as "+CMTI: \"ME\",3", without its line end, that arrives
+     * late, inside the next OBEX session, as from a client that queued it in
+     * AT mode just before the switch. Written once, with CRLF and a write of
+     * its own; the field is emptied then.
+     */
+    QByteArray lateLine;
+    /**
+     * Where lateLine goes: -1 right behind CONNECT, otherwise right before the
+     * OBEX answer packet with this index in the session, counted from 0 for
+     * the answer to the OBEX CONNECT.
+     */
+    int lateLineBeforeAnswer = -1;
     /// Name of an OBEX GET; the connection is closed right after its last answer packet.
     QString dropAfterGet;
     /// Answer every call log command with ERROR, as a client without the permission does.
@@ -190,6 +228,18 @@ struct FakePhoneConfig
     /// Connections to the screen channel that are taken and closed again unread before one is
     /// served.
     int droppedScreenConnections = 0;
+
+    /// Whether the client may read the notifications, as the user set it on the phone.
+    enum class NotificationAccess { Granted, Disabled, NotBound, NotSupported };
+    NotificationAccess notificationAccess = NotificationAccess::Granted;
+    /// The text on the clipboard of the phone.
+    QString clipboard;
+    /**
+     * AT*CLIPBOARD? is answered only after this delay and without an echo of
+     * its own, as the client does when Android lets it read the clipboard
+     * only through a window of its app; zero answers at once.
+     */
+    std::chrono::milliseconds clipboardReadDelay{0};
 };
 
 /**
@@ -207,7 +257,7 @@ struct FakePhoneConfig
  * contact gets a LUID and keys for its entries, a change touches only the
  * entries it names, and an empty body deletes the contact. The call log
  * answers AT+CPBS, AT+CPBR, AT+CPBW and AT+CPBD like the client, newest entry
- * first. A dial or hang-up command is answered with OK and only recorded.
+ * first. A dial command is answered with OK and only recorded.
  *
  * Messages live in the area "msg". AT+CMGS in text mode is recorded and
  * answered like the client, and the message then appears as a sent one;
@@ -246,6 +296,13 @@ struct FakePhoneConfig
  * text need FakePhoneConfig::accessibilityService and an Android version of
  * at least 7, the capture at least 5; touches are always taken, as the client
  * does, and only recorded.
+ *
+ * Notifications answer AT*NOTIR, AT*NOTIFY, AT*NOTIC and AT*NOTIACTION like
+ * the client, with the refusals FakePhoneConfig::notificationAccess picks, and
+ * their pictures come from "\notificationimage\<package>\<id>\<w>\<h>". The
+ * clipboard answers AT*CLIPBOARD and AT*CLIPWATCH. Calls are reported with
+ * "*ECAV" through setCallState(); ATA takes a ringing call, ATH and AT+CHUP
+ * end one, and AT+CMUT and AT*SESP are recorded.
  *
  * Never sends text messages or places calls: there is nothing behind it.
  */
@@ -344,6 +401,36 @@ public:
     /// Writes an unsolicited line in AT mode.
     void sendUnsolicited(const QByteArray &line);
 
+    /// Replaces the notifications without reporting anything.
+    void setNotifications(const QList<FakeNotification> &notifications);
+    [[nodiscard]] QList<FakeNotification> notifications() const { return m_notifications; }
+    /**
+     * Shows a notification, replacing one with the same key, and reports it
+     * like the client: when it has a ticker text, or in detail mode.
+     */
+    void postNotification(const FakeNotification &notification);
+    /// Removes the notification, reporting it in detail mode like the client.
+    void removeNotification(const QString &key);
+    /// The detail mode the desktop asked for with AT*NOTIFY=2.
+    [[nodiscard]] bool notificationsDetailed() const { return m_notificationsDetailed; }
+    /// Key and action title of every AT*NOTIACTION, in order; an empty title is the tap.
+    [[nodiscard]] QList<std::pair<QString, QString>> notificationActions() const
+    {
+        return m_notificationActions;
+    }
+    /// Whether AT*CLIPWATCH=1 is in effect.
+    [[nodiscard]] bool clipboardWatched() const { return m_clipboardWatched; }
+    /// Changes the clipboard as the user of the phone does; reported while watched.
+    void copyOnPhone(const QString &text);
+
+    /// The state of the call as the phone tracks it: 0 none, 1 dialling, 3 going on, 6 ringing.
+    [[nodiscard]] int callState() const { return m_callState; }
+    /// Makes a call ring, go on or end, reported like the client with "*ECAV".
+    void setCallState(int state, const QString &number);
+    /// The microphone and speaker switches as last set by the desktop.
+    [[nodiscard]] bool callMuted() const { return m_callMuted; }
+    [[nodiscard]] bool speakerOn() const { return m_speakerOn; }
+
     /// Drops the connection without a word.
     void dropConnection();
 
@@ -377,6 +464,13 @@ private:
     bool handleApps(const QString &command, const QString &name);
     /// Answers the screen and input commands; returns false for any other command.
     bool handleScreen(const QString &command, const QString &name);
+    /// Answers the notification commands; returns false for any other command.
+    bool handleNotifications(const QString &command, const QString &name);
+    /// Answers the clipboard commands; returns false for any other command.
+    bool handleClipboard(const QString &command, const QString &name);
+    /// Answers the call commands; returns false for any other command.
+    bool handleCalls(const QString &command, const QString &name);
+    [[nodiscard]] QByteArray notificationRecord(const FakeNotification &notification) const;
     void openScreenChannel();
     [[nodiscard]] QByteArray appLine(const FakeApp &app) const;
     /// Keeps what an upload delivered: a file, or an installation request at the root.
@@ -431,6 +525,8 @@ private:
     QString m_currentFolder;
     quint16 m_maxPacket = 0xFFFF;
     qsizetype m_discard = 0;
+    /// OBEX answer packets sent in the running session.
+    int m_answersInSession = 0;
     QByteArray m_pendingStream;
     std::unique_ptr<Transfer> m_transfer;
     QList<QByteArray> m_thumbnailRequests;
@@ -438,6 +534,14 @@ private:
     QTcpServer *m_screenServer = nullptr;
     QPointer<QTcpSocket> m_screenSocket;
     QList<QByteArray> m_screenRequests;
+    QList<FakeNotification> m_notifications;
+    QList<std::pair<QString, QString>> m_notificationActions;
+    bool m_notificationsDetailed = false;
+    bool m_clipboardWatched = false;
+    int m_callState = 0;
+    QString m_callNumber;
+    bool m_callMuted = false;
+    bool m_speakerOn = false;
 };
 
 } // namespace qpm::test

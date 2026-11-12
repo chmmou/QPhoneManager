@@ -92,7 +92,10 @@ public:
 
     struct Options
     {
-        /// Sends AT*NOTIFY=2 in the handshake and AT*NOTIR after each OBEX session.
+        /**
+         * Sends AT*NOTIFY=2 in the handshake and AT*NOTIR after each OBEX
+         * session, whose answer notificationListRead() carries.
+         */
         bool notifications = false;
         /// Sends AT*CLIPWATCH=1 in the handshake.
         bool clipboardWatch = false;
@@ -194,8 +197,10 @@ Q_SIGNALS:
     void pinRequired(int remainingTries);
     void deviceIdentified(const qpm::core::protocol::DeviceIdentity &identity);
     void statusUpdated(const qpm::core::protocol::DeviceStatus &status);
-    /// Lines the phone sent on its own, and the AT*NOTIR lines after OBEX.
+    /// Lines the phone sent on its own.
     void unsolicited(const QString &line);
+    /// The answer to the AT*NOTIR after an OBEX session, successful or not.
+    void notificationListRead(const qpm::core::protocol::AtReply &reply);
     void failed(const qpm::core::Error &error);
 
 private:

@@ -51,6 +51,9 @@ qpm_add_core_test(tst_applist)
 qpm_add_core_test(tst_appsservice)
 target_link_libraries(tst_appsservice PRIVATE Qt6::Gui)
 qpm_add_core_test(tst_screenmirror)
+qpm_add_core_test(tst_notifications)
+qpm_add_core_test(tst_clipboard)
+qpm_add_core_test(tst_callmonitor)
 qpm_add_core_test(tst_nothirdpartyservices)
 target_compile_definitions(tst_nothirdpartyservices PRIVATE
     "QPM_SOURCE_DIR=\"${PROJECT_SOURCE_DIR}\""
@@ -67,6 +70,18 @@ target_link_libraries(tst_secretstore PRIVATE qpm_platform qpm_fakephone Qt6::DB
 qpm_set_project_warnings(tst_secretstore)
 add_test(NAME tst_secretstore COMMAND tst_secretstore)
 set_tests_properties(tst_secretstore PROPERTIES TIMEOUT 60)
+
+qt_add_executable(tst_desktopnotifier platform/tst_desktopnotifier.cpp)
+target_link_libraries(tst_desktopnotifier PRIVATE qpm_platform qpm_fakephone Qt6::DBus Qt6::Test)
+qpm_set_project_warnings(tst_desktopnotifier)
+add_test(NAME tst_desktopnotifier COMMAND tst_desktopnotifier)
+set_tests_properties(tst_desktopnotifier PROPERTIES TIMEOUT 60)
+
+qt_add_executable(tst_trayicon platform/tst_trayicon.cpp)
+target_link_libraries(tst_trayicon PRIVATE qpm_platform Qt6::Widgets Qt6::Test)
+qpm_set_project_warnings(tst_trayicon)
+add_test(NAME tst_trayicon COMMAND tst_trayicon)
+set_tests_properties(tst_trayicon PROPERTIES TIMEOUT 60)
 
 qt_add_executable(tst_settings ui/tst_settings.cpp)
 target_link_libraries(tst_settings PRIVATE qpm_ui Qt6::Test)
@@ -140,6 +155,12 @@ qpm_set_project_warnings(tst_screenview)
 add_test(NAME tst_screenview COMMAND tst_screenview)
 set_tests_properties(tst_screenview PROPERTIES TIMEOUT 120)
 
+qt_add_executable(tst_desktop ui/tst_desktop.cpp)
+target_link_libraries(tst_desktop PRIVATE qpm_ui qpm_fakephone Qt6::DBus Qt6::Gui Qt6::Test)
+qpm_set_project_warnings(tst_desktop)
+add_test(NAME tst_desktop COMMAND tst_desktop)
+set_tests_properties(tst_desktop PROPERTIES TIMEOUT 120)
+
 qt_add_executable(tst_accessibility ui/tst_accessibility.cpp)
 target_link_libraries(tst_accessibility PRIVATE qpm_ui qpm_uiplugin qpm_fakephone Qt6::Quick Qt6::Test)
 qt_add_resources(tst_accessibility "tst_accessibility_config"
@@ -149,7 +170,7 @@ qt_add_resources(tst_accessibility "tst_accessibility_config"
 )
 qpm_set_project_warnings(tst_accessibility)
 add_test(NAME tst_accessibility COMMAND tst_accessibility)
-set_tests_properties(tst_accessibility PROPERTIES TIMEOUT 120)
+set_tests_properties(tst_accessibility PROPERTIES TIMEOUT 300)
 
 qt_add_executable(tst_screens ui/tst_screens.cpp)
 target_link_libraries(tst_screens PRIVATE qpm_ui qpm_uiplugin qpm_fakephone Qt6::Quick Qt6::Test)

@@ -9,6 +9,8 @@
 #include "ui/apps/AppListModel.h"
 #include "ui/calls/CallsArea.h"
 #include "ui/contacts/ContactsArea.h"
+#include "ui/desktop/CallControl.h"
+#include "ui/desktop/NotificationListModel.h"
 #include "ui/files/FileBrowserModel.h"
 #include "ui/files/TransferQueue.h"
 #include "ui/messages/MessagesArea.h"
@@ -337,6 +339,38 @@ QList<qpm::test::FakeSyncObject> exampleNotes()
     return {{1, encodeNoteAsPhoneSendsIt(shopping)}, {2, encodeNoteAsPhoneSendsIt(ideas)}};
 }
 
+// Made-up notifications of the phone, one with a picture and one ongoing.
+QList<qpm::test::FakeNotification> exampleNotifications()
+{
+    const QDateTime today(QDate::currentDate(), QTime(9, 40));
+    qpm::test::FakeNotification chat;
+    chat.id = 11;
+    chat.appLabel = QStringLiteral("Chat");
+    chat.title = QStringLiteral("Anna Becker");
+    chat.text =
+        QStringLiteral("Kommst du heute Abend zum Elternabend? Ich halte dir einen Platz frei.");
+    chat.actions = {QStringLiteral("Antworten"), QStringLiteral("Als gelesen markieren")};
+    chat.posted = today.toUTC();
+    chat.picture = portrait(QColor(0, 106, 106));
+    qpm::test::FakeNotification mail;
+    mail.id = 12;
+    mail.package = QStringLiteral("org.example.mail");
+    mail.appLabel = QStringLiteral("Post");
+    mail.title = QStringLiteral("Beispiel GmbH");
+    mail.text = QStringLiteral("Ihre Bestellung ist unterwegs.");
+    mail.actions = {QStringLiteral("Archivieren")};
+    mail.posted = today.addSecs(-3600).toUTC();
+    qpm::test::FakeNotification music;
+    music.id = 13;
+    music.package = QStringLiteral("org.example.music");
+    music.appLabel = QStringLiteral("Musik");
+    music.title = QStringLiteral("Wiedergabe läuft");
+    music.text = QStringLiteral("Hafenkonzert, Teil 2");
+    music.flags = 0x02;
+    music.posted = today.addSecs(-7200).toUTC();
+    return {chat, mail, music};
+}
+
 QByteArray appIcon(const QColor &color)
 {
     QImage image(48, 48, QImage::Format_ARGB32);
@@ -528,6 +562,8 @@ private Q_SLOTS:
     void appViewsAreGermanAndRenderInBothSchemes();
     void screenViewsAreGermanAndRenderInBothSchemes_data();
     void screenViewsAreGermanAndRenderInBothSchemes();
+    void desktopViewsAreGermanAndRenderInBothSchemes_data();
+    void desktopViewsAreGermanAndRenderInBothSchemes();
 
 private:
     [[nodiscard]] QObject *dialog(const QString &name) const;
@@ -598,6 +634,7 @@ void TestScreens::initTestCase()
     m_phone->addFile(QStringLiteral("\\sdcard\\DCIM\\Camera\\Reiseplan.pdf"),
                      QByteArray(184320, 'p'), taken);
     m_phone->setApps(exampleApps());
+    m_phone->setNotifications(exampleNotifications());
     m_phone->config().screenFrame = exampleScreen();
     m_phone->config().alarms =
         QStringList{QStringLiteral("\"06:30\",1,0,\"Aufstehen\",\"1,2,3,4,5\",1"),
@@ -647,7 +684,8 @@ QObject *TestScreens::dialog(const QString &name) const
          {QStringLiteral("contactsPage"), QStringLiteral("callsPage"),
           QStringLiteral("messagesPage"), QStringLiteral("calendarPage"),
           QStringLiteral("tasksPage"), QStringLiteral("notesPage"), QStringLiteral("filesPage"),
-          QStringLiteral("appsPage"), QStringLiteral("screenPage")}) {
+          QStringLiteral("appsPage"), QStringLiteral("screenPage"),
+          QStringLiteral("notificationsPage")}) {
         QQuickItem *page = item(pageName);
         if (QObject *found = page ? page->findChild<QObject *>(name) : nullptr)
             return found;
@@ -1568,6 +1606,122 @@ void TestScreens::screenViewsAreGermanAndRenderInBothSchemes()
         m_phone->sendUnsolicited("AT*STARTCAPTURESERVER\r\nTIMEOUT\r\nERROR");
     }
     m_phone->config().accessibilityService = true;
+    QVERIFY(m_controller->isConnected());
+}
+
+void TestScreens::desktopViewsAreGermanAndRenderInBothSchemes_data()
+{
+    QTest::addColumn<QString>("view");
+    QTest::addColumn<QString>("germanText");
+
+    QTest::newRow("notifications")
+        << QStringLiteral("notifications") << QStringLiteral("Benachrichtigungen");
+    QTest::newRow("no access") << QStringLiteral("notificationsNoAccess")
+                               << QStringLiteral("Benachrichtigungszugriff");
+    QTest::newRow("incoming call")
+        << QStringLiteral("callWindow") << QStringLiteral("Eingehender Anruf");
+    QTest::newRow("call in progress")
+        << QStringLiteral("callWindowActive") << QStringLiteral("Gespräch läuft");
+    QTest::newRow("settings") << QStringLiteral("settingsNotifications")
+                              << QStringLiteral("Benachrichtigungen");
+}
+
+void TestScreens::desktopViewsAreGermanAndRenderInBothSchemes()
+{
+    QFETCH(QString, view);
+    QFETCH(QString, germanText);
+    qpm::ui::NotificationListModel *notifications = m_controller->notifications();
+    qpm::ui::CallControl *call = m_controller->call();
+    m_window->setProperty("currentSection", 10);
+    QQuickItem *header = m_window->property("header").value<QQuickItem *>();
+    QCOMPARE(header->property("title").toString(), QStringLiteral("Benachrichtigungen"));
+    QTRY_VERIFY(item(QStringLiteral("notificationsPage")));
+    m_window->requestActivate();
+    QVERIFY(QTest::qWaitForWindowActive(m_window));
+
+    QObject *popup = nullptr;
+    QWindow *callWindow = nullptr;
+    if (view == QLatin1StringView("notifications")) {
+        QTRY_COMPARE_WITH_TIMEOUT(notifications->count(), 3, connectTimeoutMs);
+        // The row shows its picture once it is there.
+        QTRY_VERIFY_WITH_TIMEOUT(
+            !notifications
+                 ->data(notifications->index(0), qpm::ui::NotificationListModel::ImageUrlRole)
+                 .toString()
+                 .isEmpty(),
+            connectTimeoutMs);
+        QQuickItem *list = item(QStringLiteral("notificationList"));
+        list->setProperty("currentIndex", 0);
+        list->forceActiveFocus(Qt::TabFocusReason);
+        QTRY_VERIFY(list->hasActiveFocus());
+        QTRY_VERIFY(item(QStringLiteral("notificationDetailImage"))->isVisible());
+        QCOMPARE(item(QStringLiteral("notificationDetailTitle"))->property("text").toString(),
+                 QStringLiteral("Anna Becker"));
+        QVERIFY(labelWithText(item(QStringLiteral("notificationsPage")),
+                              QStringLiteral("3 Benachrichtigungen auf dem Handy")));
+    } else if (view == QLatin1StringView("notificationsNoAccess")) {
+        m_phone->config().notificationAccess =
+            qpm::test::FakePhoneConfig::NotificationAccess::Disabled;
+        QVERIFY(notifications->refresh());
+        QTRY_VERIFY_WITH_TIMEOUT(notifications->isAccessMissing(), connectTimeoutMs);
+        QVERIFY(labelWithText(item(QStringLiteral("notificationsEmpty")), germanText));
+        QQuickItem *action = item(QStringLiteral("notificationsEmptyAction"));
+        QVERIFY(action && action->isVisible());
+        action->forceActiveFocus(Qt::TabFocusReason);
+    } else if (view.startsWith(QLatin1StringView("callWindow"))) {
+        // The fake phone rings with the number of a made-up contact.
+        m_phone->setCallState(6, QStringLiteral("+491512000001"));
+        QTRY_COMPARE_WITH_TIMEOUT(call->state(), qpm::ui::CallControl::State::Ringing,
+                                  connectTimeoutMs);
+        if (view == QLatin1StringView("callWindowActive")) {
+            QVERIFY(call->answer());
+            QTRY_COMPARE_WITH_TIMEOUT(call->state(), qpm::ui::CallControl::State::Active,
+                                      connectTimeoutMs);
+            QVERIFY(call->setMuted(true));
+            QTRY_VERIFY_WITH_TIMEOUT(call->isMuted(), connectTimeoutMs);
+        }
+        callWindow = m_window->findChild<QWindow *>(QStringLiteral("callWindow"));
+        QVERIFY(callWindow);
+        QTRY_VERIFY(callWindow->isVisible());
+        QCOMPARE(call->callerText(), QStringLiteral("Anna Becker"));
+        auto *quickCall = qobject_cast<QQuickWindow *>(callWindow);
+        QVERIFY(quickCall);
+        QVERIFY(labelWithText(quickCall->contentItem(), germanText));
+        quickCall->requestActivate();
+        QVERIFY(QTest::qWaitForWindowActive(quickCall));
+    } else {
+        popup = dialog(QStringLiteral("settingsDialog"));
+        QVERIFY(popup);
+        QMetaObject::invokeMethod(popup, "open");
+        QTRY_VERIFY(popup->property("opened").toBool());
+        QQuickItem *tabs = item(QStringLiteral("settingsTabs"));
+        tabs->setProperty("currentIndex", 3);
+        QTRY_VERIFY(item(QStringLiteral("settingsNotificationsPage"))->isVisible());
+        QQuickItem *tab = item(QStringLiteral("settingsNotificationsTab"));
+        QCOMPARE(tab->property("text").toString(), germanText);
+        tab->forceActiveFocus(Qt::TabFocusReason);
+        QVERIFY(labelWithText(item(QStringLiteral("settingsNotificationsPage")),
+                              QStringLiteral("Zwischenablage")));
+    }
+
+    QVERIFY(saveBothSchemes(view));
+
+    if (popup) {
+        QMetaObject::invokeMethod(popup, "close");
+        QTRY_VERIFY(!popup->property("visible").toBool());
+    }
+    if (callWindow) {
+        QVERIFY(call->hangUp());
+        QTRY_COMPARE_WITH_TIMEOUT(call->state(), qpm::ui::CallControl::State::Idle,
+                                  connectTimeoutMs);
+        QTRY_VERIFY(!callWindow->isVisible());
+    }
+    if (view == QLatin1StringView("notificationsNoAccess")) {
+        m_phone->config().notificationAccess =
+            qpm::test::FakePhoneConfig::NotificationAccess::Granted;
+        QVERIFY(notifications->refresh());
+        QTRY_COMPARE_WITH_TIMEOUT(notifications->count(), 3, connectTimeoutMs);
+    }
     QVERIFY(m_controller->isConnected());
 }
 

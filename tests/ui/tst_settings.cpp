@@ -70,6 +70,7 @@ void TestSettings::freshSettingsHaveTheDefaults()
     QVERIFY(!settings.reduceMotion());
     QVERIFY(settings.notificationsEnabled());
     QVERIFY(!settings.clipboardSync());
+    QVERIFY(!settings.startMinimized());
     QVERIFY(settings.dataDirectory().isEmpty());
     QVERIFY(settings.lastDevice().isEmpty());
 }
@@ -88,6 +89,7 @@ void TestSettings::changesSurviveANewInstance()
         settings.setReduceMotion(true);
         settings.setNotificationsEnabled(false);
         settings.setClipboardSync(true);
+        settings.setStartMinimized(true);
         settings.setDataDirectory(QStringLiteral("/data/phones/"));
         settings.setLastDevice(QStringLiteral("dev-1"));
     }
@@ -104,6 +106,7 @@ void TestSettings::changesSurviveANewInstance()
     QVERIFY(settings.reduceMotion());
     QVERIFY(!settings.notificationsEnabled());
     QVERIFY(settings.clipboardSync());
+    QVERIFY(settings.startMinimized());
     QCOMPARE(settings.dataDirectory(), QStringLiteral("/data/phones"));
     QCOMPARE(settings.lastDevice(), QStringLiteral("dev-1"));
 }

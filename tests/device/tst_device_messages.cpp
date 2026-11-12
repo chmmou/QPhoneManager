@@ -10,6 +10,7 @@
 
 #include "WaitFor.h"
 
+#include <QDeadlineTimer>
 #include <QDir>
 #include <QPointer>
 #include <QProcess>
@@ -19,6 +20,7 @@
 #include <QTemporaryDir>
 #include <QTest>
 
+#include <functional>
 #include <memory>
 #include <optional>
 
@@ -42,7 +44,9 @@ constexpr int readyTimeoutMs = 30000;
 constexpr int syncTimeoutMs = 240000;
 constexpr int noticeTimeoutMs = 30000;
 constexpr int connectTries = 10;
-constexpr int sentLookups = 5;
+// How long a message the phone just got may take to show in its change log.
+constexpr int lookupTimeoutMs = 20000;
+constexpr int lookupRoundMs = 1000;
 
 QString sixDigits()
 {
@@ -68,6 +72,13 @@ struct ScratchStore
         return true;
     }
 };
+
+QString notFoundWithin(const QString &what)
+{
+    return QStringLiteral("%1 is not in the store after waiting %2 s")
+        .arg(what)
+        .arg(lookupTimeoutMs / 1000);
+}
 
 QList<StoredMessage> everything(const MessageStore &store)
 {
@@ -108,6 +119,9 @@ private Q_SLOTS:
 private:
     [[nodiscard]] bool connectToClient();
     [[nodiscard]] Result<MessageChanges> syncInto(MessagesService &service);
+    [[nodiscard]] Result<std::optional<StoredMessage>>
+    lookUp(MessagesService &service, const MessageStore &store,
+           const std::function<bool(const StoredMessage &)> &matches);
     [[nodiscard]] bool adb(const QStringList &arguments);
     [[nodiscard]] bool receiveOnTheEmulator(const QString &number, const QString &text);
     [[nodiscard]] bool removeTestMessagesFromTheEmulator();
@@ -204,6 +218,36 @@ Result<MessageChanges> TestDeviceMessages::syncInto(MessagesService &service)
     if (!waitFor(synced, syncTimeoutMs))
         return Error(ErrorCode::Timeout, QStringLiteral("sync did not finish"));
     return synced.result();
+}
+
+// Returns the first stored message that `matches` accepts, or none after
+// lookupTimeoutMs. Syncs again each round until then, so the result depends on
+// that time and not on how fast the rounds run. Fails when a sync fails.
+Result<std::optional<StoredMessage>>
+TestDeviceMessages::lookUp(MessagesService &service, const MessageStore &store,
+                           const std::function<bool(const StoredMessage &)> &matches)
+{
+    const auto find = [&store, &matches]() -> std::optional<StoredMessage> {
+        const QList<StoredMessage> stored = store.allMessages().value();
+        for (const StoredMessage &message : stored) {
+            if (matches(message))
+                return message;
+        }
+        return std::nullopt;
+    };
+    const QDeadlineTimer deadline(lookupTimeoutMs);
+    for (;;) {
+        if (std::optional<StoredMessage> found = find())
+            return found;
+        if (deadline.hasExpired())
+            return std::optional<StoredMessage>();
+        const Result<MessageChanges> synced = syncInto(service);
+        if (!synced.hasValue())
+            return synced.error();
+        // A pull the phone's notice starts may bring the message as well.
+        const int round = int(qMin<qint64>(lookupRoundMs, deadline.remainingTime()));
+        static_cast<void>(QTest::qWaitFor([&find]() { return find().has_value(); }, round));
+    }
 }
 
 bool TestDeviceMessages::adb(const QStringList &arguments)
@@ -335,13 +379,15 @@ void TestDeviceMessages::receivedMessageIsReadSearchedArchivedAndExported()
     // The notice makes the service pull the message without being asked.
     QVERIFY2(QTest::qWaitFor([&arrived]() { return arrived.count() > 0; }, noticeTimeoutMs),
              "no new-message notice from the phone app");
-    std::optional<StoredMessage> found;
-    const QList<StoredMessage> stored = scratch.messages->allMessages().value();
-    for (const StoredMessage &message : stored) {
-        if (message.body == text)
-            found = message;
-    }
-    QVERIFY2(found, "the received message is not in the store");
+    // The notice can come before the phone's change log holds the message;
+    // a later pull then brings it.
+    const Result<std::optional<StoredMessage>> lookup =
+        lookUp(service, *scratch.messages,
+               [&text](const StoredMessage &message) { return message.body == text; });
+    QVERIFY2(lookup.hasValue(),
+             qPrintable(QStringLiteral("a sync failed, code %1").arg(int(lookup.error().code()))));
+    const std::optional<StoredMessage> &found = lookup.value();
+    QVERIFY2(found, qPrintable(notFoundWithin(QStringLiteral("the received message"))));
     QCOMPARE(found->box, MessageBox::Inbox);
     QVERIFY(found->incoming);
     QVERIFY(!found->read);
@@ -385,16 +431,13 @@ void TestDeviceMessages::refusalsOfThePhoneAppAreReported()
     QVERIFY(syncInto(service).hasValue());
     const QString text = QStringLiteral("QPM Eingang ") + sixDigits();
     QVERIFY(receiveOnTheEmulator(QStringLiteral("4930999") + sixDigits(), text));
-    std::optional<StoredMessage> found;
-    for (int lookup = 0; lookup < sentLookups && !found; ++lookup) {
-        QVERIFY(syncInto(service).hasValue());
-        const QList<StoredMessage> stored = scratch.messages->allMessages().value();
-        for (const StoredMessage &message : stored) {
-            if (message.body == text)
-                found = message;
-        }
-    }
-    QVERIFY2(found, "the received message is not in the store");
+    const Result<std::optional<StoredMessage>> lookup =
+        lookUp(service, *scratch.messages,
+               [&text](const StoredMessage &message) { return message.body == text; });
+    QVERIFY2(lookup.hasValue(),
+             qPrintable(QStringLiteral("a sync failed, code %1").arg(int(lookup.error().code()))));
+    const std::optional<StoredMessage> &found = lookup.value();
+    QVERIFY2(found, qPrintable(notFoundWithin(QStringLiteral("the received message"))));
 
     const QFuture<Result<void>> read = service.setRead({found->luid}, true);
     QVERIFY(waitFor(read, readyTimeoutMs));
@@ -440,17 +483,15 @@ void TestDeviceMessages::oneRealMessageIsSentAndFoundAsSent()
     QVERIFY2(sent.result().value().sent == 1,
              qPrintable(QStringLiteral("the phone refused, code %1")
                             .arg(int(sent.result().value().firstError.code()))));
-    bool found = false;
-    for (int lookup = 0; lookup < sentLookups && !found; ++lookup) {
-        QVERIFY(syncInto(service).hasValue());
-        const QList<StoredMessage> stored = scratch.messages->allMessages().value();
-        for (const StoredMessage &message : stored) {
-            if (message.body == text && !message.incoming)
-                found = true;
-        }
-    }
+    const Result<std::optional<StoredMessage>> lookup =
+        lookUp(service, *scratch.messages, [&text](const StoredMessage &message) {
+            return message.body == text && !message.incoming;
+        });
+    QVERIFY2(lookup.hasValue(),
+             qPrintable(QStringLiteral("a sync failed, code %1").arg(int(lookup.error().code()))));
+    const bool found = lookup.value().has_value();
     qInfo() << "The test message is among the sent messages:" << (found ? "yes" : "no");
-    QVERIFY2(found, "the sent test message is not among the sent messages");
+    QVERIFY2(found, qPrintable(notFoundWithin(QStringLiteral("the sent test message"))));
 }
 
 QTEST_GUILESS_MAIN(TestDeviceMessages)

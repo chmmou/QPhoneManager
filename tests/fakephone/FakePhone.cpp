@@ -3,6 +3,7 @@
 #include "core/codec/AtText.h"
 #include "core/codec/CalMetadata.h"
 #include "core/codec/ContentLines.h"
+#include "core/codec/NotificationCodec.h"
 #include "core/codec/PhoneTime.h"
 #include "core/codec/PhoneVCal.h"
 #include "core/codec/PhoneVCard.h"
@@ -17,6 +18,7 @@
 
 #include <algorithm>
 #include <array>
+#include <utility>
 
 namespace qpm::test {
 
@@ -906,11 +908,20 @@ void FakePhone::handleAt(const QString &command)
         return;
     if (handleScreen(command, name))
         return;
+    if (handleNotifications(command, name))
+        return;
+    if (handleClipboard(command, name))
+        return;
+    if (handleCalls(command, name))
+        return;
 
     if (command == QLatin1StringView("AT+CPROT=0")) {
         writeAt("AT+CPROT=0\r\nCONNECT\r\n");
         m_obexMode = true;
         m_target.clear();
+        m_answersInSession = 0;
+        if (!m_config.lateLine.isEmpty() && m_config.lateLineBeforeAnswer < 0)
+            writeAt(std::exchange(m_config.lateLine, {}) + "\r\n");
         return;
     }
 
@@ -970,29 +981,240 @@ void FakePhone::handleAt(const QString &command)
         lines << QStringLiteral("*DISPLAY: 1080,2400,409.432,411.891,420");
     } else if (command == QLatin1StringView("AT+CGMR")) {
         lines << QStringLiteral("EX1A.260101.001");
-    } else if ((name.startsWith(QLatin1StringView("ATD")) && command.endsWith(u';')) ||
-               name == QLatin1StringView("ATH") || name == QLatin1StringView("AT+CHUP")) {
+    } else if (name.startsWith(QLatin1StringView("ATD")) && command.endsWith(u';')) {
         // Recorded above; there is no phone line behind the fake.
     } else if (command == QLatin1StringView("AT*SIM") ||
                command == QLatin1StringView("AT*ECAM=1") ||
-               command == QLatin1StringView("AT*NOTIFY=2") ||
-               command == QLatin1StringView("AT*CLIPWATCH=1") ||
-               command == QLatin1StringView("AT*NOTIR") ||
-               command.endsWith(QLatin1StringView("=?")) ||
-               name == QLatin1StringView("AT*CLIPBOARD")) {
+               command.endsWith(QLatin1StringView("=?"))) {
         // Accepted without a body.
     } else {
         ok = false;
     }
 
-    QString echo = command;
-    if (name == QLatin1StringView("AT*CLIPBOARD") && command.contains(u'='))
-        echo = QStringLiteral("AT*CLIPBOARD");
-    QByteArray reply = echo.toUtf8() + "\r\n";
+    QByteArray reply = command.toUtf8() + "\r\n";
     for (const QString &line : std::as_const(lines))
         reply += line.toUtf8() + "\r\n";
     reply += ok ? "OK\r\n" : "ERROR\r\n";
     writeAt(reply);
+}
+
+QString FakeNotification::key() const
+{
+    return package + u'|' + QString::number(id) + u'|' + tag;
+}
+
+QByteArray FakePhone::notificationRecord(const FakeNotification &notification) const
+{
+    using core::codec::encodeQp;
+    const QStringList fields = {
+        QString::number(notification.id),
+        encodeQp(notification.tag),
+        encodeQp(notification.package),
+        QStringLiteral("1"),
+        core::codec::formatLocalStamp(notification.posted.toLocalTime()),
+        core::codec::formatLocalStamp(notification.posted.toLocalTime()),
+        QString::number(notification.flags),
+        QStringLiteral("0"),
+        QStringLiteral("-1"),
+        encodeQp(notification.appLabel),
+        encodeQp(notification.ticker),
+        encodeQp(notification.title),
+        encodeQp(notification.text),
+        encodeQp(notification.actions.join(u'|')),
+        QString(),
+        QString(),
+        QString(),
+        notification.picture.isEmpty() ? QStringLiteral("0") : QStringLiteral("1"),
+    };
+    return fields.join(u',').toUtf8();
+}
+
+void FakePhone::setNotifications(const QList<FakeNotification> &notifications)
+{
+    m_notifications = notifications;
+}
+
+void FakePhone::postNotification(const FakeNotification &notification)
+{
+    const QString key = notification.key();
+    m_notifications.removeIf([&key](const FakeNotification &held) { return held.key() == key; });
+    m_notifications.append(notification);
+    const bool ongoing = (notification.flags & 0x02) != 0;
+    if (m_config.notificationAccess == FakePhoneConfig::NotificationAccess::Granted &&
+        ((!ongoing && !notification.ticker.isEmpty()) || m_notificationsDetailed)) {
+        sendUnsolicited("*NOTIFY: " + notificationRecord(notification));
+    }
+}
+
+void FakePhone::removeNotification(const QString &key)
+{
+    const auto found =
+        std::find_if(m_notifications.cbegin(), m_notifications.cend(),
+                     [&key](const FakeNotification &held) { return held.key() == key; });
+    if (found == m_notifications.cend())
+        return;
+    const FakeNotification removed = *found;
+    m_notifications.removeIf([&key](const FakeNotification &held) { return held.key() == key; });
+    if (m_notificationsDetailed &&
+        m_config.notificationAccess == FakePhoneConfig::NotificationAccess::Granted) {
+        sendUnsolicited("*NOTIFY: " + QByteArray::number(removed.id) + ',' +
+                        core::codec::encodeQp(removed.tag).toUtf8() + ',' +
+                        core::codec::encodeQp(removed.package).toUtf8());
+    }
+}
+
+void FakePhone::copyOnPhone(const QString &text)
+{
+    m_config.clipboard = text;
+    if (m_clipboardWatched)
+        sendUnsolicited("*CLIPWATCH:" + core::codec::encodeQp(text).toUtf8());
+}
+
+void FakePhone::setCallState(int state, const QString &number)
+{
+    m_callState = state;
+    m_callNumber = state == 0 ? QString() : number;
+    const QByteArray type = m_callNumber.isEmpty()          ? QByteArray()
+                            : m_callNumber.startsWith(u'+') ? QByteArray("145")
+                                                            : QByteArray("129");
+    sendUnsolicited("*ECAV: 1," + QByteArray::number(state) + ",1,0,0,\"" + m_callNumber.toUtf8() +
+                    "\"," + type);
+}
+
+bool FakePhone::handleNotifications(const QString &command, const QString &name)
+{
+    const bool known =
+        name == QLatin1StringView("AT*NOTIFY") || name == QLatin1StringView("AT*NOTIR") ||
+        name == QLatin1StringView("AT*NOTIC") || name == QLatin1StringView("AT*NOTIACTION") ||
+        name == QLatin1StringView("AT*NOTISHOWSETTING");
+    if (!known)
+        return false;
+    const QByteArray echo = command.toUtf8() + "\r\n";
+    if (name == QLatin1StringView("AT*NOTISHOWSETTING")) {
+        writeAt(echo + "OK\r\n");
+        return true;
+    }
+    const QByteArray reason = name.mid(2).toUtf8() + ": ";
+    switch (m_config.notificationAccess) {
+    case FakePhoneConfig::NotificationAccess::NotSupported:
+        writeAt(echo + reason + "NOT SUPPORTED\r\nERROR\r\n");
+        return true;
+    case FakePhoneConfig::NotificationAccess::Disabled:
+        // Like the client, dismissing is not refused for a missing access.
+        if (name != QLatin1StringView("AT*NOTIC")) {
+            writeAt(echo + reason + "DISABLED\r\nERROR\r\n");
+            return true;
+        }
+        break;
+    case FakePhoneConfig::NotificationAccess::NotBound:
+        if (name != QLatin1StringView("AT*NOTIC")) {
+            writeAt(echo + reason + "NOT BOUND\r\nERROR\r\n");
+            return true;
+        }
+        break;
+    case FakePhoneConfig::NotificationAccess::Granted:
+        break;
+    }
+    const QString argument = command.mid(command.indexOf(u'=') + 1);
+    if (name == QLatin1StringView("AT*NOTIFY")) {
+        if (argument == QLatin1StringView("2"))
+            m_notificationsDetailed = true;
+        else if (argument == QLatin1StringView("1"))
+            m_notificationsDetailed = false;
+        writeAt(echo + "OK\r\n");
+        return true;
+    }
+    if (name == QLatin1StringView("AT*NOTIR")) {
+        QByteArray reply = echo;
+        for (const FakeNotification &notification : std::as_const(m_notifications))
+            reply += "*NOTIR: " + notificationRecord(notification) + "\r\n";
+        writeAt(reply + "OK\r\n");
+        return true;
+    }
+    const QStringList fields = core::codec::splitFields(argument);
+    const QString key = core::codec::decodeQp(fields.value(2)) + u'|' + fields.value(0).trimmed() +
+                        u'|' + core::codec::decodeQp(fields.value(1));
+    if (name == QLatin1StringView("AT*NOTIC")) {
+        if (!command.contains(u'=')) {
+            m_notifications.clear();
+        } else {
+            const auto found =
+                std::find_if(m_notifications.cbegin(), m_notifications.cend(),
+                             [&key](const FakeNotification &held) { return held.key() == key; });
+            if (found != m_notifications.cend() && (found->flags & 0x02) == 0)
+                removeNotification(key);
+        }
+        writeAt(echo + "OK\r\n");
+        return true;
+    }
+    // The client answers OK even when nothing matches.
+    m_notificationActions.append({key, core::codec::decodeQp(fields.value(3))});
+    writeAt(echo + "OK\r\n");
+    return true;
+}
+
+bool FakePhone::handleClipboard(const QString &command, const QString &name)
+{
+    if (name == QLatin1StringView("AT*CLIPWATCH")) {
+        m_clipboardWatched = command.section(u'=', 1).trimmed() == QLatin1StringView("1");
+        writeAt(command.toUtf8() + "\r\nOK\r\n");
+        return true;
+    }
+    if (name != QLatin1StringView("AT*CLIPBOARD"))
+        return false;
+    if (command.contains(u'=')) {
+        QString text = core::codec::decodeQp(command.mid(command.indexOf(u'=') + 1));
+        if (text.endsWith(u','))
+            text.chop(1);
+        m_config.clipboard = text;
+        // The client echoes only the name of this command.
+        writeAt("AT*CLIPBOARD\r\nOK\r\n");
+        return true;
+    }
+    const QByteArray answer =
+        "AT*CLIPBOARD?\r\n*CLIPBOARD:" + core::codec::encodeQp(m_config.clipboard).toUtf8() +
+        "\r\nOK\r\n";
+    if (m_config.clipboardReadDelay.count() <= 0) {
+        writeAt(answer);
+        return true;
+    }
+    QPointer<QTcpSocket> socket = m_socket;
+    QTimer::singleShot(m_config.clipboardReadDelay, this, [socket, answer]() {
+        if (socket) {
+            socket->write(answer);
+            socket->flush();
+        }
+    });
+    return true;
+}
+
+bool FakePhone::handleCalls(const QString &command, const QString &name)
+{
+    const QByteArray echo = command.toUtf8() + "\r\n";
+    if (name == QLatin1StringView("ATA")) {
+        writeAt(echo + "OK\r\n");
+        if (m_callState == 6)
+            setCallState(3, m_callNumber);
+        return true;
+    }
+    if (name == QLatin1StringView("ATH") || name == QLatin1StringView("AT+CHUP")) {
+        writeAt(echo + "OK\r\n");
+        if (m_callState != 0)
+            setCallState(0, QString());
+        return true;
+    }
+    const bool mute = name == QLatin1StringView("AT+CMUT");
+    const bool speaker = name == QLatin1StringView("AT*SESP");
+    if (!mute && !speaker)
+        return false;
+    const QString argument = command.section(u'=', 1).trimmed();
+    if (argument == QLatin1StringView("0") || argument == QLatin1StringView("1")) {
+        (mute ? m_callMuted : m_speakerOn) = argument == QLatin1StringView("1");
+        writeAt(echo + "OK\r\n");
+        return true;
+    }
+    writeAt(echo + "ERROR\r\n");
+    return true;
 }
 
 bool FakePhone::handleCallLog(const QString &command, const QString &name)
@@ -1927,6 +2149,20 @@ void FakePhone::handleFileRequest(const ObexPacket &request)
     case obex::opGetFinal:
         if (request.type == "x-obex/folder-listing") {
             sendBody(folderListing(request.targetName == QStringLiteral("/*")));
+        } else if (name.startsWith(QLatin1StringView("\\notificationimage\\"))) {
+            const QStringList parts = name.split(u'\\', Qt::SkipEmptyParts);
+            const QString key = parts.value(1) + u'|' + parts.value(2) + u'|';
+            const auto found = std::find_if(
+                m_notifications.cbegin(), m_notifications.cend(),
+                [&key](const FakeNotification &held) { return held.key().startsWith(key); });
+            if (parts.size() < 5)
+                sendFirst(codeOnly(obex::rspBadRequest));
+            else if (m_config.notificationAccess != FakePhoneConfig::NotificationAccess::Granted)
+                sendFirst(codeOnly(obex::rspPreconditionFailed));
+            else if (found == m_notifications.cend() || found->picture.isEmpty())
+                sendFirst(codeOnly(obex::rspNotFound));
+            else
+                sendBody(found->picture);
         } else if (name.startsWith(QLatin1StringView("\\appicon\\"))) {
             const QString package = name.section(u'\\', 2, 2);
             const auto app =
@@ -2296,10 +2532,15 @@ QString FakePhone::uniqueName(const QString &path) const
 
 void FakePhone::sendPacket(const QByteArray &packet)
 {
-    if (m_socket) {
-        m_socket->write(packet);
+    if (!m_socket)
+        return;
+    if (!m_config.lateLine.isEmpty() && m_config.lateLineBeforeAnswer == m_answersInSession) {
+        m_socket->write(std::exchange(m_config.lateLine, {}) + "\r\n");
         m_socket->flush();
     }
+    ++m_answersInSession;
+    m_socket->write(packet);
+    m_socket->flush();
 }
 
 void FakePhone::sendFirst(const QByteArray &packet)

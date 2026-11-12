@@ -26,6 +26,8 @@ qt_add_library(qpm_core STATIC
     core/codec/Limits.cpp
     core/codec/MessageExport.h
     core/codec/MessageExport.cpp
+    core/codec/NotificationCodec.h
+    core/codec/NotificationCodec.cpp
     core/codec/PbMetadata.h
     core/codec/PbMetadata.cpp
     core/codec/PhoneTime.h
@@ -71,6 +73,10 @@ qt_add_library(qpm_core STATIC
     core/service/CalendarService.cpp
     core/service/CallLogService.h
     core/service/CallLogService.cpp
+    core/service/CallMonitor.h
+    core/service/CallMonitor.cpp
+    core/service/ClipboardService.h
+    core/service/ClipboardService.cpp
     core/service/ContactsService.h
     core/service/ContactsService.cpp
     core/service/DeviceStatusService.h
@@ -81,6 +87,8 @@ qt_add_library(qpm_core STATIC
     core/service/MessagesService.cpp
     core/service/NotesService.h
     core/service/NotesService.cpp
+    core/service/NotificationService.h
+    core/service/NotificationService.cpp
     core/service/OrganizerSession.h
     core/service/OrganizerSession.cpp
     core/service/SaveMode.h
@@ -131,12 +139,16 @@ target_link_libraries(qpm_bluetooth
 qpm_set_project_warnings(qpm_bluetooth)
 
 qt_add_library(qpm_platform STATIC
+    platform/DesktopNotifier.h
+    platform/DesktopNotifier.cpp
     platform/SecretServiceTypes.h
     platform/SecretServiceTypes.cpp
     platform/SecretStore.h
     platform/SecretStore.cpp
     platform/SessionBus.h
     platform/SessionBus.cpp
+    platform/TrayIcon.h
+    platform/TrayIcon.cpp
 )
 target_include_directories(qpm_platform PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(qpm_platform
@@ -175,6 +187,7 @@ set(qpm_ui_qml_files
     components/SidebarButton.qml
     components/StatusBar.qml
     dialogs/AlarmsDialog.qml
+    dialogs/CallWindow.qml
     dialogs/CalendarsDialog.qml
     dialogs/CategoriesDialog.qml
     dialogs/ConfirmDeleteDialog.qml
@@ -206,6 +219,7 @@ set(qpm_ui_qml_files
     pages/messages/ConversationView.qml
     pages/messages/MessagesPage.qml
     pages/messages/ScheduledList.qml
+    pages/notifications/NotificationsPage.qml
     pages/organizer/CalendarGrid.qml
     pages/organizer/CalendarPage.qml
     pages/organizer/EventDetail.qml
@@ -279,6 +293,12 @@ qt_add_qml_module(qpm_ui
         ui/contacts/DuplicateListModel.cpp
         ui/contacts/PhoneImageProvider.h
         ui/contacts/PhoneImageProvider.cpp
+        ui/desktop/CallControl.h
+        ui/desktop/CallControl.cpp
+        ui/desktop/DesktopIntegration.h
+        ui/desktop/DesktopIntegration.cpp
+        ui/desktop/NotificationListModel.h
+        ui/desktop/NotificationListModel.cpp
         ui/files/FileBrowserModel.h
         ui/files/FileBrowserModel.cpp
         ui/files/TransferQueue.h
@@ -337,6 +357,7 @@ set(qpm_ui_icons
     tabler/arrow-back-up.svg
     tabler/arrows-maximize.svg
     tabler/battery.svg
+    tabler/bell-off.svg
     tabler/bell.svg
     tabler/bluetooth.svg
     tabler/calendar.svg
@@ -354,6 +375,7 @@ set(qpm_ui_icons
     tabler/device-sd-card.svg
     tabler/download.svg
     tabler/edit.svg
+    tabler/external-link.svg
     tabler/filter.svg
     tabler/file.svg
     tabler/folder-plus.svg
@@ -365,9 +387,12 @@ set(qpm_ui_icons
     tabler/layout-grid.svg
     tabler/list.svg
     tabler/message.svg
+    tabler/microphone-off.svg
     tabler/messages.svg
     tabler/notes.svg
+    tabler/phone-call.svg
     tabler/phone-incoming.svg
+    tabler/phone-off.svg
     tabler/phone-outgoing.svg
     tabler/phone-x.svg
     tabler/phone.svg
@@ -389,6 +414,7 @@ set(qpm_ui_icons
     tabler/usb.svg
     tabler/user.svg
     tabler/users.svg
+    tabler/volume.svg
     tabler/wifi.svg
     tabler/x.svg
 )
@@ -406,6 +432,7 @@ target_include_directories(qpm_ui
         ${CMAKE_CURRENT_SOURCE_DIR}/ui/apps
         ${CMAKE_CURRENT_SOURCE_DIR}/ui/calls
         ${CMAKE_CURRENT_SOURCE_DIR}/ui/contacts
+        ${CMAKE_CURRENT_SOURCE_DIR}/ui/desktop
         ${CMAKE_CURRENT_SOURCE_DIR}/ui/files
         ${CMAKE_CURRENT_SOURCE_DIR}/ui/messages
         ${CMAKE_CURRENT_SOURCE_DIR}/ui/organizer

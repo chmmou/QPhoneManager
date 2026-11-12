@@ -125,6 +125,15 @@ Item {
         }
     }
 
+    Component {
+        id: notifications
+
+        NotificationsPage {
+            emptyText: root.entry.emptyText
+            onConnectRequested: root.connectRequested()
+        }
+    }
+
     Loader {
         anchors.fill: parent
         sourceComponent: {
@@ -148,6 +157,8 @@ Item {
                 return apps;
             if (root.entry.key === "screen")
                 return screen;
+            if (root.entry.key === "notifications")
+                return notifications;
             return root.entry.hasList ? listAndDetail : placeholder;
         }
     }

@@ -9,6 +9,8 @@
 #include "ui/apps/AppListModel.h"
 #include "ui/calls/CallsArea.h"
 #include "ui/contacts/ContactsArea.h"
+#include "ui/desktop/CallControl.h"
+#include "ui/desktop/NotificationListModel.h"
 #include "ui/files/FileBrowserModel.h"
 #include "ui/files/TransferQueue.h"
 #include "ui/messages/MessagesArea.h"
@@ -26,6 +28,7 @@
 #include <QStringList>
 #include <QtQmlIntegration/qqmlintegration.h>
 
+#include <chrono>
 #include <functional>
 #include <memory>
 
@@ -34,6 +37,7 @@ class QQmlEngine;
 
 namespace qpm {
 class BluetoothDeviceFinder;
+class DesktopNotifier;
 class SecretStore;
 } // namespace qpm
 
@@ -45,14 +49,22 @@ class PhoneConnection;
 
 namespace qpm::core::service {
 class AppsService;
+class CallMonitor;
+class ClipboardService;
 class DeviceStatusService;
 class FileService;
+class NotificationService;
 class ScreenMirrorClient;
 class ThumbnailChannel;
 } // namespace qpm::core::service
 
+namespace qpm::core::store {
+class ContactStore;
+}
+
 namespace qpm::ui {
 
+class DesktopIntegration;
 class Settings;
 
 /**
@@ -67,7 +79,8 @@ class Settings;
  * connection, failed attempts stay quiet.
  *
  * The object owns the connection, the models, the areas, the file browser
- * with its transfers, the apps, the screen and the profile store of the current phone. The
+ * with its transfers, the apps, the screen, the notifications, the call, the
+ * clipboard sync and the profile store of the current phone. The
  * contacts, the call log, the messages, the calendar with the tasks and the notes are part of
  * syncAll(), in that order. `settings` must outlive it or be destroyed with the engine first; the
  * object never uses it after that.
@@ -119,6 +132,8 @@ class AppController : public QObject
     Q_PROPERTY(qpm::ui::TransferQueue *transfers READ transfers CONSTANT FINAL)
     Q_PROPERTY(qpm::ui::AppListModel *apps READ apps CONSTANT FINAL)
     Q_PROPERTY(qpm::ui::ScreenMirror *screen READ screen CONSTANT FINAL)
+    Q_PROPERTY(qpm::ui::NotificationListModel *notifications READ notifications CONSTANT FINAL)
+    Q_PROPERTY(qpm::ui::CallControl *call READ call CONSTANT FINAL)
 
 public:
     enum class ConnectionState {
@@ -198,7 +213,18 @@ public:
     [[nodiscard]] TransferQueue *transfers() const { return m_transfers; }
     [[nodiscard]] AppListModel *apps() const { return m_apps; }
     [[nodiscard]] ScreenMirror *screen() const { return m_screen; }
+    [[nodiscard]] NotificationListModel *notifications() const { return m_notifications; }
+    [[nodiscard]] CallControl *call() const { return m_call; }
     [[nodiscard]] core::service::ScreenMirrorClient *screenClient() const { return m_screenClient; }
+    [[nodiscard]] core::service::NotificationService *notificationService() const
+    {
+        return m_notificationService;
+    }
+    [[nodiscard]] core::service::ClipboardService *clipboardService() const
+    {
+        return m_clipboardService;
+    }
+    [[nodiscard]] core::service::CallMonitor *callMonitor() const { return m_callMonitor; }
     [[nodiscard]] core::service::AppsService *appsService() const { return m_appsService; }
     [[nodiscard]] core::service::FileService *fileService() const { return m_fileService; }
     [[nodiscard]] core::service::ThumbnailChannel *thumbnailChannel() const
@@ -262,6 +288,15 @@ public:
     /// Adds an area to syncAll(); `title` is the translated name shown in the summary.
     void registerSyncArea(const QString &title, SyncRunner runner);
 
+    /**
+     * Shows new notifications of the phone on the desktop through `notifier`
+     * while the settings ask for that; null shows none. Takes ownership.
+     */
+    void setDesktopNotifier(std::unique_ptr<DesktopNotifier> notifier);
+
+    /// Asks the window to start a new message, as the icon in the notification area does.
+    void requestNewMessage();
+
     /// Absolute paths of adb found in the usual places, best first.
     [[nodiscard]] Q_INVOKABLE QStringList adbSuggestions() const;
 
@@ -287,6 +322,10 @@ Q_SIGNALS:
     void errorOccurred(const QString &message);
     /// One line per area with what changed; one line saying so when nothing can be synced.
     void syncFinished(const QString &summary);
+    /// The window should come to the front and start a new message.
+    void newMessageRequested();
+    /// The window should come to the front and show the notifications of the phone.
+    void notificationsRequested();
 
 private:
     struct Attempt
@@ -310,6 +349,7 @@ private:
     void runNextSyncArea(int index, QStringList lines);
     void finishSearch();
     [[nodiscard]] QString resolveAdbPath() const;
+    void applyConnectionOptions(std::chrono::milliseconds reconnectDelay);
     [[nodiscard]] QString defaultDisplayName() const;
 
     QPointer<Settings> m_settings;
@@ -338,6 +378,15 @@ private:
     AppListModel *m_apps = nullptr;
     core::service::ScreenMirrorClient *m_screenClient = nullptr;
     ScreenMirror *m_screen = nullptr;
+    core::service::NotificationService *m_notificationService = nullptr;
+    core::service::ClipboardService *m_clipboardService = nullptr;
+    core::service::CallMonitor *m_callMonitor = nullptr;
+    NotificationListModel *m_notifications = nullptr;
+    CallControl *m_call = nullptr;
+    DesktopIntegration *m_desktop = nullptr;
+    std::unique_ptr<DesktopNotifier> m_notifier;
+    /// The contacts the call monitor looks names up in; it keeps only a weak reference.
+    std::shared_ptr<core::store::ContactStore> m_callerNames;
     core::protocol::Discovery *m_discovery = nullptr;
     BluetoothDeviceFinder *m_bluetoothFinder = nullptr;
     std::unique_ptr<core::protocol::AdbBridge> m_listAdb;
@@ -351,6 +400,7 @@ private:
     QString m_bluetoothHint;
     QString m_pinToRemember;
     QList<std::pair<QString, SyncRunner>> m_syncAreas;
+    std::chrono::milliseconds m_reconnectDelay{0};
     quint64 m_pinLookup = 0;
     int m_pendingSearches = 0;
     bool m_reachedReady = false;
