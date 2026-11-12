@@ -24,7 +24,7 @@ qpm_add_core_test(tst_obexclient)
 qpm_add_core_test(tst_phoneconnection)
 qpm_add_core_test(tst_irmcsync)
 qpm_add_core_test(tst_profilestore)
-target_link_libraries(tst_profilestore PRIVATE Qt6::Sql)
+target_link_libraries(tst_profilestore PRIVATE Qt6::Sql Qt6::Concurrent)
 qpm_add_core_test(tst_devicestatus)
 qpm_add_core_test(tst_phonevcard)
 qpm_add_core_test(tst_vcardinterchange)
@@ -54,6 +54,10 @@ qpm_add_core_test(tst_screenmirror)
 qpm_add_core_test(tst_notifications)
 qpm_add_core_test(tst_clipboard)
 qpm_add_core_test(tst_callmonitor)
+qpm_add_core_test(tst_zipstore)
+qpm_add_core_test(tst_backup)
+# Every function syncs all areas with the fake phone first.
+set_tests_properties(tst_backup PROPERTIES TIMEOUT 120)
 qpm_add_core_test(tst_nothirdpartyservices)
 target_compile_definitions(tst_nothirdpartyservices PRIVATE
     "QPM_SOURCE_DIR=\"${PROJECT_SOURCE_DIR}\""
@@ -160,6 +164,17 @@ target_link_libraries(tst_desktop PRIVATE qpm_ui qpm_fakephone Qt6::DBus Qt6::Gu
 qpm_set_project_warnings(tst_desktop)
 add_test(NAME tst_desktop COMMAND tst_desktop)
 set_tests_properties(tst_desktop PROPERTIES TIMEOUT 120)
+
+qt_add_executable(tst_backupcontroller ui/tst_backupcontroller.cpp)
+target_link_libraries(tst_backupcontroller PRIVATE qpm_ui qpm_fakephone Qt6::Test)
+# The English catalogue is built along with the program.
+add_dependencies(tst_backupcontroller qphonemanager)
+target_compile_definitions(tst_backupcontroller PRIVATE
+    "QPM_TRANSLATIONS_DIR=\"${PROJECT_BINARY_DIR}/src\""
+)
+qpm_set_project_warnings(tst_backupcontroller)
+add_test(NAME tst_backupcontroller COMMAND tst_backupcontroller)
+set_tests_properties(tst_backupcontroller PROPERTIES TIMEOUT 120)
 
 qt_add_executable(tst_accessibility ui/tst_accessibility.cpp)
 target_link_libraries(tst_accessibility PRIVATE qpm_ui qpm_uiplugin qpm_fakephone Qt6::Quick Qt6::Test)

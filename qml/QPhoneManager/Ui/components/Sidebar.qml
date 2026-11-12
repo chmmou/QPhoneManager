@@ -15,6 +15,7 @@ Pane {
 
     signal sectionSelected(int index)
     signal settingsRequested
+    signal backupRequested
 
     padding: 0
 
@@ -54,6 +55,15 @@ Pane {
         }
 
         SidebarButton {
+            Layout.fillWidth: true
+            objectName: "section-backup"
+            text: qsTr("Backup")
+            iconName: "device-floppy"
+            compact: root.compact
+            onClicked: root.backupRequested()
+        }
+
+        SidebarButton {
             id: settingsButton
 
             Layout.fillWidth: true
@@ -85,7 +95,7 @@ Pane {
     function widestLabel(pixelSize: int): real {
         if (pixelSize <= 0)
             return 0;
-        let widest = Math.max(labelMetrics.advanceWidth(qsTr("Settings")), labelMetrics.advanceWidth(qsTr("Help")));
+        let widest = Math.max(labelMetrics.advanceWidth(qsTr("Backup")), labelMetrics.advanceWidth(qsTr("Settings")), labelMetrics.advanceWidth(qsTr("Help")));
         for (let i = 0; i < root.sections.length; ++i)
             widest = Math.max(widest, labelMetrics.advanceWidth(root.sections[i].title));
         return widest;

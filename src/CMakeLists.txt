@@ -6,6 +6,12 @@ qt_add_library(qpm_core STATIC
     core/Logging.cpp
     core/Version.h
     core/Version.cpp
+    core/backup/BackupArchive.h
+    core/backup/BackupArchive.cpp
+    core/backup/BackupService.h
+    core/backup/BackupService.cpp
+    core/backup/ZipStore.h
+    core/backup/ZipStore.cpp
     core/codec/AppListCodec.h
     core/codec/AppListCodec.cpp
     core/codec/AtText.h
@@ -187,6 +193,7 @@ set(qpm_ui_qml_files
     components/SidebarButton.qml
     components/StatusBar.qml
     dialogs/AlarmsDialog.qml
+    dialogs/BackupDialog.qml
     dialogs/CallWindow.qml
     dialogs/CalendarsDialog.qml
     dialogs/CategoriesDialog.qml
@@ -273,6 +280,10 @@ qt_add_qml_module(qpm_ui
         ui/TintedIcon.cpp
         ui/apps/AppListModel.h
         ui/apps/AppListModel.cpp
+        ui/backup/BackupController.h
+        ui/backup/BackupController.cpp
+        ui/backup/BackupSectionModel.h
+        ui/backup/BackupSectionModel.cpp
         ui/calls/CallListModel.h
         ui/calls/CallListModel.cpp
         ui/calls/CallsArea.h
@@ -371,6 +382,7 @@ set(qpm_ui_icons
     tabler/copy.svg
     tabler/cpu.svg
     tabler/database.svg
+    tabler/device-floppy.svg
     tabler/device-mobile.svg
     tabler/device-sd-card.svg
     tabler/download.svg
@@ -430,6 +442,7 @@ target_include_directories(qpm_ui
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/ui
         ${CMAKE_CURRENT_SOURCE_DIR}/ui/apps
+        ${CMAKE_CURRENT_SOURCE_DIR}/ui/backup
         ${CMAKE_CURRENT_SOURCE_DIR}/ui/calls
         ${CMAKE_CURRENT_SOURCE_DIR}/ui/contacts
         ${CMAKE_CURRENT_SOURCE_DIR}/ui/desktop

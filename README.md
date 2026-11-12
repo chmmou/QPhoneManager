@@ -1,8 +1,9 @@
 # QPhoneManager
 
 QPhoneManager manages an Android phone from the Linux desktop. It reads and
-edits contacts, the call log, messages, calendar, tasks and notes, and it
-handles files, apps, the phone screen and notifications.
+edits contacts, the call log, messages, calendar, tasks and notes, backs them
+up into a file and restores them, and it handles files, apps, the phone screen
+and notifications.
 
 It talks to the Android app "MyPhoneExplorer Client" over Wi-Fi, USB or
 Bluetooth. QPhoneManager is an independent project and is not affiliated with
@@ -90,7 +91,9 @@ cmake --build build/debug-6.9 --target clazy
 The test presets run without a display (`QT_QPA_PLATFORM=offscreen`). The
 `clazy` target needs `clazy-standalone`; the checks it runs are listed in
 `.clazy`. The test of the PIN storage starts its own `dbus-daemon` and is
-skipped when that program is missing.
+skipped when that program is missing. The test of the backup archive also
+checks its archives with `unzip` and with the `zipfile` module of `python3`;
+each of these two checks is skipped when its program is missing.
 
 Tests that need a phone carry the CTest label `device`. Without a phone they
 report themselves as skipped. They read these environment variables:
@@ -175,6 +178,15 @@ phone it reads only: no clipboard, no dismissing, no action of a notification
 and no setting. Only with `QPM_TEST_CALL=1` and on a phone that is not an
 emulator does it call the number in `QPM_TEST_CALL_TO`, check that the call
 shows, and hang up after at most ten seconds. It never prints that number.
+
+The backup test reads every area of the phone into a temporary store, backs
+it up into a temporary folder, reads the file back and compares it with what
+it read. It prints only the number of entries per area and deletes the file.
+On an emulator it also writes a contact `QPM Testkontakt` with six digits and,
+where a calendar takes new appointments, an appointment `QPM Testtermin` with
+six digits. It backs them up, deletes them, checks that the backup offers them
+as new, restores them, compares their fields and deletes them again. On any
+other phone it restores and writes nothing.
 
 All traffic of these tests goes through a guard. It lets a text message
 through only to the number in `QPM_TEST_SMS_TO` and a call only to the number
