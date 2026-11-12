@@ -69,7 +69,10 @@ public:
 
     /// Takes the ringing call.
     QFuture<Result<void>> answer();
-    /// Ends the call or turns a ringing one down.
+    /**
+     * Ends the call or turns a ringing one down. The command goes out in
+     * every state, Idle included, for a call the phone did not report.
+     */
     QFuture<Result<void>> hangUp();
     QFuture<Result<void>> setMuted(bool muted);
     QFuture<Result<void>> setSpeaker(bool on);

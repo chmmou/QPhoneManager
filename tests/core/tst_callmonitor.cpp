@@ -64,6 +64,8 @@ private Q_SLOTS:
     void answeredCallGoesOnAndEndsWithHangingUp();
     void outgoingCallWithoutNumberKeepsItsStates();
     void hangUpFallsBackToTheStandardCommand();
+    void hangUpIsSentWhileNoCallIsReported_data();
+    void hangUpIsSentWhileNoCallIsReported();
     void muteAndSpeakerFollowThePhoneAndEndWithTheCall();
     void refusedSwitchKeepsTheState();
     void answerWithoutARingingCallSendsNothing();
@@ -194,6 +196,35 @@ void TestCallMonitor::hangUpFallsBackToTheStandardCommand()
     QCOMPARE(m_phone->receivedCommands(),
              (QStringList{QStringLiteral("ATH"), QStringLiteral("AT+CHUP")}));
     QTRY_COMPARE_WITH_TIMEOUT(m_monitor->state(), State::Idle, timeoutMs);
+}
+
+void TestCallMonitor::hangUpIsSentWhileNoCallIsReported_data()
+{
+    QTest::addColumn<bool>("athRefused");
+    QTest::addColumn<QStringList>("expected");
+
+    QTest::newRow("ATH taken") << false << QStringList{QStringLiteral("ATH")};
+    QTest::newRow("ATH refused") << true
+                                 << QStringList{QStringLiteral("ATH"), QStringLiteral("AT+CHUP")};
+}
+
+// A call the phone never reported can still be ended.
+void TestCallMonitor::hangUpIsSentWhileNoCallIsReported()
+{
+    QFETCH(bool, athRefused);
+    QFETCH(QStringList, expected);
+    if (athRefused) {
+        m_phone->config().scriptedReplies.insert(QStringLiteral("ATH"),
+                                                 {QByteArrayLiteral("ATH\r\nERROR\r\n")});
+    }
+    QCOMPARE(m_monitor->state(), State::Idle);
+
+    const QFuture<Result<void>> ended = m_monitor->hangUp();
+    QVERIFY(waitFor(ended, timeoutMs));
+
+    QVERIFY(ended.result().hasValue());
+    QCOMPARE(m_phone->receivedCommands(), expected);
+    QCOMPARE(m_monitor->state(), State::Idle);
 }
 
 void TestCallMonitor::muteAndSpeakerFollowThePhoneAndEndWithTheCall()

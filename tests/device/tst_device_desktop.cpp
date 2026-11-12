@@ -139,6 +139,12 @@ private:
     [[nodiscard]] bool allowListener();
     void restoreListener();
     [[nodiscard]] std::optional<PhoneNotification> findNotification(const QString &tag) const;
+    /**
+     * Sends the hang-up whatever the call monitor shows, since the phone may
+     * not have reported the call, and connects once more first when the
+     * connection is gone. Returns true when the phone took the hang-up.
+     */
+    [[nodiscard]] bool endCall();
 
     QString m_adbPath;
     QString m_serial;
@@ -207,11 +213,8 @@ void TestDeviceDesktop::init()
 void TestDeviceDesktop::cleanup()
 {
     // Whatever failed above, a call of this test does not go on.
-    if (std::exchange(m_callPlaced, false) && m_calls &&
-        m_calls->state() != CallMonitor::State::Idle) {
-        const QFuture<Result<void>> ended = m_calls->hangUp();
-        QVERIFY(waitFor(ended, stepTimeoutMs));
-    }
+    if (std::exchange(m_callPlaced, false) && m_calls)
+        QVERIFY2(endCall(), "The call of this test could not be ended");
     if (!std::exchange(m_ringingNumber, QString()).isEmpty() && m_emulator) {
         static_cast<void>(adb({QStringLiteral("emu"), QStringLiteral("gsm"),
                                QStringLiteral("cancel"), m_ringingNumber}));
@@ -308,6 +311,18 @@ std::optional<PhoneNotification> TestDeviceDesktop::findNotification(const QStri
             return notification;
     }
     return std::nullopt;
+}
+
+bool TestDeviceDesktop::endCall()
+{
+    if (!m_connection->session() && !connectToClient())
+        return false;
+    const QFuture<Result<void>> ended = m_calls->hangUp();
+    if (!waitFor(ended, stepTimeoutMs))
+        return false;
+    if (!ended.result().hasValue())
+        qInfo() << "Hanging up refused, code" << int(ended.result().error().code());
+    return ended.result().hasValue();
 }
 
 void TestDeviceDesktop::notificationAccessAndListAreRead()
@@ -508,25 +523,25 @@ void TestDeviceDesktop::oneRealCallIsPlacedAndEnded()
     connect(m_calls.get(), &CallMonitor::callChanged, &recording,
             [this, &seen]() { seen.append(m_calls->state()); });
 
+    // The call goes on for at most callLimitMs from dialling, whatever the
+    // other side does and whether or not the phone reports it.
+    const QDeadlineTimer callLimit(callLimitMs);
+    const auto remainingMs = [&callLimit]() {
+        return int(qMax<qint64>(0, callLimit.remainingTime()));
+    };
     m_callPlaced = true;
     const QFuture<Result<void>> dialled = contacts.dial(number);
-    QVERIFY(waitFor(dialled, stepTimeoutMs));
+    QVERIFY(waitFor(dialled, remainingMs()));
     QVERIFY2(dialled.result().hasValue(),
              qPrintable(
                  QStringLiteral("not dialled, code %1").arg(int(dialled.result().error().code()))));
-    QTRY_VERIFY_WITH_TIMEOUT(m_calls->state() != CallMonitor::State::Idle, stepTimeoutMs);
-    // The call goes on for at most callLimitMs, whatever the other side does.
-    static_cast<void>(QTest::qWaitFor(
-        [this]() { return m_calls->state() == CallMonitor::State::Idle; }, callLimitMs));
-    if (m_calls->state() != CallMonitor::State::Idle) {
-        const QFuture<Result<void>> ended = m_calls->hangUp();
-        QVERIFY(waitFor(ended, stepTimeoutMs));
-        QVERIFY2(ended.result().hasValue(),
-                 qPrintable(
-                     QStringLiteral("not ended, code %1").arg(int(ended.result().error().code()))));
-    }
-    QTRY_COMPARE_WITH_TIMEOUT(m_calls->state(), CallMonitor::State::Idle, stepTimeoutMs);
+    const bool endedByThePhone = QTest::qWaitFor(
+        [this, &seen]() { return !seen.isEmpty() && m_calls->state() == CallMonitor::State::Idle; },
+        remainingMs());
+    if (!endedByThePhone)
+        QVERIFY2(endCall(), "The call could not be ended");
     m_callPlaced = false;
+    QTRY_COMPARE_WITH_TIMEOUT(m_calls->state(), CallMonitor::State::Idle, stepTimeoutMs);
     QStringList states;
     for (const CallMonitor::State state : std::as_const(seen))
         states.append(
