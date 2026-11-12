@@ -1,11 +1,16 @@
 #include "core/codec/PhoneTime.h"
+#include "core/codec/PhoneVCal.h"
 #include "core/codec/PhoneVCard.h"
+#include "core/codec/VNote.h"
 #include "platform/SecretStore.h"
 #include "ui/AppController.h"
 #include "ui/Settings.h"
 #include "ui/calls/CallsArea.h"
 #include "ui/contacts/ContactsArea.h"
 #include "ui/messages/MessagesArea.h"
+#include "ui/organizer/CalendarArea.h"
+#include "ui/organizer/NotesArea.h"
+#include "ui/organizer/TasksArea.h"
 
 #include "FakePhone.h"
 
@@ -22,6 +27,7 @@
 #include <QUrl>
 #include <QTemporaryDir>
 #include <QTest>
+#include <QTimeZone>
 
 #include <cmath>
 #include <memory>
@@ -75,6 +81,49 @@ qpm::test::FakeCall fakeCall(quint32 id, const QString &storage, const QString &
     call.time = qpm::core::codec::formatCallLogTime(
         QDateTime(QDate::currentDate(), QTime(10, 0)).addSecs(-3600 * qint64(id)));
     return call;
+}
+
+QByteArray organizerMetadata()
+{
+    return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<metadata version=\"1.0\">\r\n"
+           "<calendars filter_disabled=\"0\">\r\n"
+           "<calendar selected=\"1\" default=\"1\" url=\"anna@example.org@com.google/NULL\" "
+           "title=\"Familie\" color=\"FF33B679\" hidden=\"0\" timezone=\"Europe/Berlin\" "
+           "access_level=\"700\"/>\r\n"
+           "<calendar selected=\"1\" url=\"anna@example.org@com.google/NULL\" title=\"Feiertage\" "
+           "color=\"FF0B8043\" hidden=\"0\" timezone=\"Europe/Berlin\" access_level=\"200\"/>\r\n"
+           "</calendars>\r\n<tasksupport>1</tasksupport>\r\n<task_categories>\r\n"
+           "<category name=\"Haushalt\" color=\"FF8800\" id=\"1\"/>\r\n"
+           "</task_categories>\r\n</metadata>";
+}
+
+QList<qpm::test::FakeSyncObject> organizerObjects()
+{
+    qpm::core::codec::CalendarEvent meeting;
+    meeting.luid = 0x10000001;
+    meeting.summary = QStringLiteral("Elternabend");
+    meeting.location = QStringLiteral("Schule");
+    meeting.start = QDateTime(QDate(2026, 11, 12), QTime(11, 0), QTimeZone::UTC);
+    meeting.end = meeting.start.addSecs(5400);
+    meeting.calendarUrl = QStringLiteral("anna@example.org@com.google/NULL");
+    meeting.calendarTitle = QStringLiteral("Familie");
+    meeting.rrule = QStringLiteral("FREQ=WEEKLY");
+    qpm::core::codec::CalendarTask task;
+    task.luid = 2;
+    task.summary = QStringLiteral("Fenster putzen");
+    task.due = QDate(2026, 11, 20);
+    task.categories = {QStringLiteral("Haushalt")};
+    return {{meeting.luid, qpm::core::codec::encodeEventAsPhoneSendsIt(meeting)},
+            {task.luid, qpm::core::codec::encodeTaskAsPhoneSendsIt(task)}};
+}
+
+QByteArray exampleNote()
+{
+    qpm::core::codec::Note note;
+    note.luid = 1;
+    note.body = QStringLiteral("Einkaufsliste:\nMilch, Brot");
+    note.lastModified = QDateTime(QDate(2026, 11, 10), QTime(8, 0), QTimeZone::UTC);
+    return qpm::core::codec::encodeNoteAsPhoneSendsIt(note);
 }
 
 bool isControl(const QQuickItem *item)
@@ -146,6 +195,9 @@ bool focusIsShown(const QQuickItem *item)
         return false;
     if (item->metaObject()->indexOfProperty("visualFocus") >= 0)
         return item->property("visualFocus").toBool();
+    // An outlined text field draws its border in the accent colour while it has the focus.
+    if (item->inherits("QQuickTextField") || item->inherits("QQuickTextArea"))
+        return item->hasActiveFocus();
     const QList<QQuickItem *> children = item->childItems();
     for (const QQuickItem *child : children) {
         const QString type = QString::fromLatin1(child->metaObject()->className());
@@ -213,6 +265,14 @@ private Q_SLOTS:
     void messageDialogShowsItsFocusAndNamesItsControls();
     void messagesFocusChainReachesEveryControlOnce();
     void callsFocusChainReachesEveryControlOnce();
+    void textFieldsShowTheirFocusWithoutARingOnTop();
+    void organizerViewControlsHaveANameAndARole_data();
+    void organizerViewControlsHaveANameAndARole();
+    void organizerDialogsShowTheFocusAndNameTheirControls_data();
+    void organizerDialogsShowTheFocusAndNameTheirControls();
+    void calendarDaysAreChosenByKeyboard();
+    void organizerFocusChainReachesEveryControlOnce_data();
+    void organizerFocusChainReachesEveryControlOnce();
 
 private:
     [[nodiscard]] QList<QQuickItem *> controls() const;
@@ -223,6 +283,8 @@ private:
     [[nodiscard]] bool showContacts();
     [[nodiscard]] bool showCalls();
     [[nodiscard]] bool showMessages();
+    /// Connects a phone with a calendar, a task and a note and shows the section `section`.
+    [[nodiscard]] bool showOrganizer(int section);
     /// Brings the contacts area into the state in which `dialog` has something to show.
     [[nodiscard]] bool prepareContactDialog(const QString &dialog);
     static void announceAccessibility();
@@ -324,8 +386,9 @@ QObject *TestAccessibility::openDialog(const QString &name)
 {
     QObject *dialog = m_window->findChild<QObject *>(name);
     // Dialogs of a page live with the page, which a Loader created.
-    for (const QString &pageName : {QStringLiteral("contactsPage"), QStringLiteral("callsPage"),
-                                    QStringLiteral("messagesPage")}) {
+    for (const QString &pageName :
+         {QStringLiteral("contactsPage"), QStringLiteral("callsPage"), QStringLiteral("messagesPage"),
+          QStringLiteral("calendarPage"), QStringLiteral("tasksPage"), QStringLiteral("notesPage")}) {
         QQuickItem *page = findItem(m_window->contentItem(), pageName);
         if (!dialog && page)
             dialog = page->findChild<QObject *>(name);
@@ -1044,6 +1107,292 @@ void TestAccessibility::messagesFocusChainReachesEveryControlOnce()
                                 QStringLiteral("replyButton"), QStringLiteral("scheduledTab")}) {
         QVERIFY2(chain.contains(findItem(m_window->contentItem(), name)), qPrintable(name));
     }
+}
+
+// The outlined fields of the message form show their focus in their own
+// border; a ring drawn on top crossed the floating label.
+void TestAccessibility::textFieldsShowTheirFocusWithoutARingOnTop()
+{
+    QVERIFY(showMessages());
+    auto *controller =
+        m_engine->singletonInstance<AppController *>("QPhoneManager.Ui", "AppController");
+    QVERIFY(controller->messages()->composeTo(QStringLiteral("0151 1234567")));
+    controller->messages()->composer()->setScheduled(true);
+    m_window->requestActivate();
+    QVERIFY(QTest::qWaitForWindowActive(m_window));
+
+    for (const QString &name : {QStringLiteral("messageTextArea"), QStringLiteral("recipientField"),
+                                QStringLiteral("scheduleDateField"),
+                                QStringLiteral("scheduleTimeField")}) {
+        QTRY_VERIFY2(findItem(m_window->contentItem(), name), qPrintable(name));
+        QQuickItem *field = findItem(m_window->contentItem(), name);
+        field->forceActiveFocus(Qt::TabFocusReason);
+        QTRY_VERIFY2(field->hasActiveFocus(), qPrintable(name));
+        const QList<QQuickItem *> children = field->childItems();
+        for (const QQuickItem *child : children) {
+            const QString type = QString::fromLatin1(child->metaObject()->className());
+            QVERIFY2(!(type.startsWith(QLatin1StringView("FocusRing")) && child->isVisible()),
+                     qPrintable(name));
+        }
+        QVERIFY2(focusIsShown(field), qPrintable(name));
+    }
+}
+
+bool TestAccessibility::showOrganizer(int section)
+{
+    m_phone = std::make_unique<qpm::test::FakePhone>();
+    if (!m_phone->listen())
+        return false;
+    m_phone->setObjects(QStringLiteral("cal"), organizerObjects());
+    m_phone->setMetadata(QStringLiteral("cal"), organizerMetadata());
+    m_phone->setObjects(QStringLiteral("notes"), {{1, exampleNote()}});
+    m_phone->config().alarms = QStringList{QStringLiteral("\"07:30\",1,0,\"Wecker\",\"1,2,3,4,5\",1")};
+    auto *controller =
+        m_engine->singletonInstance<AppController *>("QPhoneManager.Ui", "AppController");
+    if (!controller ||
+        !controller->connectAddress(QStringLiteral("127.0.0.1:%1").arg(m_phone->port()))) {
+        return false;
+    }
+    if (!QTest::qWaitFor([controller]() { return controller->isConnected(); }, phoneTimeoutMs))
+        return false;
+    const QFuture<qpm::core::Result<qpm::core::store::OrganizerChanges>> calendar =
+        controller->calendar()->sync();
+    if (!QTest::qWaitFor([&calendar]() { return calendar.isFinished(); }, phoneTimeoutMs) ||
+        !calendar.result().hasValue()) {
+        return false;
+    }
+    const QFuture<qpm::core::Result<qpm::core::store::OrganizerChanges>> notes =
+        controller->notes()->sync();
+    if (!QTest::qWaitFor([&notes]() { return notes.isFinished(); }, phoneTimeoutMs) ||
+        !notes.result().hasValue()) {
+        return false;
+    }
+    controller->calendar()->setViewMode(qpm::ui::CalendarArea::ViewMode::Month);
+    controller->calendar()->setCurrentDate(QDate(2026, 11, 12));
+    m_window->setProperty("currentSection", section);
+    const QString pageName = section == 4   ? QStringLiteral("calendarPage")
+                             : section == 5 ? QStringLiteral("tasksPage")
+                                            : QStringLiteral("notesPage");
+    const bool shown = QTest::qWaitFor(
+        [this, pageName]() {
+            const QQuickItem *page = findItem(m_window->contentItem(), pageName);
+            return page && page->isVisible();
+        },
+        phoneTimeoutMs);
+    announceAccessibility();
+    return shown;
+}
+
+void TestAccessibility::organizerViewControlsHaveANameAndARole_data()
+{
+    QTest::addColumn<QString>("view");
+    QTest::addColumn<QStringList>("required");
+
+    QTest::newRow("month") << QStringLiteral("month")
+                           << QStringList{QStringLiteral("monthTab"), QStringLiteral("weekTab"),
+                                          QStringLiteral("dayTab"), QStringLiteral("listTab"),
+                                          QStringLiteral("previousPeriodButton"),
+                                          QStringLiteral("todayButton"),
+                                          QStringLiteral("nextPeriodButton"),
+                                          QStringLiteral("newEventButton"),
+                                          QStringLiteral("importCalendarButton"),
+                                          QStringLiteral("exportCalendarButton"),
+                                          QStringLiteral("chooseCalendarsButton"),
+                                          QStringLiteral("alarmsButton"),
+                                          QStringLiteral("holidayBox"),
+                                          QStringLiteral("calendarGrid"),
+                                          QStringLiteral("newEventOnDayButton")};
+    QTest::newRow("day and detail")
+        << QStringLiteral("day")
+        << QStringList{QStringLiteral("eventList"), QStringLiteral("editEventButton"),
+                       QStringLiteral("skipOccurrenceButton"), QStringLiteral("deleteEventButton"),
+                       QStringLiteral("backToDayButton")};
+    QTest::newRow("event form")
+        << QStringLiteral("eventForm")
+        << QStringList{QStringLiteral("eventSummaryField"), QStringLiteral("eventLocationField"),
+                       QStringLiteral("allDayBox"), QStringLiteral("eventStartDateField"),
+                       QStringLiteral("eventStartTimeField"), QStringLiteral("eventEndDateField"),
+                       QStringLiteral("eventEndTimeField"), QStringLiteral("eventCalendarBox"),
+                       QStringLiteral("eventRepeatBox"), QStringLiteral("eventColorBox"),
+                       QStringLiteral("reminderChoiceBox"), QStringLiteral("addReminderButton"),
+                       QStringLiteral("eventDescriptionArea"), QStringLiteral("saveEventButton"),
+                       QStringLiteral("cancelEventButton")};
+    QTest::newRow("tasks") << QStringLiteral("tasks")
+                           << QStringList{QStringLiteral("openTasksTab"),
+                                          QStringLiteral("doneTasksTab"),
+                                          QStringLiteral("allTasksTab"),
+                                          QStringLiteral("newTaskButton"),
+                                          QStringLiteral("importTasksButton"),
+                                          QStringLiteral("exportTasksButton"),
+                                          QStringLiteral("taskCategoriesButton"),
+                                          QStringLiteral("taskList")};
+    QTest::newRow("task form")
+        << QStringLiteral("taskForm")
+        << QStringList{QStringLiteral("taskSummaryField"), QStringLiteral("taskCompletedBox"),
+                       QStringLiteral("taskDueField"), QStringLiteral("taskPriorityBox"),
+                       QStringLiteral("taskNewCategoryField"), QStringLiteral("saveTaskButton")};
+    QTest::newRow("notes") << QStringLiteral("notes")
+                           << QStringList{QStringLiteral("noteCategoryFilter"),
+                                          QStringLiteral("newNoteButton"),
+                                          QStringLiteral("noteCategoriesButton"),
+                                          QStringLiteral("noteList")};
+    QTest::newRow("note form") << QStringLiteral("noteForm")
+                               << QStringList{QStringLiteral("noteBodyArea"),
+                                              QStringLiteral("noteNewCategoryField"),
+                                              QStringLiteral("saveNoteButton"),
+                                              QStringLiteral("cancelNoteButton")};
+}
+
+void TestAccessibility::organizerViewControlsHaveANameAndARole()
+{
+    QFETCH(QString, view);
+    QFETCH(QStringList, required);
+    const int section = view.startsWith(QLatin1StringView("task"))   ? 5
+                        : view.startsWith(QLatin1StringView("note")) ? 6
+                                                                     : 4;
+    QVERIFY(showOrganizer(section));
+    auto *controller =
+        m_engine->singletonInstance<AppController *>("QPhoneManager.Ui", "AppController");
+    const QString pageName = section == 4   ? QStringLiteral("calendarPage")
+                             : section == 5 ? QStringLiteral("tasksPage")
+                                            : QStringLiteral("notesPage");
+    QQuickItem *page = findItem(m_window->contentItem(), pageName);
+    QVERIFY(page);
+    if (view == QLatin1StringView("day")) {
+        controller->calendar()->setViewMode(qpm::ui::CalendarArea::ViewMode::Day);
+        controller->calendar()->selectRow(0);
+        QTRY_VERIFY(findItem(m_window->contentItem(), QStringLiteral("eventDetail")));
+    } else if (view == QLatin1StringView("eventForm") || view == QLatin1StringView("taskForm") ||
+               view == QLatin1StringView("noteForm")) {
+        QVERIFY(QMetaObject::invokeMethod(page, "startNew"));
+        QTRY_VERIFY(findItem(m_window->contentItem(), view));
+    }
+    announceAccessibility();
+
+    const QList<QQuickItem *> found = controls();
+
+    verifyNamesAndRoles(found, {QAccessible::List, QAccessible::Table});
+    for (const QString &name : std::as_const(required)) {
+        QQuickItem *item = findItem(m_window->contentItem(), name);
+        QVERIFY2(item && found.contains(item), qPrintable(name));
+    }
+    for (QQuickItem *item : found) {
+        const bool iconOnly = item->metaObject()->indexOfProperty("display") >= 0 &&
+                              item->property("display").toInt() == 0;
+        if (!iconOnly || item->property("text").toString().isEmpty())
+            continue;
+        QCOMPARE(QAccessible::queryAccessibleInterface(item)->text(QAccessible::Name),
+                 item->property("text").toString());
+    }
+    page->setProperty("editing", false);
+}
+
+void TestAccessibility::organizerDialogsShowTheFocusAndNameTheirControls_data()
+{
+    QTest::addColumn<int>("section");
+    QTest::addColumn<QString>("dialog");
+
+    QTest::newRow("calendars") << 4 << QStringLiteral("calendarsDialog");
+    QTest::newRow("alarms") << 4 << QStringLiteral("alarmsDialog");
+    QTest::newRow("delete appointment") << 4 << QStringLiteral("deleteEventDialog");
+    QTest::newRow("task categories") << 5 << QStringLiteral("taskCategoriesDialog");
+    QTest::newRow("note categories") << 6 << QStringLiteral("noteCategoriesDialog");
+}
+
+void TestAccessibility::organizerDialogsShowTheFocusAndNameTheirControls()
+{
+    QFETCH(int, section);
+    QFETCH(QString, dialog);
+    QVERIFY(showOrganizer(section));
+    m_window->requestActivate();
+    QVERIFY(QTest::qWaitForWindowActive(m_window));
+    const QList<QQuickItem *> before = controls();
+
+    QObject *popup = openDialog(dialog);
+    QVERIFY(popup);
+    if (dialog == QLatin1StringView("alarmsDialog")) {
+        QTRY_VERIFY(findItem(m_window->contentItem(), QStringLiteral("alarmList")) &&
+                    findItem(m_window->contentItem(), QStringLiteral("alarmList"))->isVisible());
+    }
+    announceAccessibility();
+
+    QList<QQuickItem *> inDialog = controls();
+    inDialog.removeIf([&before](QQuickItem *control) { return before.contains(control); });
+    QVERIFY(!inDialog.isEmpty());
+    verifyNamesAndRoles(inDialog, {QAccessible::List, QAccessible::Table});
+    QQuickItem *focused = m_window->activeFocusItem();
+    QVERIFY(focused);
+    QVERIFY2(focusIsShown(focused), qPrintable(describe(focused)));
+    QMetaObject::invokeMethod(popup, "close");
+    QTRY_VERIFY(!popup->property("visible").toBool());
+}
+
+void TestAccessibility::calendarDaysAreChosenByKeyboard()
+{
+    QVERIFY(showOrganizer(4));
+    auto *controller =
+        m_engine->singletonInstance<AppController *>("QPhoneManager.Ui", "AppController");
+    qpm::ui::CalendarArea *area = controller->calendar();
+    m_window->requestActivate();
+    QVERIFY(QTest::qWaitForWindowActive(m_window));
+    QQuickItem *grid = findItem(m_window->contentItem(), QStringLiteral("calendarGrid"));
+    QVERIFY(grid);
+    QAccessibleInterface *accessible = QAccessible::queryAccessibleInterface(grid);
+    QVERIFY(accessible);
+    QCOMPARE(accessible->role(), QAccessible::Table);
+    grid->forceActiveFocus(Qt::TabFocusReason);
+    QTRY_VERIFY(grid->hasActiveFocus());
+
+    QTest::keyClick(m_window, Qt::Key_Right);
+    QCOMPARE(area->currentDate(), QDate(2026, 11, 13));
+    QTest::keyClick(m_window, Qt::Key_Down);
+    QCOMPARE(area->currentDate(), QDate(2026, 11, 20));
+    QTest::keyClick(m_window, Qt::Key_Left);
+    QTest::keyClick(m_window, Qt::Key_Up);
+    QCOMPARE(area->currentDate(), QDate(2026, 11, 12));
+    QTest::keyClick(m_window, Qt::Key_PageDown);
+    QCOMPARE(area->currentDate(), QDate(2026, 12, 12));
+    QTest::keyClick(m_window, Qt::Key_PageUp);
+    QCOMPARE(area->currentDate(), QDate(2026, 11, 12));
+    QVERIFY(grid->hasActiveFocus());
+}
+
+void TestAccessibility::organizerFocusChainReachesEveryControlOnce_data()
+{
+    QTest::addColumn<int>("section");
+    QTest::addColumn<QStringList>("required");
+
+    QTest::newRow("calendar") << 4
+                              << QStringList{QStringLiteral("calendarGrid"),
+                                             QStringLiteral("newEventButton"),
+                                             QStringLiteral("holidayBox")};
+    QTest::newRow("tasks") << 5 << QStringList{QStringLiteral("taskList"),
+                                               QStringLiteral("newTaskButton")};
+    QTest::newRow("notes") << 6 << QStringList{QStringLiteral("noteList"),
+                                               QStringLiteral("noteCategoryFilter")};
+}
+
+void TestAccessibility::organizerFocusChainReachesEveryControlOnce()
+{
+    QFETCH(int, section);
+    QFETCH(QStringList, required);
+    QVERIFY(showOrganizer(section));
+    QList<QQuickItem *> chain;
+    QQuickItem *item = m_window->contentItem()->nextItemInFocusChain(true);
+    while (item && !chain.contains(item) && chain.size() < 500) {
+        chain.append(item);
+        item = item->nextItemInFocusChain(true);
+    }
+
+    QVERIFY(item);
+    QCOMPARE(item, chain.constFirst());
+    const QList<QQuickItem *> found = controls();
+    for (QQuickItem *control : found) {
+        if (control->isEnabled() && control->activeFocusOnTab())
+            QVERIFY2(chain.contains(control), qPrintable(describe(control)));
+    }
+    for (const QString &name : std::as_const(required))
+        QVERIFY2(chain.contains(findItem(m_window->contentItem(), name)), qPrintable(name));
 }
 
 void TestAccessibility::darkSchemeDarkensTheWindow()

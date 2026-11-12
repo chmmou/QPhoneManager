@@ -1,5 +1,8 @@
 #include "ui/AppController.h"
+#include "ui/PhoneNumberText.h"
 #include "ui/Settings.h"
+#include "ui/calls/CallListModel.h"
+#include "ui/calls/CallsArea.h"
 #include "ui/messages/ConversationListModel.h"
 #include "ui/messages/MessageComposer.h"
 #include "ui/messages/MessageListModel.h"
@@ -8,6 +11,7 @@
 
 #include "core/codec/CsvTable.h"
 #include "core/codec/MessageExport.h"
+#include "core/codec/PhoneTime.h"
 #include "core/codec/PhoneVCard.h"
 #include "core/sync/IrmcSync.h"
 #include "platform/SecretStore.h"
@@ -128,6 +132,9 @@ private Q_SLOTS:
     void namesFromThePhoneBecomeSafeFileNames();
     void newMessageIsAnnounced();
     void sendingNeedsAConnection();
+    void numbersAreWrittenInOneForm_data();
+    void numbersAreWrittenInOneForm();
+    void numberLooksAlikeInConversationRecipientAndCallList();
 
 private:
     [[nodiscard]] MessagesArea *area() const { return m_controller->messages(); }
@@ -312,8 +319,8 @@ void TestMessagesArea::composerTakesOnlyNumbersAndSendsToEach()
     composer->setRecipientText(QStringLiteral("030 2000002"));
     QVERIFY(composer->addRecipient());
     QCOMPARE(composer->recipientLabels(),
-             (QStringList{QStringLiteral("Erika Mustermann (+491511234567)"),
-                          QStringLiteral("0302000002")}));
+             (QStringList{QStringLiteral("Erika Mustermann (+49 151 1234567)"),
+                          QStringLiteral("030 2000002")}));
     QVERIFY(!composer->canSubmit());
     composer->setText(QStringLiteral("Bis gleich"));
     composer->setSimIndex(2);
@@ -645,6 +652,69 @@ void TestMessagesArea::sendingNeedsAConnection()
     QVERIFY(area()->hasPhone());
     QCOMPARE(area()->conversations()->totalCount(), 3);
     QVERIFY(m_phone->sentMessages().isEmpty());
+}
+
+void TestMessagesArea::numbersAreWrittenInOneForm_data()
+{
+    QTest::addColumn<QString>("number");
+    QTest::addColumn<QString>("shown");
+
+    QTest::newRow("German mobile") << QStringLiteral("+491512000001")
+                                   << QStringLiteral("+49 151 2000001");
+    QTest::newRow("German mobile, national") << QStringLiteral("01512000001")
+                                             << QStringLiteral("0151 2000001");
+    QTest::newRow("Berlin") << QStringLiteral("0302000002") << QStringLiteral("030 2000002");
+    QTest::newRow("Berlin, international with 00") << QStringLiteral("00493020000002")
+                                                   << QStringLiteral("+49 30 20000002");
+    QTest::newRow("Austrian mobile") << QStringLiteral("+436641234567")
+                                     << QStringLiteral("+43 664 1234567");
+    QTest::newRow("Swiss mobile") << QStringLiteral("+41791234567")
+                                  << QStringLiteral("+41 79 1234567");
+    QTest::newRow("other country") << QStringLiteral("+12025550123")
+                                   << QStringLiteral("+1 2025550123");
+    QTest::newRow("own grouping kept") << QStringLiteral("040-200  0006")
+                                       << QStringLiteral("040 200 0006");
+    QTest::newRow("sender name") << QStringLiteral(" Paketdienst ") << QStringLiteral("Paketdienst");
+    QTest::newRow("short code") << QStringLiteral("2222") << QStringLiteral("2222");
+}
+
+void TestMessagesArea::numbersAreWrittenInOneForm()
+{
+    QFETCH(QString, number);
+    QFETCH(QString, shown);
+
+    QCOMPARE(qpm::ui::PhoneNumberText::display(number), shown);
+}
+
+// The conversation header and the recipient chips showed a number as the
+// phone stored it, while the call list grouped the same number.
+void TestMessagesArea::numberLooksAlikeInConversationRecipientAndCallList()
+{
+    const QString stored = QStringLiteral("+491512000001");
+    const QString shown = QStringLiteral("+49 151 2000001");
+    m_phone->addObject(QStringLiteral("msg"), 14,
+                       sms(14, true, stored, QStringLiteral("Bin da."), hoursAgo(1)));
+    qpm::test::FakeCall call;
+    call.id = 1;
+    call.storage = QStringLiteral("RC");
+    call.number = stored;
+    call.time = formatCallLogTime(QDateTime::currentDateTime().addSecs(-600));
+    m_phone->setCalls({call});
+    const QFuture<Result<store::MessageChanges>> messages = area()->sync();
+    QTRY_VERIFY_WITH_TIMEOUT(messages.isFinished(), timeoutMs);
+    QVERIFY(messages.result().hasValue());
+    const QFuture<Result<store::CallChanges>> calls = m_controller->calls()->sync();
+    QTRY_VERIFY_WITH_TIMEOUT(calls.isFinished(), timeoutMs);
+    QVERIFY(calls.result().hasValue());
+
+    const ConversationListModel *list = area()->conversations();
+    QCOMPARE(role(list, 0, "title"), shown);
+    area()->setCurrentThread(list->threadKeyAt(0));
+    QCOMPARE(area()->currentAddress(), shown);
+    QCOMPARE(role(m_controller->calls()->list(), 0, "title"), shown);
+    QVERIFY(area()->composeTo(stored));
+    QCOMPARE(area()->composer()->recipientLabels(), QStringList{shown});
+    QCOMPARE(area()->composer()->recipientNumbers(), QStringList{stored});
 }
 
 QTEST_MAIN(TestMessagesArea)

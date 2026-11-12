@@ -1,6 +1,7 @@
 #include "ui/calls/CallListModel.h"
 
 #include "core/store/ContactStore.h"
+#include "ui/PhoneNumberText.h"
 
 #include <QLocale>
 
@@ -52,7 +53,7 @@ QVariant CallListModel::data(const QModelIndex &index, int role) const
     case IdRole:
         return int(entry.id);
     case NumberRole:
-        return entry.number;
+        return PhoneNumberText::display(entry.number);
     case NameRole: {
         const QString contact = contactNameFor(entry.number);
         return contact.isEmpty() ? entry.name : contact;
@@ -192,7 +193,7 @@ QString CallListModel::titleOf(const CallEntry &entry) const
     if (!entry.name.trimmed().isEmpty())
         return entry.name;
     if (!entry.number.isEmpty())
-        return entry.number;
+        return PhoneNumberText::display(entry.number);
     return tr("Unknown number");
 }
 

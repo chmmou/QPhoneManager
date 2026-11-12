@@ -2,6 +2,7 @@
 
 #include "core/service/ContactsService.h"
 #include "core/service/MessagesService.h"
+#include "ui/PhoneNumberText.h"
 #include "ui/messages/MessagesArea.h"
 
 #include <QLocale>
@@ -70,7 +71,8 @@ QStringList MessageComposer::recipientLabels() const
     QStringList labels;
     for (const QString &number : m_numbers) {
         const QString name = m_names ? m_names(number) : QString();
-        labels.append(name.isEmpty() ? number : tr("%1 (%2)").arg(name, number));
+        const QString shown = PhoneNumberText::display(number);
+        labels.append(name.isEmpty() ? shown : tr("%1 (%2)").arg(name, shown));
     }
     return labels;
 }

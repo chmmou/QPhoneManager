@@ -301,13 +301,24 @@ void TestIrmcSync::unknownCounterForcesAFullReload()
 void TestIrmcSync::ownWritesAreRecognisedByTheirHash()
 {
     QVERIFY(pull(IrmcDomain::Notes).hasValue());
+    // The phone takes notes only after "initsync" was read in the same session.
+    const QFuture<Result<ObexResponse>> loaded = m_obex->get(QStringLiteral("telecom/notes/initsync"));
+    QVERIFY(waitFor(loaded));
+    QVERIFY(loaded.result().hasValue());
     const QByteArray written = note(2, "Written here");
     const QFuture<Result<ObexResponse>> put =
         m_obex->put(QStringLiteral("telecom/notes/luid/000000000002.vnt"), written);
     QVERIFY(waitFor(put));
     QVERIFY(put.result().hasValue());
-    // The store keeps the hash of what this program wrote.
-    m_store->hashOverrides.insert(2, sha1(written));
+    // The phone keeps a note in its own form; the store keeps the hash of the
+    // version it read back after writing, which ends with its last line end.
+    QByteArray readBack;
+    for (const FakeSyncObject &object : m_phone->area(QStringLiteral("notes")).objects) {
+        if (object.luid == 2)
+            readBack = object.data;
+    }
+    QVERIFY(!readBack.isEmpty());
+    m_store->hashOverrides.insert(2, sha1(readBack + "\r\n"));
 
     const Result<SyncDelta> delta = pull(IrmcDomain::Notes);
 

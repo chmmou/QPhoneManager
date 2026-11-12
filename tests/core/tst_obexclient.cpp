@@ -211,6 +211,10 @@ void TestObexClient::createAnswerYieldsTheLuid()
 {
     m_phone->setObjects(QStringLiteral("notes"), manyNotes(4));
     QVERIFY(connectTo(ObexClient::Target::IrmcSync));
+    // The phone takes notes only after "initsync" was read in the same session.
+    const QFuture<Result<ObexResponse>> loaded = m_obex->get(QStringLiteral("telecom/notes/initsync"));
+    QVERIFY(waitFor(loaded));
+    QVERIFY(loaded.result().hasValue());
 
     const QFuture<Result<ObexResponse>> created = m_obex->put(
         QStringLiteral("telecom/notes/luid/.vnt"), "BEGIN:VNOTE\r\nBODY:New\r\nEND:VNOTE\r\n");

@@ -1,8 +1,13 @@
 #include "FakePhone.h"
 
 #include "core/codec/AtText.h"
+#include "core/codec/CalMetadata.h"
+#include "core/codec/ContentLines.h"
 #include "core/codec/PhoneTime.h"
+#include "core/codec/PhoneVCal.h"
 #include "core/codec/PhoneVCard.h"
+#include "core/codec/SafeXml.h"
+#include "core/codec/VNote.h"
 #include "core/protocol/ObexPacket.h"
 
 #include <QCryptographicHash>
@@ -294,6 +299,134 @@ bool hasMessageLine(const QByteArray &body, QByteArrayView expected)
 
 constexpr quint32 messageKindMask = 0x30000000;
 constexpr quint32 scheduledBit = 0x20000000;
+constexpr quint32 eventBit = 0x10000000;
+constexpr quint32 rgbMask = 0x00FFFFFF;
+
+QString hex6(quint32 color)
+{
+    return QStringLiteral("%1").arg(color & rgbMask, 6, 16, QLatin1Char('0')).toUpper();
+}
+
+QString categoryLines(const QList<core::codec::OrganizerCategory> &categories)
+{
+    QString out;
+    for (const core::codec::OrganizerCategory &category : categories) {
+        out += QStringLiteral("<category name=\"%1\" color=\"%2\" id=\"%3\"/>\r\n")
+                   .arg(xmlEscaped(category.name), hex6(category.color))
+                   .arg(category.id);
+    }
+    return out;
+}
+
+// metadata.xml of the calendar in the form the client writes it.
+QByteArray phoneCalMetadata(const core::codec::CalMetadata &metadata)
+{
+    QString out = QStringLiteral("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
+                                 "<metadata version=\"1.0\">\r\n");
+    if (!metadata.calendars.isEmpty())
+        out += QStringLiteral("<calendars filter_disabled=\"%1\">\r\n")
+                   .arg(metadata.filterDisabled ? 1 : 0);
+    for (const core::codec::CalendarInfo &calendar : metadata.calendars) {
+        out += QStringLiteral("<calendar selected=\"%1\"").arg(calendar.selected ? 1 : 0);
+        if (calendar.isDefault)
+            out += QStringLiteral(" default=\"1\"");
+        out += QStringLiteral(" url=\"%1\" title=\"%2\" color=\"%3\" hidden=\"%4\" "
+                              "timezone=\"%5\" access_level=\"%6\"/>\r\n")
+                   .arg(xmlEscaped(calendar.url), xmlEscaped(calendar.title),
+                        QStringLiteral("%1").arg(calendar.color, 8, 16, QLatin1Char('0')).toUpper())
+                   .arg(calendar.hidden ? 1 : 0)
+                   .arg(calendar.timezone)
+                   .arg(calendar.accessLevel);
+    }
+    out += QStringLiteral("</calendars>\r\n<tasksupport>1</tasksupport>\r\n<task_categories>\r\n");
+    out += categoryLines(metadata.taskCategories);
+    out += QStringLiteral("</task_categories>\r\n</metadata>");
+    return out.toUtf8();
+}
+
+QByteArray phoneNoteMetadata(const QList<core::codec::OrganizerCategory> &categories)
+{
+    return (QStringLiteral("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<metadata "
+                           "version=\"1.0\"><note_categories>\r\n") +
+            categoryLines(categories) + QStringLiteral("</note_categories>\r\n</metadata>"))
+        .toUtf8();
+}
+
+// Changes of categories in a metadata PUT, applied like the client does.
+void applyCategoryChanges(QList<core::codec::OrganizerCategory> &categories,
+                          const core::codec::XmlElement &section)
+{
+    for (const core::codec::XmlElement &entry : section.children) {
+        if (entry.name != QLatin1StringView("category"))
+            continue;
+        const QString flag = entry.attribute(QStringLiteral("flag"));
+        const QString name = entry.attribute(QStringLiteral("name"));
+        const quint32 color = entry.attribute(QStringLiteral("color")).toUInt(nullptr, 16);
+        const int id = entry.attribute(QStringLiteral("id")).toInt();
+        if (flag == QLatin1StringView("add")) {
+            const bool known = std::any_of(
+                categories.cbegin(), categories.cend(),
+                [&name](const core::codec::OrganizerCategory &category) { return category.name == name; });
+            if (known || name.isEmpty())
+                continue;
+            int next = 1;
+            for (const core::codec::OrganizerCategory &category : std::as_const(categories))
+                next = std::max(next, category.id + 1);
+            categories.append({next, name, color});
+        } else if (flag == QLatin1StringView("edit")) {
+            for (core::codec::OrganizerCategory &category : categories) {
+                if (category.id == id) {
+                    category.name = name;
+                    category.color = color;
+                }
+            }
+        } else if (flag == QLatin1StringView("delete")) {
+            categories.removeIf(
+                [id](const core::codec::OrganizerCategory &category) { return category.id == id; });
+        }
+    }
+}
+
+// Adds the categories a task or a note names that the phone does not know,
+// with the colours of the COLOR parameter where the body has one.
+void addNamedCategories(QList<core::codec::OrganizerCategory> &categories,
+                        const QStringList &names, const QByteArray &body)
+{
+    QStringList colors;
+    const QList<core::codec::ContentLine> lines = core::codec::readContentLines(body);
+    for (const core::codec::ContentLine &line : lines) {
+        if (line.name == QLatin1StringView("CATEGORIES"))
+            colors = line.parameter(QStringLiteral("COLOR")).split(u',');
+    }
+    for (qsizetype i = 0; i < names.size(); ++i) {
+        const QString &name = names.at(i);
+        const bool known = std::any_of(categories.cbegin(), categories.cend(),
+                                       [&name](const core::codec::OrganizerCategory &category) {
+                                           return category.name.compare(name, Qt::CaseInsensitive) == 0;
+                                       });
+        if (known)
+            continue;
+        int next = 1;
+        for (const core::codec::OrganizerCategory &category : std::as_const(categories))
+            next = std::max(next, category.id + 1);
+        categories.append({next, name, colors.value(i).toUInt(nullptr, 16)});
+    }
+}
+
+QByteArray createdAnswer(quint32 luid)
+{
+    ObexPacket response;
+    response.code = obex::rspOk;
+    response.appParameters = "  " + luidText(luid).toLatin1() + " ";
+    return encoded(response);
+}
+
+QDateTime nowToTheSecond()
+{
+    QDateTime now = QDateTime::currentDateTimeUtc();
+    now.setTime(QTime(now.time().hour(), now.time().minute(), now.time().second()));
+    return now;
+}
 
 } // namespace
 
@@ -561,6 +694,8 @@ void FakePhone::handleAt(const QString &command)
     if (handleCallLog(command, name))
         return;
     if (handleMessaging(command, name))
+        return;
+    if (handleAlarms(command, name))
         return;
 
     if (command == QLatin1StringView("AT+CPROT=0")) {
@@ -945,6 +1080,7 @@ void FakePhone::handleObex(const QByteArray &bytes)
             return;
         }
         m_target = request.target;
+        m_loadedAreas.clear();
         m_currentFolder.clear();
         m_maxPacket = request.maxPacketLength == 0 ? 0xFFFF : request.maxPacketLength;
         ObexPacket response;
@@ -959,6 +1095,7 @@ void FakePhone::handleObex(const QByteArray &bytes)
         sendPacket(codeOnly(obex::rspOk) + m_config.afterDisconnect);
         m_obexMode = false;
         m_target.clear();
+        m_loadedAreas.clear();
         m_pendingStream.clear();
         return;
     case obex::opAbort:
@@ -1002,6 +1139,10 @@ void FakePhone::handleSyncGet(const QString &name)
         sendFirst(codeOnly(obex::rspNotFound));
         return;
     }
+    if (areaName == QLatin1StringView("cal") && m_config.calendarDenied) {
+        sendFirst(codeOnly(obex::rspUnauthorized));
+        return;
+    }
     FakeSyncArea &data = m_areas[areaName];
     const QString rest = lower.mid(root.size() + areaName.size());
     const QString extension = extensionOf(areaName);
@@ -1010,6 +1151,7 @@ void FakePhone::handleSyncGet(const QString &name)
     if (rest == QLatin1StringView("/info.log")) {
         sendBody(total);
     } else if (rest == QLatin1StringView("/initsync")) {
+        m_loadedAreas.insert(areaName);
         for (int i = 0; i < m_config.paddingBeforeReply; ++i) {
             sendPacket(QByteArray::fromHex("900003"));
             m_discard += 3;
@@ -1101,6 +1243,14 @@ void FakePhone::handleSyncPut(const QString &name, const QByteArray &body, bool 
 
     if (areaName == QLatin1StringView("msg")) {
         handleMessagePut(rest, body, hasBody);
+        return;
+    }
+    if (areaName == QLatin1StringView("cal")) {
+        handleCalendarPut(rest, body, hasBody);
+        return;
+    }
+    if (areaName == QLatin1StringView("notes")) {
+        handleNotePut(rest, body, hasBody);
         return;
     }
     if (rest == QLatin1StringView("/metadata.xml")) {
@@ -1250,6 +1400,295 @@ void FakePhone::handleContactPut(const QString &rest, const QByteArray &body)
         return;
     }
     sendFirst(codeOnly(obex::rspNotFound));
+}
+
+void FakePhone::handleCalendarPut(const QString &rest, const QByteArray &body, bool hasBody)
+{
+    const QString area = QStringLiteral("cal");
+    FakeSyncArea &data = m_areas[area];
+    if (m_config.calendarDenied) {
+        sendFirst(codeOnly(obex::rspUnauthorized));
+        return;
+    }
+    const auto parsedMetadata = core::codec::parseCalMetadata(data.metadata);
+    core::codec::CalMetadata metadata =
+        parsedMetadata.hasValue() ? parsedMetadata.value() : core::codec::CalMetadata();
+    if (rest == QLatin1StringView("/metadata.xml")) {
+        // The client answers OK even to a document it cannot read.
+        const auto document = core::codec::parseSafeXml(body);
+        if (document.hasValue()) {
+            for (const core::codec::XmlElement &section : document.value().children) {
+                if (section.name == QLatin1StringView("calendars")) {
+                    metadata.filterDisabled =
+                        section.attribute(QStringLiteral("filter_disabled")) == QLatin1StringView("1");
+                    bool defaultSeen = false;
+                    for (core::codec::CalendarInfo &calendar : metadata.calendars) {
+                        calendar.selected = metadata.filterDisabled;
+                        for (const core::codec::XmlElement &entry : section.children) {
+                            if (entry.attribute(QStringLiteral("url")) != calendar.url ||
+                                entry.attribute(QStringLiteral("title")) != calendar.title) {
+                                continue;
+                            }
+                            if (entry.attribute(QStringLiteral("selected")) == QLatin1StringView("1"))
+                                calendar.selected = true;
+                            if (entry.attribute(QStringLiteral("default")) == QLatin1StringView("1"))
+                                defaultSeen = true;
+                        }
+                    }
+                    if (defaultSeen) {
+                        for (core::codec::CalendarInfo &calendar : metadata.calendars) {
+                            calendar.isDefault = false;
+                            for (const core::codec::XmlElement &entry : section.children) {
+                                if (entry.attribute(QStringLiteral("url")) == calendar.url &&
+                                    entry.attribute(QStringLiteral("title")) == calendar.title &&
+                                    entry.attribute(QStringLiteral("default")) ==
+                                        QLatin1StringView("1")) {
+                                    calendar.isDefault = true;
+                                }
+                            }
+                        }
+                    }
+                } else if (section.name == QLatin1StringView("task_categories")) {
+                    applyCategoryChanges(metadata.taskCategories, section);
+                }
+            }
+            data.metadata = phoneCalMetadata(metadata);
+        }
+        sendFirst(codeOnly(obex::rspOk));
+        return;
+    }
+    if (!m_loadedAreas.contains(area)) {
+        sendFirst(codeOnly(obex::rspPreconditionFailed));
+        return;
+    }
+    const bool isTask = body.contains("\r\nBEGIN:VTODO\r\n") || body.startsWith("BEGIN:VTODO\r\n");
+    const bool isEvent = body.contains("BEGIN:VEVENT\r\n");
+    if (rest == QLatin1StringView("/luid/.vcs")) {
+        if (!hasBody || (!isTask && !isEvent)) {
+            sendFirst(codeOnly(obex::rspBadRequest));
+            return;
+        }
+        quint32 luid = 0;
+        QByteArray stored;
+        if (isTask) {
+            const auto task = core::codec::parsePhoneTask(body);
+            if (!task.hasValue()) {
+                sendFirst(codeOnly(obex::rspBadRequest));
+                return;
+            }
+            luid = 1;
+            for (const FakeSyncObject &object : std::as_const(data.objects)) {
+                if ((object.luid & eventBit) == 0)
+                    luid = std::max(luid, object.luid + 1);
+            }
+            core::codec::CalendarTask created = task.value();
+            created.luid = luid;
+            created.lastModified = nowToTheSecond();
+            addNamedCategories(metadata.taskCategories, created.categories, body);
+            data.metadata = phoneCalMetadata(metadata);
+            stored = core::codec::encodeTaskAsPhoneSendsIt(created);
+        } else {
+            const auto event = core::codec::parsePhoneEvent(body);
+            if (!event.hasValue()) {
+                sendFirst(codeOnly(obex::rspBadRequest));
+                return;
+            }
+            core::codec::CalendarEvent created = event.value();
+            const core::codec::CalendarInfo *target = nullptr;
+            for (const core::codec::CalendarInfo &calendar : std::as_const(metadata.calendars)) {
+                const bool usable = calendar.selected || metadata.filterDisabled;
+                if (usable && calendar.url == created.calendarUrl &&
+                    calendar.title == created.calendarTitle) {
+                    target = &calendar;
+                }
+            }
+            for (const core::codec::CalendarInfo &calendar : std::as_const(metadata.calendars)) {
+                if (!target && calendar.isDefault)
+                    target = &calendar;
+            }
+            if (!target && !metadata.calendars.isEmpty())
+                target = &metadata.calendars.constFirst();
+            created.calendarUrl = target ? target->url : QString();
+            created.calendarTitle = target ? target->title : QString();
+            quint32 next = 1;
+            for (const FakeSyncObject &object : std::as_const(data.objects)) {
+                if ((object.luid & eventBit) != 0)
+                    next = std::max(next, (object.luid & ~eventBit) + 1);
+            }
+            luid = eventBit | next;
+            created.luid = luid;
+            stored = core::codec::encodeEventAsPhoneSendsIt(created);
+        }
+        addObject(area, luid, stored);
+        sendFirst(createdAnswer(luid));
+        return;
+    }
+    bool ok = rest.startsWith(QLatin1StringView("/luid/")) &&
+              rest.endsWith(QLatin1StringView(".vcs")) && rest.size() == 6 + luidDigits + 4;
+    const quint32 luid = ok ? rest.mid(6, luidDigits).toUInt(&ok, 16) : 0;
+    FakeSyncObject *existing = nullptr;
+    for (FakeSyncObject &object : data.objects) {
+        if (ok && object.luid == luid)
+            existing = &object;
+    }
+    if (!existing) {
+        sendFirst(codeOnly(obex::rspNotFound));
+        return;
+    }
+    if (!hasBody || body.isEmpty()) {
+        removeObject(area, luid);
+        sendFirst(codeOnly(obex::rspOk));
+        return;
+    }
+    if (core::codec::isTaskObject(existing->data)) {
+        const auto task = core::codec::parsePhoneTask(body);
+        if (!isTask || !task.hasValue()) {
+            sendFirst(codeOnly(obex::rspBadRequest));
+            return;
+        }
+        core::codec::CalendarTask changed = task.value();
+        changed.luid = luid;
+        changed.lastModified = nowToTheSecond();
+        addNamedCategories(metadata.taskCategories, changed.categories, body);
+        data.metadata = phoneCalMetadata(metadata);
+        editObject(area, luid, core::codec::encodeTaskAsPhoneSendsIt(changed));
+    } else {
+        const auto before = core::codec::parsePhoneEvent(existing->data);
+        const auto event = core::codec::parsePhoneEvent(body);
+        if (!isEvent || !event.hasValue() || !before.hasValue()) {
+            sendFirst(codeOnly(obex::rspBadRequest));
+            return;
+        }
+        core::codec::CalendarEvent changed = event.value();
+        changed.luid = luid;
+        // The client never moves an event to another calendar on a change.
+        changed.calendarUrl = before.value().calendarUrl;
+        changed.calendarTitle = before.value().calendarTitle;
+        if (changed.color && *changed.color == 0)
+            changed.color.reset();
+        editObject(area, luid, core::codec::encodeEventAsPhoneSendsIt(changed));
+    }
+    sendFirst(codeOnly(obex::rspOk));
+}
+
+void FakePhone::handleNotePut(const QString &rest, const QByteArray &body, bool hasBody)
+{
+    const QString area = QStringLiteral("notes");
+    FakeSyncArea &data = m_areas[area];
+    const auto parsedCategories = core::codec::parseNoteMetadata(data.metadata);
+    QList<core::codec::OrganizerCategory> categories =
+        parsedCategories.hasValue() ? parsedCategories.value()
+                                    : QList<core::codec::OrganizerCategory>();
+    if (rest == QLatin1StringView("/metadata.xml")) {
+        const auto document = core::codec::parseSafeXml(body);
+        if (document.hasValue()) {
+            for (const core::codec::XmlElement &section : document.value().children) {
+                if (section.name == QLatin1StringView("note_categories"))
+                    applyCategoryChanges(categories, section);
+            }
+            data.metadata = phoneNoteMetadata(categories);
+        }
+        sendFirst(codeOnly(obex::rspOk));
+        return;
+    }
+    if (!m_loadedAreas.contains(area)) {
+        sendFirst(codeOnly(obex::rspPreconditionFailed));
+        return;
+    }
+    const bool isNote = body.contains("BEGIN:VNOTE\r\n");
+    if (rest == QLatin1StringView("/luid/.vnt")) {
+        const auto note = core::codec::parsePhoneNote(body);
+        if (!hasBody || !isNote || !note.hasValue()) {
+            sendFirst(codeOnly(obex::rspBadRequest));
+            return;
+        }
+        quint32 luid = 1;
+        for (const FakeSyncObject &object : std::as_const(data.objects))
+            luid = std::max(luid, object.luid + 1);
+        core::codec::Note created = note.value();
+        created.luid = luid;
+        created.lastModified = nowToTheSecond();
+        addNamedCategories(categories, created.categories, body);
+        data.metadata = phoneNoteMetadata(categories);
+        addObject(area, luid, core::codec::encodeNoteAsPhoneSendsIt(created));
+        sendFirst(createdAnswer(luid));
+        return;
+    }
+    bool ok = rest.startsWith(QLatin1StringView("/luid/")) &&
+              rest.endsWith(QLatin1StringView(".vnt")) && rest.size() == 6 + luidDigits + 4;
+    const quint32 luid = ok ? rest.mid(6, luidDigits).toUInt(&ok, 16) : 0;
+    const bool known = ok && std::any_of(data.objects.cbegin(), data.objects.cend(),
+                                         [luid](const FakeSyncObject &object) {
+                                             return object.luid == luid;
+                                         });
+    if (!known) {
+        sendFirst(codeOnly(obex::rspNotFound));
+        return;
+    }
+    if (!hasBody || body.isEmpty()) {
+        removeObject(area, luid);
+        sendFirst(codeOnly(obex::rspOk));
+        return;
+    }
+    const auto note = core::codec::parsePhoneNote(body);
+    if (!isNote || !note.hasValue()) {
+        sendFirst(codeOnly(obex::rspBadRequest));
+        return;
+    }
+    core::codec::Note changed = note.value();
+    changed.luid = luid;
+    changed.lastModified = nowToTheSecond();
+    addNamedCategories(categories, changed.categories, body);
+    data.metadata = phoneNoteMetadata(categories);
+    editObject(area, luid, core::codec::encodeNoteAsPhoneSendsIt(changed));
+    sendFirst(codeOnly(obex::rspOk));
+}
+
+bool FakePhone::handleAlarms(const QString &command, const QString &name)
+{
+    if (name != QLatin1StringView("AT+CALA"))
+        return false;
+    QByteArray reply = command.toUtf8() + "\r\n";
+    if (!m_config.alarms) {
+        writeAt(reply + "DUMP: java.lang.Exception: Alarm Provider not found\r\nERROR\r\n");
+        return true;
+    }
+    QStringList &alarms = *m_config.alarms;
+    if (command == QLatin1StringView("AT+CALA?")) {
+        for (const QString &line : std::as_const(alarms))
+            reply += "+CALA: " + line.toUtf8() + "\r\n";
+        writeAt(reply + (alarms.isEmpty() ? "ERROR\r\n" : "OK\r\n"));
+        return true;
+    }
+    const QStringList fields = core::codec::splitFields(command.mid(8));
+    bool ok = fields.size() >= 5;
+    int id = ok ? fields.at(1).trimmed().toInt(&ok) : 0;
+    if (!ok) {
+        writeAt(reply + "ERROR\r\n");
+        return true;
+    }
+    if (id == 0) {
+        for (const QString &line : std::as_const(alarms))
+            id = std::max(id, core::codec::splitFields(line).value(1).toInt() + 1);
+        id = std::max(id, 1);
+    }
+    const QString days = fields.size() > 5 ? fields.mid(4, fields.size() - 5).join(u',') : QString();
+    const QString line = QStringLiteral("%1,%2,%3,%4,%5,%6")
+                             .arg(fields.at(0).trimmed())
+                             .arg(id)
+                             .arg(fields.at(2).trimmed(), fields.at(3).trimmed(), days,
+                                  fields.constLast().trimmed());
+    bool replaced = false;
+    for (QString &existing : alarms) {
+        if (core::codec::splitFields(existing).value(1).toInt() == id) {
+            existing = line;
+            replaced = true;
+        }
+    }
+    if (!replaced)
+        alarms.append(line);
+    writeAt(reply + "OK\r\n");
+    return true;
 }
 
 void FakePhone::handleFileRequest(const ObexPacket &request)

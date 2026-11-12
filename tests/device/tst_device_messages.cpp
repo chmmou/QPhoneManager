@@ -316,16 +316,25 @@ void TestDeviceMessages::receivedMessageIsReadSearchedArchivedAndExported()
     service.setStore(scratch.messages);
     QVERIFY(syncInto(service).hasValue());
     QSignalSpy arrived(&service, &MessagesService::messagesArrived);
+    // The phone app sends no notice for the first message after it started
+    // with an empty message store; that message only sets its counter. A
+    // message ahead of the one under test takes that place.
     const QString number = QStringLiteral("4930999") + sixDigits();
+    QVERIFY2(receiveOnTheEmulator(number, QStringLiteral("QPM Eingang ") + sixDigits() +
+                                              QStringLiteral(" Vorlauf")),
+             "the emulator console did not take the message");
+    // Whether this one gets a notice depends on how the app started, so the result is not checked.
+    static_cast<void>(
+        QTest::qWaitFor([&arrived]() { return arrived.count() > 0; }, noticeTimeoutMs));
+    QVERIFY(syncInto(service).hasValue());
+    arrived.clear();
     const QString text = QStringLiteral("QPM Eingang ") + sixDigits() + QStringLiteral(" Grüße");
 
     QVERIFY2(receiveOnTheEmulator(number, text), "the emulator console did not take the message");
 
-    const bool noticed =
-        QTest::qWaitFor([&arrived]() { return arrived.count() > 0; }, noticeTimeoutMs);
-    qInfo() << "New-message notice from the phone app:" << (noticed ? "yes" : "no");
-    if (!noticed)
-        QVERIFY(syncInto(service).hasValue());
+    // The notice makes the service pull the message without being asked.
+    QVERIFY2(QTest::qWaitFor([&arrived]() { return arrived.count() > 0; }, noticeTimeoutMs),
+             "no new-message notice from the phone app");
     std::optional<StoredMessage> found;
     const QList<StoredMessage> stored = scratch.messages->allMessages().value();
     for (const StoredMessage &message : stored) {

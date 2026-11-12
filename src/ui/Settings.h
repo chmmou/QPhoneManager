@@ -59,6 +59,10 @@ class Settings : public QObject
      */
     Q_PROPERTY(QString dataDirectory READ dataDirectory WRITE setDataDirectory NOTIFY
                    dataDirectoryChanged FINAL)
+    /// "de", "at" or "ch" for the public holidays shown in the calendar, empty for none.
+    /// Other values are ignored.
+    Q_PROPERTY(QString holidayRegion READ holidayRegion WRITE setHolidayRegion NOTIFY
+                   holidayRegionChanged FINAL)
     /// Device id of the phone shown last; the start-up connects to it.
     Q_PROPERTY(QString lastDevice READ lastDevice WRITE setLastDevice NOTIFY lastDeviceChanged FINAL)
 
@@ -93,6 +97,8 @@ public:
     void setDataDirectory(const QString &path);
     [[nodiscard]] QString lastDevice() const;
     void setLastDevice(const QString &deviceId);
+    [[nodiscard]] QString holidayRegion() const;
+    void setHolidayRegion(const QString &region);
 
     /// The local path of a file dialog result; empty for anything but a local file.
     [[nodiscard]] Q_INVOKABLE QString pathFromUrl(const QUrl &url) const;
@@ -109,6 +115,7 @@ Q_SIGNALS:
     void clipboardSyncChanged();
     void dataDirectoryChanged();
     void lastDeviceChanged();
+    void holidayRegionChanged();
 
 private:
     void setFlag(const QString &key, bool defaultValue, bool enabled, void (Settings::*changed)());

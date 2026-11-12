@@ -106,7 +106,9 @@ AppController::AppController(Settings *settings, std::unique_ptr<SecretStore> se
       m_photos(std::make_shared<PhotoSource>()),
       m_contacts(new ContactsArea(m_connection, m_photos, this)),
       m_calls(new CallsArea(m_connection, m_contacts->service(), this)),
-      m_messages(new MessagesArea(m_connection, m_statusService, this))
+      m_messages(new MessagesArea(m_connection, m_statusService, this)),
+      m_calendar(new CalendarArea(m_connection, this)),
+      m_tasks(new TasksArea(m_calendar->service(), this)), m_notes(new NotesArea(m_connection, this))
 {
     Q_ASSERT(settings);
     const QString configured = settings->dataDirectory();
@@ -144,6 +146,29 @@ AppController::AppController(Settings *settings, std::unique_ptr<SecretStore> se
                 return SyncChanges{pulled.value().added, pulled.value().changed,
                                    pulled.value().removed};
             });
+    });
+    registerSyncArea(tr("Calendar and tasks"), [this]() {
+        return m_calendar->sync().then(
+            this, [](const Result<core::store::OrganizerChanges> &pulled) -> Result<SyncChanges> {
+                if (!pulled.hasValue())
+                    return pulled.error();
+                return SyncChanges{pulled.value().added, pulled.value().changed,
+                                   pulled.value().removed};
+            });
+    });
+    registerSyncArea(tr("Notes"), [this]() {
+        return m_notes->sync().then(
+            this, [](const Result<core::store::OrganizerChanges> &pulled) -> Result<SyncChanges> {
+                if (!pulled.hasValue())
+                    return pulled.error();
+                return SyncChanges{pulled.value().added, pulled.value().changed,
+                                   pulled.value().removed};
+            });
+    });
+    m_calendar->setHolidayRegion(settings->holidayRegion());
+    connect(settings, &Settings::holidayRegionChanged, this, [this]() {
+        if (m_settings)
+            m_calendar->setHolidayRegion(m_settings->holidayRegion());
     });
     connect(m_contacts->service(), &core::service::ContactsService::contactsChanged, m_calls,
             &CallsArea::refreshNames);
@@ -418,6 +443,9 @@ void AppController::onStateChanged()
     m_contacts->setConnected(isConnected());
     m_calls->setConnected(isConnected());
     m_messages->setConnected(isConnected());
+    m_calendar->setConnected(isConnected());
+    m_tasks->setConnected(isConnected());
+    m_notes->setConnected(isConnected());
     Q_EMIT connectionStateChanged();
 }
 
@@ -911,6 +939,9 @@ bool AppController::openStore(const QString &deviceId)
     m_contacts->setProfileStore(m_store.get());
     m_calls->setProfileStore(m_store.get());
     m_messages->setProfileStore(m_store.get());
+    m_calendar->setProfileStore(m_store.get());
+    m_tasks->setStore(m_calendar->store());
+    m_notes->setStore(m_calendar->store());
     return true;
 }
 
@@ -920,6 +951,9 @@ void AppController::closeStore()
     m_contacts->setProfileStore(nullptr);
     m_calls->setProfileStore(nullptr);
     m_messages->setProfileStore(nullptr);
+    m_notes->setStore(nullptr);
+    m_tasks->setStore(nullptr);
+    m_calendar->setProfileStore(nullptr);
     m_store.reset();
 }
 

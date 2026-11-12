@@ -62,6 +62,17 @@ QString lastDeviceKey()
     return QStringLiteral("connection/lastDevice");
 }
 
+QString holidayRegionKey()
+{
+    return QStringLiteral("calendar/holidayRegion");
+}
+
+bool isKnownHolidayRegion(const QString &region)
+{
+    return region.isEmpty() || region == QLatin1StringView("de") ||
+           region == QLatin1StringView("at") || region == QLatin1StringView("ch");
+}
+
 QStringList defaultConnectionOrder()
 {
     return {QStringLiteral("usb"), QStringLiteral("wifi"), QStringLiteral("bluetooth")};
@@ -251,6 +262,20 @@ void Settings::setLastDevice(const QString &deviceId)
         return;
     m_settings->setValue(lastDeviceKey(), deviceId);
     Q_EMIT lastDeviceChanged();
+}
+
+QString Settings::holidayRegion() const
+{
+    const QString region = m_settings->value(holidayRegionKey()).toString();
+    return isKnownHolidayRegion(region) ? region : QString();
+}
+
+void Settings::setHolidayRegion(const QString &region)
+{
+    if (!isKnownHolidayRegion(region) || region == holidayRegion())
+        return;
+    m_settings->setValue(holidayRegionKey(), region);
+    Q_EMIT holidayRegionChanged();
 }
 
 QString Settings::pathFromUrl(const QUrl &url) const

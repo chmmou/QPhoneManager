@@ -71,6 +71,33 @@ Item {
         }
     }
 
+    Component {
+        id: calendar
+
+        CalendarPage {
+            emptyText: root.entry.emptyText
+            onConnectRequested: root.connectRequested()
+        }
+    }
+
+    Component {
+        id: tasks
+
+        TasksPage {
+            emptyText: root.entry.emptyText
+            onConnectRequested: root.connectRequested()
+        }
+    }
+
+    Component {
+        id: notes
+
+        NotesPage {
+            emptyText: root.entry.emptyText
+            onConnectRequested: root.connectRequested()
+        }
+    }
+
     Loader {
         anchors.fill: parent
         sourceComponent: {
@@ -82,6 +109,12 @@ Item {
                 return calls;
             if (root.entry.key === "messages")
                 return messages;
+            if (root.entry.key === "calendar")
+                return calendar;
+            if (root.entry.key === "tasks")
+                return tasks;
+            if (root.entry.key === "notes")
+                return notes;
             return root.entry.hasList ? listAndDetail : placeholder;
         }
     }

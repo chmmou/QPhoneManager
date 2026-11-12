@@ -102,6 +102,38 @@ const QList<QStringList> &migrations()
             QStringLiteral("DELETE FROM sync_objects WHERE domain = 'msg'"),
             QStringLiteral("DELETE FROM meta WHERE key = 'counter.msg'"),
         },
+        {
+            QStringLiteral("CREATE TABLE calendars (url TEXT NOT NULL, title TEXT NOT NULL, "
+                           "color INTEGER NOT NULL, hidden INTEGER NOT NULL, "
+                           "timezone TEXT NOT NULL, access_level INTEGER NOT NULL, "
+                           "selected INTEGER NOT NULL, is_default INTEGER NOT NULL, "
+                           "PRIMARY KEY (url, title))"),
+            QStringLiteral("CREATE TABLE events (luid INTEGER PRIMARY KEY NOT NULL, "
+                           "calendar_url TEXT NOT NULL, calendar_title TEXT NOT NULL, "
+                           "summary TEXT NOT NULL, location TEXT NOT NULL, "
+                           "description TEXT NOT NULL, start_utc TEXT NOT NULL, "
+                           "end_utc TEXT NOT NULL, all_day INTEGER NOT NULL, rrule TEXT NOT NULL, "
+                           "exdates TEXT NOT NULL, alarms TEXT NOT NULL, class INTEGER NOT NULL, "
+                           "transp INTEGER NOT NULL, color INTEGER, raw BLOB NOT NULL, "
+                           "hash BLOB NOT NULL)"),
+            QStringLiteral("CREATE INDEX events_start ON events (start_utc)"),
+            QStringLiteral("CREATE TABLE tasks (luid INTEGER PRIMARY KEY NOT NULL, "
+                           "summary TEXT NOT NULL, description TEXT NOT NULL, "
+                           "start_date TEXT NOT NULL, due_date TEXT NOT NULL, "
+                           "reminder_utc TEXT NOT NULL, rrule TEXT NOT NULL, "
+                           "priority INTEGER NOT NULL, completed INTEGER NOT NULL, "
+                           "categories TEXT NOT NULL, modified_utc TEXT NOT NULL, "
+                           "raw BLOB NOT NULL, hash BLOB NOT NULL)"),
+            QStringLiteral("CREATE TABLE notes (luid INTEGER PRIMARY KEY NOT NULL, "
+                           "body TEXT NOT NULL, modified_utc TEXT NOT NULL, "
+                           "categories TEXT NOT NULL, raw BLOB NOT NULL, hash BLOB NOT NULL)"),
+            QStringLiteral("CREATE TABLE categories (domain TEXT NOT NULL, id INTEGER NOT NULL, "
+                           "name TEXT NOT NULL, color INTEGER NOT NULL, PRIMARY KEY (domain, id))"),
+            // Calendar and notes pulled before these tables existed are only
+            // in sync_objects; forgetting them makes the next pull load all.
+            QStringLiteral("DELETE FROM sync_objects WHERE domain IN ('cal', 'notes')"),
+            QStringLiteral("DELETE FROM meta WHERE key IN ('counter.cal', 'counter.notes')"),
+        },
     };
     return steps;
 }
