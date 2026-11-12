@@ -113,6 +113,41 @@ QString OrganizerText::timeExample()
     return formatTime(QTime(exampleHour, exampleMinute));
 }
 
+QString OrganizerText::dateHint()
+{
+    const QString format = longYearDateFormat();
+    QString hint;
+    qsizetype i = 0;
+    while (i < format.size()) {
+        const QChar c = format.at(i);
+        if (c == u'\'') {
+            const qsizetype close = format.indexOf(u'\'', i + 1);
+            const qsizetype end = close < 0 ? format.size() : close;
+            hint += format.mid(i + 1, end - i - 1);
+            i = end + 1;
+            continue;
+        }
+        qsizetype run = 1;
+        while (i + run < format.size() && format.at(i + run) == c)
+            ++run;
+        if (c == u'd')
+            hint += tr("DD", "letters for the day in the form of a date");
+        else if (c == u'M')
+            hint += tr("MM", "letters for the month in the form of a date");
+        else if (c == u'y')
+            hint += tr("YYYY", "letters for the year in the form of a date");
+        else
+            hint += format.mid(i, run);
+        i += run;
+    }
+    return hint;
+}
+
+QString OrganizerText::timeHint()
+{
+    return tr("hh:mm", "letters for hours and minutes in the form of a time");
+}
+
 QString OrganizerText::errorText(const core::Error &error, Area area)
 {
     switch (error.code()) {
@@ -332,7 +367,7 @@ QString OrganizerText::reminderText(qint64 minutes)
 
 QStringList OrganizerText::visibilityChoices()
 {
-    return {tr("As the calendar sets it"), tr("Confidential"), tr("Private"), tr("Public")};
+    return {tr("Like the calendar"), tr("Confidential"), tr("Private"), tr("Public")};
 }
 
 QStringList OrganizerText::availabilityChoices()

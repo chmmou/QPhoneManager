@@ -44,6 +44,9 @@ qpm_add_core_test(tst_vnote)
 qpm_add_core_test(tst_holidays)
 qpm_add_core_test(tst_alarms)
 qpm_add_core_test(tst_organizerservice)
+qpm_add_core_test(tst_folderlisting)
+qpm_add_core_test(tst_files)
+qpm_add_core_test(tst_thumbnails)
 qpm_add_core_test(tst_nothirdpartyservices)
 target_compile_definitions(tst_nothirdpartyservices PRIVATE
     "QPM_SOURCE_DIR=\"${PROJECT_SOURCE_DIR}\""
@@ -107,6 +110,18 @@ target_compile_definitions(tst_messagearea PRIVATE
 qpm_set_project_warnings(tst_messagearea)
 add_test(NAME tst_messagearea COMMAND tst_messagearea)
 set_tests_properties(tst_messagearea PROPERTIES TIMEOUT 120)
+
+qt_add_executable(tst_transferqueue ui/tst_transferqueue.cpp)
+target_link_libraries(tst_transferqueue PRIVATE qpm_ui qpm_fakephone Qt6::Test)
+qpm_set_project_warnings(tst_transferqueue)
+add_test(NAME tst_transferqueue COMMAND tst_transferqueue)
+set_tests_properties(tst_transferqueue PROPERTIES TIMEOUT 120)
+
+qt_add_executable(tst_filebrowser ui/tst_filebrowser.cpp)
+target_link_libraries(tst_filebrowser PRIVATE qpm_ui qpm_fakephone Qt6::Gui Qt6::Test)
+qpm_set_project_warnings(tst_filebrowser)
+add_test(NAME tst_filebrowser COMMAND tst_filebrowser)
+set_tests_properties(tst_filebrowser PROPERTIES TIMEOUT 120)
 
 qt_add_executable(tst_accessibility ui/tst_accessibility.cpp)
 target_link_libraries(tst_accessibility PRIVATE qpm_ui qpm_uiplugin qpm_fakephone Qt6::Quick Qt6::Test)

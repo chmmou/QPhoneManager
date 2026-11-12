@@ -7,6 +7,8 @@
 #include "core/protocol/Discovery.h"
 #include "core/protocol/PhoneConnection.h"
 #include "core/service/DeviceStatusService.h"
+#include "core/service/FileService.h"
+#include "core/service/ThumbnailChannel.h"
 #include "platform/SecretStore.h"
 #include "ui/DeviceStatusModel.h"
 #include "ui/FoundPhoneModel.h"
@@ -108,7 +110,12 @@ AppController::AppController(Settings *settings, std::unique_ptr<SecretStore> se
       m_calls(new CallsArea(m_connection, m_contacts->service(), this)),
       m_messages(new MessagesArea(m_connection, m_statusService, this)),
       m_calendar(new CalendarArea(m_connection, this)),
-      m_tasks(new TasksArea(m_calendar->service(), this)), m_notes(new NotesArea(m_connection, this))
+      m_tasks(new TasksArea(m_calendar->service(), this)),
+      m_notes(new NotesArea(m_connection, this)),
+      m_fileService(new core::service::FileService(m_connection, this)),
+      m_thumbnailChannel(new core::service::ThumbnailChannel(m_connection, this)),
+      m_transfers(new TransferQueue(m_fileService, this)),
+      m_files(new FileBrowserModel(m_fileService, m_thumbnailChannel, m_transfers, m_photos, this))
 {
     Q_ASSERT(settings);
     const QString configured = settings->dataDirectory();
@@ -446,6 +453,8 @@ void AppController::onStateChanged()
     m_calendar->setConnected(isConnected());
     m_tasks->setConnected(isConnected());
     m_notes->setConnected(isConnected());
+    m_transfers->setConnected(isConnected());
+    m_files->setConnected(isConnected());
     Q_EMIT connectionStateChanged();
 }
 

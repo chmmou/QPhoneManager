@@ -170,6 +170,30 @@ ApplicationWindow {
     }
 
     Connections {
+        target: AppController.files
+
+        function onErrorOccurred(message: string): void {
+            messageBar.show(message, true);
+        }
+
+        function onInfoMessage(message: string): void {
+            messageBar.show(message, false);
+        }
+    }
+
+    Connections {
+        target: AppController.transfers
+
+        function onErrorOccurred(message: string): void {
+            messageBar.show(message, true);
+        }
+
+        function onInfoMessage(message: string): void {
+            messageBar.show(message, false);
+        }
+    }
+
+    Connections {
         target: AppController
 
         function onErrorOccurred(message: string): void {

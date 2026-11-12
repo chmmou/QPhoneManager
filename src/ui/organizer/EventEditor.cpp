@@ -222,6 +222,16 @@ QString EventEditor::timeExample() const
     return OrganizerText::timeExample();
 }
 
+QString EventEditor::dateHint() const
+{
+    return OrganizerText::dateHint();
+}
+
+QString EventEditor::timeHint() const
+{
+    return OrganizerText::timeHint();
+}
+
 QDateTime EventEditor::startOf() const
 {
     const QDate date = OrganizerText::parseDate(m_startDate);

@@ -2,7 +2,9 @@
 
 #include "core/Error.h"
 
+#include <QHash>
 #include <QImage>
+#include <QList>
 #include <QMutex>
 #include <QQuickImageProvider>
 #include <QSize>
@@ -31,8 +33,9 @@ inline constexpr int maxContactPhotoSide = 480;
 /**
  * The pictures the image provider hands out, shared between the main thread
  * and the threads the QML engine loads images on: the folder of the photo
- * blobs of the current phone, the photo being edited and the picture being
- * cropped. Every member may be called from any thread.
+ * blobs of the current phone, the photo being edited, the picture being
+ * cropped and the thumbnails of phone files, which are kept in memory only.
+ * Every member may be called from any thread.
  */
 class PhotoSource
 {
@@ -49,21 +52,32 @@ public:
     quint64 setCandidate(const QImage &image);
     [[nodiscard]] QImage candidate() const;
 
+    /// Most thumbnails kept; adding one more drops the oldest.
+    static constexpr qsizetype maxThumbnails = 3000;
+
+    /// Keeps a thumbnail and returns the number it is found under.
+    quint64 addThumbnail(const QImage &image);
+    /// The thumbnail `id`, or a null image when it is not kept.
+    [[nodiscard]] QImage thumbnail(quint64 id) const;
+    void clearThumbnails();
+
 private:
     mutable QMutex m_mutex;
     QString m_blobDirectory;
     QImage m_draft;
     QImage m_candidate;
+    QHash<quint64, QImage> m_thumbnails;
+    QList<quint64> m_thumbnailOrder;
     quint64 m_serial = 0;
 };
 
 /**
  * Hands out the program's pictures under "image://qpm/": "photo/<luid>/<blob>"
  * for a stored contact photo, "part/<blob>" for a picture sent in a message,
- * "draft/<n>" for the photo being edited and "candidate/<n>" for the picture
- * being cropped. Stored pictures are read with readImageSafely(). An unknown
- * or malformed id, and a blob that is no picture, yield an empty image.
- * requestImage() may run on a loader thread of the engine.
+ * "draft/<n>" for the photo being edited, "candidate/<n>" for the picture
+ * being cropped and "thumb/<n>" for the thumbnail of a phone file. Stored pictures are read with
+ * readImageSafely(). An unknown or malformed id, and a blob that is no picture, yield an empty
+ * image. requestImage() may run on a loader thread of the engine.
  */
 class PhoneImageProvider : public QQuickImageProvider
 {

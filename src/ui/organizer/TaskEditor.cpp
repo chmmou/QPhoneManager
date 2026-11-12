@@ -146,6 +146,16 @@ QString TaskEditor::timeExample() const
     return OrganizerText::timeExample();
 }
 
+QString TaskEditor::dateHint() const
+{
+    return OrganizerText::dateHint();
+}
+
+QString TaskEditor::timeHint() const
+{
+    return OrganizerText::timeHint();
+}
+
 QString TaskEditor::problem() const
 {
     if (m_task.summary.trimmed().isEmpty())
@@ -154,6 +164,8 @@ QString TaskEditor::problem() const
         return tr("Enter the start date like %1, or leave it empty.").arg(dateExample());
     if (!m_dueDate.trimmed().isEmpty() && !OrganizerText::parseDate(m_dueDate).isValid())
         return tr("Enter the due date like %1, or leave it empty.").arg(dateExample());
+    if (const QString order = dateOrderProblem(); !order.isEmpty())
+        return order;
     const bool reminderDate = !m_reminderDate.trimmed().isEmpty();
     const bool reminderTime = !m_reminderTime.trimmed().isEmpty();
     if (reminderDate != reminderTime)
@@ -162,6 +174,15 @@ QString TaskEditor::problem() const
         return tr("Enter the date of the reminder like %1.").arg(dateExample());
     if (reminderTime && !OrganizerText::parseTime(m_reminderTime).isValid())
         return tr("Enter the time of the reminder like %1.").arg(timeExample());
+    return {};
+}
+
+QString TaskEditor::dateOrderProblem() const
+{
+    const QDate start = OrganizerText::parseDate(m_startDate);
+    const QDate due = OrganizerText::parseDate(m_dueDate);
+    if (start.isValid() && due.isValid() && start > due)
+        return tr("The start lies after the due date. Change one of the two dates.");
     return {};
 }
 

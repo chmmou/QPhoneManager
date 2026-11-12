@@ -75,6 +75,13 @@ public:
     };
     Q_DECLARE_FLAGS(SetPathFlags, SetPathFlag)
 
+    /// How far a folder listing reaches.
+    enum class ListingDepth {
+        Folder,
+        /// The folder and every folder below it, one listing block each.
+        Tree,
+    };
+
     struct PutOptions
     {
         /// Sent as the Time header in UTC when set.
@@ -93,6 +100,14 @@ public:
      */
     QFuture<Result<ObexResponse>> get(const QString &name, const QByteArray &type = {},
                                       std::chrono::milliseconds timeout = std::chrono::seconds(90));
+
+    /**
+     * Reads the listing of the current Filebrowser folder as the phone sends
+     * it, see codec::parseFolderListing(). Every received chunk and every
+     * keep-alive restarts `timeout`.
+     */
+    QFuture<Result<ObexResponse>>
+    listFolder(ListingDepth depth, std::chrono::milliseconds timeout = std::chrono::seconds(30));
 
     /**
      * Writes `body` to `name` in a single packet. Fails with

@@ -167,6 +167,20 @@ QFuture<Result<ObexResponse>> ObexClient::get(const QString &name, const QByteAr
     return enqueueForResponse(std::move(request));
 }
 
+QFuture<Result<ObexResponse>> ObexClient::listFolder(ListingDepth depth,
+                                                     std::chrono::milliseconds timeout)
+{
+    ObexPacket packet;
+    packet.code = obex::opGetFinal;
+    packet.type = QByteArrayLiteral("x-obex/folder-listing");
+    // The phone takes this target name as the request for the folders below.
+    if (depth == ListingDepth::Tree)
+        packet.targetName = QStringLiteral("/*");
+    std::unique_ptr<Request> request = makeRequest(packet, timeout);
+    request->maxBodyBytes = limits::maxObexFileBytes;
+    return enqueueForResponse(std::move(request));
+}
+
 QFuture<Result<ObexResponse>> ObexClient::put(const QString &name, const QByteArray &body,
                                               const PutOptions &options)
 {

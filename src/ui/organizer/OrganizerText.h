@@ -42,6 +42,10 @@ public:
     [[nodiscard]] static QString dateExample();
     /// A time written the way parseTime() takes it, for hints.
     [[nodiscard]] static QString timeExample();
+    /// The form of a date in the locale with letters, such as "DD/MM/YYYY", for an empty field.
+    [[nodiscard]] static QString dateHint();
+    /// The form of a time with letters, such as "hh:mm", for an empty field.
+    [[nodiscard]] static QString timeHint();
 
     /// What went wrong and what to do; empty for a cancelled operation.
     [[nodiscard]] static QString errorText(const core::Error &error, Area area);

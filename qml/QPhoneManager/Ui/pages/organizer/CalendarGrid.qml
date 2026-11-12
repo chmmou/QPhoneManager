@@ -123,30 +123,7 @@ Item {
 
                     Repeater {
                         model: dayCell.entries
-
-                        delegate: RowLayout {
-                            id: entryRow
-
-                            required property int index
-                            required property string modelData
-
-                            Layout.fillWidth: true
-                            spacing: Theme.gridUnit
-
-                            Rectangle {
-                                Layout.preferredWidth: Theme.gridUnit * 2
-                                Layout.preferredHeight: Theme.gridUnit * 2
-                                radius: Theme.gridUnit
-                                color: dayCell.entryColors[entryRow.index]
-                            }
-
-                            Label {
-                                Layout.fillWidth: true
-                                text: entryRow.modelData
-                                font.pixelSize: TypeScale.hint
-                                elide: Text.ElideRight
-                            }
-                        }
+                        delegate: root.rows === 1 ? weekEntry : monthEntry
                     }
 
                     Label {
@@ -159,6 +136,75 @@ Item {
 
                     Item {
                         Layout.fillHeight: true
+                    }
+                }
+
+                // A week has tall cells, so a title takes up to three lines there.
+                Component {
+                    id: weekEntry
+
+                    Label {
+                        id: weekLabel
+
+                        required property int index
+                        required property string modelData
+                        readonly property int dotRoom: Theme.gridUnit * 3
+
+                        Layout.fillWidth: true
+                        text: weekLabel.modelData
+                        font.pixelSize: TypeScale.hint
+                        wrapMode: Text.Wrap
+                        maximumLineCount: 3
+                        elide: Text.ElideRight
+
+                        // Only the first line leaves room for the dot, so the lines
+                        // below it get the full width of the cell. With this handler
+                        // connected, a single line laid out by a layout is not elided,
+                        // which is why a month cell does without it.
+                        onLineLaidOut: line => {
+                            if (line.number === 0) {
+                                line.x += weekLabel.dotRoom;
+                                line.width -= weekLabel.dotRoom;
+                            }
+                        }
+
+                        Rectangle {
+                            y: Theme.gridUnit
+                            width: Theme.gridUnit * 2
+                            height: Theme.gridUnit * 2
+                            radius: Theme.gridUnit
+                            color: dayCell.entryColors[weekLabel.index]
+                        }
+                    }
+                }
+
+                Component {
+                    id: monthEntry
+
+                    RowLayout {
+                        id: monthRow
+
+                        required property int index
+                        required property string modelData
+
+                        Layout.fillWidth: true
+                        spacing: Theme.gridUnit
+
+                        Rectangle {
+                            Layout.alignment: Qt.AlignTop
+                            Layout.topMargin: Theme.gridUnit
+                            Layout.preferredWidth: Theme.gridUnit * 2
+                            Layout.preferredHeight: Theme.gridUnit * 2
+                            radius: Theme.gridUnit
+                            color: dayCell.entryColors[monthRow.index]
+                        }
+
+                        Label {
+                            Layout.fillWidth: true
+                            text: monthRow.modelData
+                            font.pixelSize: TypeScale.hint
+                            elide: Text.ElideRight
+                        }
                     }
                 }
             }

@@ -24,7 +24,8 @@ Item {
         // The list scrolls through more appointments than fit.
         clip: true
         model: root.area.list
-        currentIndex: -1
+        // Starts at the appearance shown, so that a list made anew keeps it.
+        currentIndex: root.area.currentRow
         activeFocusOnTab: true
         keyNavigationEnabled: true
         highlightMoveDuration: 0
@@ -107,7 +108,7 @@ Item {
 
                     Label {
                         Layout.fillWidth: true
-                        text: eventRow.location.length > 0 ? qsTr("%1, %2").arg(eventRow.timeText, eventRow.location) : eventRow.timeText
+                        text: eventRow.location.length > 0 ? qsTr("%1, %2").arg(eventRow.timeText).arg(eventRow.location) : eventRow.timeText
                         font.pixelSize: TypeScale.hint
                         color: Theme.foregroundOnSurfaceVariant
                         elide: Text.ElideRight
@@ -142,6 +143,26 @@ Item {
         anchors.fill: parent
         visible: list.count === 0
         text: root.emptyText
+    }
+
+    Connections {
+        target: root.area
+
+        function onCurrentChanged(): void {
+            list.currentIndex = root.area.currentRow;
+        }
+    }
+
+    Connections {
+        target: root.area.list
+
+        function onCountChanged(): void {
+            list.currentIndex = root.area.currentRow;
+        }
+
+        function onModelReset(): void {
+            list.currentIndex = root.area.currentRow;
+        }
     }
 
     function luidAt(row: int): int {

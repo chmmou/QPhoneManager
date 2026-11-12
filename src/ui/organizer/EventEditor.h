@@ -78,6 +78,10 @@ class EventEditor : public QObject
     Q_PROPERTY(QString problem READ problem NOTIFY fieldsChanged FINAL)
     Q_PROPERTY(QString dateExample READ dateExample CONSTANT FINAL)
     Q_PROPERTY(QString timeExample READ timeExample CONSTANT FINAL)
+    /// The form of a date with letters, for an empty date field.
+    Q_PROPERTY(QString dateHint READ dateHint CONSTANT FINAL)
+    /// The form of a time with letters, for an empty time field.
+    Q_PROPERTY(QString timeHint READ timeHint CONSTANT FINAL)
     Q_PROPERTY(bool modified READ isModified NOTIFY fieldsChanged FINAL)
     Q_PROPERTY(bool busy READ isBusy NOTIFY busyChanged FINAL)
     /// Connected, not busy, no problem.
@@ -133,6 +137,8 @@ public:
     [[nodiscard]] QString problem() const;
     [[nodiscard]] QString dateExample() const;
     [[nodiscard]] QString timeExample() const;
+    [[nodiscard]] QString dateHint() const;
+    [[nodiscard]] QString timeHint() const;
     [[nodiscard]] bool isModified() const;
     [[nodiscard]] bool isBusy() const { return m_busy; }
     [[nodiscard]] bool canSave() const;

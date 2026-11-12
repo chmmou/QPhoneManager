@@ -108,6 +108,30 @@ QImage PhotoSource::candidate() const
     return m_candidate;
 }
 
+quint64 PhotoSource::addThumbnail(const QImage &image)
+{
+    const QMutexLocker locker(&m_mutex);
+    const quint64 id = ++m_serial;
+    m_thumbnails.insert(id, image);
+    m_thumbnailOrder.append(id);
+    while (m_thumbnailOrder.size() > maxThumbnails)
+        m_thumbnails.remove(m_thumbnailOrder.takeFirst());
+    return id;
+}
+
+QImage PhotoSource::thumbnail(quint64 id) const
+{
+    const QMutexLocker locker(&m_mutex);
+    return m_thumbnails.value(id);
+}
+
+void PhotoSource::clearThumbnails()
+{
+    const QMutexLocker locker(&m_mutex);
+    m_thumbnails.clear();
+    m_thumbnailOrder.clear();
+}
+
 PhoneImageProvider::PhoneImageProvider(std::shared_ptr<PhotoSource> source, QObject *parent)
     : QQuickImageProvider(QQmlImageProviderBase::Image), m_source(std::move(source))
 {
@@ -122,6 +146,11 @@ QImage PhoneImageProvider::requestImage(const QString &id, QSize *size, const QS
         image = fitted(m_source->draft(), requestedSize);
     } else if (parts.value(0) == QLatin1StringView("candidate")) {
         image = fitted(m_source->candidate(), requestedSize);
+    } else if (parts.size() == 2 && parts.at(0) == QLatin1StringView("thumb")) {
+        bool ok = false;
+        const quint64 thumb = parts.at(1).toULongLong(&ok);
+        if (ok)
+            image = fitted(m_source->thumbnail(thumb), requestedSize);
     } else if ((parts.size() == 3 && parts.at(0) == QLatin1StringView("photo") &&
                 isBlobName(parts.at(2))) ||
                (parts.size() == 2 && parts.at(0) == QLatin1StringView("part") &&

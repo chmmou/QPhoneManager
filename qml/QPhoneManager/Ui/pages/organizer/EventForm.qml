@@ -100,9 +100,9 @@ Item {
                         objectName: "eventStartDateField"
                         Layout.fillWidth: true
                         text: root.editor.startDate
-                        // Shown only while empty: the outlined field would float the example
-                        // above the value like a label.
-                        placeholderText: startDateField.text.length > 0 ? "" : root.editor.dateExample
+                        // Shown only while empty: the outlined field would float the form
+                        // of the date above the value like a label.
+                        placeholderText: startDateField.text.length > 0 ? "" : root.editor.dateHint
                         Accessible.name: qsTr("Start date")
                         onTextEdited: root.editor.startDate = startDateField.text
                     }
@@ -114,7 +114,7 @@ Item {
                         Layout.preferredWidth: TypeScale.body * 6
                         enabled: !root.editor.allDay
                         text: root.editor.startTime
-                        placeholderText: startTimeField.text.length > 0 ? "" : root.editor.timeExample
+                        placeholderText: startTimeField.text.length > 0 ? "" : root.editor.timeHint
                         Accessible.name: qsTr("Start time")
                         onTextEdited: root.editor.startTime = startTimeField.text
                     }
@@ -129,7 +129,7 @@ Item {
                         objectName: "eventEndDateField"
                         Layout.fillWidth: true
                         text: root.editor.endDate
-                        placeholderText: endDateField.text.length > 0 ? "" : root.editor.dateExample
+                        placeholderText: endDateField.text.length > 0 ? "" : root.editor.dateHint
                         Accessible.name: qsTr("End date")
                         onTextEdited: root.editor.endDate = endDateField.text
                     }
@@ -141,7 +141,7 @@ Item {
                         Layout.preferredWidth: TypeScale.body * 6
                         enabled: !root.editor.allDay
                         text: root.editor.endTime
-                        placeholderText: endTimeField.text.length > 0 ? "" : root.editor.timeExample
+                        placeholderText: endTimeField.text.length > 0 ? "" : root.editor.timeHint
                         Accessible.name: qsTr("End time")
                         onTextEdited: root.editor.endTime = endTimeField.text
                     }

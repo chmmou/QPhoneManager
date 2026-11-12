@@ -441,6 +441,7 @@ struct FakePhone::Transfer
     QPointer<QTcpSocket> side;
     bool done = false;
     bool statusPending = false;
+    bool missed = false;
 };
 
 FakePhone::FakePhone(QObject *parent)
@@ -1100,6 +1101,7 @@ void FakePhone::handleObex(const QByteArray &bytes)
         return;
     case obex::opAbort:
         m_pendingStream.clear();
+        dropTransfer();
         sendPacket(codeOnly(obex::rspOk));
         return;
     default:
@@ -1716,7 +1718,7 @@ void FakePhone::handleFileRequest(const ObexPacket &request)
     }
     case obex::opGetFinal:
         if (request.type == "x-obex/folder-listing") {
-            sendBody(folderListing());
+            sendBody(folderListing(request.targetName == QStringLiteral("/*")));
         } else if (const auto file = this->file(resolve(name))) {
             sendBody(file->data);
         } else {
@@ -1724,6 +1726,10 @@ void FakePhone::handleFileRequest(const ObexPacket &request)
         }
         return;
     case obex::opPutFinal: {
+        if (name == QLatin1StringView("\\getthumbnail")) {
+            handleThumbnailRequest(request.body);
+            return;
+        }
         const QString path = resolve(name);
         if (request.bodyKind != ObexPacket::BodyKind::None) {
             QDateTime modified = QDateTime::currentDateTimeUtc();
@@ -1794,10 +1800,23 @@ void FakePhone::handleFileRequest(const ObexPacket &request)
             return;
         }
         Transfer *raw = transfer.get();
+        if (raw->upload && m_config.missedUploadChannels > 0) {
+            --m_config.missedUploadChannels;
+            raw->missed = true;
+        }
         connect(transfer->server, &QTcpServer::newConnection, this, [this, raw]() {
             QTcpSocket *side = raw->server->nextPendingConnection();
+            if (!raw->upload && m_config.droppedDownloadConnections > 0) {
+                --m_config.droppedDownloadConnections;
+                side->disconnectFromHost();
+                return;
+            }
             raw->side = side;
             raw->server->close();
+            if (raw->missed) {
+                side->disconnectFromHost();
+                return;
+            }
             if (!raw->upload) {
                 side->write(raw->data);
                 side->disconnectFromHost();
@@ -1806,7 +1825,7 @@ void FakePhone::handleFileRequest(const ObexPacket &request)
                     finishTransfer();
                 return;
             }
-            connect(side, &QTcpSocket::readyRead, this, [this, raw, side]() {
+            const auto receive = [this, raw, side]() {
                 raw->data += side->readAll();
                 if (quint64(raw->data.size()) >= raw->length && !raw->done) {
                     raw->done = true;
@@ -1815,6 +1834,32 @@ void FakePhone::handleFileRequest(const ObexPacket &request)
                     if (raw->statusPending)
                         finishTransfer();
                 }
+            };
+            const auto read = [this, side, receive]() {
+                connect(side, &QTcpSocket::readyRead, this, receive);
+                // Like the client, an empty upload ends when the other side closes.
+                connect(side, &QTcpSocket::disconnected, this, receive);
+                if (side->bytesAvailable() > 0)
+                    receive();
+            };
+            if (m_config.uploadReadDelay.count() <= 0) {
+                read();
+                return;
+            }
+            auto closedEarly = std::make_shared<bool>(false);
+            connect(side, &QTcpSocket::disconnected, this,
+                    [closedEarly]() { *closedEarly = true; });
+            QTimer::singleShot(m_config.uploadReadDelay, side, [this, raw, closedEarly, read]() {
+                if (m_transfer.get() != raw)
+                    return;
+                if (!*closedEarly) {
+                    read();
+                    return;
+                }
+                raw->done = true;
+                addFile(raw->path, QByteArray(), raw->modified);
+                if (raw->statusPending)
+                    finishTransfer();
             });
         });
         ObexPacket response;
@@ -1830,6 +1875,11 @@ void FakePhone::handleFileRequest(const ObexPacket &request)
     case obex::opSocketStatus:
         if (!m_transfer) {
             sendFirst(codeOnly(obex::rspPreconditionFailed));
+        } else if (m_transfer->missed && !m_transfer->done) {
+            // The client closes the file also when it answers "timeout".
+            m_transfer->done = true;
+            addFile(m_transfer->path, QByteArray(), m_transfer->modified);
+            sendFirst(codeOnly(obex::rspRequestTimeout));
         } else if (m_transfer->done) {
             finishTransfer();
         } else {
@@ -1854,6 +1904,86 @@ void FakePhone::finishTransfer()
     sendPacket(codeOnly(obex::rspOk));
 }
 
+void FakePhone::dropTransfer()
+{
+    if (!m_transfer)
+        return;
+    if (m_transfer->side) {
+        m_transfer->side->disconnect(this);
+        m_transfer->side->abort();
+    }
+    if (m_transfer->server) {
+        m_transfer->server->disconnect(this);
+        m_transfer->server->deleteLater();
+    }
+    m_transfer.reset();
+}
+
+void FakePhone::handleThumbnailRequest(const QByteArray &body)
+{
+    m_thumbnailRequests.append(body);
+    const auto parsed = core::codec::parseSafeXml(body);
+    if (!parsed.hasValue()) {
+        sendFirst(codeOnly(obex::rspBadRequest));
+        return;
+    }
+    QString folderAttribute;
+    QStringList names;
+    for (const core::codec::XmlElement &child : parsed.value().children) {
+        if (child.name == QLatin1StringView("folder") && folderAttribute.isEmpty())
+            folderAttribute = child.attribute(QStringLiteral("path"));
+        else if (child.name == QLatin1StringView("file"))
+            names.append(child.attribute(QStringLiteral("name")));
+    }
+    if (names.isEmpty()) {
+        sendFirst(codeOnly(obex::rspBadRequest));
+        return;
+    }
+    static const QStringList pictureSuffixes = {QStringLiteral(".jpg"), QStringLiteral(".jpeg"),
+                                                QStringLiteral(".png"), QStringLiteral(".gif"),
+                                                QStringLiteral(".mp4"), QStringLiteral(".mov")};
+    const QString folder = resolve(folderAttribute);
+    QByteArray stream;
+    for (const QString &leaf : std::as_const(names)) {
+        const bool picture = std::any_of(
+            pictureSuffixes.cbegin(), pictureSuffixes.cend(),
+            [&leaf](const QString &suffix) { return leaf.endsWith(suffix, Qt::CaseInsensitive); });
+        const std::optional<FakeFile> found = file(folder + u'\\' + leaf);
+        if (!picture || !found)
+            continue;
+        stream += "FileBegin;" + folderAttribute.toUtf8() + '\\' + leaf.toUtf8() +
+                  ";Orientation=" + QByteArray::number(m_config.thumbnailOrientation) + "\r\n";
+        stream += found->data + "\r\nFileEnd";
+    }
+    stream += "FileBegin;EndOfStream\r\n";
+
+    if (m_thumbnailServer)
+        m_thumbnailServer->deleteLater();
+    m_thumbnailServer = new QTcpServer(this);
+    if (!m_thumbnailServer->listen(QHostAddress::LocalHost, 0)) {
+        sendFirst(codeOnly(obex::rspInternalServerError));
+        return;
+    }
+    QTcpServer *server = m_thumbnailServer;
+    connect(server, &QTcpServer::newConnection, this, [this, server, stream]() {
+        QTcpSocket *side = server->nextPendingConnection();
+        if (m_config.droppedThumbnailConnections > 0) {
+            --m_config.droppedThumbnailConnections;
+            side->disconnectFromHost();
+            return;
+        }
+        server->close();
+        // Like the client, the stream ends with its marker and the socket
+        // stays open until the other side closes it.
+        side->write(stream);
+        connect(side, &QTcpSocket::disconnected, side, &QObject::deleteLater);
+    });
+    ObexPacket response;
+    response.code = obex::rspOk;
+    response.appParameters = "TCP:" + QByteArray::number(server->serverPort());
+    sendFirst(encoded(response));
+}
+
 QString FakePhone::resolve(const QString &name) const
 {
     QString path;
@@ -1868,23 +1998,41 @@ QString FakePhone::resolve(const QString &name) const
     return path;
 }
 
-QByteArray FakePhone::folderListing() const
+QByteArray FakePhone::folderListing(bool withSubfolders) const
 {
-    QString xml = QStringLiteral("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
-                                 "<!DOCTYPE folder-listing SYSTEM \"obex-folder-listing.dtd\">\r\n"
-                                 "<folder-listing version=\"1.0\">\r\n");
+    QString xml =
+        QStringLiteral("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
+                       "<!DOCTYPE folder-listing SYSTEM \"obex-folder-listing.dtd\">\r\n");
+    xml += folderListingBlock(m_currentFolder);
+    if (withSubfolders) {
+        QStringList below;
+        const QString prefix = m_currentFolder + u'\\';
+        for (const QString &folder : m_folders) {
+            if (folder.startsWith(prefix))
+                below.append(folder);
+        }
+        below.sort();
+        for (const QString &folder : std::as_const(below))
+            xml += folderListingBlock(folder);
+    }
+    return xml.toUtf8();
+}
+
+QString FakePhone::folderListingBlock(const QString &folder) const
+{
+    QString xml = QStringLiteral("<folder-listing version=\"1.0\">\r\n");
     xml += QStringLiteral("<parent-folder path=\"%1\"/>")
-               .arg(m_currentFolder.isEmpty() ? QString() : xmlEscaped(m_currentFolder + u'\\'));
+               .arg(folder.isEmpty() ? QString() : xmlEscaped(folder + u'\\'));
     QStringList folders;
-    for (const QString &folder : m_folders) {
-        if (parentOf(folder) == m_currentFolder)
-            folders.append(leafOf(folder));
+    for (const QString &candidate : m_folders) {
+        if (parentOf(candidate) == folder)
+            folders.append(leafOf(candidate));
     }
     folders.sort();
-    for (const QString &folder : std::as_const(folders))
-        xml += QStringLiteral("\r\n<folder name=\"%1\"/>").arg(xmlEscaped(folder));
+    for (const QString &name : std::as_const(folders))
+        xml += QStringLiteral("\r\n<folder name=\"%1\"/>").arg(xmlEscaped(name));
     for (auto it = m_files.cbegin(); it != m_files.cend(); ++it) {
-        if (parentOf(it.key()) != m_currentFolder)
+        if (parentOf(it.key()) != folder)
             continue;
         xml += QStringLiteral("\r\n<file name=\"%1\" size=\"%2\" modified=\"%3\"/>")
                    .arg(xmlEscaped(leafOf(it.key())))
@@ -1892,7 +2040,7 @@ QByteArray FakePhone::folderListing() const
                    .arg(core::codec::formatUtcStamp(it.value().modified));
     }
     xml += QStringLiteral("\r\n</folder-listing>");
-    return xml.toUtf8();
+    return xml;
 }
 
 QString FakePhone::uniqueName(const QString &path) const
