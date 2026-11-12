@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <array>
+#include <utility>
 
 namespace qpm::test {
 
@@ -918,6 +919,9 @@ void FakePhone::handleAt(const QString &command)
         writeAt("AT+CPROT=0\r\nCONNECT\r\n");
         m_obexMode = true;
         m_target.clear();
+        m_answersInSession = 0;
+        if (!m_config.lateLine.isEmpty() && m_config.lateLineBeforeAnswer < 0)
+            writeAt(std::exchange(m_config.lateLine, {}) + "\r\n");
         return;
     }
 
@@ -2528,10 +2532,15 @@ QString FakePhone::uniqueName(const QString &path) const
 
 void FakePhone::sendPacket(const QByteArray &packet)
 {
-    if (m_socket) {
-        m_socket->write(packet);
+    if (!m_socket)
+        return;
+    if (!m_config.lateLine.isEmpty() && m_config.lateLineBeforeAnswer == m_answersInSession) {
+        m_socket->write(std::exchange(m_config.lateLine, {}) + "\r\n");
         m_socket->flush();
     }
+    ++m_answersInSession;
+    m_socket->write(packet);
+    m_socket->flush();
 }
 
 void FakePhone::sendFirst(const QByteArray &packet)

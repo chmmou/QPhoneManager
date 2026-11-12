@@ -145,6 +145,13 @@ void AtSession::writeRaw(const QByteArray &bytes)
         m_transport->write(bytes);
 }
 
+void AtSession::takeLateLine(const QByteArray &line)
+{
+    if (m_ended || line.trimmed().isEmpty())
+        return;
+    processLine(QString::fromUtf8(line.endsWith('\r') ? line.chopped(1) : line));
+}
+
 void AtSession::terminate(const Error &error)
 {
     if (m_ended)

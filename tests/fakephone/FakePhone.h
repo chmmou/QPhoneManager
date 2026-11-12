@@ -160,6 +160,19 @@ struct FakePhoneConfig
     quint8 connectRefusal = 0;
     /// Bytes written right behind the answer to DISCONNECT, in the same write.
     QByteArray afterDisconnect;
+    /**
+     * A line such as "+CMTI: \"ME\",3", without its line end, that arrives
+     * late, inside the next OBEX session, as from a client that queued it in
+     * AT mode just before the switch. Written once, with CRLF and a write of
+     * its own; the field is emptied then.
+     */
+    QByteArray lateLine;
+    /**
+     * Where lateLine goes: -1 right behind CONNECT, otherwise right before the
+     * OBEX answer packet with this index in the session, counted from 0 for
+     * the answer to the OBEX CONNECT.
+     */
+    int lateLineBeforeAnswer = -1;
     /// Name of an OBEX GET; the connection is closed right after its last answer packet.
     QString dropAfterGet;
     /// Answer every call log command with ERROR, as a client without the permission does.
@@ -512,6 +525,8 @@ private:
     QString m_currentFolder;
     quint16 m_maxPacket = 0xFFFF;
     qsizetype m_discard = 0;
+    /// OBEX answer packets sent in the running session.
+    int m_answersInSession = 0;
     QByteArray m_pendingStream;
     std::unique_ptr<Transfer> m_transfer;
     QList<QByteArray> m_thumbnailRequests;

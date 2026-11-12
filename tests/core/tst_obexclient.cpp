@@ -1,3 +1,4 @@
+#include "core/codec/Limits.h"
 #include "core/codec/SafeXml.h"
 #include "core/protocol/AtSession.h"
 #include "core/protocol/ObexClient.h"
@@ -66,6 +67,35 @@ public:
     bool m_failOnContinue = false;
 };
 
+// A TCP stream that hands on what it receives one byte at a time, so that
+// every line and every packet arrives split over many reads.
+class ByteWiseTransport : public Transport
+{
+    Q_OBJECT
+
+public:
+    ByteWiseTransport(const QString &host, quint16 port, QObject *parent = nullptr)
+        : Transport(parent), m_inner(host, port)
+    {
+        connect(&m_inner, &Transport::opened, this, &Transport::opened);
+        connect(&m_inner, &Transport::failed, this, &Transport::failed);
+        connect(&m_inner, &Transport::closed, this, &Transport::closed);
+        connect(&m_inner, &Transport::dataReceived, this, [this](const QByteArray &chunk) {
+            for (const char byte : chunk)
+                Q_EMIT dataReceived(QByteArray(1, byte));
+        });
+    }
+
+    void open() override { m_inner.open(); }
+    void close() override { m_inner.close(); }
+    void write(const QByteArray &frame) override { m_inner.write(frame); }
+    [[nodiscard]] bool isOpen() const override { return m_inner.isOpen(); }
+    [[nodiscard]] QString peerDescription() const override { return m_inner.peerDescription(); }
+
+private:
+    TcpTransport m_inner;
+};
+
 } // namespace
 
 class TestObexClient : public QObject
@@ -101,12 +131,15 @@ private Q_SLOTS:
     void refusedConnectReportsItsMappedError();
     void streamEndingWhileAnsweringFailsTheRequestCleanly_data();
     void streamEndingWhileAnsweringFailsTheRequestCleanly();
+    void lateAtLineIsPassedOnAndTheAnswersAreStillRead_data();
+    void lateAtLineIsPassedOnAndTheAnswersAreStillRead();
+    void overlongLateAtLineEndsTheSession();
 
 private:
     [[nodiscard]] bool connectTo(ObexClient::Target target);
 
     std::unique_ptr<FakePhone> m_phone;
-    std::unique_ptr<TcpTransport> m_transport;
+    std::unique_ptr<Transport> m_transport;
     std::unique_ptr<AtSession> m_session;
     std::unique_ptr<ObexClient> m_obex;
 };
@@ -579,6 +612,75 @@ void TestObexClient::streamEndingWhileAnsweringFailsTheRequestCleanly()
     QCOMPARE(dump.result().error().code(), ErrorCode::ConnectionClosed);
     QVERIFY(m_session->isEnded());
     QVERIFY(!m_obex->isConnected());
+}
+
+void TestObexClient::lateAtLineIsPassedOnAndTheAnswersAreStillRead_data()
+{
+    QTest::addColumn<int>("beforeAnswer");
+    QTest::addColumn<bool>("byteWise");
+
+    QTest::newRow("behind CONNECT") << -1 << false;
+    QTest::newRow("between two answers") << 1 << false;
+    QTest::newRow("before the DISCONNECT answer") << 2 << false;
+    QTest::newRow("behind CONNECT, byte by byte") << -1 << true;
+    QTest::newRow("between two answers, byte by byte") << 1 << true;
+}
+
+// The client queues its notices in AT mode and can send one after it has
+// switched to OBEX mode. The text was read as the length of an OBEX packet,
+// so the answers behind it were never complete and the request timed out.
+void TestObexClient::lateAtLineIsPassedOnAndTheAnswersAreStillRead()
+{
+    QFETCH(int, beforeAnswer);
+    QFETCH(bool, byteWise);
+    if (byteWise) {
+        m_obex.reset();
+        m_session.reset();
+        m_transport =
+            std::make_unique<ByteWiseTransport>(QStringLiteral("127.0.0.1"), m_phone->port());
+        m_session = std::make_unique<AtSession>(m_transport.get());
+        m_obex = std::make_unique<ObexClient>(m_session.get());
+        QSignalSpy opened(m_transport.get(), &Transport::opened);
+        m_transport->open();
+        QVERIFY(opened.wait());
+    }
+    m_phone->setObjects(QStringLiteral("notes"), manyNotes(3));
+    m_phone->config().lateLine = QByteArrayLiteral("+CMTI: \"ME\",3");
+    m_phone->config().lateLineBeforeAnswer = beforeAnswer;
+    QSignalSpy unsolicited(m_session.get(), &AtSession::unsolicited);
+
+    QVERIFY(connectTo(ObexClient::Target::IrmcSync));
+    const QFuture<Result<ObexResponse>> info =
+        m_obex->get(QStringLiteral("telecom/notes/info.log"));
+    QVERIFY(waitFor(info));
+    const QFuture<Result<void>> disconnected = m_obex->disconnectTarget();
+    QVERIFY(waitFor(disconnected));
+
+    QVERIFY(info.result().hasValue());
+    QCOMPARE(info.result().value().body, QByteArrayLiteral("Total-Records:3"));
+    QVERIFY(disconnected.result().hasValue());
+    QCOMPARE(unsolicited.count(), 1);
+    QCOMPARE(unsolicited.first().first().toString(), QStringLiteral("+CMTI: \"ME\",3"));
+    QVERIFY(m_phone->config().lateLine.isEmpty());
+    const QFuture<AtReply> battery = m_session->send(QStringLiteral("AT+CBC"));
+    QVERIFY(waitFor(battery));
+    QCOMPARE(battery.result().status, AtReply::Status::Ok);
+}
+
+void TestObexClient::overlongLateAtLineEndsTheSession()
+{
+    m_phone->config().lateLine = QByteArray(limits::maxAtLineBytes + 1, 'A');
+    m_phone->config().lateLineBeforeAnswer = 0;
+    QSignalSpy fatal(m_session.get(), &AtSession::fatal);
+
+    const QFuture<Result<void>> connected = m_obex->connectTarget(ObexClient::Target::IrmcSync);
+    QVERIFY(waitFor(connected));
+
+    QCOMPARE(connected.result().error().code(), ErrorCode::LimitExceeded);
+    QVERIFY(m_session->isEnded());
+    QCOMPARE(fatal.count(), 1);
+    QCOMPARE(fatal.first().first().value<Error>().code(), ErrorCode::LimitExceeded);
+    QTRY_VERIFY(!m_transport->isOpen());
 }
 
 QTEST_GUILESS_MAIN(TestObexClient)
