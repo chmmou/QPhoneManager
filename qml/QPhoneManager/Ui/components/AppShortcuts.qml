@@ -34,8 +34,12 @@ Item {
         onActivated: root.searchRequested()
     }
 
+    // StandardKey.Refresh and StandardKey.Quit depend on the desktop theme
+    // and resolve to nothing on some. The program runs on Linux only, where
+    // F5 and Ctrl+Q are the usual keys; listing them next to the standard
+    // keys would register the same key twice on the themes that know it.
     Shortcut {
-        sequences: [StandardKey.Refresh]
+        sequence: "F5"
         enabled: root.canSync
         onActivated: root.syncRequested()
     }
@@ -46,7 +50,7 @@ Item {
     }
 
     Shortcut {
-        sequences: [StandardKey.Quit]
+        sequence: "Ctrl+Q"
         onActivated: root.quitRequested()
     }
 
