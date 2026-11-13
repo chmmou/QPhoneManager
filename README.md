@@ -139,7 +139,14 @@ system. appimagetool packs the AppImage.
 
 The script downloads these tools once into
 `~/.cache/qphonemanager/appimage-tools` and checks each one against a fixed
-SHA-256 sum on every run. It stops when a sum does not match.
+SHA-256 sum on every run. It stops when a sum does not match. Set
+`QPM_APPIMAGE_TOOLS_DIR` to keep them in another directory.
+`build-appimage.sh --fetch-tools` only downloads and checks them.
+
+To sign the AppImage, set `QPM_APPIMAGE_SIGN_KEY` to the fingerprint of a
+secret key in your gpg keyring. appimagetool then embeds the signature and the
+public key in the AppImage. `packaging/appimage/verify-signature.sh` checks
+that signature and the detached one in `<AppImage>.asc`.
 
 | Tool | Version |
 |---|---|
@@ -157,8 +164,40 @@ sudo apt install libxcb-cursor0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libx
 
 Running the AppImage needs FUSE, that is `fusermount3` or `fusermount` on
 `PATH`. Without it, start the AppImage with `--appimage-extract-and-run`.
-The AppImage needs glibc 2.43 or newer and takes `libstdc++` from the
-system.
+The AppImage takes glibc and `libstdc++` from the system, so it needs at
+least the versions of the machine it was built on. The release AppImage is
+built on Ubuntu 22.04 and needs glibc 2.34 and the `libstdc++` of GCC 11
+(`GLIBCXX_3.4.29`) or newer.
+
+## Releases
+
+The owner makes a release by pushing a tag `vX.Y.Z` that names the version
+in `CMakeLists.txt`. A suffix such as `v1.1.0-rc.1` makes a pre-release.
+The workflow `.github/workflows/release.yml` then builds and tests the
+release preset, builds the AppImage, signs it and creates the GitHub release
+with three files: the AppImage, its signature `<AppImage>.asc` and
+`SHA256SUMS`. Started by hand, the workflow makes an unsigned test build and
+keeps the AppImage as an artifact of the run.
+
+The workflow builds in the image `ghcr.io/chmmou/qphonemanager/ci-ubuntu`
+from `res/ci/ubuntu/Dockerfile`. The workflow `deps-image.yml` builds it.
+
+The workflow needs one secret, `GPG_PRIVATE_KEY`: the owner's secret key,
+ASCII-armored and without a passphrase. A tag run without it stops with an
+error.
+
+To check a downloaded AppImage, import the owner's public key and verify the
+signature:
+
+```bash
+curl -fsSL https://github.com/chmmou.gpg | gpg --import
+gpg --verify QPhoneManager-1.0.0-x86_64.AppImage.asc QPhoneManager-1.0.0-x86_64.AppImage
+sha256sum --check --ignore-missing SHA256SUMS
+```
+
+gpg prints "Good signature" and the fingerprint of the key. Check that it is
+the fingerprint of the key you imported. The AppImage also carries the
+signature inside. `packaging/appimage/verify-signature.sh` checks both.
 
 ## Test
 

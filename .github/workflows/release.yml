@@ -1,0 +1,204 @@
+name: Release
+
+# Builds the AppImage, and on a version tag signs it and publishes it.
+#
+# A tag v<version> is pushed by the owner and has to name the version in
+# CMakeLists.txt. The run tests the release build, packs the AppImage, signs it
+# with the key in the secret GPG_PRIVATE_KEY, embedded and as a detached .asc,
+# checks both signatures and creates the GitHub release for the tag.
+#
+# A manual run is a test build. It builds, tests and packs the same way and
+# keeps the AppImage as an artifact of the run. It signs nothing and publishes
+# nothing.
+
+on:
+  push:
+    tags: [ 'v*' ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  # The minimum the project declares. It picks the image below.
+  QT_VERSION: 6.9.3
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    permissions:
+      contents: read
+      # Only to pull the image below. Write access stays with deps-image.yml.
+      packages: read
+
+    # Everything the build needs comes from the image, the AppImage tools
+    # included. It is built by deps-image.yml. FUSE is not available in a
+    # container, so build-appimage.sh runs the tools in their extract-and-run
+    # mode.
+    container:
+      image: ghcr.io/chmmou/qphonemanager/ci-ubuntu:qt6.9.3
+      # The package may be private; the token reads it through packages: read.
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    env:
+      PRESET: release-6.9
+      # A manual run started on a tag is still a test build.
+      IS_TAG: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}
+
+    steps:
+      - name: Require the signing key
+        if: env.IS_TAG == 'true'
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+        # Before the build, so that a missing secret does not cost the build.
+        run: |
+          if [ -z "$GPG_PRIVATE_KEY" ]; then
+            echo "::error::The secret GPG_PRIVATE_KEY is not set. A tag run signs the AppImage and cannot do so without it."
+            exit 1
+          fi
+
+      - name: Check out the code
+        uses: actions/checkout@v7.0.1
+
+      - name: Check what the image brought
+        run: |
+          set -euxo pipefail
+          # A Qt other than the one this run means to ship would pass silently.
+          test "$(qmake6 -query QT_VERSION)" = "$QT_VERSION"
+
+      - name: Configure
+        run: cmake --preset "$PRESET"
+
+      - name: Match the tag to the project version
+        if: env.IS_TAG == 'true'
+        # A suffix such as -rc.1 is allowed and makes the release a pre-release.
+        run: |
+          set -euo pipefail
+          version="$(sed -n 's/^CMAKE_PROJECT_VERSION:STATIC=//p' "build/$PRESET/CMakeCache.txt")"
+          case "$GITHUB_REF_NAME" in
+            "v$version" | "v$version"-*) ;;
+            *)
+              echo "::error::The tag $GITHUB_REF_NAME does not name the project version $version."
+              exit 1
+              ;;
+          esac
+
+      - name: Build
+        run: cmake --build --preset "$PRESET"
+
+      - name: Test
+        # The test preset runs on the offscreen platform. A Q_ASSERT is gone in
+        # this configuration, so this is the run that tests what is shipped.
+        run: ctest --preset "$PRESET"
+
+      - name: Import the signing key
+        if: env.IS_TAG == 'true'
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+        # The key has no passphrase, so gpg asks for nothing. It lives in a
+        # keyring of its own below the runner's temporary directory and is
+        # removed by the last step whatever happens before.
+        run: |
+          set -euo pipefail
+          export GNUPGHOME="$RUNNER_TEMP/gnupg"
+          install -d -m 700 "$GNUPGHOME"
+          printf '%s\n' "$GPG_PRIVATE_KEY" | gpg --batch --quiet --import
+          count="$(gpg --batch --with-colons --list-secret-keys | grep -c '^sec:' || true)"
+          if [ "$count" != 1 ]; then
+            echo "::error::GPG_PRIVATE_KEY has to hold exactly one secret key; it holds $count."
+            exit 1
+          fi
+          fingerprint="$(gpg --batch --with-colons --list-secret-keys | awk -F: '$1 == "fpr" && !found { print $10; found = 1 }')"
+          echo "GNUPGHOME=$GNUPGHOME" >> "$GITHUB_ENV"
+          echo "SIGNING_KEY=$fingerprint" >> "$GITHUB_ENV"
+          echo "Signing with $fingerprint"
+
+      - name: Build the AppImage
+        run: |
+          set -euo pipefail
+          # Set only on a tag run; appimagetool then embeds the signature.
+          if [ -n "${SIGNING_KEY:-}" ]; then
+            export QPM_APPIMAGE_SIGN_KEY="$SIGNING_KEY"
+          fi
+          packaging/appimage/build-appimage.sh "$PRESET"
+
+      - name: Sign the AppImage detached
+        if: env.IS_TAG == 'true'
+        run: |
+          set -euo pipefail
+          for file in dist/*.AppImage; do
+            gpg --batch --yes --local-user "$SIGNING_KEY" --armor \
+              --detach-sign --output "$file.asc" "$file"
+          done
+
+      - name: Check both signatures
+        if: env.IS_TAG == 'true'
+        run: |
+          set -euo pipefail
+          for file in dist/*.AppImage; do
+            packaging/appimage/verify-signature.sh "$file" "$SIGNING_KEY"
+          done
+
+      - name: Compute the checksums
+        run: |
+          set -euo pipefail
+          cd dist
+          sha256sum -- * > SHA256SUMS
+          cat SHA256SUMS
+
+      - name: Remove the signing key
+        if: always() && env.IS_TAG == 'true'
+        run: |
+          gpgconf --kill all || true
+          rm -rf "$RUNNER_TEMP/gnupg"
+
+      - name: Keep the AppImage
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: appimage
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7
+
+  release:
+    needs: build
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+
+    permissions:
+      # The one job that writes: it creates the release.
+      contents: write
+
+    steps:
+      - name: Fetch the AppImage
+        uses: actions/download-artifact@v8.0.2
+        with:
+          name: appimage
+          path: dist
+
+      - name: Check the files against their checksums
+        working-directory: dist
+        run: sha256sum --check SHA256SUMS
+
+      - name: Create the release
+        working-directory: dist
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          # A tag with a suffix such as v1.1.0-rc.1 is a pre-release.
+          prerelease=()
+          case "$GITHUB_REF_NAME" in
+            *-*) prerelease=(--prerelease) ;;
+          esac
+          gh release create "$GITHUB_REF_NAME" \
+            --repo "$GITHUB_REPOSITORY" \
+            --verify-tag \
+            --title "QPhoneManager ${GITHUB_REF_NAME#v}" \
+            --notes "The changes are listed in CHANGELOG.md. README.md says how to check the signature." \
+            "${prerelease[@]}" \
+            ./*.AppImage ./*.AppImage.asc SHA256SUMS
