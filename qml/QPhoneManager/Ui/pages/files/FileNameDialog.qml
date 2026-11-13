@@ -54,6 +54,7 @@ Dialog {
         nameField.forceActiveFocus(Qt.TabFocusReason);
     }
     onAccepted: root.nameChosen(nameField.text)
+    Component.onCompleted: Theme.calmPopup(root)
 
     ColumnLayout {
         anchors.left: parent.left

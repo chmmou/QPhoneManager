@@ -139,6 +139,7 @@ Item {
                     model: [qsTr("All groups")].concat(root.area.groupNames)
                     Accessible.name: qsTr("Show group")
                     onActivated: index => root.area.list.groupFilter = index > 0 ? root.area.groupNames[index - 1] : ""
+                    Component.onCompleted: Theme.calmPopup(groupBox.popup)
 
                     FocusRing {
                         shown: groupBox.visualFocus
@@ -154,6 +155,7 @@ Item {
                     model: [qsTr("All accounts")].concat(root.area.accountNames)
                     Accessible.name: qsTr("Show account")
                     onActivated: index => root.area.list.accountFilter = index > 0 ? root.area.accountKeys[index - 1] : ""
+                    Component.onCompleted: Theme.calmPopup(accountBox.popup)
 
                     FocusRing {
                         shown: accountBox.visualFocus
@@ -298,6 +300,7 @@ Item {
         onOpened: cancelDeleteButton.forceActiveFocus(Qt.TabFocusReason)
         onClosed: cancelDeleteButton.focus = false
         onAccepted: root.area.removeContacts([root.pendingDelete])
+        Component.onCompleted: Theme.calmPopup(deleteDialog)
 
         Label {
             anchors.left: parent.left
@@ -330,6 +333,8 @@ Item {
 
     Menu {
         id: accountMenu
+
+        Component.onCompleted: Theme.calmPopup(accountMenu)
 
         Repeater {
             model: root.area.accountNames

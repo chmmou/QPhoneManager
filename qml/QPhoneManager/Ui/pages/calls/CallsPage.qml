@@ -40,6 +40,7 @@ Item {
                     currentIndex: root.area.list.kindFilter
                     Accessible.name: qsTr("Show calls")
                     onCurrentIndexChanged: root.area.list.kindFilter = root.kindAt(kindTabs.currentIndex)
+                    Component.onCompleted: Theme.calmTabBar(kindTabs)
 
                     TabButton {
                         id: allTab
@@ -217,6 +218,7 @@ Item {
         onOpened: cancelDeleteButton.forceActiveFocus(Qt.TabFocusReason)
         onClosed: cancelDeleteButton.focus = false
         onAccepted: root.area.removeCalls(root.pendingDelete)
+        Component.onCompleted: Theme.calmPopup(deleteDialog)
 
         Label {
             objectName: "deleteCallsText"

@@ -46,7 +46,11 @@ ApplicationWindow {
 
     onConnectRequested: connectDialog.open()
     onCurrentSectionChanged: appHeader.clearSearch()
-    Component.onCompleted: AppController.start()
+    Component.onCompleted: {
+        // Every tool tip of the window is this one shared popup.
+        Theme.calmPopup(appHeader.ToolTip.toolTip);
+        AppController.start();
+    }
 
     Binding {
         target: AppController.contacts

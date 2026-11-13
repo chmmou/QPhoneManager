@@ -36,6 +36,7 @@ Dialog {
     }
 
     onOpened: closeButton.forceActiveFocus(Qt.PopupFocusReason)
+    Component.onCompleted: Theme.calmPopup(root)
 
     ColumnLayout {
         anchors.fill: parent
@@ -174,6 +175,7 @@ Dialog {
             nameField.forceActiveFocus(Qt.PopupFocusReason);
         }
         onAccepted: AppController.renameDevice(root.pendingId, nameField.text)
+        Component.onCompleted: Theme.calmPopup(renameDialog)
 
         TextField {
             id: nameField
@@ -216,6 +218,7 @@ Dialog {
 
         onOpened: cancelRemoveButton.forceActiveFocus(Qt.PopupFocusReason)
         onAccepted: AppController.removeDevice(root.pendingId)
+        Component.onCompleted: Theme.calmPopup(removeDialog)
 
         Label {
             anchors.left: parent.left

@@ -58,6 +58,7 @@ Dialog {
         root.editor.applyCrop(Math.round((selection.x - root.offsetX) / root.pictureScale), Math.round((selection.y - root.offsetY) / root.pictureScale), Math.round(selection.side / root.pictureScale));
     }
     onRejected: root.editor.dropCandidate()
+    Component.onCompleted: Theme.calmPopup(root)
 
     ColumnLayout {
         anchors.fill: parent

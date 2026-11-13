@@ -42,6 +42,7 @@ Dialog {
     // focus up on closing makes the next opening set that reason again.
     onOpened: cancelButton.forceActiveFocus(Qt.TabFocusReason)
     onClosed: cancelButton.focus = false
+    Component.onCompleted: Theme.calmPopup(root)
 
     Label {
         anchors.left: parent.left

@@ -56,6 +56,7 @@ ColumnLayout {
                     currentIndex: entryRow.typeIndex
                     Accessible.name: qsTr("Type of %1").arg(root.valueName)
                     onActivated: index => root.entries.setTypeIndex(entryRow.index, index)
+                    Component.onCompleted: Theme.calmPopup(typeBox.popup)
 
                     FocusRing {
                         shown: typeBox.visualFocus

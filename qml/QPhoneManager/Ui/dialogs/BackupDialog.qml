@@ -47,6 +47,7 @@ Dialog {
         backupTab.focus = false;
         restoreTab.focus = false;
     }
+    Component.onCompleted: Theme.calmPopup(root)
 
     // The shortcut of the window does not reach past a modal dialog, so F1
     // asks for the chapter here. Off while closed, so the two never compete.
@@ -66,6 +67,7 @@ Dialog {
             objectName: "backupTabs"
             Layout.fillWidth: true
             enabled: !root.backup.busy
+            Component.onCompleted: Theme.calmTabBar(tabs)
 
             TabButton {
                 id: backupTab

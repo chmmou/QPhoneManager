@@ -59,6 +59,7 @@ Dialog {
     // Keeping both loses nothing, so it takes the focus first.
     onOpened: keepBothButton.forceActiveFocus(Qt.TabFocusReason)
     onClosed: keepBothButton.focus = false
+    Component.onCompleted: Theme.calmPopup(root)
 
     ColumnLayout {
         anchors.left: parent.left

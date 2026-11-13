@@ -109,6 +109,7 @@ Item {
                         currentIndex: root.editor.accountIndex
                         Accessible.name: qsTr("Save in account")
                         onActivated: index => root.editor.accountIndex = index
+                        Component.onCompleted: Theme.calmPopup(accountBox.popup)
 
                         FocusRing {
                             shown: accountBox.visualFocus

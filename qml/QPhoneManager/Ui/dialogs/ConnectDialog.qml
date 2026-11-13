@@ -41,6 +41,7 @@ Dialog {
         addressField.forceActiveFocus(Qt.PopupFocusReason);
     }
     onClosed: AppController.stopSearch()
+    Component.onCompleted: Theme.calmPopup(root)
 
     Connections {
         target: AppController
@@ -60,6 +61,7 @@ Dialog {
 
             objectName: "connectTabs"
             Layout.fillWidth: true
+            Component.onCompleted: Theme.calmTabBar(tabs)
 
             TabButton {
                 id: wifiTab
