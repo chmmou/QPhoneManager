@@ -76,6 +76,35 @@ Instead of the variables, you can add your own presets in
 }
 ```
 
+### Handbook as PDF
+
+The target `handbook_pdf` sets the handbook as two PDF files:
+`doc/handbook/QPhoneManager-Handbuch.pdf` in German and
+`doc/handbook/QPhoneManager-Manual.pdf` in English. The normal build does not
+run it. Run it after a change to the handbook and commit both files.
+
+```bash
+cmake --build build/debug-6.9 --target handbook_pdf
+```
+
+The target needs `pandoc` and `weasyprint` on `PATH`. Without them the
+configure step still works, and only this target fails with a message. The
+PDFs in the repository were made with these versions:
+
+| Tool | Version |
+|---|---|
+| pandoc | 3.7.0.2 |
+| WeasyPrint | 67.0 |
+
+The template, the stylesheet and the pandoc filter lie in `doc/handbook/pdf/`.
+The text font is Noto Sans and code uses Noto Sans Mono. WeasyPrint hyphenates
+German text only when the German hyphenation patterns are installed. On
+Ubuntu 26.04 this installs everything the target needs:
+
+```bash
+sudo apt install pandoc weasyprint hyphen-de fonts-noto-core fonts-noto-mono
+```
+
 ## Help and handbook
 
 The handbook lies in `doc/handbook/`, in German and English, one Markdown

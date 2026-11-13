@@ -524,6 +524,7 @@ qt_add_resources(qpm_ui "qpm_ui_help"
     BASE "${qpm_help_dir}"
     FILES ${qpm_help_files}
 )
+qpm_add_handbook_pdf_target(TOPICS ${qpm_help_topics})
 # The generated QML type registration includes headers by their base name only.
 target_include_directories(qpm_ui
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
