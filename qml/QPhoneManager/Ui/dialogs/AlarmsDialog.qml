@@ -247,7 +247,7 @@ Dialog {
             Button {
                 id: newButton
 
-                text: qsTr("New")
+                text: qsTr("Start new alarm")
                 flat: true
                 onClicked: root.startNew()
 

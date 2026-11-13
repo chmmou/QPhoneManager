@@ -73,6 +73,16 @@ numbers follow [Semantic Versioning](https://semver.org/).
   messages. The call log stays in the backup, because the app on the phone
   may not change it.
 - The sidebar opens backup and restore above the settings.
+- Help in the program: F1 opens the chapter of the area on screen, in the
+  language of the program, with English and then German where a chapter is
+  missing. The help has contents, back and forward, and links that work by
+  keyboard. Links to web pages open in the browser, and only over https.
+- The handbook in German and English as Markdown, built into the help during
+  the build.
+- An About dialog with the version, the copyright, the license, the Qt version
+  in use and the components with their licenses: the full license text of
+  QPhoneManager, the Tabler Icons and the QR code library, and for Qt its
+  copyright, its license and where to get its source code.
 
 ### Changed
 
@@ -87,6 +97,8 @@ numbers follow [Semantic Versioning](https://semver.org/).
   update.
 - The question before deleting calls says that the app on the phone may
   refuse it and what then happens.
+- The German texts are shorter and more direct, and the button that starts a
+  new alarm names its action.
 
 ### Fixed
 
