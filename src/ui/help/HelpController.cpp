@@ -175,8 +175,11 @@ QString HelpController::currentHtml() const
     html.replace(QStringLiteral("src=\"") + imageFolder,
                  QStringLiteral("src=\"") + folder + imageFolder);
     const qsizetype head = html.indexOf(QLatin1StringView("</head>"));
+    // max-width shrinks a wide image to the width of the text and keeps its
+    // proportions; a narrower image keeps its own size.
     html.insert(head >= 0 ? head : 0,
-                QStringLiteral("<style>a { color: %1; }</style>").arg(m_linkColor.name()));
+                QStringLiteral("<style>a { color: %1; } img { max-width: 100%; }</style>")
+                    .arg(m_linkColor.name()));
     return html;
 }
 
