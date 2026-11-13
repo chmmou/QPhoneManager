@@ -83,6 +83,8 @@ numbers follow [Semantic Versioning](https://semver.org/).
   in use and the components with their licenses: the full license text of
   QPhoneManager, the Tabler Icons and the QR code library, and for Qt its
   copyright, its license and where to get its source code.
+- An AppImage for x86_64, built by `packaging/appimage/build-appimage.sh`, and
+  a desktop file, AppStream metadata and the icon in the install step.
 
 ### Changed
 

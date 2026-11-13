@@ -119,6 +119,47 @@ chapters and the rules the build checks.
 build/debug-6.9/src/qphonemanager
 ```
 
+## AppImage
+
+`packaging/appimage/build-appimage.sh` builds
+`dist/QPhoneManager-<version>-x86_64.AppImage` from the preset `release-6.9`.
+To use another release preset, give its name as the first argument.
+
+```bash
+export QPM_QT_6_9=/opt/qt/6.9.3/gcc_64
+packaging/appimage/build-appimage.sh
+```
+
+The install step of the build puts the program into `build/<preset>/AppDir`,
+together with the desktop file and AppStream metadata from
+`packaging/linux/` and the icon. Qt's deployment script adds the Qt
+libraries, plugins and QML modules the program uses. linuxdeploy then adds
+the system libraries that Qt needs and that are not part of every Linux
+system. appimagetool packs the AppImage.
+
+The script downloads these tools once into
+`~/.cache/qphonemanager/appimage-tools` and checks each one against a fixed
+SHA-256 sum on every run. It stops when a sum does not match.
+
+| Tool | Version |
+|---|---|
+| linuxdeploy | 1-alpha-20251107-1 |
+| appimagetool | 1.9.1 |
+| AppImage runtime (type2-runtime) | 20251108 |
+
+Building needs `curl` and `sha256sum`, but no FUSE. linuxdeploy takes the
+libraries for Qt's X11 platform plugin from the build machine. On Ubuntu
+26.04 this installs them:
+
+```bash
+sudo apt install libxcb-cursor0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0
+```
+
+Running the AppImage needs FUSE, that is `fusermount3` or `fusermount` on
+`PATH`. Without it, start the AppImage with `--appimage-extract-and-run`.
+The AppImage needs glibc 2.43 or newer and takes `libstdc++` from the
+system.
+
 ## Test
 
 ```bash

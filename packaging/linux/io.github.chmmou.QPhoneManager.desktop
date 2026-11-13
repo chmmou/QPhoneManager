@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=QPhoneManager
+GenericName=Phone Manager
+GenericName[de]=Handy-Verwaltung
+Comment=Manage an Android phone from the Linux desktop
+Comment[de]=Android-Handy vom Linux-Desktop aus verwalten
+Exec=qphonemanager
+Icon=io.github.chmmou.QPhoneManager
+Terminal=false
+Categories=Utility;TelephonyTools;
+Keywords=Android;phone;contacts;SMS;calendar;backup;
+Keywords[de]=Android;Handy;Smartphone;Kontakte;SMS;Kalender;Sicherung;
