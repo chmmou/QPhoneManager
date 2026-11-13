@@ -6,6 +6,7 @@
 #include "ui/Settings.h"
 
 #include <QApplication>
+#include <QGuiApplication>
 #include <QIcon>
 #include <QLocale>
 #include <QQmlApplicationEngine>
@@ -52,6 +53,9 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationName(QStringLiteral("QPhoneManager"));
     QCoreApplication::setApplicationName(QStringLiteral("QPhoneManager"));
     QCoreApplication::setApplicationVersion(qpm::applicationVersion());
+    // The name of the installed desktop file. Wayland and the task bar find
+    // the entry and its icon through it.
+    QGuiApplication::setDesktopFileName(QStringLiteral("io.github.chmmou.QPhoneManager"));
 
     QApplication app(argc, argv);
     QApplication::setWindowIcon(QIcon(QStringLiteral(":/icons/app/qphonemanager.svg")));
