@@ -17,6 +17,8 @@ the maker of MyPhoneExplorer.
   Bluetooth, Gui, Svg, Widgets, DBus, Qml, Quick, Quick Controls 2,
   Quick Dialogs 2, Quick Layouts, Help, Test, Quick Test and Linguist Tools.
 - CMake 3.28 or newer, Ninja and a C++20 compiler.
+- `qhelpgenerator` from the Qt installation the build uses. It comes with
+  the Qt Help module; the build does not look for it on `PATH`.
 - For USB connections: `adb` from the Android SDK Platform Tools.
 
 ## Build
@@ -73,6 +75,14 @@ Instead of the variables, you can add your own presets in
     ]
 }
 ```
+
+## Help and handbook
+
+The handbook lies in `doc/handbook/`, in German and English, one Markdown
+chapter per area of the program. The build turns it into one help file per
+language with the tool in `tools/helpgen` and embeds them in the program.
+F1 opens the chapter of the area on screen. `doc/handbook/README.md` lists the
+chapters and the rules the build checks.
 
 ## Run
 

@@ -51,6 +51,7 @@ include(Clazy)
 enable_testing()
 
 add_subdirectory(third_party/qrcodegen)
+add_subdirectory(tools/helpgen)
 add_subdirectory(src)
 add_subdirectory(tests)
 

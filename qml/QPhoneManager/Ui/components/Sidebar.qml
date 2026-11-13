@@ -10,12 +10,15 @@ Pane {
     required property list<SectionEntry> sections
     required property int currentIndex
     property bool compact: false
+    /// The help is shown instead of the current section.
+    property bool helpShown: false
     /// Width at which the longest label fits next to its icon.
     readonly property int fittingWidth: Math.ceil(root.widestLabel(labelMetrics.font.pixelSize) + settingsButton.leftPadding + settingsButton.rightPadding + settingsButton.spacing + Theme.sidebarIconSize + Theme.gridUnit * 4)
 
     signal sectionSelected(int index)
     signal settingsRequested
     signal backupRequested
+    signal helpRequested
 
     padding: 0
 
@@ -26,6 +29,7 @@ Pane {
         ListView {
             id: sectionList
 
+            objectName: "sectionList"
             Layout.fillWidth: true
             Layout.fillHeight: true
             // The list scrolls when the window is too low for all sections.
@@ -44,7 +48,7 @@ Pane {
                 text: modelData.title
                 iconName: modelData.iconName
                 compact: root.compact
-                highlighted: index === root.currentIndex
+                highlighted: index === root.currentIndex && !root.helpShown
                 objectName: "section-" + modelData.key
                 onClicked: root.sectionSelected(index)
             }
@@ -80,7 +84,8 @@ Pane {
             text: qsTr("Help")
             iconName: "help"
             compact: root.compact
-            enabled: false
+            highlighted: root.helpShown
+            onClicked: root.helpRequested()
         }
     }
 

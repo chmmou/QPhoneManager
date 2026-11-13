@@ -203,6 +203,38 @@ qpm_set_project_warnings(tst_screens)
 add_test(NAME tst_screens COMMAND tst_screens)
 set_tests_properties(tst_screens PROPERTIES TIMEOUT 120)
 
+qt_add_executable(tst_helpgen tools/tst_helpgen.cpp)
+target_link_libraries(tst_helpgen PRIVATE Qt6::Gui Qt6::Help Qt6::Test)
+# The test runs the tool as the build does.
+add_dependencies(tst_helpgen helpgen)
+target_compile_definitions(tst_helpgen PRIVATE
+    "QPM_HELPGEN=\"$<TARGET_FILE:helpgen>\""
+    "QPM_QHELPGENERATOR=\"${QPM_QHELPGENERATOR}\""
+)
+qpm_set_project_warnings(tst_helpgen)
+add_test(NAME tst_helpgen COMMAND tst_helpgen)
+set_tests_properties(tst_helpgen PROPERTIES TIMEOUT 120)
+
+qt_add_executable(tst_help ui/tst_help.cpp)
+target_link_libraries(tst_help PRIVATE qpm_ui qpm_uiplugin Qt6::Quick Qt6::Test)
+qt_add_resources(tst_help "tst_help_config"
+    PREFIX "/"
+    BASE "${PROJECT_SOURCE_DIR}/res"
+    FILES "${PROJECT_SOURCE_DIR}/res/qtquickcontrols2.conf"
+)
+# Help files of its own come from the tool; the handbook and the list of
+# components are compared with the sources.
+add_dependencies(tst_help helpgen)
+target_compile_definitions(tst_help PRIVATE
+    "QPM_HELPGEN=\"$<TARGET_FILE:helpgen>\""
+    "QPM_QHELPGENERATOR=\"${QPM_QHELPGENERATOR}\""
+    "QPM_SOURCE_DIR=\"${PROJECT_SOURCE_DIR}\""
+    "QPM_PROJECT_VERSION=\"${PROJECT_VERSION}\""
+)
+qpm_set_project_warnings(tst_help)
+add_test(NAME tst_help COMMAND tst_help)
+set_tests_properties(tst_help PROPERTIES TIMEOUT 180)
+
 # A QML module with the fake phone, for the Qt Quick tests below.
 qt_add_library(qpm_testsupport STATIC)
 qt_add_qml_module(qpm_testsupport

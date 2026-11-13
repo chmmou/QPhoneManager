@@ -48,6 +48,14 @@ Dialog {
         restoreTab.focus = false;
     }
 
+    // The shortcut of the window does not reach past a modal dialog, so F1
+    // asks for the chapter here. Off while closed, so the two never compete.
+    Shortcut {
+        sequences: [StandardKey.HelpContents]
+        enabled: root.opened
+        onActivated: root.helpRequested()
+    }
+
     ColumnLayout {
         anchors.fill: parent
         spacing: Theme.gridUnit * 3

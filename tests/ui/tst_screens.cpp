@@ -566,6 +566,8 @@ private Q_SLOTS:
     void screenViewsAreGermanAndRenderInBothSchemes();
     void desktopViewsAreGermanAndRenderInBothSchemes_data();
     void desktopViewsAreGermanAndRenderInBothSchemes();
+    void helpViewsAreGermanAndRenderInBothSchemes_data();
+    void helpViewsAreGermanAndRenderInBothSchemes();
     void backupViewsAreGermanAndRenderInBothSchemes_data();
     void backupViewsAreGermanAndRenderInBothSchemes();
 
@@ -1726,6 +1728,67 @@ void TestScreens::desktopViewsAreGermanAndRenderInBothSchemes()
         QVERIFY(notifications->refresh());
         QTRY_COMPARE_WITH_TIMEOUT(notifications->count(), 3, connectTimeoutMs);
     }
+    QVERIFY(m_controller->isConnected());
+}
+
+void TestScreens::helpViewsAreGermanAndRenderInBothSchemes_data()
+{
+    QTest::addColumn<QString>("view");
+    QTest::addColumn<QString>("germanTitle");
+
+    QTest::newRow("chapter by F1") << QStringLiteral("helpContacts") << QStringLiteral("Kontakte");
+    QTest::newRow("start of the help")
+        << QStringLiteral("helpStart") << QStringLiteral("Erste Schritte");
+    QTest::newRow("about") << QStringLiteral("aboutDialog") << QStringLiteral("Über QPhoneManager");
+}
+
+void TestScreens::helpViewsAreGermanAndRenderInBothSchemes()
+{
+    QFETCH(QString, view);
+    QFETCH(QString, germanTitle);
+    m_window->requestActivate();
+    QVERIFY(QTest::qWaitForWindowActive(m_window));
+    m_window->setProperty("helpShown", false);
+    m_window->setProperty("currentSection", 1);
+    QQuickItem *header = m_window->property("header").value<QQuickItem *>();
+    if (view == QLatin1StringView("helpStart")) {
+        QVERIFY(QMetaObject::invokeMethod(item(QStringLiteral("section-help")), "click"));
+    } else {
+        QTest::keyClick(m_window, Qt::Key_F1);
+    }
+    QTRY_VERIFY(m_window->property("helpShown").toBool());
+    QCOMPARE(header->property("title").toString(), QStringLiteral("Hilfe"));
+
+    QObject *popup = nullptr;
+    if (view == QLatin1StringView("aboutDialog")) {
+        popup = dialog(view);
+        QVERIFY(popup);
+        QQuickItem *about = item(QStringLiteral("aboutButton"));
+        QCOMPARE(about->property("text").toString(), germanTitle);
+        about->forceActiveFocus(Qt::TabFocusReason);
+        QTest::keyClick(m_window, Qt::Key_Space);
+        QTRY_VERIFY(popup->property("opened").toBool());
+        QCOMPARE(popup->property("title").toString(), germanTitle);
+        QVERIFY(item(QStringLiteral("aboutVersion"))
+                    ->property("text")
+                    .toString()
+                    .startsWith(QStringLiteral("QPhoneManager ")));
+        QVERIFY(labelWithText(m_window->contentItem(), QStringLiteral("Bausteine")));
+    } else {
+        QTRY_COMPARE(item(QStringLiteral("helpTitle"))->property("text").toString(), germanTitle);
+        // The contents show the German titles of the handbook.
+        QVERIFY(labelWithText(item(QStringLiteral("helpContents")),
+                              QStringLiteral("Benachrichtigungen")));
+        QTRY_VERIFY(item(QStringLiteral("helpText"))->hasActiveFocus());
+    }
+
+    QVERIFY(saveBothSchemes(view));
+
+    if (popup) {
+        QMetaObject::invokeMethod(popup, "close");
+        QTRY_VERIFY(!popup->property("visible").toBool());
+    }
+    m_window->setProperty("helpShown", false);
     QVERIFY(m_controller->isConnected());
 }
 

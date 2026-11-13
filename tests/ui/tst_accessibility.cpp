@@ -323,6 +323,10 @@ private Q_SLOTS:
     void notificationsAreUsedByKeyboard();
     void callWindowNamesItsControlsAndShowsItsFocus();
     void backupDialogIsUsedByKeyboard();
+    void helpPageControlsHaveANameAndARole();
+    void helpFocusChainReachesEveryControlOnce();
+    void helpIsUsedByKeyboard();
+    void aboutDialogShowsItsFocusAndNamesItsControls();
 
 private:
     [[nodiscard]] QList<QQuickItem *> controls() const;
@@ -345,6 +349,8 @@ private:
     [[nodiscard]] bool showNotifications();
     /// Brings the contacts area into the state in which `dialog` has something to show.
     [[nodiscard]] bool prepareContactDialog(const QString &dialog);
+    /// Opens the help with F1 in the contacts area, as a user does.
+    [[nodiscard]] bool showHelp();
     static void announceAccessibility();
 
     QTemporaryDir m_config;
@@ -2283,6 +2289,173 @@ void TestAccessibility::backupDialogIsUsedByKeyboard()
 
     QTest::keyClick(m_window, Qt::Key_Escape);
     QTRY_VERIFY(!popup->property("visible").toBool());
+}
+
+bool TestAccessibility::showHelp()
+{
+    m_window->requestActivate();
+    if (!QTest::qWaitForWindowActive(m_window))
+        return false;
+    m_window->setProperty("currentSection", 1);
+    QTest::keyClick(m_window, Qt::Key_F1);
+    const QObject *help =
+        m_engine->singletonInstance<QObject *>("QPhoneManager.Ui", "HelpController");
+    const bool shown = QTest::qWaitFor([this, help]() {
+        const QQuickItem *page = findItem(m_window->contentItem(), QStringLiteral("helpPage"));
+        return page && page->isVisible() && !help->property("busy").toBool();
+    });
+    announceAccessibility();
+    return shown;
+}
+
+void TestAccessibility::helpPageControlsHaveANameAndARole()
+{
+    QVERIFY(showHelp());
+
+    const QList<QQuickItem *> found = controls();
+
+    verifyNamesAndRoles(found, {QAccessible::List});
+    for (const QString &name : {QStringLiteral("helpBackButton"),
+                                QStringLiteral("helpForwardButton"), QStringLiteral("aboutButton"),
+                                QStringLiteral("helpContents"), QStringLiteral("helpText")}) {
+        QQuickItem *item = findItem(m_window->contentItem(), name);
+        QVERIFY2(item && found.contains(item), qPrintable(name));
+    }
+    // Back and forward stay in view, switched off, while there is no page to go to.
+    QVERIFY(!findItem(m_window->contentItem(), QStringLiteral("helpBackButton"))->isEnabled());
+    for (QQuickItem *item : found) {
+        const bool iconOnly = item->metaObject()->indexOfProperty("display") >= 0 &&
+                              item->property("display").toInt() == 0;
+        if (!iconOnly || item->property("text").toString().isEmpty())
+            continue;
+        QCOMPARE(QAccessible::queryAccessibleInterface(item)->text(QAccessible::Name),
+                 item->property("text").toString());
+    }
+    QQuickItem *text = findItem(m_window->contentItem(), QStringLiteral("helpText"));
+    QCOMPARE(QAccessible::queryAccessibleInterface(text)->text(QAccessible::Name),
+             m_engine->singletonInstance<QObject *>("QPhoneManager.Ui", "HelpController")
+                 ->property("currentTitle")
+                 .toString());
+    QQuickItem *contents = findItem(m_window->contentItem(), QStringLiteral("helpContents"));
+    QCOMPARE(QAccessible::queryAccessibleInterface(contents)->role(), QAccessible::List);
+    QVERIFY(
+        !QAccessible::queryAccessibleInterface(contents)->text(QAccessible::Description).isEmpty());
+    // The chapters are plain rows; each says what it is and which chapter it opens.
+    auto *chapter = contents->property("currentItem").value<QQuickItem *>();
+    QVERIFY(chapter);
+    QAccessibleInterface *row = QAccessible::queryAccessibleInterface(chapter);
+    QVERIFY(row);
+    QCOMPARE(row->role(), QAccessible::ListItem);
+    QVERIFY(!row->text(QAccessible::Name).isEmpty());
+    QCOMPARE(row->text(QAccessible::Name), chapter->property("title").toString());
+}
+
+void TestAccessibility::helpFocusChainReachesEveryControlOnce()
+{
+    QVERIFY(showHelp());
+    QList<QQuickItem *> chain;
+    QQuickItem *item = m_window->contentItem()->nextItemInFocusChain(true);
+    while (item && !chain.contains(item) && chain.size() < 500) {
+        chain.append(item);
+        item = item->nextItemInFocusChain(true);
+    }
+
+    QVERIFY(item);
+    QCOMPARE(item, chain.constFirst());
+    const QList<QQuickItem *> found = controls();
+    for (QQuickItem *control : found) {
+        if (control->isEnabled() && control->activeFocusOnTab())
+            QVERIFY2(chain.contains(control), qPrintable(describe(control)));
+    }
+    for (const QString &name : {QStringLiteral("helpContents"), QStringLiteral("helpText"),
+                                QStringLiteral("aboutButton")}) {
+        QVERIFY2(chain.contains(findItem(m_window->contentItem(), name)), qPrintable(name));
+    }
+}
+
+// F1 opens the help with the focus shown in the text; the contents choose
+// another chapter with the arrow keys and Enter; the About dialog opens from
+// the keyboard.
+void TestAccessibility::helpIsUsedByKeyboard()
+{
+    QVERIFY(showHelp());
+    QObject *help = m_engine->singletonInstance<QObject *>("QPhoneManager.Ui", "HelpController");
+    QCOMPARE(help->property("currentTopic").toString(), QStringLiteral("contacts"));
+    QQuickItem *text = findItem(m_window->contentItem(), QStringLiteral("helpText"));
+    QTRY_VERIFY(text->hasActiveFocus());
+    QVERIFY(findItem(m_window->contentItem(), QStringLiteral("helpTextFocusRing"))->isVisible());
+
+    QQuickItem *contents = findItem(m_window->contentItem(), QStringLiteral("helpContents"));
+    contents->forceActiveFocus(Qt::TabFocusReason);
+    QVERIFY(
+        findItem(m_window->contentItem(), QStringLiteral("helpContentsFocusRing"))->isVisible());
+    QTest::keyClick(m_window, Qt::Key_Down);
+    QTest::keyClick(m_window, Qt::Key_Return);
+    QTRY_COMPARE(help->property("currentTopic").toString(), QStringLiteral("calls"));
+    QVERIFY(contents->hasActiveFocus());
+
+    QQuickItem *back = findItem(m_window->contentItem(), QStringLiteral("helpBackButton"));
+    QTRY_VERIFY(back->isEnabled());
+    back->forceActiveFocus(Qt::TabFocusReason);
+    QVERIFY(focusIsShown(back));
+    QTest::keyClick(m_window, Qt::Key_Space);
+    QTRY_COMPARE(help->property("currentTopic").toString(), QStringLiteral("contacts"));
+
+    QQuickItem *about = findItem(m_window->contentItem(), QStringLiteral("aboutButton"));
+    about->forceActiveFocus(Qt::TabFocusReason);
+    QVERIFY(focusIsShown(about));
+    QObject *dialog = m_window->findChild<QObject *>(QStringLiteral("aboutDialog"));
+    QTest::keyClick(m_window, Qt::Key_Space);
+    QTRY_VERIFY(dialog->property("opened").toBool());
+    QTest::keyClick(m_window, Qt::Key_Escape);
+    QTRY_VERIFY(!dialog->property("visible").toBool());
+
+    // A section of the sidebar leaves the help again.
+    QTest::keyClick(m_window, Qt::Key_3, Qt::ControlModifier);
+    QTRY_VERIFY(!m_window->property("helpShown").toBool());
+    QCOMPARE(m_window->property("currentSection").toInt(), 2);
+}
+
+// The About dialog starts on the list of components with its focus shown;
+// the arrow keys choose a component and its license shows next to the list.
+void TestAccessibility::aboutDialogShowsItsFocusAndNamesItsControls()
+{
+    m_window->requestActivate();
+    QVERIFY(QTest::qWaitForWindowActive(m_window));
+    const QList<QQuickItem *> before = controls();
+    for (int opening = 1; opening <= 2; ++opening) {
+        QObject *popup = openDialog(QStringLiteral("aboutDialog"));
+        QVERIFY(popup);
+        announceAccessibility();
+        QList<QQuickItem *> inDialog = controls();
+        inDialog.removeIf([&before](QQuickItem *control) { return before.contains(control); });
+        verifyNamesAndRoles(inDialog, {QAccessible::List});
+        QQuickItem *list = findItem(m_window->contentItem(), QStringLiteral("componentList"));
+        QVERIFY(list && inDialog.contains(list));
+        QVERIFY(list->hasActiveFocus());
+        QVERIFY2(findItem(m_window->contentItem(), QStringLiteral("componentListFocusRing"))
+                     ->isVisible(),
+                 qPrintable(QStringLiteral("opening %1").arg(opening)));
+        // The components are plain rows; each names component, version and license.
+        auto *component = list->property("currentItem").value<QQuickItem *>();
+        QVERIFY(component);
+        QAccessibleInterface *row = QAccessible::queryAccessibleInterface(component);
+        QVERIFY(row);
+        QCOMPARE(row->role(), QAccessible::ListItem);
+        QCOMPARE(row->text(QAccessible::Name), QStringLiteral("%1 %2, %3")
+                                                   .arg(component->property("name").toString(),
+                                                        component->property("version").toString(),
+                                                        component->property("license").toString()));
+        QVERIFY(!row->text(QAccessible::Description).isEmpty());
+        QQuickItem *license = findItem(m_window->contentItem(), QStringLiteral("licenseText"));
+        QVERIFY(license && inDialog.contains(license));
+        const QString first = license->property("text").toString();
+        QTest::keyClick(m_window, Qt::Key_Down);
+        QTRY_VERIFY(license->property("text").toString() != first);
+        QVERIFY(!QAccessible::queryAccessibleInterface(license)->text(QAccessible::Name).isEmpty());
+        QMetaObject::invokeMethod(popup, "close");
+        QTRY_VERIFY(!popup->property("visible").toBool());
+    }
 }
 
 QTEST_MAIN(TestAccessibility)

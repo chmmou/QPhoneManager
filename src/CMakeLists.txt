@@ -192,6 +192,7 @@ set(qpm_ui_qml_files
     components/Sidebar.qml
     components/SidebarButton.qml
     components/StatusBar.qml
+    dialogs/AboutDialog.qml
     dialogs/AlarmsDialog.qml
     dialogs/BackupDialog.qml
     dialogs/CallWindow.qml
@@ -207,6 +208,7 @@ set(qpm_ui_qml_files
     dialogs/QrConnectDialog.qml
     dialogs/SettingsDialog.qml
     dialogs/VersionConflictDialog.qml
+    pages/HelpPage.qml
     pages/OverviewPage.qml
     pages/apps/AppsPage.qml
     pages/calls/CallDetail.qml
@@ -314,6 +316,12 @@ qt_add_qml_module(qpm_ui
         ui/files/FileBrowserModel.cpp
         ui/files/TransferQueue.h
         ui/files/TransferQueue.cpp
+        ui/help/AboutInfo.h
+        ui/help/AboutInfo.cpp
+        ui/help/HelpController.h
+        ui/help/HelpController.cpp
+        ui/help/HelpTopicModel.h
+        ui/help/HelpTopicModel.cpp
         ui/messages/ConversationListModel.h
         ui/messages/ConversationListModel.cpp
         ui/messages/MessageComposer.h
@@ -436,6 +444,84 @@ qt_add_resources(qpm_ui "qpm_ui_icons"
     BASE "${PROJECT_SOURCE_DIR}/res/icons"
     FILES ${qpm_ui_icons}
 )
+
+# The license texts the About dialog shows, unchanged from the repository.
+set(qpm_license_texts
+    "${PROJECT_SOURCE_DIR}/LICENSE|QPhoneManager.txt"
+    "${PROJECT_SOURCE_DIR}/res/icons/tabler/LICENSE|tabler-icons.txt"
+    "${PROJECT_SOURCE_DIR}/third_party/qrcodegen/LICENSE|qrcodegen.txt"
+)
+set(qpm_license_files "")
+foreach(entry IN LISTS qpm_license_texts)
+    string(REPLACE "|" ";" parts "${entry}")
+    list(GET parts 0 file)
+    list(GET parts 1 alias)
+    set_source_files_properties("${file}" PROPERTIES QT_RESOURCE_ALIAS "${alias}")
+    list(APPEND qpm_license_files "${file}")
+endforeach()
+qt_add_resources(qpm_ui "qpm_ui_licenses"
+    PREFIX "/licenses"
+    FILES ${qpm_license_files}
+)
+
+# The help: one compressed help file per language, built from the Markdown
+# handbook. The topics are the areas of the program in the order of the
+# table of contents; F1 looks a chapter up by its topic.
+set(qpm_help_topics
+    getting-started
+    overview
+    contacts
+    calls
+    messages
+    calendar
+    tasks
+    notes
+    files
+    apps
+    screen
+    notifications
+    backup
+    settings
+)
+list(JOIN qpm_help_topics "," qpm_help_topic_list)
+# Only the Qt installation of the build is searched, never PATH.
+find_program(QPM_QHELPGENERATOR qhelpgenerator
+    PATHS
+        "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_LIBEXECS}"
+        "${QT6_INSTALL_PREFIX}/${QT6_INSTALL_BINS}"
+    NO_DEFAULT_PATH
+    REQUIRED
+)
+set(qpm_help_dir "${CMAKE_CURRENT_BINARY_DIR}/help")
+set(qpm_help_files "")
+foreach(language IN ITEMS de en)
+    set(source "${PROJECT_SOURCE_DIR}/doc/handbook/${language}")
+    set(chapters "${qpm_help_topics}")
+    list(TRANSFORM chapters PREPEND "${source}/")
+    list(TRANSFORM chapters APPEND ".md")
+    set(output "${qpm_help_dir}/qphonemanager_${language}.qch")
+    add_custom_command(
+        OUTPUT "${output}"
+        COMMAND helpgen
+            --language ${language}
+            --source "${source}"
+            --topics "${qpm_help_topic_list}"
+            --qhelpgenerator "${QPM_QHELPGENERATOR}"
+            --work "${qpm_help_dir}/${language}"
+            --output "${output}"
+            --depfile "${qpm_help_dir}/qphonemanager_${language}.d"
+        DEPENDS helpgen ${chapters}
+        DEPFILE "${qpm_help_dir}/qphonemanager_${language}.d"
+        COMMENT "Building the help file for ${language}"
+        VERBATIM
+    )
+    list(APPEND qpm_help_files "${output}")
+endforeach()
+qt_add_resources(qpm_ui "qpm_ui_help"
+    PREFIX "/help"
+    BASE "${qpm_help_dir}"
+    FILES ${qpm_help_files}
+)
 # The generated QML type registration includes headers by their base name only.
 target_include_directories(qpm_ui
     PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
@@ -447,6 +533,7 @@ target_include_directories(qpm_ui
         ${CMAKE_CURRENT_SOURCE_DIR}/ui/contacts
         ${CMAKE_CURRENT_SOURCE_DIR}/ui/desktop
         ${CMAKE_CURRENT_SOURCE_DIR}/ui/files
+        ${CMAKE_CURRENT_SOURCE_DIR}/ui/help
         ${CMAKE_CURRENT_SOURCE_DIR}/ui/messages
         ${CMAKE_CURRENT_SOURCE_DIR}/ui/organizer
         ${CMAKE_CURRENT_SOURCE_DIR}/ui/screen
@@ -461,6 +548,7 @@ target_link_libraries(qpm_ui
     PRIVATE
         qrcodegen
         Qt6::Concurrent
+        Qt6::Help
         Qt6::Svg
 )
 qpm_set_project_warnings(qpm_ui)

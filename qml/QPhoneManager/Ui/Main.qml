@@ -12,6 +12,8 @@ ApplicationWindow {
     readonly property string currentKey: sectionCatalog.all[root.currentSection].key
     readonly property bool hasData: (root.currentKey === "contacts" && AppController.contacts.hasPhone) || (root.currentKey === "calls" && AppController.calls.hasPhone) || (root.currentKey === "messages" && AppController.messages.hasPhone) || (root.currentKey === "calendar" && AppController.calendar.hasPhone) || (root.currentKey === "tasks" && AppController.tasks.hasPhone) || (root.currentKey === "notes" && AppController.notes.hasPhone) || (root.currentKey === "apps" && AppController.apps.totalCount > 0)
     property int currentSection: 0
+    /// The help is shown in place of the current section.
+    property bool helpShown: false
 
     signal connectRequested
 
@@ -31,10 +33,10 @@ ApplicationWindow {
     header: AppHeader {
         id: appHeader
 
-        title: sectionCatalog.all[root.currentSection].title
-        iconName: sectionCatalog.all[root.currentSection].iconName
+        title: root.helpShown ? qsTr("Help") : sectionCatalog.all[root.currentSection].title
+        iconName: root.helpShown ? "help" : sectionCatalog.all[root.currentSection].iconName
         connected: root.connected
-        canSearch: root.hasData
+        canSearch: root.hasData && !root.helpShown
         onSyncRequested: AppController.syncAll()
         onConnectRequested: root.connectRequested()
         onPhonesRequested: profilesDialog.open()
@@ -285,13 +287,14 @@ ApplicationWindow {
 
     AppShortcuts {
         sectionCount: sectionCatalog.all.length
-        canSearch: root.hasData
+        canSearch: root.hasData && !root.helpShown
         canSync: root.connected
-        onSectionRequested: index => root.currentSection = index
+        onSectionRequested: index => root.showSectionAt(index)
         onSearchRequested: appHeader.focusSearch()
         onSyncRequested: appHeader.syncRequested()
         onQuitRequested: Qt.quit()
         onSettingsRequested: settingsDialog.open()
+        onHelpRequested: root.showHelp(root.helpShown ? HelpController.currentTopic : root.currentKey)
     }
 
     RowLayout {
@@ -307,9 +310,11 @@ ApplicationWindow {
             sections: sectionCatalog.all
             currentIndex: root.currentSection
             compact: root.width < Theme.compactWindowWidth
-            onSectionSelected: index => root.currentSection = index
+            helpShown: root.helpShown
+            onSectionSelected: index => root.showSectionAt(index)
             onSettingsRequested: settingsDialog.open()
             onBackupRequested: backupDialog.open()
+            onHelpRequested: root.showHelp("getting-started")
         }
 
         Rectangle {
@@ -325,7 +330,7 @@ ApplicationWindow {
 
             DisconnectedBanner {
                 Layout.fillWidth: true
-                visible: !root.connected && !AppController.connecting
+                visible: !root.connected && !AppController.connecting && !root.helpShown
                 dataDate: AppController.lastConnectionText
                 onConnectRequested: root.connectRequested()
             }
@@ -340,6 +345,7 @@ ApplicationWindow {
             StackLayout {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                visible: !root.helpShown
                 currentIndex: root.currentSection
 
                 Repeater {
@@ -352,6 +358,15 @@ ApplicationWindow {
                         onConnectRequested: root.connectRequested()
                     }
                 }
+            }
+
+            HelpPage {
+                id: helpPage
+
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                visible: root.helpShown
+                onAboutRequested: aboutDialog.open()
             }
         }
     }
@@ -385,12 +400,26 @@ ApplicationWindow {
         id: backupDialog
 
         objectName: "backupDialog"
+        onHelpRequested: {
+            backupDialog.close();
+            root.showHelp("backup");
+        }
     }
 
     SettingsDialog {
         id: settingsDialog
 
         objectName: "settingsDialog"
+        onHelpRequested: {
+            settingsDialog.close();
+            root.showHelp("settings");
+        }
+    }
+
+    AboutDialog {
+        id: aboutDialog
+
+        objectName: "aboutDialog"
     }
 
     ProfilesDialog {
@@ -412,9 +441,22 @@ ApplicationWindow {
     function showSection(key: string): void {
         for (let i = 0; i < sectionCatalog.all.length; ++i) {
             if (sectionCatalog.all[i].key === key) {
-                root.currentSection = i;
+                root.showSectionAt(i);
                 return;
             }
         }
+    }
+
+    function showSectionAt(index: int): void {
+        root.helpShown = false;
+        root.currentSection = index;
+    }
+
+    // Opens the chapter of `topic` and moves the focus into it, so that the
+    // keys scroll the text right away.
+    function showHelp(topic: string): void {
+        HelpController.openTopic(topic);
+        root.helpShown = true;
+        helpPage.focusContent();
     }
 }

@@ -15,6 +15,7 @@ Item {
     signal syncRequested
     signal quitRequested
     signal settingsRequested
+    signal helpRequested
 
     Instantiator {
         model: Math.min(root.sectionCount, 9)
@@ -47,5 +48,10 @@ Item {
     Shortcut {
         sequences: [StandardKey.Quit]
         onActivated: root.quitRequested()
+    }
+
+    Shortcut {
+        sequences: [StandardKey.HelpContents]
+        onActivated: root.helpRequested()
     }
 }
