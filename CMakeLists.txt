@@ -47,6 +47,7 @@ check_pie_supported()
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 include(ProjectWarnings)
 include(Clazy)
+include(HandbookPdf)
 
 enable_testing()
 
