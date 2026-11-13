@@ -5,6 +5,7 @@
 #include "core/service/ScreenMirrorClient.h"
 #include "ui/AppController.h"
 #include "ui/DeviceStatusModel.h"
+#include "ui/QrCodeProvider.h"
 #include "ui/Settings.h"
 #include "ui/apps/AppListModel.h"
 #include "ui/backup/BackupController.h"
@@ -31,6 +32,7 @@
 #include <QGuiApplication>
 #include <QImage>
 #include <QSignalSpy>
+#include <QLibraryInfo>
 #include <QLocale>
 #include <QPainter>
 #include <QQmlApplicationEngine>
@@ -608,12 +610,25 @@ void dropLayerEffects(QQuickItem *item)
         dropLayerEffects(child);
 }
 
+// The software scene graph draws the round Material ripple of a focused
+// check box or radio button at the corner of the window instead of around
+// the control. The focus ring of the program still shows the focus.
+void hideRipples(QQuickItem *item)
+{
+    if (item->inherits("QQuickMaterialRipple"))
+        item->setVisible(false);
+    const QList<QQuickItem *> children = item->childItems();
+    for (QQuickItem *child : children)
+        hideRipples(child);
+}
+
 // A grab once the picture has stopped changing, so no transition is caught halfway.
 QImage settledGrab(QQuickWindow *window)
 {
     if (window->rendererInterface()->graphicsApi() == QSGRendererInterface::Software) {
         QQuickItem *root = window->contentItem();
         dropLayerEffects(root->parentItem() ? root->parentItem() : root);
+        hideRipples(root->parentItem() ? root->parentItem() : root);
     }
     constexpr int attempts = 40;
     constexpr int pauseMs = 50;
@@ -684,6 +699,8 @@ private:
     QTemporaryDir m_shots;
     QString m_shotDir;
     QTranslator m_translator;
+    QTranslator m_qtBaseTranslator;
+    QTranslator m_qtQuickTranslator;
     bool m_english = false;
     std::unique_ptr<FakePhone> m_phone;
     std::unique_ptr<QQmlApplicationEngine> m_engine;
@@ -711,9 +728,18 @@ void TestScreens::initTestCase()
     QVERIFY(m_translator.load(
         QStringLiteral(QPM_TRANSLATIONS_DIR "/qphonemanager_%1.qm").arg(language)));
     QCoreApplication::installTranslator(&m_translator);
+    // The program also installs the catalogues of Qt; the file dialogs take
+    // their labels from them.
+    const QString qtCatalogues = QLibraryInfo::path(QLibraryInfo::TranslationsPath);
+    QVERIFY(m_qtBaseTranslator.load(QStringLiteral("qtbase_%1.qm").arg(language), qtCatalogues));
+    QVERIFY(m_qtQuickTranslator.load(QStringLiteral("qtdeclarative_%1.qm").arg(language),
+                                     qtCatalogues));
+    QCoreApplication::installTranslator(&m_qtBaseTranslator);
+    QCoreApplication::installTranslator(&m_qtQuickTranslator);
     if (qEnvironmentVariableIsSet("QPM_SOFTWARE_RENDERING"))
         QQuickWindow::setGraphicsApi(QSGRendererInterface::Software);
-    m_shotDir = qEnvironmentVariable("QPM_SCREENSHOT_DIR", m_shots.path());
+    // Absolute, since the working folder changes further down.
+    m_shotDir = QDir(qEnvironmentVariable("QPM_SCREENSHOT_DIR", m_shots.path())).absolutePath();
 
     m_phone = std::make_unique<FakePhone>();
     QVERIFY(m_phone->listen());
@@ -759,6 +785,12 @@ void TestScreens::initTestCase()
             .arg(byLanguage("Aufstehen", "Wake up")),
         QStringLiteral("\"08:00\",2,0,\"%1\",\"6,7\",0").arg(byLanguage("Wochenende", "Weekend"))};
 
+    // A file dialog opens in the working folder, whose path would name the
+    // account that runs the test.
+    const QString documents = m_home.filePath(byLanguage("Dokumente", "Documents"));
+    QVERIFY(QDir().mkpath(documents));
+    QVERIFY(QDir::setCurrent(documents));
+
     m_engine = std::make_unique<QQmlApplicationEngine>();
     m_engine->loadFromModule("QPhoneManager.Ui", "Main");
     QCOMPARE(m_engine->rootObjects().size(), 1);
@@ -801,6 +833,8 @@ void TestScreens::cleanupTestCase()
     m_window = nullptr;
     m_engine.reset();
     QCoreApplication::removeTranslator(&m_translator);
+    QCoreApplication::removeTranslator(&m_qtBaseTranslator);
+    QCoreApplication::removeTranslator(&m_qtQuickTranslator);
     if (qEnvironmentVariableIsSet("QPM_SCREENSHOT_DIR"))
         qInfo() << "Screenshots kept in" << m_shotDir;
 }
@@ -866,28 +900,45 @@ bool TestScreens::save(const QString &name)
 void TestScreens::viewsAreTranslatedAndRenderInBothSchemes_data()
 {
     QTest::addColumn<QString>("view");
+    QTest::addColumn<QString>("popupName");
+    QTest::addColumn<int>("tab");
     QTest::addColumn<QString>("title");
 
-    QTest::newRow("overview") << QString() << byLanguage("Übersicht", "Overview");
-    QTest::newRow("connect") << QStringLiteral("connectDialog")
-                             << byLanguage("Handy verbinden", "Connect a phone");
-    QTest::newRow("pin") << QStringLiteral("pinDialog")
+    const QString connect = byLanguage("Handy verbinden", "Connect a phone");
+    const QString settings = byLanguage("Einstellungen", "Settings");
+    QTest::newRow("overview") << QStringLiteral("overview") << QString() << -1
+                              << byLanguage("Übersicht", "Overview");
+    QTest::newRow("connect") << QStringLiteral("connectDialog") << QStringLiteral("connectDialog")
+                             << -1 << connect;
+    QTest::newRow("connect by USB")
+        << QStringLiteral("connectUsb") << QStringLiteral("connectDialog") << 1 << connect;
+    QTest::newRow("connect by Bluetooth")
+        << QStringLiteral("connectBluetooth") << QStringLiteral("connectDialog") << 2 << connect;
+    QTest::newRow("pin") << QStringLiteral("pinDialog") << QStringLiteral("pinDialog") << -1
                          << byLanguage("PIN eingeben", "Enter the PIN");
-    QTest::newRow("qr") << QStringLiteral("qrDialog")
+    QTest::newRow("qr") << QStringLiteral("qrDialog") << QStringLiteral("qrDialog") << -1
                         << byLanguage("Mit QR-Code verbinden", "Connect with a QR code");
     QTest::newRow("settings") << QStringLiteral("settingsDialog")
-                              << byLanguage("Einstellungen", "Settings");
+                              << QStringLiteral("settingsDialog") << -1 << settings;
+    QTest::newRow("settings, connection") << QStringLiteral("settingsConnection")
+                                          << QStringLiteral("settingsDialog") << 0 << settings;
+    QTest::newRow("settings, appearance") << QStringLiteral("settingsAppearance")
+                                          << QStringLiteral("settingsDialog") << 1 << settings;
+    QTest::newRow("settings, language and storage")
+        << QStringLiteral("settingsStorage") << QStringLiteral("settingsDialog") << 2 << settings;
 }
 
 void TestScreens::viewsAreTranslatedAndRenderInBothSchemes()
 {
     QFETCH(QString, view);
+    QFETCH(QString, popupName);
+    QFETCH(int, tab);
     QFETCH(QString, title);
-    QObject *popup = view.isEmpty() ? nullptr : dialog(view);
+    QObject *popup = popupName.isEmpty() ? nullptr : dialog(popupName);
     if (popup) {
-        if (view == QLatin1StringView("connectDialog"))
+        if (popupName == QLatin1StringView("connectDialog"))
             popup->setProperty("searchOnOpen", false);
-        if (view == QLatin1StringView("pinDialog")) {
+        if (popupName == QLatin1StringView("pinDialog")) {
             popup->setProperty("wrongPin", true);
             popup->setProperty("remainingTries", 9);
         }
@@ -895,13 +946,56 @@ void TestScreens::viewsAreTranslatedAndRenderInBothSchemes()
         QTRY_VERIFY(popup->property("opened").toBool());
         QCOMPARE(popup->property("title").toString(), title);
     } else {
-        QVERIFY(view.isEmpty());
+        QVERIFY(popupName.isEmpty());
         QQuickItem *header = m_window->property("header").value<QQuickItem *>();
         QVERIFY(header);
         QCOMPARE(header->property("title").toString(), title);
     }
 
-    const QString name = view.isEmpty() ? QStringLiteral("overview") : view;
+    // The pictures go into the handbook, so the dialogs show example values
+    // instead of the address and the folders of the computer that runs the test.
+    if (popupName == QLatin1StringView("qrDialog")) {
+        const qpm::ui::QrCodeProvider *provider = m_controller->qrCode();
+        const QString address = provider->ownAddress();
+        const QString example = QStringLiteral("192.0.2.10");
+        QQuickItem *code = item(QStringLiteral("qrCode"));
+        QVERIFY(code);
+        code->setProperty("text",
+                          qpm::ui::QrCodeProvider::codeText(QStringLiteral("Example0Session0Id00"),
+                                                            QHostAddress(example)));
+        auto *content = popup->property("contentItem").value<QQuickItem *>();
+        QQuickItem *addressLabel =
+            address.isEmpty() || !content ? nullptr : labelWithText(content, address);
+        if (addressLabel) {
+            addressLabel->setProperty(
+                "text", addressLabel->property("text").toString().replace(address, example));
+        }
+    }
+    if (popupName == QLatin1StringView("settingsDialog")) {
+        QQuickItem *adbBox = item(QStringLiteral("adbPathBox"));
+        QQuickItem *storageFolder = item(QStringLiteral("storageFolder"));
+        QVERIFY(adbBox && storageFolder);
+        adbBox->setProperty(
+            "model", QStringList{QStringLiteral("/home/user/Android/Sdk/platform-tools/adb")});
+        adbBox->setProperty("editText", QString());
+        storageFolder->setProperty(
+            "text", QStringLiteral("/home/user/.local/share/QPhoneManager/QPhoneManager/profiles"));
+    }
+    if (tab >= 0) {
+        QQuickItem *tabs =
+            item(popupName == QLatin1StringView("connectDialog") ? QStringLiteral("connectTabs")
+                                                                 : QStringLiteral("settingsTabs"));
+        QVERIFY(tabs);
+        tabs->setProperty("currentIndex", tab);
+        QQuickItem *tabButton = nullptr;
+        QVERIFY(QMetaObject::invokeMethod(tabs, "itemAt", Q_RETURN_ARG(QQuickItem *, tabButton),
+                                          Q_ARG(int, tab)));
+        QVERIFY(tabButton);
+        tabButton->forceActiveFocus(Qt::TabFocusReason);
+        QTRY_VERIFY(tabButton->hasActiveFocus());
+    }
+
+    const QString name = view;
     m_settings->setColorScheme(Settings::ColorScheme::Light);
     QVERIFY(save(name + QStringLiteral("-light")));
     m_settings->setColorScheme(Settings::ColorScheme::Dark);
@@ -909,6 +1003,12 @@ void TestScreens::viewsAreTranslatedAndRenderInBothSchemes()
     m_settings->setColorScheme(Settings::ColorScheme::System);
 
     if (popup) {
+        if (tab >= 0) {
+            QQuickItem *tabs = item(popupName == QLatin1StringView("connectDialog")
+                                        ? QStringLiteral("connectTabs")
+                                        : QStringLiteral("settingsTabs"));
+            tabs->setProperty("currentIndex", 0);
+        }
         QMetaObject::invokeMethod(popup, "close");
         QTRY_VERIFY(!popup->property("visible").toBool());
     }
