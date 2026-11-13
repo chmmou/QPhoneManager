@@ -85,6 +85,10 @@ numbers follow [Semantic Versioning](https://semver.org/).
   copyright, its license and where to get its source code.
 - An AppImage for x86_64, built by `packaging/appimage/build-appimage.sh`, and
   a desktop file, AppStream metadata and the icon in the install step.
+- Releases on GitHub: a version tag builds and tests the AppImage in a
+  container image, signs it with GPG, embedded and as a separate `.asc` file,
+  and publishes it with SHA-256 checksums. A manual run makes an unsigned test
+  build.
 
 ### Changed
 

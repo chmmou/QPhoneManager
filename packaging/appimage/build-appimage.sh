@@ -2,6 +2,7 @@
 # Builds dist/QPhoneManager-<version>-x86_64.AppImage from a release build.
 #
 # Usage: packaging/appimage/build-appimage.sh [configure-preset]
+#        packaging/appimage/build-appimage.sh --fetch-tools
 #
 # The preset defaults to release-6.9 and reads the Qt directory from the
 # environment variable it names, for example QPM_QT_6_9. The Qt part of the
@@ -11,6 +12,12 @@
 #
 # The tools are fixed releases. They are downloaded once into a cache outside
 # the repository and checked against the SHA-256 sums below on every run.
+# QPM_APPIMAGE_TOOLS_DIR names another cache directory. --fetch-tools only
+# fills the cache and checks it; the CI image is prepared that way.
+#
+# When QPM_APPIMAGE_SIGN_KEY holds the fingerprint of a secret key in the
+# keyring of gpg, appimagetool signs the AppImage with that key and embeds the
+# signature and the public key.
 set -euo pipefail
 
 linuxdeploy_url="https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20251107-1/linuxdeploy-x86_64.AppImage"
@@ -23,13 +30,18 @@ runtime_url="https://github.com/AppImage/type2-runtime/releases/download/2025110
 runtime_sha256="2fca8b443c92510f1483a883f60061ad09b46b978b2631c807cd873a47ec260d"
 
 app_id="io.github.chmmou.QPhoneManager"
+fetch_only=0
+if [ "${1:-}" = "--fetch-tools" ]; then
+    fetch_only=1
+    shift
+fi
 preset="${1:-release-6.9}"
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source_dir="$(cd "$script_dir/../.." && pwd)"
 build_dir="$source_dir/build/$preset"
 appdir="$build_dir/AppDir"
 dist_dir="$source_dir/dist"
-cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}/qphonemanager/appimage-tools"
+cache_dir="${QPM_APPIMAGE_TOOLS_DIR:-${XDG_CACHE_HOME:-$HOME/.cache}/qphonemanager/appimage-tools}"
 
 fail() {
     echo "build-appimage.sh: $*" >&2
@@ -56,7 +68,7 @@ fetch() {
     echo "$file"
 }
 
-for tool in cmake curl sha256sum; do
+for tool in curl sha256sum; do
     command -v "$tool" >/dev/null || fail "$tool not found"
 done
 [ "$(uname -m)" = "x86_64" ] || fail "only x86_64 is supported"
@@ -64,6 +76,17 @@ done
 linuxdeploy="$(fetch "$linuxdeploy_url" "$linuxdeploy_sha256" linuxdeploy-1-alpha-20251107-1-x86_64.AppImage)"
 appimagetool="$(fetch "$appimagetool_url" "$appimagetool_sha256" appimagetool-1.9.1-x86_64.AppImage)"
 runtime="$(fetch "$runtime_url" "$runtime_sha256" type2-runtime-20251108-x86_64)"
+if [ "$fetch_only" = 1 ]; then
+    echo "The tools in $cache_dir match their checksums"
+    exit 0
+fi
+
+command -v cmake >/dev/null || fail "cmake not found"
+sign_args=()
+if [ -n "${QPM_APPIMAGE_SIGN_KEY:-}" ]; then
+    command -v gpg >/dev/null || fail "gpg not found; appimagetool needs it to sign"
+    sign_args=(--sign --sign-key "$QPM_APPIMAGE_SIGN_KEY")
+fi
 
 cd "$source_dir"
 cmake --preset "$preset"
@@ -99,5 +122,5 @@ export APPIMAGE_EXTRACT_AND_RUN=1
 mkdir -p "$dist_dir"
 output="$dist_dir/QPhoneManager-$version-x86_64.AppImage"
 rm -f "$output"
-ARCH=x86_64 "$appimagetool" --runtime-file "$runtime" "$appdir" "$output"
+ARCH=x86_64 "$appimagetool" --runtime-file "$runtime" "${sign_args[@]}" "$appdir" "$output"
 echo "Built $output"
