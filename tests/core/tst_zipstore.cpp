@@ -43,6 +43,12 @@ void put32(QByteArray &out, quint32 value)
     out.append(bytes, 4);
 }
 
+QByteArray withField32(QByteArray bytes, qsizetype at, quint32 value)
+{
+    qToLittleEndian(value, bytes.data() + at);
+    return bytes;
+}
+
 // One entry of an archive built by hand, with fields a writer could get wrong.
 struct RawEntry
 {
@@ -151,6 +157,8 @@ private Q_SLOTS:
     void wrongCrcIsReportedOnRead();
     void archiveCutShortIsRefused_data();
     void archiveCutShortIsRefused();
+    void archiveCutInsideAHeaderIsRefused_data();
+    void archiveCutInsideAHeaderIsRefused();
     void storedEntryWithTwoSizesIsRefused();
     void moreEntriesThanAllowedAreRefused();
     void writerStopsAtTheEntryLimit();
@@ -406,6 +414,42 @@ void TestZipStore::archiveCutShortIsRefused_data()
 }
 
 void TestZipStore::archiveCutShortIsRefused()
+{
+    QFETCH(QByteArray, archive);
+
+    const Result<void> opened = openBytes(archive);
+    QVERIFY(!opened.hasValue());
+    QCOMPARE(opened.error().code(), ErrorCode::InvalidInput);
+}
+
+// Each row ends the bytes the reader takes from the file inside a header of
+// fixed size, where a missing length check would read past them.
+void TestZipStore::archiveCutInsideAHeaderIsRefused_data()
+{
+    QTest::addColumn<QByteArray>("archive");
+
+    QTest::newRow("empty file") << QByteArray();
+
+    QByteArray endOnly;
+    put32(endOnly, 0x06054b50);
+    put16(endOnly, 0);
+    put16(endOnly, 0);
+    put16(endOnly, 1);
+    put16(endOnly, 1);
+    put32(endOnly, 0);
+    put32(endOnly, 0);
+    put16(endOnly, 0);
+    QTest::newRow("entry promised, directory empty") << endOnly;
+
+    const QByteArray whole = rawArchive({{"a.txt", "data"}});
+    const qsizetype endAt = whole.size() - 22;
+    const quint32 directoryAt = qFromLittleEndian<quint32>(whole.constData() + endAt + 16);
+    QTest::newRow("central header cut short") << withField32(whole, endAt + 12, 20);
+    QTest::newRow("local header cut short")
+        << withField32(whole, directoryAt + 42, quint32(whole.size() - 10));
+}
+
+void TestZipStore::archiveCutInsideAHeaderIsRefused()
 {
     QFETCH(QByteArray, archive);
 
