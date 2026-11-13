@@ -173,7 +173,8 @@ Item {
                             width: Theme.gridUnit * 2
                             height: Theme.gridUnit * 2
                             radius: Theme.gridUnit
-                            color: dayCell.entryColors[weekLabel.index]
+                            // An entry being removed has the index -1 for a moment.
+                            color: dayCell.entryColors[weekLabel.index] ?? "transparent"
                         }
                     }
                 }
@@ -196,7 +197,8 @@ Item {
                             Layout.preferredWidth: Theme.gridUnit * 2
                             Layout.preferredHeight: Theme.gridUnit * 2
                             radius: Theme.gridUnit
-                            color: dayCell.entryColors[monthRow.index]
+                            // An entry being removed has the index -1 for a moment.
+                            color: dayCell.entryColors[monthRow.index] ?? "transparent"
                         }
 
                         Label {
