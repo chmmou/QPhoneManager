@@ -323,7 +323,9 @@ Dialog {
                             value: "en"
                         }
                     ]
-                    currentIndex: languageBox.indexOfValue(Settings.language)
+                    // The binding first runs before the model is filled, when no
+                    // value is found yet; reading the count runs it again once it is.
+                    currentIndex: languageBox.count > 0 ? languageBox.indexOfValue(Settings.language) : -1
                     Accessible.name: qsTr("Language")
                     onActivated: Settings.language = languageBox.currentValue
                 }
