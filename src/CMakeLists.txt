@@ -608,3 +608,44 @@ qt_add_translations(TARGETS qphonemanager
 install(TARGETS qphonemanager
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+
+set(qpm_app_id "io.github.chmmou.QPhoneManager")
+install(FILES "${PROJECT_SOURCE_DIR}/packaging/linux/${qpm_app_id}.desktop"
+    DESTINATION "${CMAKE_INSTALL_DATADIR}/applications"
+)
+install(FILES "${PROJECT_SOURCE_DIR}/packaging/linux/${qpm_app_id}.metainfo.xml"
+    DESTINATION "${CMAKE_INSTALL_DATADIR}/metainfo"
+)
+install(FILES "${PROJECT_SOURCE_DIR}/res/icons/app/qphonemanager.svg"
+    DESTINATION "${CMAKE_INSTALL_DATADIR}/icons/hicolor/scalable/apps"
+    RENAME "${qpm_app_id}.svg"
+)
+
+# The plugins the deployment installs with the program. The offscreen
+# platform lets the program start without a display. The program uses only
+# the SQLite driver; the other drivers need the client library of their
+# database. The QML debugging, EGLFS, network information and TLS plugins
+# serve features the program does not use.
+qt_import_plugins(qphonemanager
+    INCLUDE_BY_TYPE platforms Qt6::QXcbIntegrationPlugin Qt6::QOffscreenIntegrationPlugin
+    INCLUDE_BY_TYPE sqldrivers Qt6::QSQLiteDriverPlugin
+    EXCLUDE_BY_TYPE qmltooling
+    EXCLUDE_BY_TYPE egldeviceintegrations
+    EXCLUDE_BY_TYPE networkinformation
+    EXCLUDE_BY_TYPE tls
+)
+# The import scan of the deployment only looks below the source directory of
+# the executable, and the QML sources of qpm_ui lie outside it. Qt 6.9 and 6.12
+# read this property but do not document it; build-appimage.sh fails when no
+# QML module was deployed.
+set_target_properties(qphonemanager PROPERTIES
+    QT_QML_IMPORT_SCANNER_EXTRA_ROOT_PATHS "${PROJECT_SOURCE_DIR}/qml"
+)
+# The Qt translation catalogues are embedded in the executable, so the
+# deployment leaves the translations of the Qt installation out.
+qt_generate_deploy_qml_app_script(
+    TARGET qphonemanager
+    OUTPUT_SCRIPT qpm_deploy_script
+    NO_TRANSLATIONS
+)
+install(SCRIPT "${qpm_deploy_script}")

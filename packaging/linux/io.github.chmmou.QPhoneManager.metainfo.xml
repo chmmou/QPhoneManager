@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.chmmou.QPhoneManager</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>BSD-3-Clause</project_license>
+
+  <name>QPhoneManager</name>
+  <summary>Manage an Android phone from the Linux desktop</summary>
+  <summary xml:lang="de">Android-Handy vom Linux-Desktop aus verwalten</summary>
+
+  <description>
+    <p>
+      QPhoneManager reads and edits the contacts, call log, messages, calendar,
+      tasks and notes of an Android phone. It backs them up into a file and
+      restores them. It also handles files, apps, the phone screen and
+      notifications.
+    </p>
+    <p xml:lang="de">
+      QPhoneManager liest und bearbeitet Kontakte, Anrufliste, Nachrichten,
+      Kalender, Aufgaben und Notizen eines Android-Handys. Es sichert sie in
+      eine Datei und stellt sie wieder her. Dazu kommen Dateien, Apps, der
+      Bildschirm des Handys und Benachrichtigungen.
+    </p>
+    <p>
+      It talks to the Android app "MyPhoneExplorer Client" over Wi-Fi, USB or
+      Bluetooth. QPhoneManager is an independent project and is not affiliated
+      with the maker of MyPhoneExplorer.
+    </p>
+    <p xml:lang="de">
+      Es verbindet sich über WLAN, USB oder Bluetooth mit der Android-App
+      "MyPhoneExplorer Client". QPhoneManager ist ein eigenständiges Projekt
+      und gehört nicht zum Hersteller von MyPhoneExplorer.
+    </p>
+  </description>
+
+  <developer id="io.github.chmmou">
+    <name>Alexander Saal</name>
+  </developer>
+
+  <launchable type="desktop-id">io.github.chmmou.QPhoneManager.desktop</launchable>
+  <url type="homepage">https://github.com/chmmou/QPhoneManager</url>
+
+  <provides>
+    <binary>qphonemanager</binary>
+  </provides>
+
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+  </supports>
+
+  <content_rating type="oars-1.1"/>
+</component>

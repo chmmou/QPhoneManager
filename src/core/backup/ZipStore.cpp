@@ -62,13 +62,21 @@ void put32(QByteArray &out, quint32 value)
     out.append(bytes, 4);
 }
 
+// get16() and get32() return 0 for bytes outside data. The size check alone
+// covers a null array; isNull() is spelled out because GCC 15 at -O3 with
+// Qt 6.12 otherwise sees a read past the one-byte array that constData()
+// returns for it.
 quint16 get16(const QByteArray &data, qsizetype at)
 {
+    if (data.isNull() || at < 0 || at > data.size() - 2)
+        return 0;
     return qFromLittleEndian<quint16>(data.constData() + at);
 }
 
 quint32 get32(const QByteArray &data, qsizetype at)
 {
+    if (data.isNull() || at < 0 || at > data.size() - 4)
+        return 0;
     return qFromLittleEndian<quint32>(data.constData() + at);
 }
 
