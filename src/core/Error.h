@@ -2,7 +2,7 @@
 
 #include <QString>
 
-#include <optional>
+#include <memory>
 #include <utility>
 
 namespace qpm::core {
@@ -54,7 +54,7 @@ private:
 
 /**
  * Either a value or an Error. value() may only be called when hasValue() is
- * true.
+ * true. error() is a default Error, meaning "no error", while a value is held.
  */
 template <typename T> class [[nodiscard]] Result
 {
@@ -62,20 +62,24 @@ public:
     // Implicit on purpose, although single-argument constructors are
     // otherwise explicit: a function returning Result<T> can then write both
     // "return value;" and "return Error(...);".
-    Result(T value) : m_value(std::move(value)) {}
+    Result(T value) : m_value(std::make_shared<const T>(std::move(value))) {}
     // Implicit for the same reason as above.
     Result(Error error) : m_error(std::move(error)) {}
 
-    [[nodiscard]] bool hasValue() const { return m_value.has_value(); }
+    [[nodiscard]] bool hasValue() const { return m_value != nullptr; }
     [[nodiscard]] const T &value() const
     {
-        Q_ASSERT(m_value.has_value());
+        Q_ASSERT(m_value);
         return *m_value;
     }
     [[nodiscard]] const Error &error() const { return m_error; }
 
 private:
-    std::optional<T> m_value;
+    // The value lives behind a pointer that is always initialized. With an
+    // optional or a variant in place, GCC 15 at -O3 reports the storage of the
+    // absent value as maybe uninitialized once a Result holding an Error is
+    // moved into a QFuture. Copies share the value, which nothing can change.
+    std::shared_ptr<const T> m_value;
     Error m_error;
 };
 
