@@ -1,6 +1,7 @@
 pragma Singleton
 
 import QtQuick
+import QtQuick.Templates as T
 
 QtObject {
     id: root
@@ -33,7 +34,38 @@ QtObject {
     readonly property int sidebarIconSize: 24
     readonly property int listIconSize: 20
 
+    // On while the user asked for less motion in the settings.
+    readonly property bool reduceMotion: Settings.reduceMotion
+
     function icon(name: string): url {
         return "qrc:/icons/tabler/" + name + ".svg";
+    }
+
+    // Opens and closes `popup` without its motion while reduceMotion is on,
+    // and gives it back when it is off again. Called once, when the popup is
+    // complete; the motion it keeps is the one the style gave it.
+    function calmPopup(popup: T.Popup): void {
+        const enter = popup.enter;
+        const exit = popup.exit;
+        const apply = () => {
+            popup.enter = root.reduceMotion ? null : enter;
+            popup.exit = root.reduceMotion ? null : exit;
+        };
+        apply();
+        root.reduceMotionChanged.connect(popup, apply);
+    }
+
+    // Lets the marker of `tabs` jump to the chosen tab while reduceMotion is
+    // on. Called once, when the tab bar is complete.
+    function calmTabBar(tabs: T.TabBar): void {
+        const list = tabs.contentItem as ListView;
+        if (!list)
+            return;
+        const duration = list.highlightMoveDuration;
+        const apply = () => {
+            list.highlightMoveDuration = root.reduceMotion ? 0 : duration;
+        };
+        apply();
+        root.reduceMotionChanged.connect(list, apply);
     }
 }

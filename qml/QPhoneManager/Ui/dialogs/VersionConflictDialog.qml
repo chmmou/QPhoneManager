@@ -69,6 +69,7 @@ Dialog {
     // focus up on closing makes the next opening set that reason again.
     onOpened: backButton.forceActiveFocus(Qt.TabFocusReason)
     onClosed: backButton.focus = false
+    Component.onCompleted: Theme.calmPopup(root)
 
     ColumnLayout {
         anchors.fill: parent

@@ -40,6 +40,7 @@ Item {
                     currentIndex: root.area.list.filterIndex
                     Accessible.name: qsTr("Show tasks")
                     onCurrentIndexChanged: root.area.list.filterIndex = filterTabs.currentIndex
+                    Component.onCompleted: Theme.calmTabBar(filterTabs)
 
                     TabButton {
                         id: openTab

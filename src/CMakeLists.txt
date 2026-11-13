@@ -276,6 +276,8 @@ qt_add_qml_module(qpm_ui
         ui/QrCodeImage.cpp
         ui/QrCodeProvider.h
         ui/QrCodeProvider.cpp
+        ui/ReducedMotionFilter.h
+        ui/ReducedMotionFilter.cpp
         ui/Settings.h
         ui/Settings.cpp
         ui/TintedIcon.h

@@ -168,6 +168,7 @@ Item {
                         currentIndex: root.editor.calendarIndex
                         Accessible.name: qsTr("Calendar")
                         onActivated: index => root.editor.calendarIndex = index
+                        Component.onCompleted: Theme.calmPopup(calendarBox.popup)
 
                         FocusRing {
                             shown: calendarBox.visualFocus
@@ -187,6 +188,7 @@ Item {
                         currentIndex: root.editor.repeatIndex
                         Accessible.name: qsTr("Repeats")
                         onActivated: index => root.editor.repeatIndex = index
+                        Component.onCompleted: Theme.calmPopup(repeatBox.popup)
 
                         FocusRing {
                             shown: repeatBox.visualFocus
@@ -206,6 +208,7 @@ Item {
                         currentIndex: root.editor.colorIndex
                         Accessible.name: qsTr("Colour")
                         onActivated: index => root.editor.colorIndex = index
+                        Component.onCompleted: Theme.calmPopup(colorBox.popup)
 
                         FocusRing {
                             shown: colorBox.visualFocus
@@ -225,6 +228,7 @@ Item {
                         currentIndex: root.editor.availabilityIndex
                         Accessible.name: qsTr("Shown as")
                         onActivated: index => root.editor.availabilityIndex = index
+                        Component.onCompleted: Theme.calmPopup(availabilityBox.popup)
 
                         FocusRing {
                             shown: availabilityBox.visualFocus
@@ -244,6 +248,7 @@ Item {
                         currentIndex: root.editor.visibilityIndex
                         Accessible.name: qsTr("Visible to")
                         onActivated: index => root.editor.visibilityIndex = index
+                        Component.onCompleted: Theme.calmPopup(visibilityBox.popup)
 
                         FocusRing {
                             shown: visibilityBox.visualFocus
@@ -328,6 +333,7 @@ Item {
                         model: root.editor.reminderChoices
                         currentIndex: 3
                         Accessible.name: qsTr("Time of a new reminder")
+                        Component.onCompleted: Theme.calmPopup(reminderBox.popup)
 
                         FocusRing {
                             shown: reminderBox.visualFocus

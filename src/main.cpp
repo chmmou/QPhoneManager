@@ -2,6 +2,7 @@
 #include "core/Version.h"
 #include "platform/TrayIcon.h"
 #include "ui/AppController.h"
+#include "ui/ReducedMotionFilter.h"
 #include "ui/Settings.h"
 
 #include <QApplication>
@@ -61,6 +62,9 @@ int main(int argc, char *argv[])
     // of the system stays when it already speaks that language.
     if (QLocale::system().name().section(u'_', 0, 0) != language)
         QLocale::setDefault(QLocale(language));
+    // The settings are read anew at each request, so a change shows at once.
+    qpm::ui::ReducedMotionFilter reducedMotion(&startup);
+    app.installEventFilter(&reducedMotion);
     QTranslator appTranslator;
     QTranslator qtBaseTranslator;
     QTranslator qtQuickTranslator;

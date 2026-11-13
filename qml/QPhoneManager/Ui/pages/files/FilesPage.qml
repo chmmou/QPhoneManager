@@ -568,6 +568,7 @@ Item {
         id: uploadMenu
 
         objectName: "uploadMenu"
+        Component.onCompleted: Theme.calmPopup(uploadMenu)
 
         MenuItem {
             text: qsTr("Copy files")
@@ -586,6 +587,7 @@ Item {
         objectName: "fileMenu"
         // Wide enough for the longest entry in both languages.
         width: TypeScale.body * 18
+        Component.onCompleted: Theme.calmPopup(entryMenu)
 
         MenuItem {
             text: root.currentIsFolder ? qsTr("Open") : qsTr("Open on this computer")
@@ -676,6 +678,7 @@ Item {
         onOpened: cancelDeleteButton.forceActiveFocus(Qt.TabFocusReason)
         onClosed: cancelDeleteButton.focus = false
         onAccepted: root.files.remove([root.pendingDelete])
+        Component.onCompleted: Theme.calmPopup(deleteDialog)
 
         Label {
             objectName: "deleteFileText"

@@ -46,6 +46,7 @@ Item {
                         currentIndex: root.area.viewIndex
                         Accessible.name: qsTr("View")
                         onCurrentIndexChanged: root.area.viewIndex = viewTabs.currentIndex
+                        Component.onCompleted: Theme.calmTabBar(viewTabs)
 
                         TabButton {
                             id: monthTab
@@ -201,6 +202,7 @@ Item {
                         ToolTip.visible: holidayBox.hovered
                         ToolTip.text: qsTr("Show public holidays of")
                         onActivated: index => Settings.holidayRegion = root.holidayRegions[index]
+                        Component.onCompleted: Theme.calmPopup(holidayBox.popup)
 
                         FocusRing {
                             shown: holidayBox.visualFocus

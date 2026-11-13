@@ -1,3 +1,6 @@
+#include "ui/ReducedMotionFilter.h"
+#include "ui/Settings.h"
+
 #include <QCoreApplication>
 #include <QFile>
 #include <QLocale>
@@ -29,10 +32,16 @@ public Q_SLOTS:
         QCoreApplication::setOrganizationName(QStringLiteral("QPhoneManagerTest"));
         QCoreApplication::setApplicationName(QStringLiteral("tst_qml"));
         QLocale::setDefault(QLocale::c());
+        // As in the program, so that the text menus follow the setting.
+        m_settings = std::make_unique<qpm::ui::Settings>();
+        m_reducedMotion = std::make_unique<qpm::ui::ReducedMotionFilter>(m_settings.get());
+        QCoreApplication::instance()->installEventFilter(m_reducedMotion.get());
     }
 
 private:
     std::unique_ptr<QTemporaryDir> m_home;
+    std::unique_ptr<qpm::ui::Settings> m_settings;
+    std::unique_ptr<qpm::ui::ReducedMotionFilter> m_reducedMotion;
 };
 
 QUICK_TEST_MAIN_WITH_SETUP(qml, Setup)

@@ -9,6 +9,8 @@
 #include <QMap>
 #include <QProcess>
 #include <QQmlApplicationEngine>
+#include <QQmlContext>
+#include <QQmlExpression>
 #include <QQmlExtensionPlugin>
 #include <QQuickItem>
 #include <QQuickWindow>
@@ -100,6 +102,7 @@ private Q_SLOTS:
     void onlyChapterLinksAndHttpsAreFollowed();
     void linkPositionsMatchTheText();
     void imagesOfAChapterAreShown();
+    void wideImagesShrinkToTheTextWidth();
     void firstChapterWaitsForTheHelpWithoutBlocking();
     void helpThatCannotBeLoadedSaysSo();
     void failedWebLinkShowsItsAddress();
@@ -544,6 +547,63 @@ void TestHelp::imagesOfAChapterAreShown()
     QVERIFY(url.isLocalFile());
     QVERIFY(url.toLocalFile().endsWith(QStringLiteral("/de/images/liste.png")));
     QCOMPARE(QImage(url.toLocalFile()).size(), QSize(60, 40));
+}
+
+// A screenshot wider than the text column kept its own width, so the page
+// scrolled sideways. It now shrinks to the text, also when the window gets
+// narrower, and a wide text does not enlarge it.
+void TestHelp::wideImagesShrinkToTheTextWidth()
+{
+    QImage picture(1600, 400, QImage::Format_RGB32);
+    picture.fill(Qt::darkCyan);
+    const QString file =
+        buildHelpFile(QStringLiteral("de"),
+                      {{QStringLiteral("alpha"),
+                        QStringLiteral("# Alpha\n\n![Das Fenster](images/fenster.png)\n")}},
+                      {QStringLiteral("alpha")}, {{QStringLiteral("fenster.png"), picture}});
+    QVERIFY(!file.isEmpty());
+    HelpController help({file});
+    help.setLanguage(QStringLiteral("de"));
+    QVERIFY(help.openTopic(QStringLiteral("alpha")));
+    QTRY_VERIFY(!help.isBusy());
+
+    QTextDocument document;
+    document.setHtml(help.currentHtml());
+    document.setTextWidth(500);
+    QVERIFY2(document.idealWidth() <= 500, qPrintable(QString::number(document.idealWidth())));
+    // A quarter of the width as height, as the picture has.
+    QVERIFY2(document.size().height() < 200, qPrintable(QString::number(document.size().height())));
+    document.setTextWidth(2400);
+    QVERIFY2(document.idealWidth() >= 1600 && document.idealWidth() < 1700,
+             qPrintable(QString::number(document.idealWidth())));
+
+    // The page of the window shows the same text in its own column.
+    m_window->requestActivate();
+    QVERIFY(QTest::qWaitForWindowActive(m_window));
+    QVERIFY(QMetaObject::invokeMethod(item(QStringLiteral("section-help")), "click"));
+    QTRY_VERIFY(!m_help->isBusy());
+    QQuickItem *text = item(QStringLiteral("helpText"));
+    QVERIFY(text);
+    text->setProperty("text", help.currentHtml());
+    const auto fits = [text]() {
+        const qreal column = text->width() - text->property("leftPadding").toReal() -
+                             text->property("rightPadding").toReal();
+        return text->property("contentWidth").toReal() <= column + 0.5;
+    };
+    const int width = m_window->width();
+    QTRY_VERIFY2(fits(), qPrintable(QString::number(text->property("contentWidth").toReal())));
+    m_window->resize(m_window->minimumWidth(), m_window->height());
+    QTRY_COMPARE(m_window->width(), m_window->minimumWidth());
+    QTRY_VERIFY2(fits(), qPrintable(QString::number(text->property("contentWidth").toReal())));
+
+    m_window->resize(width, m_window->height());
+    QTRY_COMPARE(m_window->width(), width);
+    QQmlExpression rebind(qmlContext(text), text,
+                          QStringLiteral("text = Qt.binding(() => HelpController.currentHtml)"));
+    rebind.evaluate();
+    QVERIFY(!rebind.hasError());
+    QVERIFY(text->property("text").toString().contains(m_help->currentTitle()));
+    showSection(0);
 }
 
 // The first chapter sets up the help on a worker thread; the call returns

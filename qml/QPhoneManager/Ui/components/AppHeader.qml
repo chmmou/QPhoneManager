@@ -40,6 +40,7 @@ ToolBar {
             displayText: deviceBox.currentIndex >= 0 ? deviceBox.currentText : qsTr("No phone")
             Accessible.name: qsTr("Phone")
             onActivated: AppController.selectDevice(deviceBox.currentValue)
+            Component.onCompleted: Theme.calmPopup(deviceBox.popup)
 
             FocusRing {
                 shown: deviceBox.visualFocus

@@ -37,6 +37,7 @@ Dialog {
         closeButton.forceActiveFocus(Qt.PopupFocusReason);
     }
     onClosed: root.provider.active = false
+    Component.onCompleted: Theme.calmPopup(root)
 
     Connections {
         target: AppController

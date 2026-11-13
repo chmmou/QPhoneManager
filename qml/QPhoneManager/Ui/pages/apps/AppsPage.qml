@@ -48,6 +48,7 @@ Item {
                     currentIndex: root.tabOf(root.apps.filter)
                     Accessible.name: qsTr("Show apps")
                     onCurrentIndexChanged: root.apps.filter = root.filterAt(filterTabs.currentIndex)
+                    Component.onCompleted: Theme.calmTabBar(filterTabs)
 
                     TabButton {
                         id: userTab
@@ -414,6 +415,7 @@ Item {
         objectName: "appMenu"
         // Wide enough for the longest entry in both languages.
         width: TypeScale.body * 22
+        Component.onCompleted: Theme.calmPopup(appMenu)
 
         MenuItem {
             text: qsTr("Open on the phone")
@@ -476,6 +478,7 @@ Item {
         onOpened: cancelUninstallButton.forceActiveFocus(Qt.TabFocusReason)
         onClosed: cancelUninstallButton.focus = false
         onAccepted: root.apps.uninstall(root.pendingRemoval)
+        Component.onCompleted: Theme.calmPopup(uninstallDialog)
 
         Label {
             objectName: "uninstallAppText"

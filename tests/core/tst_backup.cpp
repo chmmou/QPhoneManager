@@ -18,9 +18,11 @@
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QSemaphore>
 #include <QSignalSpy>
 #include <QTemporaryDir>
 #include <QTest>
+#include <QThreadPool>
 #include <QTimeZone>
 
 #include <memory>
@@ -238,6 +240,47 @@ QList<FakeCall> exampleCalls()
     missed.number = QStringLiteral("030 12345672");
     return {dialled, missed};
 }
+
+/**
+ * Holds the one worker thread of the global pool from waitUntilHeld() until
+ * release() or destruction, so that a job started meanwhile cannot run. A
+ * small job could otherwise end before the call that started it returns,
+ * and its continuation then ran at once.
+ */
+class PoolHold
+{
+    Q_DISABLE_COPY_MOVE(PoolHold)
+
+public:
+    PoolHold() : m_pool(QThreadPool::globalInstance()), m_threads(m_pool->maxThreadCount())
+    {
+        m_pool->setMaxThreadCount(1);
+        // The task shares the semaphores, since it may outlive a failed test.
+        m_pool->start([holding = m_holding, release = m_release]() {
+            holding->release();
+            release->acquire();
+        });
+    }
+    ~PoolHold() { release(); }
+
+    [[nodiscard]] bool waitUntilHeld() { return m_holding->tryAcquire(1, timeoutMs); }
+
+    void release()
+    {
+        if (m_released)
+            return;
+        m_released = true;
+        m_release->release();
+        m_pool->setMaxThreadCount(m_threads);
+    }
+
+private:
+    QThreadPool *m_pool;
+    int m_threads;
+    std::shared_ptr<QSemaphore> m_holding = std::make_shared<QSemaphore>();
+    std::shared_ptr<QSemaphore> m_release = std::make_shared<QSemaphore>();
+    bool m_released = false;
+};
 
 QList<BackupSection> everySection()
 {
@@ -837,14 +880,20 @@ void TestBackup::withoutConnectionThePreviewComparesWithThisComputer()
     QCOMPARE(report.value().sections.value(BackupSection::Contacts).restored, 0);
 }
 
+// Under load the small backup could finish before create() returned, and
+// the first operation had already ended when the second came.
 void TestBackup::secondOperationWhileOneRunsIsRefused()
 {
+    PoolHold hold;
+    QVERIFY(hold.waitUntilHeld());
+
     const QString path = backupPath(QStringLiteral("busy.qpmbackup"));
     const QFuture<Result<BackupInfo>> first =
         m_backup->create(path, everySection(), CsvLanguage::English);
     QVERIFY(m_backup->isRunning());
 
     const Result<Backup> second = wait(m_backup->open(path));
+    hold.release();
 
     QVERIFY(!second.hasValue());
     QCOMPARE(second.error().code(), ErrorCode::InvalidInput);
@@ -891,7 +940,8 @@ void TestBackup::backupOfAnotherPhoneOnlyAdds()
 }
 
 // A switch of the phone while the parts are prepared must not put the
-// messages into the archive of the other phone.
+// messages into the archive of the other phone. Under load the parts could
+// be ready before the switch, so the switch came too late.
 void TestBackup::archiveImportStaysWithTheStoreItStartedWith()
 {
     const Result<Backup> backup = backupAndOpen({BackupSection::Messages});
@@ -899,9 +949,12 @@ void TestBackup::archiveImportStaysWithTheStoreItStartedWith()
     ProfileStore otherProfile(m_dir->filePath(QStringLiteral("profiles")), QStringLiteral("dev-2"));
     QVERIFY(otherProfile.open().hasValue());
     const auto otherStore = std::make_shared<store::MessageStore>(&otherProfile);
+    PoolHold hold;
+    QVERIFY(hold.waitUntilHeld());
 
     const QFuture<Result<int>> imported = m_messages->importToArchive(backup.value().data.messages);
     m_messages->setStore(otherStore);
+    hold.release();
     const Result<int> result = wait(imported);
 
     QVERIFY(!result.hasValue());

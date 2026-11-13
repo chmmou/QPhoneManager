@@ -183,6 +183,7 @@ Item {
                             currentIndex: root.composer.simIndex
                             Accessible.name: qsTr("SIM card")
                             onActivated: index => root.composer.simIndex = index
+                            Component.onCompleted: Theme.calmPopup(simBox.popup)
 
                             FocusRing {
                                 shown: simBox.visualFocus

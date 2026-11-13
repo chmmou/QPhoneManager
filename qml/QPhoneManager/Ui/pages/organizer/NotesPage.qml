@@ -41,6 +41,7 @@ Item {
                     currentIndex: Math.max(0, root.area.categories.names.indexOf(root.area.list.categoryFilter) + 1)
                     Accessible.name: qsTr("Show notes of the category")
                     onActivated: index => root.area.list.categoryFilter = index > 0 ? root.area.categories.names[index - 1] : ""
+                    Component.onCompleted: Theme.calmPopup(categoryFilterBox.popup)
 
                     FocusRing {
                         shown: categoryFilterBox.visualFocus

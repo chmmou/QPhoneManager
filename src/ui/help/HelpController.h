@@ -57,7 +57,9 @@ class HelpController : public QObject
     Q_PROPERTY(QString currentLanguage READ currentLanguage NOTIFY pageChanged FINAL)
     /**
      * The chapter as rich text; empty while `busy` and when the help has no
-     * chapter for the topic. Changes with the page and with `linkColor`.
+     * chapter for the topic. Changes with the page and with `linkColor`. An
+     * image in it is never wider than the text width of the document that
+     * shows it, and is never enlarged.
      */
     Q_PROPERTY(QString currentHtml READ currentHtml NOTIFY htmlChanged FINAL)
     /// What to tell the user when `currentHtml` is empty and the help is not busy.

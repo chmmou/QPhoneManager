@@ -381,6 +381,7 @@ Item {
         id: messageMenu
 
         objectName: "messageMenu"
+        Component.onCompleted: Theme.calmPopup(messageMenu)
 
         MenuItem {
             text: root.area.messages.archivedAt(list.currentIndex) ? qsTr("Take out of the archive") : qsTr("Keep in the archive")

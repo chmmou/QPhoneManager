@@ -987,7 +987,7 @@
     <message>
         <location filename="../../qml/QPhoneManager/Ui/dialogs/ConflictDialog.qml" line="41"/>
         <source>Keep the phone&apos;s version</source>
-        <translation>Fassung vom Handy behalten</translation>
+        <translation>Fassung des Handys behalten</translation>
     </message>
     <message>
         <location filename="../../qml/QPhoneManager/Ui/dialogs/ConflictDialog.qml" line="55"/>
@@ -1743,7 +1743,7 @@
     <message>
         <location filename="../../src/ui/contacts/ContactTypes.cpp" line="194"/>
         <source>The contacts cannot be saved on this computer. Check the storage folder in the settings.</source>
-        <translation>Die Kontakte lassen sich auf diesem Rechner nicht speichern. Prüfen Sie den Ablageort in den Einstellungen.</translation>
+        <translation>Die Kontakte lassen sich auf diesem Rechner nicht speichern. Prüfen Sie den Ablageordner in den Einstellungen.</translation>
     </message>
     <message>
         <location filename="../../src/ui/contacts/ContactTypes.cpp" line="197"/>
@@ -3124,7 +3124,7 @@
     <message>
         <location filename="../../src/ui/organizer/OrganizerText.cpp" line="192"/>
         <source>The data cannot be saved on this computer. Check the storage folder in the settings.</source>
-        <translation>Die Daten lassen sich auf diesem Rechner nicht speichern. Prüfen Sie den Speicherordner in den Einstellungen.</translation>
+        <translation>Die Daten lassen sich auf diesem Rechner nicht speichern. Prüfen Sie den Ablageordner in den Einstellungen.</translation>
     </message>
     <message>
         <location filename="../../src/ui/organizer/OrganizerText.cpp" line="196"/>
@@ -5347,7 +5347,7 @@ Den Lizenztext finden Sie unter https://www.gnu.org/licenses/lgpl-3.0.html.</tra
     <message>
         <location filename="../../src/ui/backup/BackupController.cpp" line="441"/>
         <source>The data on this computer cannot be changed. Check the storage folder in the settings.</source>
-        <translation>Die Daten auf diesem Rechner lassen sich nicht ändern. Prüfen Sie den Speicherordner in den Einstellungen.</translation>
+        <translation>Die Daten auf diesem Rechner lassen sich nicht ändern. Prüfen Sie den Ablageordner in den Einstellungen.</translation>
     </message>
     <message>
         <location filename="../../src/ui/backup/BackupController.cpp" line="445"/>
@@ -5641,7 +5641,7 @@ Den Lizenztext finden Sie unter https://www.gnu.org/licenses/lgpl-3.0.html.</tra
     <message>
         <location filename="../../src/ui/calls/CallsArea.cpp" line="41"/>
         <source>The call log cannot be saved on this computer. Check the storage folder in the settings.</source>
-        <translation>Die Anrufliste lässt sich auf diesem Rechner nicht speichern. Prüfen Sie den Ablageort in den Einstellungen.</translation>
+        <translation>Die Anrufliste lässt sich auf diesem Rechner nicht speichern. Prüfen Sie den Ablageordner in den Einstellungen.</translation>
     </message>
     <message>
         <location filename="../../src/ui/calls/CallsArea.cpp" line="44"/>
@@ -6510,7 +6510,7 @@ Den Lizenztext finden Sie unter https://www.gnu.org/licenses/lgpl-3.0.html.</tra
     <message>
         <location filename="../../src/ui/messages/MessagesArea.cpp" line="821"/>
         <source>The messages cannot be saved on this computer. Check the storage folder in the settings.</source>
-        <translation>Die Nachrichten lassen sich auf diesem Rechner nicht speichern. Prüfen Sie den Ablageort in den Einstellungen.</translation>
+        <translation>Die Nachrichten lassen sich auf diesem Rechner nicht speichern. Prüfen Sie den Ablageordner in den Einstellungen.</translation>
     </message>
     <message>
         <location filename="../../src/ui/messages/MessagesArea.cpp" line="826"/>

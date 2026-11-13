@@ -40,6 +40,7 @@ Dialog {
         adbBox.editText = Settings.adbPath;
         adbBox.forceActiveFocus(Qt.PopupFocusReason);
     }
+    Component.onCompleted: Theme.calmPopup(root)
 
     // The shortcut of the window does not reach past a modal dialog, so F1
     // asks for the chapter here. Off while closed, so the two never compete.
@@ -58,6 +59,7 @@ Dialog {
 
             objectName: "settingsTabs"
             Layout.fillWidth: true
+            Component.onCompleted: Theme.calmTabBar(tabs)
 
             TabButton {
                 id: connectionTab
@@ -141,6 +143,7 @@ Dialog {
                                 if (!adbBox.activeFocus)
                                     Settings.adbPath = adbBox.editText.trim();
                             }
+                            Component.onCompleted: Theme.calmPopup(adbBox.popup)
                         }
 
                         Button {
@@ -323,9 +326,12 @@ Dialog {
                             value: "en"
                         }
                     ]
-                    currentIndex: languageBox.indexOfValue(Settings.language)
+                    // The binding first runs before the model is filled, when no
+                    // value is found yet; reading the count runs it again once it is.
+                    currentIndex: languageBox.count > 0 ? languageBox.indexOfValue(Settings.language) : -1
                     Accessible.name: qsTr("Language")
                     onActivated: Settings.language = languageBox.currentValue
+                    Component.onCompleted: Theme.calmPopup(languageBox.popup)
                 }
 
                 Label {

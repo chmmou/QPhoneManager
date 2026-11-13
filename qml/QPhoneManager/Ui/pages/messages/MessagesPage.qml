@@ -44,6 +44,7 @@ Item {
                     objectName: "messageViewTabs"
                     Accessible.name: qsTr("Show messages")
                     onCurrentIndexChanged: root.area.composing = false
+                    Component.onCompleted: Theme.calmTabBar(viewTabs)
 
                     TabButton {
                         id: conversationsTab
@@ -292,6 +293,7 @@ Item {
             if (root.pendingDeleteScheduled)
                 root.area.composing = false;
         }
+        Component.onCompleted: Theme.calmPopup(deleteDialog)
 
         Label {
             objectName: "deleteMessagesText"

@@ -48,6 +48,7 @@ Dialog {
     onOpened: calendarList.forceActiveFocus(Qt.TabFocusReason)
     onAccepted: root.area.applyCalendarChoice()
     onRejected: root.area.calendars.revertChoice()
+    Component.onCompleted: Theme.calmPopup(root)
 
     ColumnLayout {
         anchors.fill: parent

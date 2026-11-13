@@ -32,6 +32,7 @@
 #include <QQmlExtensionPlugin>
 #include <QQuickItem>
 #include <QQuickWindow>
+#include <QRegularExpression>
 #include <QSet>
 #include <QSignalSpy>
 #include <QUrl>
@@ -301,6 +302,7 @@ private Q_SLOTS:
     void organizerDialogsShowTheFocusAndNameTheirControls_data();
     void organizerDialogsShowTheFocusAndNameTheirControls();
     void calendarDaysAreChosenByKeyboard();
+    void calendarSwitchesBetweenMonthAndWeekWithoutWarnings();
     void organizerFocusChainReachesEveryControlOnce_data();
     void organizerFocusChainReachesEveryControlOnce();
     void fileViewControlsHaveANameAndARole_data();
@@ -1423,6 +1425,52 @@ void TestAccessibility::calendarDaysAreChosenByKeyboard()
     QTest::keyClick(m_window, Qt::Key_PageUp);
     QCOMPARE(area->currentDate(), QDate(2026, 11, 12));
     QVERIFY(grid->hasActiveFocus());
+}
+
+// Switching from month to week builds the new cells with month entries first
+// and swaps them for week entries once the row count follows. The swapped-out
+// entries had the index -1 for a moment, and the colour dot of each warned that
+// it got no colour.
+void TestAccessibility::calendarSwitchesBetweenMonthAndWeekWithoutWarnings()
+{
+    QTest::failOnWarning(QRegularExpression(QStringLiteral("CalendarGrid\\.qml")));
+    QVERIFY(showOrganizer(4));
+    auto *controller =
+        m_engine->singletonInstance<AppController *>("QPhoneManager.Ui", "AppController");
+    qpm::ui::CalendarArea *area = controller->calendar();
+    // The line limit of the first entry the grid draws: three in a week, none in a month.
+    const auto entryLineLimit = [this]() {
+        const QQuickItem *grid = findItem(m_window->contentItem(), QStringLiteral("calendarGrid"));
+        QList<const QQuickItem *> pending;
+        if (grid)
+            pending.append(grid);
+        while (!pending.isEmpty()) {
+            const QQuickItem *next = pending.takeLast();
+            if (next->inherits("QQuickText") &&
+                next->property("text").toString().contains(QStringLiteral("Elternabend"))) {
+                return next->property("maximumLineCount").toInt();
+            }
+            const QList<QQuickItem *> children = next->childItems();
+            for (const QQuickItem *child : children)
+                pending.append(child);
+        }
+        return 0;
+    };
+    constexpr int weekLines = 3;
+
+    QTRY_VERIFY(entryLineLimit() > weekLines);
+    // The warning only came once the month had been drawn with the grid holding the focus.
+    m_window->requestActivate();
+    QVERIFY(QTest::qWaitForWindowActive(m_window));
+    QQuickItem *grid = findItem(m_window->contentItem(), QStringLiteral("calendarGrid"));
+    QVERIFY(grid);
+    grid->forceActiveFocus(Qt::TabFocusReason);
+    QTRY_VERIFY(grid->hasActiveFocus());
+    QVERIFY(!m_window->grabWindow().isNull());
+    area->setViewMode(qpm::ui::CalendarArea::ViewMode::Week);
+    QTRY_COMPARE(entryLineLimit(), weekLines);
+    area->setViewMode(qpm::ui::CalendarArea::ViewMode::Month);
+    QTRY_VERIFY(entryLineLimit() > weekLines);
 }
 
 void TestAccessibility::organizerFocusChainReachesEveryControlOnce_data()

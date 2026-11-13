@@ -172,6 +172,7 @@ Item {
                         currentIndex: root.editor.repeatIndex
                         Accessible.name: qsTr("Repeats")
                         onActivated: index => root.editor.repeatIndex = index
+                        Component.onCompleted: Theme.calmPopup(repeatBox.popup)
 
                         FocusRing {
                             shown: repeatBox.visualFocus
@@ -192,6 +193,7 @@ Item {
                         currentIndex: root.editor.priorityIndex
                         Accessible.name: qsTr("Priority")
                         onActivated: index => root.editor.priorityIndex = index
+                        Component.onCompleted: Theme.calmPopup(priorityBox.popup)
 
                         FocusRing {
                             shown: priorityBox.visualFocus

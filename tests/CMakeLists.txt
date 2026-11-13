@@ -194,7 +194,7 @@ qt_add_resources(tst_screens "tst_screens_config"
     BASE "${PROJECT_SOURCE_DIR}/res"
     FILES "${PROJECT_SOURCE_DIR}/res/qtquickcontrols2.conf"
 )
-# The German catalogue is built along with the program.
+# The German and the English catalogue are built along with the program.
 add_dependencies(tst_screens qphonemanager)
 target_compile_definitions(tst_screens PRIVATE
     "QPM_TRANSLATIONS_DIR=\"${PROJECT_BINARY_DIR}/src\""

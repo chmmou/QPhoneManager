@@ -58,6 +58,7 @@ Dialog {
     onClosed: pinField.clear()
     onAccepted: root.pinEntered(pinField.text, rememberBox.checked)
     onRejected: root.cancelled()
+    Component.onCompleted: Theme.calmPopup(root)
 
     ColumnLayout {
         anchors.fill: parent

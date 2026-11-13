@@ -40,6 +40,7 @@ Dialog {
         closeButton.forceActiveFocus(Qt.TabFocusReason);
     }
     onClosed: closeButton.focus = false
+    Component.onCompleted: Theme.calmPopup(root)
 
     ColumnLayout {
         anchors.fill: parent

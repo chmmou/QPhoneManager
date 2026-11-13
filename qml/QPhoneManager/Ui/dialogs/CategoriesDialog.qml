@@ -42,6 +42,7 @@ Dialog {
         categoryList.currentIndex = -1;
         nameField.forceActiveFocus(Qt.TabFocusReason);
     }
+    Component.onCompleted: Theme.calmPopup(root)
 
     ColumnLayout {
         anchors.fill: parent
@@ -150,6 +151,7 @@ Dialog {
                 Layout.fillWidth: true
                 model: root.colorChoices
                 Accessible.name: qsTr("Colour of the category")
+                Component.onCompleted: Theme.calmPopup(colorBox.popup)
 
                 FocusRing {
                     shown: colorBox.visualFocus

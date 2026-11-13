@@ -39,6 +39,7 @@ Dialog {
         componentList.currentIndex = 0;
         componentList.forceActiveFocus(Qt.TabFocusReason);
     }
+    Component.onCompleted: Theme.calmPopup(root)
 
     ColumnLayout {
         anchors.fill: parent
