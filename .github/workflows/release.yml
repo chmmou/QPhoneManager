@@ -44,6 +44,11 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
+    # In a container job the default shell is sh, which knows no pipefail.
+    defaults:
+      run:
+        shell: bash
+
     env:
       PRESET: release-6.9
       # A manual run started on a tag is still a test build.
