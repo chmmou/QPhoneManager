@@ -66,6 +66,12 @@ ContactValue entry(quint64 dataId, int type, const QString &value)
     return result;
 }
 
+// `englishText` for an English run, `german` otherwise; both are UTF-8.
+QString inLanguage(bool english, const char *german, const char *englishText)
+{
+    return QString::fromUtf8(english ? englishText : german);
+}
+
 QByteArray portrait(const QColor &color)
 {
     QImage image(96, 96, QImage::Format_RGB32);
@@ -78,7 +84,7 @@ QByteArray portrait(const QColor &color)
 }
 
 // Made-up people for the pictures; none of them exists.
-QList<qpm::test::FakeSyncObject> exampleContacts()
+QList<qpm::test::FakeSyncObject> exampleContacts(bool english)
 {
     struct Person
     {
@@ -88,15 +94,26 @@ QList<qpm::test::FakeSyncObject> exampleContacts()
         const char *company;
         QColor photo;
     };
-    const QList<Person> people = {
-        {"Anna", "Becker", "+49 151 2000001", "", QColor(0, 106, 106)},
-        {"Bernd", "Albrecht", "+49 30 2000002", "Albrecht & Söhne", QColor()},
-        {"Clara", "Schmitz", "+49 170 2000003", "", QColor(180, 90, 40)},
-        {"Erika", "Mustermann", "+49 151 2000004", "Beispiel GmbH", QColor(90, 60, 150)},
-        {"Erika", "Musterman", "0151 2000004", "", QColor()},
-        {"Jörg", "Weiß", "+49 221 2000005", "", QColor()},
-        {"Zoë", "Örtel", "+49 40 2000006", "Hafenbüro", QColor(40, 140, 80)},
-    };
+    const QList<Person> people =
+        english ? QList<Person>{
+                      {"Anna", "Baker", "+49 151 2000001", "", QColor(0, 106, 106)},
+                      {"Bernard", "Allen", "+49 30 2000002", "Allen & Sons", QColor()},
+                      {"Clara", "Smith", "+49 170 2000003", "", QColor(180, 90, 40)},
+                      {"Erica", "Sample", "+49 151 2000004", "Example Ltd", QColor(90, 60, 150)},
+                      {"Erica", "Sampel", "0151 2000004", "", QColor()},
+                      {"James", "White", "+49 221 2000005", "", QColor()},
+                      {"Zoë", "Turner", "+49 40 2000006", "Harbor Office", QColor(40, 140, 80)},
+                  }
+                : QList<Person>{
+                      {"Anna", "Becker", "+49 151 2000001", "", QColor(0, 106, 106)},
+                      {"Bernd", "Albrecht", "+49 30 2000002", "Albrecht & Söhne", QColor()},
+                      {"Clara", "Schmitz", "+49 170 2000003", "", QColor(180, 90, 40)},
+                      {"Erika", "Mustermann", "+49 151 2000004", "Beispiel GmbH",
+                       QColor(90, 60, 150)},
+                      {"Erika", "Musterman", "0151 2000004", "", QColor()},
+                      {"Jörg", "Weiß", "+49 221 2000005", "", QColor()},
+                      {"Zoë", "Örtel", "+49 40 2000006", "Hafenbüro", QColor(40, 140, 80)},
+                  };
     QList<qpm::test::FakeSyncObject> objects;
     quint32 luid = 1;
     for (const Person &person : people) {
@@ -108,19 +125,25 @@ QList<qpm::test::FakeSyncObject> exampleContacts()
         contact.organization = QString::fromUtf8(person.company);
         contact.phones = {entry(luid * 10, phoneType::mobile, QString::fromUtf8(person.number))};
         if (luid == 4) {
-            contact.title = QStringLiteral("Einkauf");
+            contact.title = inLanguage(english, "Einkauf", "Purchasing");
             contact.phones.append(entry(41, phoneType::work, QStringLiteral("+49 221 3000004")));
-            contact.emails = {entry(42, emailType::work, QStringLiteral("erika@example.org"))};
+            contact.emails = {entry(42, emailType::work,
+                                    inLanguage(english, "erika@example.org", "erica@example.org"))};
             ContactValue address;
             address.dataId = 43;
             address.type = addressType::work;
-            address.address = {QString(), QString(), QStringLiteral("Musterweg 12"),
-                               QStringLiteral("Köln"), QString(), QStringLiteral("50667"),
-                               QStringLiteral("Deutschland")};
+            address.address = {QString(),
+                               QString(),
+                               inLanguage(english, "Musterweg 12", "12 Sample Street"),
+                               inLanguage(english, "Köln", "Cologne"),
+                               QString(),
+                               QStringLiteral("50667"),
+                               inLanguage(english, "Deutschland", "Germany")};
             contact.addresses = {address};
             contact.birthday = QDate(1979, 4, 23);
-            contact.groups = {QStringLiteral("Arbeit")};
-            contact.note = QStringLiteral("Mittwochs im Homeoffice.");
+            contact.groups = {inLanguage(english, "Arbeit", "Work")};
+            contact.note =
+                inLanguage(english, "Mittwochs im Homeoffice.", "Works from home on Wednesdays.");
             contact.accountType = QStringLiteral("com.google");
             contact.accountName = QStringLiteral("anna@example.org");
         }
@@ -133,7 +156,7 @@ QList<qpm::test::FakeSyncObject> exampleContacts()
 }
 
 // Calls of the made-up people above and of numbers no contact has.
-QList<qpm::test::FakeCall> exampleCalls()
+QList<qpm::test::FakeCall> exampleCalls(bool english)
 {
     struct Call
     {
@@ -150,7 +173,8 @@ QList<qpm::test::FakeCall> exampleCalls()
         {2, "MC", 0, QTime(8, 40), "+49 30 2000002", "", 0},
         {3, "DC", 0, QTime(7, 55), "+49 170 2000003", "", 312},
         {4, "MC", 1, QTime(19, 3), "", "", 0},
-        {5, "RC", 1, QTime(14, 20), "+49 89 2000099", "Praxis Dr. Klein", 1832},
+        {5, "RC", 1, QTime(14, 20), "+49 89 2000099",
+         english ? "Dr. Klein's Office" : "Praxis Dr. Klein", 1832},
         {6, "DC", 3, QTime(11, 5), "+49 221 3000004", "", 47},
         {7, "DC", 9, QTime(16, 45), "+49 40 2000006", "", 3725},
     };
@@ -171,8 +195,11 @@ QList<qpm::test::FakeCall> exampleCalls()
 
 // Made-up messages with the made-up people above, a sender name and a
 // scheduled greeting.
-QList<qpm::test::FakeSyncObject> exampleMessages()
+QList<qpm::test::FakeSyncObject> exampleMessages(bool english)
 {
+    const auto say = [english](const char *german, const char *englishText) {
+        return english ? englishText : german;
+    };
     const auto stamp = [](int daysAgo, QTime time) {
         return QDateTime(QDate::currentDate().addDays(-daysAgo), time)
             .toUTC()
@@ -202,60 +229,91 @@ QList<qpm::test::FakeSyncObject> exampleMessages()
     buffer.open(QIODevice::WriteOnly);
     picture.save(&buffer, "PNG");
     const QByteArray photoMessage =
-        "BEGIN:VMESSAGE\r\nTYP:MMS;IN\r\nBOX:INBOX\r\nREAD:1\r\nDATE:" +
-        stamp(0, QTime(8, 5)) +
-        "\r\nNUMBER:+49 170 2000003\r\nSUBJECT;CHARSET=UTF-8:Ausflug zum See\r\n"
-        "ATT;NAME=text_0.txt;TYPE=text/plain;CHARSET=UTF-8:Schöne Grüße vom See!\r\n"
-        "ATT;NAME=See.png;TYPE=image/png;SIZE=" +
-        QByteArray::number(png.size()) + ";ENCODING=BASE64:" + png.toBase64() +
+        "BEGIN:VMESSAGE\r\nTYP:MMS;IN\r\nBOX:INBOX\r\nREAD:1\r\nDATE:" + stamp(0, QTime(8, 5)) +
+        "\r\nNUMBER:+49 170 2000003\r\nSUBJECT;CHARSET=UTF-8:" +
+        QByteArray(say("Ausflug zum See", "Trip to the lake")) +
+        "\r\nATT;NAME=text_0.txt;TYPE=text/plain;CHARSET=UTF-8:" +
+        QByteArray(say("Schöne Grüße vom See!", "Greetings from the lake!")) +
+        "\r\nATT;NAME=" + QByteArray(say("See.png", "Lake.png")) +
+        ";TYPE=image/png;SIZE=" + QByteArray::number(png.size()) +
+        ";ENCODING=BASE64:" + png.toBase64() +
         "\r\n\r\nX-IRMC-LUID:000010000020\r\nEND:VMESSAGE\r\n";
     return {
-        sms(21, true, "+49 151 2000001", "Hast du am Samstag Zeit? Wir wollen grillen.", 1,
-            QTime(18, 2), true),
-        sms(22, false, "+49 151 2000001", "Ja, gerne! Was soll ich mitbringen?", 1, QTime(18, 10),
-            true),
-        sms(23, true, "+49 151 2000001", "Einen Salat wäre super.", 1, QTime(18, 12), true),
-        sms(24, true, "+49 151 2000001", "Treffpunkt 15 Uhr bei uns, Gartentor ist offen.", 0,
-            QTime(9, 30), false),
-        sms(25, true, "Paketdienst", "Ihr Paket kommt heute zwischen 10 und 14 Uhr.", 2,
-            QTime(7, 45), true),
-        sms(26, false, "+49 30 2000002", "Danke für die Unterlagen, ich melde mich morgen.", 3,
-            QTime(16, 20), true),
+        sms(21, true, "+49 151 2000001",
+            say("Hast du am Samstag Zeit? Wir wollen grillen.",
+                "Are you free on Saturday? We are having a barbecue."),
+            1, QTime(18, 2), true),
+        sms(22, false, "+49 151 2000001",
+            say("Ja, gerne! Was soll ich mitbringen?", "Yes, I'd love to! What should I bring?"), 1,
+            QTime(18, 10), true),
+        sms(23, true, "+49 151 2000001", say("Einen Salat wäre super.", "A salad would be great."),
+            1, QTime(18, 12), true),
+        sms(24, true, "+49 151 2000001",
+            say("Treffpunkt 15 Uhr bei uns, Gartentor ist offen.",
+                "Meet at our place at 3 pm, the garden gate is open."),
+            0, QTime(9, 30), false),
+        sms(25, true, say("Paketdienst", "Parcel Service"),
+            say("Ihr Paket kommt heute zwischen 10 und 14 Uhr.",
+                "Your parcel arrives today between 10 am and 2 pm."),
+            2, QTime(7, 45), true),
+        sms(26, false, "+49 30 2000002",
+            say("Danke für die Unterlagen, ich melde mich morgen.",
+                "Thanks for the papers, I will get back to you tomorrow."),
+            3, QTime(16, 20), true),
         {0x10000020, photoMessage},
-        {0x20000001, "BEGIN:VMESSAGE\r\nTYP:SMS;OUT\r\nBOX:SHEDULED\r\n"
-                     "RECIPIENT;CHARSET=UTF-8:Erika Mustermann;+49 151 2000004;SHEDULED;;\r\n"
-                     "DATE:" + stamp(-5, QTime(8, 0)) +
-                         "\r\nBODY;CHARSET=UTF-8:Alles Gute zum Geburtstag, Erika!\r\n"
-                         "X-IRMC-LUID:000020000001\r\nEND:VMESSAGE\r\n"},
+        {0x20000001,
+         "BEGIN:VMESSAGE\r\nTYP:SMS;OUT\r\nBOX:SHEDULED\r\n"
+         "RECIPIENT;CHARSET=UTF-8:" +
+             QByteArray(say("Erika Mustermann", "Erica Sample")) +
+             ";+49 151 2000004;SHEDULED;;\r\nDATE:" + stamp(-5, QTime(8, 0)) +
+             "\r\nBODY;CHARSET=UTF-8:" +
+             QByteArray(say("Alles Gute zum Geburtstag, Erika!", "Happy birthday, Erica!")) +
+             "\r\nX-IRMC-LUID:000020000001\r\nEND:VMESSAGE\r\n"},
     };
 }
 
-QByteArray exampleMetadata()
+QByteArray exampleMetadata(bool english)
 {
     return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<metadata version=\"1.0\">\r\n"
            "<accounts filter_disabled=\"0\">\r\n"
-           "<account selected=\"1\" type=\"null\" name=\"null\"  default=\"1\" title=\"Phone\"/>\r\n"
+           "<account selected=\"1\" type=\"null\" name=\"null\"  default=\"1\" "
+           "title=\"Phone\"/>\r\n"
            "<account selected=\"1\" type=\"com.google\" name=\"anna@example.org\"  "
            "title=\"Google\"/>\r\n</accounts>\r\n<groups>\r\n"
-           "<group title=\"Arbeit\" sourceid=\"1\" account_name=\"anna@example.org\" "
+           "<group title=\"" +
+           QByteArray(english ? "Work" : "Arbeit") +
+           "\" sourceid=\"1\" account_name=\"anna@example.org\" "
            "account_type=\"com.google\"/>\r\n</groups>\r\n</metadata>";
 }
 } // namespace
 
-QByteArray calendarMetadata()
+QByteArray calendarMetadata(bool english)
 {
+    const auto say = [english](const char *german, const char *englishText) {
+        return QByteArray(english ? englishText : german);
+    };
     return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<metadata version=\"1.0\">\r\n"
            "<calendars filter_disabled=\"0\">\r\n"
            "<calendar selected=\"1\" default=\"1\" url=\"anna@example.org@com.google/NULL\" "
-           "title=\"Familie\" color=\"FF33B679\" hidden=\"0\" timezone=\"Europe/Berlin\" "
+           "title=\"" +
+           say("Familie", "Family") +
+           "\" color=\"FF33B679\" hidden=\"0\" timezone=\"Europe/Berlin\" "
            "access_level=\"700\"/>\r\n"
-           "<calendar selected=\"1\" url=\"anna@example.org@com.google/NULL\" title=\"Arbeit\" "
-           "color=\"FF4285F4\" hidden=\"0\" timezone=\"Europe/Berlin\" access_level=\"700\"/>\r\n"
-           "<calendar selected=\"0\" url=\"anna@example.org@com.google/NULL\" title=\"Feiertage\" "
-           "color=\"FF0B8043\" hidden=\"0\" timezone=\"Europe/Berlin\" access_level=\"200\"/>\r\n"
+           "<calendar selected=\"1\" url=\"anna@example.org@com.google/NULL\" title=\"" +
+           say("Arbeit", "Work") +
+           "\" color=\"FF4285F4\" hidden=\"0\" timezone=\"Europe/Berlin\" "
+           "access_level=\"700\"/>\r\n"
+           "<calendar selected=\"0\" url=\"anna@example.org@com.google/NULL\" title=\"" +
+           say("Feiertage", "Holidays") +
+           "\" color=\"FF0B8043\" hidden=\"0\" timezone=\"Europe/Berlin\" "
+           "access_level=\"200\"/>\r\n"
            "</calendars>\r\n<tasksupport>1</tasksupport>\r\n<task_categories>\r\n"
-           "<category name=\"Haushalt\" color=\"FF8800\" id=\"1\"/>\r\n"
-           "<category name=\"Büro\" color=\"4285F4\" id=\"2\"/>\r\n"
+           "<category name=\"" +
+           say("Haushalt", "Household") +
+           "\" color=\"FF8800\" id=\"1\"/>\r\n"
+           "<category name=\"" +
+           say("Büro", "Office") +
+           "\" color=\"4285F4\" id=\"2\"/>\r\n"
            "</task_categories>\r\n</metadata>";
 }
 
@@ -272,6 +330,13 @@ CalendarEvent appointment(quint32 luid, const QString &summary, const QDateTime 
     return event;
 }
 
+// A title too long for one line of a week cell.
+QString longEventTitle(bool english)
+{
+    return inLanguage(english, "Winterreifen beim Autohaus am Stadtrand abholen",
+                      "Pick up the winter tires from the car dealer on the edge of town");
+}
+
 QDateTime berlin(int day, int hour, int minute = 0)
 {
     return QDateTime(QDate(2026, 11, day), QTime(hour, minute),
@@ -280,42 +345,46 @@ QDateTime berlin(int day, int hour, int minute = 0)
 }
 
 // Made-up appointments, tasks and notes for the pictures.
-QList<qpm::test::FakeSyncObject> exampleOrganizer()
+QList<qpm::test::FakeSyncObject> exampleOrganizer(bool english)
 {
-    CalendarEvent meeting = appointment(0x10000001, QStringLiteral("Elternabend"), berlin(12, 19),
-                                        90, QStringLiteral("Familie"));
-    meeting.location = QStringLiteral("Grundschule am Park");
-    meeting.description = QStringLiteral("Bitte die Unterlagen zur Klassenfahrt mitbringen.");
+    const QString family = inLanguage(english, "Familie", "Family");
+    CalendarEvent meeting =
+        appointment(0x10000001, inLanguage(english, "Elternabend", "Parents' evening"),
+                    berlin(12, 19), 90, family);
+    meeting.location = inLanguage(english, "Grundschule am Park", "Park Primary School");
+    meeting.description = inLanguage(english, "Bitte die Unterlagen zur Klassenfahrt mitbringen.",
+                                     "Please bring the papers for the class trip.");
     meeting.alarms = {meeting.start.addSecs(-1800)};
-    CalendarEvent sport = appointment(0x10000002, QStringLiteral("Lauftreff"), berlin(3, 18), 60,
-                                      QStringLiteral("Familie"));
+    CalendarEvent sport = appointment(0x10000002, inLanguage(english, "Lauftreff", "Running group"),
+                                      berlin(3, 18), 60, family);
     sport.rrule = QStringLiteral("FREQ=WEEKLY;BYDAY=TU");
-    CalendarEvent review = appointment(0x10000003, QStringLiteral("Quartalsbericht"),
-                                       berlin(12, 9, 30), 60, QStringLiteral("Arbeit"));
+    CalendarEvent review =
+        appointment(0x10000003, inLanguage(english, "Quartalsbericht", "Quarterly report"),
+                    berlin(12, 9, 30), 60, inLanguage(english, "Arbeit", "Work"));
     review.color = 0xFFE67C73;
-    CalendarEvent trip = appointment(0x10000004, QStringLiteral("Kurzurlaub Ostsee"), berlin(20, 0),
-                                     0, QStringLiteral("Familie"));
+    CalendarEvent trip =
+        appointment(0x10000004, inLanguage(english, "Kurzurlaub Ostsee", "Weekend at the coast"),
+                    berlin(20, 0), 0, family);
     trip.allDay = true;
     trip.start = QDateTime(QDate(2026, 11, 20), QTime(0, 0), QTimeZone::UTC);
     trip.end = QDateTime(QDate(2026, 11, 23), QTime(0, 0), QTimeZone::UTC);
     CalendarEvent tyres =
-        appointment(0x10000005, QStringLiteral("Winterreifen beim Autohaus am Stadtrand abholen"),
-                    berlin(13, 16), 30, QStringLiteral("Familie"));
+        appointment(0x10000005, longEventTitle(english), berlin(13, 16), 30, family);
     CalendarTask windows;
     windows.luid = 5;
-    windows.summary = QStringLiteral("Fenster putzen");
+    windows.summary = inLanguage(english, "Fenster putzen", "Clean the windows");
     windows.due = QDate(2026, 11, 20);
-    windows.categories = {QStringLiteral("Haushalt")};
+    windows.categories = {inLanguage(english, "Haushalt", "Household")};
     CalendarTask tax;
     tax.luid = 6;
-    tax.summary = QStringLiteral("Steuererklärung abgeben");
+    tax.summary = inLanguage(english, "Steuererklärung abgeben", "File the tax return");
     tax.start = QDate(2026, 10, 15);
     tax.due = QDate(2026, 11, 2);
     tax.priority = TaskPriority::High;
-    tax.categories = {QStringLiteral("Büro")};
+    tax.categories = {inLanguage(english, "Büro", "Office")};
     CalendarTask done;
     done.luid = 7;
-    done.summary = QStringLiteral("Winterreifen aufziehen");
+    done.summary = inLanguage(english, "Winterreifen aufziehen", "Fit the winter tires");
     done.completed = true;
     return {{meeting.luid, encodeEventAsPhoneSendsIt(meeting)},
             {sport.luid, encodeEventAsPhoneSendsIt(sport)},
@@ -327,47 +396,51 @@ QList<qpm::test::FakeSyncObject> exampleOrganizer()
             {done.luid, encodeTaskAsPhoneSendsIt(done)}};
 }
 
-QList<qpm::test::FakeSyncObject> exampleNotes()
+QList<qpm::test::FakeSyncObject> exampleNotes(bool english)
 {
     Note shopping;
     shopping.luid = 1;
-    shopping.body = QStringLiteral("Einkaufsliste\nMilch, Brot, Äpfel, Kaffee");
+    shopping.body = inLanguage(english, "Einkaufsliste\nMilch, Brot, Äpfel, Kaffee",
+                               "Shopping list\nMilk, bread, apples, coffee");
     shopping.lastModified = berlin(10, 8);
-    shopping.categories = {QStringLiteral("Privat")};
+    shopping.categories = {inLanguage(english, "Privat", "Personal")};
     Note ideas;
     ideas.luid = 2;
-    ideas.body = QStringLiteral("Geschenkideen\nBuch über Gartenpflege, Konzertkarten");
+    ideas.body = inLanguage(english, "Geschenkideen\nBuch über Gartenpflege, Konzertkarten",
+                            "Gift ideas\nA book on gardening, concert tickets");
     ideas.lastModified = berlin(11, 20);
     return {{1, encodeNoteAsPhoneSendsIt(shopping)}, {2, encodeNoteAsPhoneSendsIt(ideas)}};
 }
 
 // Made-up notifications of the phone, one with a picture and one ongoing.
-QList<qpm::test::FakeNotification> exampleNotifications()
+QList<qpm::test::FakeNotification> exampleNotifications(bool english)
 {
     const QDateTime today(QDate::currentDate(), QTime(9, 40));
     qpm::test::FakeNotification chat;
     chat.id = 11;
     chat.appLabel = QStringLiteral("Chat");
-    chat.title = QStringLiteral("Anna Becker");
-    chat.text =
-        QStringLiteral("Kommst du heute Abend zum Elternabend? Ich halte dir einen Platz frei.");
-    chat.actions = {QStringLiteral("Antworten"), QStringLiteral("Als gelesen markieren")};
+    chat.title = inLanguage(english, "Anna Becker", "Anna Baker");
+    chat.text = inLanguage(english,
+                           "Kommst du heute Abend zum Elternabend? Ich halte dir einen Platz frei.",
+                           "Are you coming to the parents' evening tonight? I'll save you a seat.");
+    chat.actions = {inLanguage(english, "Antworten", "Reply"),
+                    inLanguage(english, "Als gelesen markieren", "Mark as read")};
     chat.posted = today.toUTC();
     chat.picture = portrait(QColor(0, 106, 106));
     qpm::test::FakeNotification mail;
     mail.id = 12;
     mail.package = QStringLiteral("org.example.mail");
-    mail.appLabel = QStringLiteral("Post");
-    mail.title = QStringLiteral("Beispiel GmbH");
-    mail.text = QStringLiteral("Ihre Bestellung ist unterwegs.");
-    mail.actions = {QStringLiteral("Archivieren")};
+    mail.appLabel = inLanguage(english, "Post", "Mail");
+    mail.title = inLanguage(english, "Beispiel GmbH", "Example Ltd");
+    mail.text = inLanguage(english, "Ihre Bestellung ist unterwegs.", "Your order is on its way.");
+    mail.actions = {inLanguage(english, "Archivieren", "Archive")};
     mail.posted = today.addSecs(-3600).toUTC();
     qpm::test::FakeNotification music;
     music.id = 13;
     music.package = QStringLiteral("org.example.music");
-    music.appLabel = QStringLiteral("Musik");
-    music.title = QStringLiteral("Wiedergabe läuft");
-    music.text = QStringLiteral("Hafenkonzert, Teil 2");
+    music.appLabel = inLanguage(english, "Musik", "Music");
+    music.title = inLanguage(english, "Wiedergabe läuft", "Now playing");
+    music.text = inLanguage(english, "Hafenkonzert, Teil 2", "Harbor Concert, Part 2");
     music.flags = 0x02;
     music.posted = today.addSecs(-7200).toUTC();
     return {chat, mail, music};
@@ -389,7 +462,7 @@ QByteArray appIcon(const QColor &color)
 }
 
 // Made-up apps for the pictures, with plain coloured icons.
-QList<qpm::test::FakeApp> exampleApps()
+QList<qpm::test::FakeApp> exampleApps(bool english)
 {
     struct App
     {
@@ -401,15 +474,33 @@ QList<qpm::test::FakeApp> exampleApps()
         int daysAgo;
         QColor color;
     };
-    const QList<App> apps = {
-        {"org.example.wetter", "Wetter am Ort", "4.2.1", true, 1840000, 12, QColor(0, 106, 106)},
-        {"org.example.rezepte", "Rezepte", "2.0", true, 730000, 40, QColor(200, 120, 30)},
-        {"org.example.fahrplan", "Fahrplan Nord", "11.3", true, 3210000, 3, QColor(90, 60, 150)},
-        {"org.example.uebung", "Übungen für den Rücken", "1.0.7", true, 210000, 90,
-         QColor(40, 140, 80)},
-        {"com.android.settings", "Einstellungen", "16", false, 4100000, 300, QColor(70, 70, 70)},
-        {"com.android.deskclock", "Uhr", "16.1", false, 620000, 300, QColor(30, 90, 180)},
-    };
+    const QList<App> apps =
+        english
+            ? QList<App>{
+                  {"org.example.weather", "Local Weather", "4.2.1", true, 1840000, 12,
+                   QColor(0, 106, 106)},
+                  {"org.example.recipes", "Recipes", "2.0", true, 730000, 40, QColor(200, 120, 30)},
+                  {"org.example.transit", "Transit North", "11.3", true, 3210000, 3,
+                   QColor(90, 60, 150)},
+                  {"org.example.backcare", "Back Exercises", "1.0.7", true, 210000, 90,
+                   QColor(40, 140, 80)},
+                  {"com.android.settings", "Settings", "16", false, 4100000, 300,
+                   QColor(70, 70, 70)},
+                  {"com.android.deskclock", "Clock", "16.1", false, 620000, 300,
+                   QColor(30, 90, 180)},
+              }
+            : QList<App>{
+                  {"org.example.wetter", "Wetter am Ort", "4.2.1", true, 1840000, 12,
+                   QColor(0, 106, 106)},
+                  {"org.example.rezepte", "Rezepte", "2.0", true, 730000, 40, QColor(200, 120, 30)},
+                  {"org.example.fahrplan", "Fahrplan Nord", "11.3", true, 3210000, 3,
+                   QColor(90, 60, 150)},
+                  {"org.example.uebung", "Übungen für den Rücken", "1.0.7", true, 210000, 90,
+                   QColor(40, 140, 80)},
+                  {"com.android.settings", "Einstellungen", "16", false, 4100000, 300,
+                   QColor(70, 70, 70)},
+                  {"com.android.deskclock", "Uhr", "16.1", false, 620000, 300, QColor(30, 90, 180)},
+              };
     QList<qpm::test::FakeApp> result;
     for (const App &app : apps) {
         qpm::test::FakeApp fake;
@@ -458,10 +549,13 @@ QByteArray exampleScreen()
     return "FileBegin;540x1200;0;540x1200;PNG;100\r\n" + png + "\r\nFileEnd";
 }
 
-QByteArray noteMetadata()
+QByteArray noteMetadata(bool english)
 {
-    return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<metadata version=\"1.0\"><note_categories>\r\n"
-           "<category name=\"Privat\" color=\"33B679\" id=\"1\"/>\r\n</note_categories>\r\n</metadata>";
+    return "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<metadata "
+           "version=\"1.0\"><note_categories>\r\n"
+           "<category name=\"" +
+           QByteArray(english ? "Personal" : "Privat") +
+           "\" color=\"33B679\" id=\"1\"/>\r\n</note_categories>\r\n</metadata>";
 }
 
 bool similar(const QColor &a, const QColor &b)
@@ -534,9 +628,10 @@ QImage settledGrab(QQuickWindow *window)
     return last;
 }
 
-// The main views and dialogs in German, light and dark, against the fake
-// phone. With QPM_SCREENSHOT_DIR set, the pictures are kept there for a look
-// at contrast and focus.
+// The main views and dialogs, light and dark, against the fake phone. They
+// are in German, or in English with QPM_SCREENSHOT_LANG=en. With
+// QPM_SCREENSHOT_DIR set, the pictures are kept there for a look at contrast
+// and focus.
 class TestScreens : public QObject
 {
     Q_OBJECT
@@ -546,41 +641,50 @@ public:
 
 private Q_SLOTS:
     void initTestCase();
+    void init();
     void cleanupTestCase();
 
-    void viewsAreGermanAndRenderInBothSchemes_data();
-    void viewsAreGermanAndRenderInBothSchemes();
-    void contactViewsAreGermanAndRenderInBothSchemes_data();
-    void contactViewsAreGermanAndRenderInBothSchemes();
-    void callViewsAreGermanAndRenderInBothSchemes_data();
-    void callViewsAreGermanAndRenderInBothSchemes();
-    void messageViewsAreGermanAndRenderInBothSchemes_data();
-    void messageViewsAreGermanAndRenderInBothSchemes();
-    void organizerViewsAreGermanAndRenderInBothSchemes_data();
-    void organizerViewsAreGermanAndRenderInBothSchemes();
-    void fileViewsAreGermanAndRenderInBothSchemes_data();
-    void fileViewsAreGermanAndRenderInBothSchemes();
-    void appViewsAreGermanAndRenderInBothSchemes_data();
-    void appViewsAreGermanAndRenderInBothSchemes();
-    void screenViewsAreGermanAndRenderInBothSchemes_data();
-    void screenViewsAreGermanAndRenderInBothSchemes();
-    void desktopViewsAreGermanAndRenderInBothSchemes_data();
-    void desktopViewsAreGermanAndRenderInBothSchemes();
-    void helpViewsAreGermanAndRenderInBothSchemes_data();
-    void helpViewsAreGermanAndRenderInBothSchemes();
-    void backupViewsAreGermanAndRenderInBothSchemes_data();
-    void backupViewsAreGermanAndRenderInBothSchemes();
+    void viewsAreTranslatedAndRenderInBothSchemes_data();
+    void viewsAreTranslatedAndRenderInBothSchemes();
+    void contactViewsAreTranslatedAndRenderInBothSchemes_data();
+    void contactViewsAreTranslatedAndRenderInBothSchemes();
+    void callViewsAreTranslatedAndRenderInBothSchemes_data();
+    void callViewsAreTranslatedAndRenderInBothSchemes();
+    void messageViewsAreTranslatedAndRenderInBothSchemes_data();
+    void messageViewsAreTranslatedAndRenderInBothSchemes();
+    void organizerViewsAreTranslatedAndRenderInBothSchemes_data();
+    void organizerViewsAreTranslatedAndRenderInBothSchemes();
+    void fileViewsAreTranslatedAndRenderInBothSchemes_data();
+    void fileViewsAreTranslatedAndRenderInBothSchemes();
+    void appViewsAreTranslatedAndRenderInBothSchemes_data();
+    void appViewsAreTranslatedAndRenderInBothSchemes();
+    void screenViewsAreTranslatedAndRenderInBothSchemes_data();
+    void screenViewsAreTranslatedAndRenderInBothSchemes();
+    void desktopViewsAreTranslatedAndRenderInBothSchemes_data();
+    void desktopViewsAreTranslatedAndRenderInBothSchemes();
+    void helpViewsAreTranslatedAndRenderInBothSchemes_data();
+    void helpViewsAreTranslatedAndRenderInBothSchemes();
+    void backupViewsAreTranslatedAndRenderInBothSchemes_data();
+    void backupViewsAreTranslatedAndRenderInBothSchemes();
 
 private:
     [[nodiscard]] QObject *dialog(const QString &name) const;
     [[nodiscard]] QQuickItem *item(const QString &name) const;
     [[nodiscard]] bool save(const QString &name);
     [[nodiscard]] bool saveBothSchemes(const QString &name);
+    // `german` and `english` are UTF-8.
+    [[nodiscard]] QString byLanguage(const char *german, const char *english) const;
+    [[nodiscard]] QString travelPlan() const
+    {
+        return byLanguage("Reiseplan.pdf", "Itinerary.pdf");
+    }
+    [[nodiscard]] QString beachPhoto() const { return byLanguage("Strand.jpg", "Beach.jpg"); }
 
     QTemporaryDir m_home;
     QTemporaryDir m_shots;
     QString m_shotDir;
     QTranslator m_translator;
+    bool m_english = false;
     std::unique_ptr<FakePhone> m_phone;
     std::unique_ptr<QQmlApplicationEngine> m_engine;
     QQuickWindow *m_window = nullptr;
@@ -596,8 +700,16 @@ void TestScreens::initTestCase()
     qputenv("XDG_DATA_HOME", QFile::encodeName(m_home.filePath(QStringLiteral("data"))));
     QCoreApplication::setOrganizationName(QStringLiteral("QPhoneManagerTest"));
     QCoreApplication::setApplicationName(QStringLiteral("tst_screens"));
-    QLocale::setDefault(QLocale(QLocale::German, QLocale::Germany));
-    QVERIFY(m_translator.load(QStringLiteral(QPM_TRANSLATIONS_DIR "/qphonemanager_de.qm")));
+    const QString language = qEnvironmentVariable("QPM_SCREENSHOT_LANG", QStringLiteral("de"));
+    QVERIFY2(language == QLatin1StringView("de") || language == QLatin1StringView("en"),
+             qPrintable(QStringLiteral("QPM_SCREENSHOT_LANG is %1, not de or en").arg(language)));
+    m_english = language == QLatin1StringView("en");
+    // English follows the program on a system in another language: the
+    // locale "en", which is American English, and the English catalogue.
+    QLocale::setDefault(m_english ? QLocale(QLocale::English, QLocale::UnitedStates)
+                                  : QLocale(QLocale::German, QLocale::Germany));
+    QVERIFY(m_translator.load(
+        QStringLiteral(QPM_TRANSLATIONS_DIR "/qphonemanager_%1.qm").arg(language)));
     QCoreApplication::installTranslator(&m_translator);
     if (qEnvironmentVariableIsSet("QPM_SOFTWARE_RENDERING"))
         QQuickWindow::setGraphicsApi(QSGRendererInterface::Software);
@@ -609,42 +721,43 @@ void TestScreens::initTestCase()
     m_phone->config().manufacturer = QStringLiteral("Google");
     m_phone->config().scriptedReplies.insert(
         QStringLiteral("AT*SOPS"),
-        {QByteArrayLiteral("AT*SOPS\r\n*SOPS: Beispielnetz,26201,de\r\nOK\r\n")});
+        {m_english ? QByteArrayLiteral("AT*SOPS\r\n*SOPS: Example Net,26201,de\r\nOK\r\n")
+                   : QByteArrayLiteral("AT*SOPS\r\n*SOPS: Beispielnetz,26201,de\r\nOK\r\n")});
     m_phone->config().scriptedReplies.insert(
         QStringLiteral("AT*SIM"),
-        {QByteArrayLiteral("AT*SIM\r\n*SIM: 0,,Privat,Beispielnetz,VS\r\nOK\r\n")});
-    m_phone->setObjects(QStringLiteral("pb"), exampleContacts());
-    m_phone->setMetadata(QStringLiteral("pb"), exampleMetadata());
-    m_phone->setCalls(exampleCalls());
-    m_phone->setObjects(QStringLiteral("msg"), exampleMessages());
-    m_phone->setObjects(QStringLiteral("cal"), exampleOrganizer());
-    m_phone->setMetadata(QStringLiteral("cal"), calendarMetadata());
-    m_phone->setObjects(QStringLiteral("notes"), exampleNotes());
-    m_phone->setMetadata(QStringLiteral("notes"), noteMetadata());
+        {m_english ? QByteArrayLiteral("AT*SIM\r\n*SIM: 0,,Personal,Example Net,VS\r\nOK\r\n")
+                   : QByteArrayLiteral("AT*SIM\r\n*SIM: 0,,Privat,Beispielnetz,VS\r\nOK\r\n")});
+    m_phone->setObjects(QStringLiteral("pb"), exampleContacts(m_english));
+    m_phone->setMetadata(QStringLiteral("pb"), exampleMetadata(m_english));
+    m_phone->setCalls(exampleCalls(m_english));
+    m_phone->setObjects(QStringLiteral("msg"), exampleMessages(m_english));
+    m_phone->setObjects(QStringLiteral("cal"), exampleOrganizer(m_english));
+    m_phone->setMetadata(QStringLiteral("cal"), calendarMetadata(m_english));
+    m_phone->setObjects(QStringLiteral("notes"), exampleNotes(m_english));
+    m_phone->setMetadata(QStringLiteral("notes"), noteMetadata(m_english));
     const QDateTime taken(QDate(2026, 8, 14), QTime(10, 12), QTimeZone::UTC);
     m_phone->addFolder(QStringLiteral("\\external\\DCIM"));
     m_phone->addFolder(QStringLiteral("\\sdcard\\Music"));
-    m_phone->addFolder(QStringLiteral("\\sdcard\\DCIM\\Camera\\Urlaub Ostsee"));
-    const QList<std::pair<const char *, QColor>> photos = {
-        {"Strand.jpg", QColor(0, 106, 106)},
-        {"Leuchtturm.jpg", QColor(180, 90, 40)},
-        {"Hafen.jpg", QColor(90, 60, 150)},
-        {"Dünen.jpg", QColor(40, 140, 80)},
-        {"Sonnenuntergang.jpg", QColor(200, 120, 30)}};
-    for (const auto &[name, color] : photos) {
-        m_phone->addFile(QStringLiteral("\\sdcard\\DCIM\\Camera\\") + QString::fromUtf8(name),
-                         portrait(color), taken);
-    }
-    m_phone->addFile(QStringLiteral("\\sdcard\\DCIM\\Camera\\Ausflug.mp4"),
-                     QByteArray(2400000, 'v'), taken);
-    m_phone->addFile(QStringLiteral("\\sdcard\\DCIM\\Camera\\Reiseplan.pdf"),
-                     QByteArray(184320, 'p'), taken);
-    m_phone->setApps(exampleApps());
-    m_phone->setNotifications(exampleNotifications());
+    const QString camera = QStringLiteral("\\sdcard\\DCIM\\Camera\\");
+    m_phone->addFolder(camera + byLanguage("Urlaub Ostsee", "Beach Vacation"));
+    const QList<std::pair<QString, QColor>> photos = {
+        {beachPhoto(), QColor(0, 106, 106)},
+        {byLanguage("Leuchtturm.jpg", "Lighthouse.jpg"), QColor(180, 90, 40)},
+        {byLanguage("Hafen.jpg", "Harbor.jpg"), QColor(90, 60, 150)},
+        {byLanguage("Dünen.jpg", "Dunes.jpg"), QColor(40, 140, 80)},
+        {byLanguage("Sonnenuntergang.jpg", "Sunset.jpg"), QColor(200, 120, 30)}};
+    for (const auto &[name, color] : photos)
+        m_phone->addFile(camera + name, portrait(color), taken);
+    m_phone->addFile(camera + byLanguage("Ausflug.mp4", "Trip.mp4"), QByteArray(2400000, 'v'),
+                     taken);
+    m_phone->addFile(camera + travelPlan(), QByteArray(184320, 'p'), taken);
+    m_phone->setApps(exampleApps(m_english));
+    m_phone->setNotifications(exampleNotifications(m_english));
     m_phone->config().screenFrame = exampleScreen();
-    m_phone->config().alarms =
-        QStringList{QStringLiteral("\"06:30\",1,0,\"Aufstehen\",\"1,2,3,4,5\",1"),
-                    QStringLiteral("\"08:00\",2,0,\"Wochenende\",\"6,7\",0")};
+    m_phone->config().alarms = QStringList{
+        QStringLiteral("\"06:30\",1,0,\"%1\",\"1,2,3,4,5\",1")
+            .arg(byLanguage("Aufstehen", "Wake up")),
+        QStringLiteral("\"08:00\",2,0,\"%1\",\"6,7\",0").arg(byLanguage("Wochenende", "Weekend"))};
 
     m_engine = std::make_unique<QQmlApplicationEngine>();
     m_engine->loadFromModule("QPhoneManager.Ui", "Main");
@@ -669,6 +782,16 @@ void TestScreens::initTestCase()
                                  m_controller->status()->cpuPercent() >= 0 &&
                                  !m_controller->status()->simCards().isEmpty(),
                              connectTimeoutMs);
+}
+
+// The message bar keeps its last text until it is closed or replaced, so a
+// message of an earlier view would show in every later picture.
+void TestScreens::init()
+{
+    QQuickItem *messageBar = item(QStringLiteral("messageBar"));
+    QVERIFY(messageBar);
+    messageBar->setProperty("text", QString());
+    QVERIFY(!messageBar->isVisible());
 }
 
 void TestScreens::cleanupTestCase()
@@ -704,6 +827,11 @@ QQuickItem *TestScreens::item(const QString &name) const
     return findVisual(m_window->contentItem(), name);
 }
 
+QString TestScreens::byLanguage(const char *german, const char *english) const
+{
+    return inLanguage(m_english, german, english);
+}
+
 bool TestScreens::saveBothSchemes(const QString &name)
 {
     m_settings->setColorScheme(Settings::ColorScheme::Light);
@@ -716,6 +844,12 @@ bool TestScreens::saveBothSchemes(const QString &name)
 
 bool TestScreens::save(const QString &name)
 {
+    // The pictures go into the handbook, where a message left over from an
+    // earlier view does not belong.
+    if (const QQuickItem *bar = item(QStringLiteral("messageBar")); bar && bar->isVisible()) {
+        qWarning() << name << "shows the message" << bar->property("text").toString();
+        return false;
+    }
     // Without a native file dialog, as on the offscreen platform, Qt shows
     // its own one in a window of its own; that window is the picture then.
     QQuickWindow *shown = m_window;
@@ -729,24 +863,26 @@ bool TestScreens::save(const QString &name)
     return !image.isNull() && image.save(QDir(m_shotDir).filePath(name + QStringLiteral(".png")));
 }
 
-void TestScreens::viewsAreGermanAndRenderInBothSchemes_data()
+void TestScreens::viewsAreTranslatedAndRenderInBothSchemes_data()
 {
     QTest::addColumn<QString>("view");
-    QTest::addColumn<QString>("germanTitle");
+    QTest::addColumn<QString>("title");
 
-    QTest::newRow("overview") << QString() << QStringLiteral("Übersicht");
+    QTest::newRow("overview") << QString() << byLanguage("Übersicht", "Overview");
     QTest::newRow("connect") << QStringLiteral("connectDialog")
-                             << QStringLiteral("Handy verbinden");
-    QTest::newRow("pin") << QStringLiteral("pinDialog") << QStringLiteral("PIN eingeben");
-    QTest::newRow("qr") << QStringLiteral("qrDialog") << QStringLiteral("Mit QR-Code verbinden");
+                             << byLanguage("Handy verbinden", "Connect a phone");
+    QTest::newRow("pin") << QStringLiteral("pinDialog")
+                         << byLanguage("PIN eingeben", "Enter the PIN");
+    QTest::newRow("qr") << QStringLiteral("qrDialog")
+                        << byLanguage("Mit QR-Code verbinden", "Connect with a QR code");
     QTest::newRow("settings") << QStringLiteral("settingsDialog")
-                              << QStringLiteral("Einstellungen");
+                              << byLanguage("Einstellungen", "Settings");
 }
 
-void TestScreens::viewsAreGermanAndRenderInBothSchemes()
+void TestScreens::viewsAreTranslatedAndRenderInBothSchemes()
 {
     QFETCH(QString, view);
-    QFETCH(QString, germanTitle);
+    QFETCH(QString, title);
     QObject *popup = view.isEmpty() ? nullptr : dialog(view);
     if (popup) {
         if (view == QLatin1StringView("connectDialog"))
@@ -757,12 +893,12 @@ void TestScreens::viewsAreGermanAndRenderInBothSchemes()
         }
         QMetaObject::invokeMethod(popup, "open");
         QTRY_VERIFY(popup->property("opened").toBool());
-        QCOMPARE(popup->property("title").toString(), germanTitle);
+        QCOMPARE(popup->property("title").toString(), title);
     } else {
         QVERIFY(view.isEmpty());
         QQuickItem *header = m_window->property("header").value<QQuickItem *>();
         QVERIFY(header);
-        QCOMPARE(header->property("title").toString(), germanTitle);
+        QCOMPARE(header->property("title").toString(), title);
     }
 
     const QString name = view.isEmpty() ? QStringLiteral("overview") : view;
@@ -779,23 +915,25 @@ void TestScreens::viewsAreGermanAndRenderInBothSchemes()
     QVERIFY(m_controller->isConnected());
 }
 
-void TestScreens::contactViewsAreGermanAndRenderInBothSchemes_data()
+void TestScreens::contactViewsAreTranslatedAndRenderInBothSchemes_data()
 {
     QTest::addColumn<QString>("view");
-    QTest::addColumn<QString>("germanTitle");
+    QTest::addColumn<QString>("title");
 
-    QTest::newRow("list and detail") << QStringLiteral("contacts") << QStringLiteral("Kontakte");
-    QTest::newRow("form") << QStringLiteral("contactForm") << QStringLiteral("Kontakt bearbeiten");
+    QTest::newRow("list and detail")
+        << QStringLiteral("contacts") << byLanguage("Kontakte", "Contacts");
+    QTest::newRow("form") << QStringLiteral("contactForm")
+                          << byLanguage("Kontakt bearbeiten", "Edit contact");
     QTest::newRow("duplicates") << QStringLiteral("duplicatesDialog")
-                                << QStringLiteral("Doppelte Kontakte");
+                                << byLanguage("Doppelte Kontakte", "Duplicate contacts");
     QTest::newRow("import") << QStringLiteral("importDialog")
-                            << QStringLiteral("Kontakte importieren");
+                            << byLanguage("Kontakte importieren", "Import contacts");
 }
 
-void TestScreens::contactViewsAreGermanAndRenderInBothSchemes()
+void TestScreens::contactViewsAreTranslatedAndRenderInBothSchemes()
 {
     QFETCH(QString, view);
-    QFETCH(QString, germanTitle);
+    QFETCH(QString, title);
     qpm::ui::ContactsArea *area = m_controller->contacts();
     if (area->list()->totalCount() == 0) {
         const QFuture<qpm::core::Result<qpm::core::store::ContactChanges>> pulled = area->sync();
@@ -805,8 +943,8 @@ void TestScreens::contactViewsAreGermanAndRenderInBothSchemes()
     m_window->setProperty("currentSection", 1);
     area->setCurrentLuid(4);
     QQuickItem *header = m_window->property("header").value<QQuickItem *>();
-    QCOMPARE(header->property("title").toString(), QStringLiteral("Kontakte"));
-    // The longest German section name fits without being cut.
+    QCOMPARE(header->property("title").toString(), byLanguage("Kontakte", "Contacts"));
+    // The longest section name fits without being cut.
     const QQuickItem *longest = item(QStringLiteral("section-notifications"));
     QVERIFY(longest);
     const QQuickItem *label = longest->property("contentItem").value<QQuickItem *>();
@@ -820,7 +958,7 @@ void TestScreens::contactViewsAreGermanAndRenderInBothSchemes()
     if (view == QLatin1StringView("contacts")) {
         QTRY_VERIFY(item(QStringLiteral("contactName")) &&
                     item(QStringLiteral("contactName"))->property("text").toString() ==
-                        QStringLiteral("Erika Mustermann"));
+                        byLanguage("Erika Mustermann", "Erica Sample"));
         QQuickItem *list = item(QStringLiteral("contactList"));
         QVERIFY(list);
         list->forceActiveFocus(Qt::TabFocusReason);
@@ -832,7 +970,7 @@ void TestScreens::contactViewsAreGermanAndRenderInBothSchemes()
         QList<QQuickItem *> pending = {form};
         while (!pending.isEmpty() && !headingFound) {
             QQuickItem *next = pending.takeLast();
-            headingFound = next->property("text").toString() == germanTitle;
+            headingFound = next->property("text").toString() == title;
             pending.append(next->childItems());
         }
         QVERIFY(headingFound);
@@ -848,7 +986,7 @@ void TestScreens::contactViewsAreGermanAndRenderInBothSchemes()
         // A popup is only drawn in full once its opening transition is over.
         const bool hasOpened = popup->metaObject()->indexOfProperty("opened") >= 0;
         QTRY_VERIFY(popup->property(hasOpened ? "opened" : "visible").toBool());
-        QCOMPARE(popup->property("title").toString(), germanTitle);
+        QCOMPARE(popup->property("title").toString(), title);
     }
 
     QVERIFY(saveBothSchemes(view));
@@ -861,25 +999,26 @@ void TestScreens::contactViewsAreGermanAndRenderInBothSchemes()
     QVERIFY(m_controller->isConnected());
 }
 
-void TestScreens::callViewsAreGermanAndRenderInBothSchemes_data()
+void TestScreens::callViewsAreTranslatedAndRenderInBothSchemes_data()
 {
     QTest::addColumn<QString>("view");
-    QTest::addColumn<QString>("germanTitle");
+    QTest::addColumn<QString>("title");
 
-    QTest::newRow("list and detail") << QStringLiteral("calls") << QStringLiteral("Anrufe");
-    QTest::newRow("missed only") << QStringLiteral("callsMissed") << QStringLiteral("Anrufe");
+    QTest::newRow("list and detail") << QStringLiteral("calls") << byLanguage("Anrufe", "Calls");
+    QTest::newRow("missed only") << QStringLiteral("callsMissed") << byLanguage("Anrufe", "Calls");
     QTest::newRow("delete one") << QStringLiteral("deleteCall")
-                                << QStringLiteral("Anruf mit Bernd Albrecht löschen?");
+                                << byLanguage("Anruf mit Bernd Albrecht löschen?",
+                                              "Delete the call with Bernard Allen?");
     QTest::newRow("delete shown") << QStringLiteral("deleteShownCalls")
-                                  << QStringLiteral("7 Anrufe löschen?");
+                                  << byLanguage("7 Anrufe löschen?", "Delete 7 calls?");
     QTest::newRow("export") << QStringLiteral("exportCallsDialog")
-                            << QStringLiteral("Anrufe exportieren");
+                            << byLanguage("Anrufe exportieren", "Export calls");
 }
 
-void TestScreens::callViewsAreGermanAndRenderInBothSchemes()
+void TestScreens::callViewsAreTranslatedAndRenderInBothSchemes()
 {
     QFETCH(QString, view);
-    QFETCH(QString, germanTitle);
+    QFETCH(QString, title);
     if (m_controller->contacts()->list()->totalCount() == 0) {
         const QFuture<qpm::core::Result<qpm::core::store::ContactChanges>> contacts =
             m_controller->contacts()->sync();
@@ -894,7 +1033,7 @@ void TestScreens::callViewsAreGermanAndRenderInBothSchemes()
     }
     m_window->setProperty("currentSection", 2);
     QQuickItem *header = m_window->property("header").value<QQuickItem *>();
-    QCOMPARE(header->property("title").toString(), QStringLiteral("Anrufe"));
+    QCOMPARE(header->property("title").toString(), byLanguage("Anrufe", "Calls"));
     QQuickItem *page = item(QStringLiteral("callsPage"));
     QVERIFY(page);
     area->list()->setKindFilter(view == QLatin1StringView("callsMissed")
@@ -903,7 +1042,7 @@ void TestScreens::callViewsAreGermanAndRenderInBothSchemes()
     area->setCurrentId(2);
     QTRY_VERIFY(item(QStringLiteral("callTitle")) &&
                 item(QStringLiteral("callTitle"))->property("text").toString() ==
-                    QStringLiteral("Bernd Albrecht"));
+                    byLanguage("Bernd Albrecht", "Bernard Allen"));
 
     // The highlight of the tab bar slides to the chosen tab; the picture waits for it.
     QQuickItem *tabs = item(QStringLiteral("callKindTabs"));
@@ -938,7 +1077,7 @@ void TestScreens::callViewsAreGermanAndRenderInBothSchemes()
             QMetaObject::invokeMethod(popup, "open");
         const bool hasOpened = popup->metaObject()->indexOfProperty("opened") >= 0;
         QTRY_VERIFY(popup->property(hasOpened ? "opened" : "visible").toBool());
-        QCOMPARE(popup->property("title").toString(), germanTitle);
+        QCOMPARE(popup->property("title").toString(), title);
     }
     // The client refuses to change the call log, and the list then stays as
     // it is; the question must not promise more.
@@ -946,8 +1085,10 @@ void TestScreens::callViewsAreGermanAndRenderInBothSchemes()
         const QQuickItem *text = item(QStringLiteral("deleteCallsText"));
         QVERIFY(text);
         QCOMPARE(text->property("text").toString(),
-                 QStringLiteral("Das Handy löscht den Anruf nur, wenn die App es erlaubt. Sonst "
-                                "bleibt er auf dem Handy und in dieser Liste."));
+                 byLanguage("Das Handy löscht den Anruf nur, wenn die App es erlaubt. Sonst "
+                            "bleibt er auf dem Handy und in dieser Liste.",
+                            "The phone deletes the call only if its app allows it. Otherwise it "
+                            "stays on the phone and in this list."));
     }
 
     QVERIFY(saveBothSchemes(view));
@@ -960,29 +1101,33 @@ void TestScreens::callViewsAreGermanAndRenderInBothSchemes()
     QVERIFY(m_controller->isConnected());
 }
 
-void TestScreens::messageViewsAreGermanAndRenderInBothSchemes_data()
+void TestScreens::messageViewsAreTranslatedAndRenderInBothSchemes_data()
 {
     QTest::addColumn<QString>("view");
-    QTest::addColumn<QString>("germanTitle");
+    QTest::addColumn<QString>("title");
 
-    QTest::newRow("conversation") << QStringLiteral("messages") << QStringLiteral("Anna Becker");
+    QTest::newRow("conversation") << QStringLiteral("messages")
+                                  << byLanguage("Anna Becker", "Anna Baker");
     QTest::newRow("picture") << QStringLiteral("messagesPicture")
-                             << QStringLiteral("Clara Schmitz");
-    QTest::newRow("compose") << QStringLiteral("compose") << QStringLiteral("Neue Nachricht");
-    QTest::newRow("compose later") << QStringLiteral("composeScheduled")
-                                   << QStringLiteral("Neue Nachricht");
+                             << byLanguage("Clara Schmitz", "Clara Smith");
+    QTest::newRow("compose") << QStringLiteral("compose")
+                             << byLanguage("Neue Nachricht", "New message");
+    QTest::newRow("compose later")
+        << QStringLiteral("composeScheduled") << byLanguage("Neue Nachricht", "New message");
     QTest::newRow("scheduled") << QStringLiteral("scheduled")
-                               << QStringLiteral("Geplante Nachricht ändern");
+                               << byLanguage("Geplante Nachricht ändern",
+                                             "Change the scheduled message");
     QTest::newRow("delete") << QStringLiteral("deleteMessagesDialog")
-                            << QStringLiteral("Gespräch mit Anna Becker löschen?");
+                            << byLanguage("Gespräch mit Anna Becker löschen?",
+                                          "Delete the conversation with Anna Baker?");
     QTest::newRow("export") << QStringLiteral("exportMessagesDialog")
-                            << QStringLiteral("Gespräch exportieren");
+                            << byLanguage("Gespräch exportieren", "Export the conversation");
 }
 
-void TestScreens::messageViewsAreGermanAndRenderInBothSchemes()
+void TestScreens::messageViewsAreTranslatedAndRenderInBothSchemes()
 {
     QFETCH(QString, view);
-    QFETCH(QString, germanTitle);
+    QFETCH(QString, title);
     if (m_controller->contacts()->list()->totalCount() == 0) {
         const QFuture<qpm::core::Result<qpm::core::store::ContactChanges>> contacts =
             m_controller->contacts()->sync();
@@ -997,7 +1142,7 @@ void TestScreens::messageViewsAreGermanAndRenderInBothSchemes()
     }
     m_window->setProperty("currentSection", 3);
     QQuickItem *header = m_window->property("header").value<QQuickItem *>();
-    QCOMPARE(header->property("title").toString(), QStringLiteral("Nachrichten"));
+    QCOMPARE(header->property("title").toString(), byLanguage("Nachrichten", "Messages"));
     QQuickItem *page = item(QStringLiteral("messagesPage"));
     QVERIFY(page);
     QQuickItem *tabs = item(QStringLiteral("messageViewTabs"));
@@ -1009,15 +1154,15 @@ void TestScreens::messageViewsAreGermanAndRenderInBothSchemes()
     QObject *popup = nullptr;
     if (view == QLatin1StringView("compose") || view == QLatin1StringView("composeScheduled")) {
         QVERIFY(area->composeTo(QStringLiteral("+49 30 2000002")));
-        area->composer()->setText(QStringLiteral("Ich bin in zehn Minuten da. Bis gleich!"));
+        area->composer()->setText(byLanguage("Ich bin in zehn Minuten da. Bis gleich!",
+                                             "I'll be there in ten minutes. See you soon!"));
         area->composer()->setScheduled(view == QLatin1StringView("composeScheduled"));
         QTRY_VERIFY(item(QStringLiteral("composeTitle")) &&
-                    item(QStringLiteral("composeTitle"))->property("text").toString() ==
-                        germanTitle);
+                    item(QStringLiteral("composeTitle"))->property("text").toString() == title);
         QCOMPARE(item(QStringLiteral("partsText"))->property("text").toString(),
-                 QStringLiteral("1 SMS"));
+                 byLanguage("1 SMS", "1 message"));
         QCOMPARE(item(QStringLiteral("recipientChip0"))->property("text").toString(),
-                 QStringLiteral("Bernd Albrecht (+49 30 2000002)"));
+                 byLanguage("Bernd Albrecht (+49 30 2000002)", "Bernard Allen (+49 30 2000002)"));
         if (view == QLatin1StringView("composeScheduled")) {
             // The form was right, the picture showed the box unticked and the
             // button greyed: it was taken before the tick had been drawn, and
@@ -1044,15 +1189,14 @@ void TestScreens::messageViewsAreGermanAndRenderInBothSchemes()
     } else if (view == QLatin1StringView("scheduled")) {
         QVERIFY(area->editScheduled(area->scheduled()->luidAt(0)));
         QTRY_VERIFY(item(QStringLiteral("composeTitle")) &&
-                    item(QStringLiteral("composeTitle"))->property("text").toString() ==
-                        germanTitle);
+                    item(QStringLiteral("composeTitle"))->property("text").toString() == title);
         QQuickItem *list = item(QStringLiteral("scheduledList"));
         QVERIFY(list);
     } else if (view == QLatin1StringView("messages") ||
                view == QLatin1StringView("messagesPicture")) {
         QTRY_VERIFY(item(QStringLiteral("conversationTitle")) &&
                     item(QStringLiteral("conversationTitle"))->property("text").toString() ==
-                        germanTitle);
+                        title);
         m_window->requestActivate();
         QVERIFY(QTest::qWaitForWindowActive(m_window));
         QQuickItem *list = item(QStringLiteral("conversationList"));
@@ -1076,12 +1220,14 @@ void TestScreens::messageViewsAreGermanAndRenderInBothSchemes()
         QVERIFY(line);
         m_settings->setColorScheme(Settings::ColorScheme::Light);
         const QImage shot = settledGrab(m_window);
-        const QPointF top = line->mapToScene(QPointF(0, 0));
+        // The line can sit at a fractional x; the renderer draws it on the
+        // nearest pixel column.
+        const QPoint top = line->mapToScene(QPointF(0, 0)).toPoint();
         const QColor lineColor = line->property("color").value<QColor>();
         int drawn = 0;
         const int rows = int(line->height());
         for (int y = 0; y < rows; ++y) {
-            if (similar(shot.pixelColor(int(top.x()), int(top.y()) + y), lineColor))
+            if (similar(shot.pixelColor(top.x(), top.y() + y), lineColor))
                 ++drawn;
         }
         QVERIFY2(drawn >= rows * 95 / 100, qPrintable(QStringLiteral("%1 of %2").arg(drawn).arg(rows)));
@@ -1096,7 +1242,7 @@ void TestScreens::messageViewsAreGermanAndRenderInBothSchemes()
             QVERIFY(QMetaObject::invokeMethod(page, "startExport", Q_ARG(bool, false)));
         const bool hasOpened = popup->metaObject()->indexOfProperty("opened") >= 0;
         QTRY_VERIFY(popup->property(hasOpened ? "opened" : "visible").toBool());
-        QCOMPARE(popup->property("title").toString(), germanTitle);
+        QCOMPARE(popup->property("title").toString(), title);
     }
     // A picture in a message is drawn once it is loaded.
     QTRY_VERIFY([this]() {
@@ -1124,41 +1270,46 @@ void TestScreens::messageViewsAreGermanAndRenderInBothSchemes()
     QVERIFY(m_controller->isConnected());
 }
 
-void TestScreens::organizerViewsAreGermanAndRenderInBothSchemes_data()
+void TestScreens::organizerViewsAreTranslatedAndRenderInBothSchemes_data()
 {
     QTest::addColumn<QString>("view");
-    QTest::addColumn<QString>("germanTitle");
+    QTest::addColumn<QString>("title");
 
     QTest::newRow("month") << QStringLiteral("calendarMonth") << QStringLiteral("November 2026");
     QTest::newRow("week") << QStringLiteral("calendarWeek")
-                          << QStringLiteral("KW 46: 09.11.2026 bis 15.11.2026");
+                          << byLanguage("KW 46: 09.11.2026 bis 15.11.2026",
+                                        "Week 45: 11/8/2026 to 11/14/2026");
     QTest::newRow("day") << QStringLiteral("calendarDay")
-                         << QStringLiteral("Donnerstag, 12. November 2026");
+                         << byLanguage("Donnerstag, 12. November 2026",
+                                       "Thursday, November 12, 2026");
     QTest::newRow("list") << QStringLiteral("calendarList") << QStringLiteral("November 2026");
-    QTest::newRow("detail") << QStringLiteral("eventDetail") << QStringLiteral("Elternabend");
+    QTest::newRow("detail") << QStringLiteral("eventDetail")
+                            << byLanguage("Elternabend", "Parents' evening");
     QTest::newRow("event form") << QStringLiteral("eventForm")
-                                << QStringLiteral("Termin bearbeiten");
+                                << byLanguage("Termin bearbeiten", "Edit appointment");
     QTest::newRow("calendars") << QStringLiteral("calendarsDialog")
-                               << QStringLiteral("Kalender auf dem Handy");
+                               << byLanguage("Kalender auf dem Handy", "Calendars on the phone");
     QTest::newRow("alarms") << QStringLiteral("alarmsDialog")
-                            << QStringLiteral("Wecker auf dem Handy");
+                            << byLanguage("Wecker auf dem Handy", "Alarms on the phone");
     QTest::newRow("delete") << QStringLiteral("deleteEventDialog")
-                            << QStringLiteral("Termin Elternabend löschen?");
-    QTest::newRow("tasks") << QStringLiteral("tasks") << QStringLiteral("Aufgaben");
+                            << byLanguage("Termin Elternabend löschen?",
+                                          "Delete appointment Parents' evening?");
+    QTest::newRow("tasks") << QStringLiteral("tasks") << byLanguage("Aufgaben", "Tasks");
     QTest::newRow("task form") << QStringLiteral("taskForm")
-                               << QStringLiteral("Aufgabe bearbeiten");
+                               << byLanguage("Aufgabe bearbeiten", "Edit task");
     QTest::newRow("task categories") << QStringLiteral("taskCategoriesDialog")
-                                     << QStringLiteral("Kategorien für Aufgaben");
-    QTest::newRow("notes") << QStringLiteral("notes") << QStringLiteral("Notizen");
-    QTest::newRow("note form") << QStringLiteral("noteForm") << QStringLiteral("Notiz bearbeiten");
+                                     << byLanguage("Kategorien für Aufgaben", "Task categories");
+    QTest::newRow("notes") << QStringLiteral("notes") << byLanguage("Notizen", "Notes");
+    QTest::newRow("note form") << QStringLiteral("noteForm")
+                               << byLanguage("Notiz bearbeiten", "Edit note");
     QTest::newRow("note categories") << QStringLiteral("noteCategoriesDialog")
-                                     << QStringLiteral("Kategorien für Notizen");
+                                     << byLanguage("Kategorien für Notizen", "Note categories");
 }
 
-void TestScreens::organizerViewsAreGermanAndRenderInBothSchemes()
+void TestScreens::organizerViewsAreTranslatedAndRenderInBothSchemes()
 {
     QFETCH(QString, view);
-    QFETCH(QString, germanTitle);
+    QFETCH(QString, title);
     qpm::ui::CalendarArea *calendar = m_controller->calendar();
     if (m_controller->tasks()->list()->totalCount() == 0) {
         const QFuture<qpm::core::Result<qpm::core::store::OrganizerChanges>> events = calendar->sync();
@@ -1180,9 +1331,9 @@ void TestScreens::organizerViewsAreGermanAndRenderInBothSchemes()
     const QString pageName = tasks   ? QStringLiteral("tasksPage")
                              : notes ? QStringLiteral("notesPage")
                                      : QStringLiteral("calendarPage");
-    const QString sectionTitle = tasks   ? QStringLiteral("Aufgaben")
-                                 : notes ? QStringLiteral("Notizen")
-                                         : QStringLiteral("Kalender");
+    const QString sectionTitle = tasks   ? byLanguage("Aufgaben", "Tasks")
+                                 : notes ? byLanguage("Notizen", "Notes")
+                                         : byLanguage("Kalender", "Calendar");
     m_window->setProperty("currentSection", section);
     QQuickItem *header = m_window->property("header").value<QQuickItem *>();
     QCOMPARE(header->property("title").toString(), sectionTitle);
@@ -1201,15 +1352,14 @@ void TestScreens::organizerViewsAreGermanAndRenderInBothSchemes()
                               : view == QLatin1StringView("calendarDay")  ? qpm::ui::CalendarArea::ViewMode::Day
                                                                           : qpm::ui::CalendarArea::ViewMode::List);
         QTRY_COMPARE(item(QStringLiteral("calendarPeriodTitle"))->property("text").toString(),
-                     germanTitle);
+                     title);
         focusName = view == QLatin1StringView("calendarMonth") || view == QLatin1StringView("calendarWeek")
                         ? QStringLiteral("calendarGrid")
                         : QStringLiteral("eventList");
         if (view == QLatin1StringView("calendarMonth") ||
             view == QLatin1StringView("calendarWeek")) {
             // A week shows a long title on up to three lines, a month on one.
-            const QString longTitle =
-                QStringLiteral("Winterreifen beim Autohaus am Stadtrand abholen");
+            const QString longTitle = longEventTitle(m_english);
             const auto lines = [this, &longTitle]() {
                 const QQuickItem *label = labelWithText(m_window->contentItem(), longTitle);
                 return label ? label->property("lineCount").toInt() : 0;
@@ -1231,14 +1381,15 @@ void TestScreens::organizerViewsAreGermanAndRenderInBothSchemes()
                                                                         : QStringLiteral("eventTitle");
         QTRY_VERIFY(item(heading));
         if (view == QLatin1StringView("eventDetail")) {
-            QTRY_COMPARE(item(heading)->property("text").toString(), germanTitle);
+            QTRY_COMPARE(item(heading)->property("text").toString(), title);
             // The list marks the appointment the detail shows.
             QVERIFY(calendar->currentRow() >= 0);
             QTRY_COMPARE(item(QStringLiteral("eventList"))->property("currentIndex").toInt(),
                          calendar->currentRow());
             // The list joined time and place with a call that Qt 6.9 refuses; the line stayed empty.
             QTRY_VERIFY(
-                labelWithText(m_window->contentItem(), QStringLiteral(", Grundschule am Park")));
+                labelWithText(m_window->contentItem(),
+                              byLanguage(", Grundschule am Park", ", Park Primary School")));
         }
         if (view == QLatin1StringView("eventForm")) {
             // Every choice of the form shows its whole text.
@@ -1273,7 +1424,7 @@ void TestScreens::organizerViewsAreGermanAndRenderInBothSchemes()
         if (tasks) {
             // An empty date field shows the form of a date, not a date that reads as a value.
             QCOMPARE(item(QStringLiteral("taskStartField"))->property("placeholderText").toString(),
-                     QStringLiteral("TT.MM.JJJJ"));
+                     byLanguage("TT.MM.JJJJ", "MM/DD/YYYY"));
             QCOMPARE(item(QStringLiteral("taskReminderTimeField"))
                          ->property("placeholderText")
                          .toString(),
@@ -1289,7 +1440,7 @@ void TestScreens::organizerViewsAreGermanAndRenderInBothSchemes()
         }
         const bool hasOpened = popup->metaObject()->indexOfProperty("opened") >= 0;
         QTRY_VERIFY(popup->property(hasOpened ? "opened" : "visible").toBool());
-        QCOMPARE(popup->property("title").toString(), germanTitle);
+        QCOMPARE(popup->property("title").toString(), title);
         if (view == QLatin1StringView("alarmsDialog")) {
             QTRY_VERIFY(item(QStringLiteral("alarmList")) &&
                         item(QStringLiteral("alarmList"))->property("count").toInt() == 2);
@@ -1302,7 +1453,7 @@ void TestScreens::organizerViewsAreGermanAndRenderInBothSchemes()
         QList<QQuickItem *> pending = {form};
         while (!pending.isEmpty() && !headingFound) {
             QQuickItem *next = pending.takeLast();
-            headingFound = next->property("text").toString() == germanTitle;
+            headingFound = next->property("text").toString() == title;
             pending.append(next->childItems());
         }
         QVERIFY(headingFound);
@@ -1324,33 +1475,35 @@ void TestScreens::organizerViewsAreGermanAndRenderInBothSchemes()
     QVERIFY(m_controller->isConnected());
 }
 
-void TestScreens::fileViewsAreGermanAndRenderInBothSchemes_data()
+void TestScreens::fileViewsAreTranslatedAndRenderInBothSchemes_data()
 {
     QTest::addColumn<QString>("view");
-    QTest::addColumn<QString>("germanTitle");
+    QTest::addColumn<QString>("title");
 
-    QTest::newRow("storages") << QStringLiteral("filesRoot") << QStringLiteral("Dateien");
-    QTest::newRow("grid") << QStringLiteral("filesGrid") << QStringLiteral("Dateien");
-    QTest::newRow("list") << QStringLiteral("filesList") << QStringLiteral("Dateien");
+    QTest::newRow("storages") << QStringLiteral("filesRoot") << byLanguage("Dateien", "Files");
+    QTest::newRow("grid") << QStringLiteral("filesGrid") << byLanguage("Dateien", "Files");
+    QTest::newRow("list") << QStringLiteral("filesList") << byLanguage("Dateien", "Files");
     QTest::newRow("menu") << QStringLiteral("fileMenu") << QString();
     QTest::newRow("new folder") << QStringLiteral("fileNameDialog")
-                                << QStringLiteral("Neuer Ordner");
+                                << byLanguage("Neuer Ordner", "New folder");
     QTest::newRow("delete") << QStringLiteral("deleteFileDialog")
-                            << QStringLiteral("Reiseplan.pdf löschen?");
+                            << byLanguage("Reiseplan.pdf löschen?", "Delete Itinerary.pdf?");
     QTest::newRow("conflict") << QStringLiteral("fileConflictDialog")
-                              << QStringLiteral("Reiseplan.pdf gibt es schon");
-    QTest::newRow("transfers") << QStringLiteral("filesTransfers") << QStringLiteral("Dateien");
+                              << byLanguage("Reiseplan.pdf gibt es schon",
+                                            "Itinerary.pdf exists already");
+    QTest::newRow("transfers") << QStringLiteral("filesTransfers")
+                               << byLanguage("Dateien", "Files");
 }
 
-void TestScreens::fileViewsAreGermanAndRenderInBothSchemes()
+void TestScreens::fileViewsAreTranslatedAndRenderInBothSchemes()
 {
     QFETCH(QString, view);
-    QFETCH(QString, germanTitle);
+    QFETCH(QString, title);
     qpm::ui::FileBrowserModel *files = m_controller->files();
     qpm::ui::TransferQueue *transfers = m_controller->transfers();
     m_window->setProperty("currentSection", 7);
     QQuickItem *header = m_window->property("header").value<QQuickItem *>();
-    QCOMPARE(header->property("title").toString(), QStringLiteral("Dateien"));
+    QCOMPARE(header->property("title").toString(), byLanguage("Dateien", "Files"));
     QTRY_VERIFY(item(QStringLiteral("filesPage")));
     QQuickItem *page = item(QStringLiteral("filesPage"));
     page->setProperty("showGrid", view != QLatin1StringView("filesList"));
@@ -1360,23 +1513,24 @@ void TestScreens::fileViewsAreGermanAndRenderInBothSchemes()
     QVERIFY(files->open(folder));
     QTRY_VERIFY_WITH_TIMEOUT(!files->isBusy() && files->count() > 0, connectTimeoutMs);
     if (view == QLatin1StringView("filesRoot")) {
-        QCOMPARE(files->crumbNames(), QStringList{QStringLiteral("Handy")});
+        QCOMPARE(files->crumbNames(), QStringList{byLanguage("Handy", "Phone")});
         QCOMPARE(
             files->data(files->index(0), qpm::ui::FileBrowserModel::DisplayNameRole).toString(),
-            QStringLiteral("Interner Speicher"));
+            byLanguage("Interner Speicher", "Internal storage"));
     } else {
         QCOMPARE(files->crumbNames(),
-                 (QStringList{QStringLiteral("Handy"), QStringLiteral("Interner Speicher"),
+                 (QStringList{byLanguage("Handy", "Phone"),
+                              byLanguage("Interner Speicher", "Internal storage"),
                               QStringLiteral("DCIM"), QStringLiteral("Camera")}));
         // The pictures are shown once their thumbnails are there.
-        const int strand = files->rowOf(QStringLiteral("Strand.jpg"));
+        const int strand = files->rowOf(beachPhoto());
         QTRY_VERIFY_WITH_TIMEOUT(
             !files->data(files->index(strand), qpm::ui::FileBrowserModel::ThumbnailUrlRole)
                  .toString()
                  .isEmpty(),
             connectTimeoutMs);
     }
-    page->setProperty("currentRow", files->rowOf(QStringLiteral("Reiseplan.pdf")));
+    page->setProperty("currentRow", files->rowOf(travelPlan()));
     m_window->requestActivate();
     QVERIFY(QTest::qWaitForWindowActive(m_window));
 
@@ -1392,23 +1546,21 @@ void TestScreens::fileViewsAreGermanAndRenderInBothSchemes()
         focus->forceActiveFocus(Qt::TabFocusReason);
         QTRY_VERIFY(focus->hasActiveFocus());
     } else if (view == QLatin1StringView("filesTransfers")) {
-        QVERIFY(files->download({QStringLiteral("Reiseplan.pdf"), QStringLiteral("Strand.jpg")},
-                                QUrl::fromLocalFile(target.path())));
+        QVERIFY(files->download({travelPlan(), beachPhoto()}, QUrl::fromLocalFile(target.path())));
         QTRY_VERIFY_WITH_TIMEOUT(!transfers->isActive(), connectTimeoutMs);
         QTRY_VERIFY(item(QStringLiteral("transferList")) &&
                     item(QStringLiteral("transferList"))->isVisible());
         QCOMPARE(item(QStringLiteral("transferSummary"))->property("text").toString(),
-                 QStringLiteral("Übertragungen beendet"));
+                 byLanguage("Übertragungen beendet", "Transfers finished"));
     } else if (view == QLatin1StringView("fileConflictDialog")) {
-        QFile existing(target.filePath(QStringLiteral("Reiseplan.pdf")));
+        QFile existing(target.filePath(travelPlan()));
         QVERIFY(existing.open(QIODevice::WriteOnly));
         existing.close();
-        QVERIFY(
-            files->download({QStringLiteral("Reiseplan.pdf")}, QUrl::fromLocalFile(target.path())));
+        QVERIFY(files->download({travelPlan()}, QUrl::fromLocalFile(target.path())));
         popup = dialog(view);
         QVERIFY(popup);
         QTRY_VERIFY_WITH_TIMEOUT(popup->property("opened").toBool(), connectTimeoutMs);
-        QCOMPARE(popup->property("title").toString(), germanTitle);
+        QCOMPARE(popup->property("title").toString(), title);
     } else {
         popup = dialog(view);
         QVERIFY(popup);
@@ -1419,8 +1571,8 @@ void TestScreens::fileViewsAreGermanAndRenderInBothSchemes()
         else
             QVERIFY(QMetaObject::invokeMethod(page, "showMenu"));
         QTRY_VERIFY(popup->property("opened").toBool());
-        if (!germanTitle.isEmpty())
-            QCOMPARE(popup->property("title").toString(), germanTitle);
+        if (!title.isEmpty())
+            QCOMPARE(popup->property("title").toString(), title);
     }
 
     QVERIFY(saveBothSchemes(view));
@@ -1438,23 +1590,23 @@ void TestScreens::fileViewsAreGermanAndRenderInBothSchemes()
     QVERIFY(m_controller->isConnected());
 }
 
-void TestScreens::appViewsAreGermanAndRenderInBothSchemes_data()
+void TestScreens::appViewsAreTranslatedAndRenderInBothSchemes_data()
 {
     QTest::addColumn<QString>("view");
-    QTest::addColumn<QString>("germanTitle");
+    QTest::addColumn<QString>("title");
 
     QTest::newRow("own apps") << QStringLiteral("apps") << QStringLiteral("Apps");
     QTest::newRow("system apps") << QStringLiteral("appsSystem") << QStringLiteral("Apps");
     QTest::newRow("menu") << QStringLiteral("appMenu") << QString();
     QTest::newRow("remove") << QStringLiteral("uninstallAppDialog")
-                            << QStringLiteral("Wetter am Ort entfernen?");
+                            << byLanguage("Wetter am Ort entfernen?", "Remove Local Weather?");
     QTest::newRow("install") << QStringLiteral("appsTransfer") << QStringLiteral("Apps");
 }
 
-void TestScreens::appViewsAreGermanAndRenderInBothSchemes()
+void TestScreens::appViewsAreTranslatedAndRenderInBothSchemes()
 {
     QFETCH(QString, view);
-    QFETCH(QString, germanTitle);
+    QFETCH(QString, title);
     qpm::ui::AppListModel *apps = m_controller->apps();
     m_window->setProperty("currentSection", 8);
     QQuickItem *header = m_window->property("header").value<QQuickItem *>();
@@ -1467,7 +1619,7 @@ void TestScreens::appViewsAreGermanAndRenderInBothSchemes()
     // The rows show their icons once these are there.
     const QString shown = view == QLatin1StringView("appsSystem")
                               ? QStringLiteral("com.android.settings")
-                              : QStringLiteral("org.example.wetter");
+                              : byLanguage("org.example.wetter", "org.example.weather");
     QTRY_VERIFY_WITH_TIMEOUT(
         !apps->data(apps->index(apps->rowOf(shown)), qpm::ui::AppListModel::IconUrlRole)
              .toString()
@@ -1489,7 +1641,8 @@ void TestScreens::appViewsAreGermanAndRenderInBothSchemes()
     } else if (view == QLatin1StringView("appsTransfer")) {
         // The phone reads the APK late, so the copy is still under way in the picture.
         m_phone->config().uploadReadDelay = std::chrono::milliseconds(4000);
-        const QString source = local.filePath(QStringLiteral("Würfelspiel-1.4.apk"));
+        const QString source =
+            local.filePath(byLanguage("Würfelspiel-1.4.apk", "Dice-Game-1.4.apk"));
         QFile file(source);
         QVERIFY(file.open(QIODevice::WriteOnly));
         file.write(QByteArray("PK\x03\x04", 4) + QByteArray(3000000, 'w'));
@@ -1500,15 +1653,16 @@ void TestScreens::appViewsAreGermanAndRenderInBothSchemes()
         QVERIFY(item(QStringLiteral("appTransferText"))
                     ->property("text")
                     .toString()
-                    .startsWith(QStringLiteral("Würfelspiel-1.4.apk wird an das Handy gesendet")));
+                    .startsWith(byLanguage("Würfelspiel-1.4.apk wird an das Handy gesendet",
+                                           "Sending Dice-Game-1.4.apk to the phone")));
     } else {
         popup = dialog(view);
         QVERIFY(popup);
         QVERIFY(QMetaObject::invokeMethod(
             page, view == QLatin1StringView("appMenu") ? "showMenu" : "confirmUninstall"));
         QTRY_VERIFY(popup->property("opened").toBool());
-        if (!germanTitle.isEmpty())
-            QCOMPARE(popup->property("title").toString(), germanTitle);
+        if (!title.isEmpty())
+            QCOMPARE(popup->property("title").toString(), title);
     }
 
     QVERIFY(saveBothSchemes(view));
@@ -1526,30 +1680,31 @@ void TestScreens::appViewsAreGermanAndRenderInBothSchemes()
     QVERIFY(m_controller->isConnected());
 }
 
-void TestScreens::screenViewsAreGermanAndRenderInBothSchemes_data()
+void TestScreens::screenViewsAreTranslatedAndRenderInBothSchemes_data()
 {
     QTest::addColumn<QString>("view");
-    QTest::addColumn<QString>("germanText");
+    QTest::addColumn<QString>("shownText");
 
     QTest::newRow("not started") << QStringLiteral("screenIdle")
-                                 << QStringLiteral("Bildschirm zeigen");
+                                 << byLanguage("Bildschirm zeigen", "Show the screen");
     QTest::newRow("question on the phone")
-        << QStringLiteral("screenConsent") << QStringLiteral("Bestätigen Sie auf dem Handy");
-    QTest::newRow("mirrored") << QStringLiteral("screen") << QStringLiteral("Beenden");
+        << QStringLiteral("screenConsent")
+        << byLanguage("Bestätigen Sie auf dem Handy", "Confirm on the phone");
+    QTest::newRow("mirrored") << QStringLiteral("screen") << byLanguage("Beenden", "Stop");
     QTest::newRow("no control") << QStringLiteral("screenNoControl")
-                                << QStringLiteral("Bedienungshilfe");
+                                << byLanguage("Bedienungshilfe", "accessibility service");
     QTest::newRow("screenshot") << QStringLiteral("screenshotDialog")
-                                << QStringLiteral("Bildschirmfoto speichern");
+                                << byLanguage("Bildschirmfoto speichern", "Save the screenshot");
 }
 
-void TestScreens::screenViewsAreGermanAndRenderInBothSchemes()
+void TestScreens::screenViewsAreTranslatedAndRenderInBothSchemes()
 {
     QFETCH(QString, view);
-    QFETCH(QString, germanText);
+    QFETCH(QString, shownText);
     qpm::ui::ScreenMirror *mirror = m_controller->screen();
     m_window->setProperty("currentSection", 9);
     QQuickItem *header = m_window->property("header").value<QQuickItem *>();
-    QCOMPARE(header->property("title").toString(), QStringLiteral("Bildschirm"));
+    QCOMPARE(header->property("title").toString(), byLanguage("Bildschirm", "Screen"));
     QTRY_VERIFY(item(QStringLiteral("screenPage")));
     QQuickItem *page = item(QStringLiteral("screenPage"));
     m_window->requestActivate();
@@ -1559,9 +1714,10 @@ void TestScreens::screenViewsAreGermanAndRenderInBothSchemes()
 
     QObject *popup = nullptr;
     if (view == QLatin1StringView("screenIdle")) {
-        QVERIFY(labelWithText(page, QStringLiteral("Hier erscheint der Bildschirm des Handys")));
+        QVERIFY(labelWithText(page, byLanguage("Hier erscheint der Bildschirm des Handys",
+                                               "The screen of the phone shows here")));
         QQuickItem *start = item(QStringLiteral("screenStartButton"));
-        QCOMPARE(start->property("text").toString(), germanText);
+        QCOMPARE(start->property("text").toString(), shownText);
         start->forceActiveFocus(Qt::TabFocusReason);
     } else if (view == QLatin1StringView("screenConsent")) {
         // The phone leaves the question open, as long as its user has not answered.
@@ -1573,18 +1729,18 @@ void TestScreens::screenViewsAreGermanAndRenderInBothSchemes()
         QVERIFY(item(QStringLiteral("screenStatusText"))
                     ->property("text")
                     .toString()
-                    .startsWith(germanText));
+                    .startsWith(shownText));
     } else {
         QVERIFY(mirror->start());
         QTRY_VERIFY_WITH_TIMEOUT(mirror->hasFrame(), connectTimeoutMs);
         QCOMPARE(item(QStringLiteral("screenStartButton"))->property("text").toString(),
-                 QStringLiteral("Beenden"));
+                 byLanguage("Beenden", "Stop"));
         if (view == QLatin1StringView("screenNoControl")) {
             QTRY_VERIFY(item(QStringLiteral("screenControlHint"))->isVisible());
             QVERIFY(item(QStringLiteral("screenControlHintText"))
                         ->property("text")
                         .toString()
-                        .contains(germanText));
+                        .contains(shownText));
             QVERIFY(!item(QStringLiteral("screenBackButton"))->isEnabled());
         } else {
             QVERIFY(!item(QStringLiteral("screenControlHint"))->isVisible());
@@ -1595,7 +1751,7 @@ void TestScreens::screenViewsAreGermanAndRenderInBothSchemes()
             QVERIFY(popup);
             QMetaObject::invokeMethod(popup, "open");
             QTRY_VERIFY(popup->property("visible").toBool());
-            QCOMPARE(popup->property("title").toString(), germanText);
+            QCOMPARE(popup->property("title").toString(), shownText);
         }
     }
 
@@ -1615,32 +1771,33 @@ void TestScreens::screenViewsAreGermanAndRenderInBothSchemes()
     QVERIFY(m_controller->isConnected());
 }
 
-void TestScreens::desktopViewsAreGermanAndRenderInBothSchemes_data()
+void TestScreens::desktopViewsAreTranslatedAndRenderInBothSchemes_data()
 {
     QTest::addColumn<QString>("view");
-    QTest::addColumn<QString>("germanText");
+    QTest::addColumn<QString>("shownText");
 
     QTest::newRow("notifications")
-        << QStringLiteral("notifications") << QStringLiteral("Benachrichtigungen");
+        << QStringLiteral("notifications") << byLanguage("Benachrichtigungen", "Notifications");
     QTest::newRow("no access") << QStringLiteral("notificationsNoAccess")
-                               << QStringLiteral("Benachrichtigungszugriff");
+                               << byLanguage("Benachrichtigungszugriff", "notification access");
     QTest::newRow("incoming call")
-        << QStringLiteral("callWindow") << QStringLiteral("Eingehender Anruf");
+        << QStringLiteral("callWindow") << byLanguage("Eingehender Anruf", "Incoming call");
     QTest::newRow("call in progress")
-        << QStringLiteral("callWindowActive") << QStringLiteral("Gespräch läuft");
+        << QStringLiteral("callWindowActive") << byLanguage("Gespräch läuft", "Call in progress");
     QTest::newRow("settings") << QStringLiteral("settingsNotifications")
-                              << QStringLiteral("Benachrichtigungen");
+                              << byLanguage("Benachrichtigungen", "Notifications");
 }
 
-void TestScreens::desktopViewsAreGermanAndRenderInBothSchemes()
+void TestScreens::desktopViewsAreTranslatedAndRenderInBothSchemes()
 {
     QFETCH(QString, view);
-    QFETCH(QString, germanText);
+    QFETCH(QString, shownText);
     qpm::ui::NotificationListModel *notifications = m_controller->notifications();
     qpm::ui::CallControl *call = m_controller->call();
     m_window->setProperty("currentSection", 10);
     QQuickItem *header = m_window->property("header").value<QQuickItem *>();
-    QCOMPARE(header->property("title").toString(), QStringLiteral("Benachrichtigungen"));
+    QCOMPARE(header->property("title").toString(),
+             byLanguage("Benachrichtigungen", "Notifications"));
     QTRY_VERIFY(item(QStringLiteral("notificationsPage")));
     m_window->requestActivate();
     QVERIFY(QTest::qWaitForWindowActive(m_window));
@@ -1662,15 +1819,16 @@ void TestScreens::desktopViewsAreGermanAndRenderInBothSchemes()
         QTRY_VERIFY(list->hasActiveFocus());
         QTRY_VERIFY(item(QStringLiteral("notificationDetailImage"))->isVisible());
         QCOMPARE(item(QStringLiteral("notificationDetailTitle"))->property("text").toString(),
-                 QStringLiteral("Anna Becker"));
-        QVERIFY(labelWithText(item(QStringLiteral("notificationsPage")),
-                              QStringLiteral("3 Benachrichtigungen auf dem Handy")));
+                 byLanguage("Anna Becker", "Anna Baker"));
+        QVERIFY(labelWithText(
+            item(QStringLiteral("notificationsPage")),
+            byLanguage("3 Benachrichtigungen auf dem Handy", "3 notifications on the phone")));
     } else if (view == QLatin1StringView("notificationsNoAccess")) {
         m_phone->config().notificationAccess =
             qpm::test::FakePhoneConfig::NotificationAccess::Disabled;
         QVERIFY(notifications->refresh());
         QTRY_VERIFY_WITH_TIMEOUT(notifications->isAccessMissing(), connectTimeoutMs);
-        QVERIFY(labelWithText(item(QStringLiteral("notificationsEmpty")), germanText));
+        QVERIFY(labelWithText(item(QStringLiteral("notificationsEmpty")), shownText));
         QQuickItem *action = item(QStringLiteral("notificationsEmptyAction"));
         QVERIFY(action && action->isVisible());
         action->forceActiveFocus(Qt::TabFocusReason);
@@ -1689,10 +1847,10 @@ void TestScreens::desktopViewsAreGermanAndRenderInBothSchemes()
         callWindow = m_window->findChild<QWindow *>(QStringLiteral("callWindow"));
         QVERIFY(callWindow);
         QTRY_VERIFY(callWindow->isVisible());
-        QCOMPARE(call->callerText(), QStringLiteral("Anna Becker"));
+        QCOMPARE(call->callerText(), byLanguage("Anna Becker", "Anna Baker"));
         auto *quickCall = qobject_cast<QQuickWindow *>(callWindow);
         QVERIFY(quickCall);
-        QVERIFY(labelWithText(quickCall->contentItem(), germanText));
+        QVERIFY(labelWithText(quickCall->contentItem(), shownText));
         quickCall->requestActivate();
         QVERIFY(QTest::qWaitForWindowActive(quickCall));
     } else {
@@ -1704,10 +1862,10 @@ void TestScreens::desktopViewsAreGermanAndRenderInBothSchemes()
         tabs->setProperty("currentIndex", 3);
         QTRY_VERIFY(item(QStringLiteral("settingsNotificationsPage"))->isVisible());
         QQuickItem *tab = item(QStringLiteral("settingsNotificationsTab"));
-        QCOMPARE(tab->property("text").toString(), germanText);
+        QCOMPARE(tab->property("text").toString(), shownText);
         tab->forceActiveFocus(Qt::TabFocusReason);
         QVERIFY(labelWithText(item(QStringLiteral("settingsNotificationsPage")),
-                              QStringLiteral("Zwischenablage")));
+                              byLanguage("Zwischenablage", "clipboard")));
     }
 
     QVERIFY(saveBothSchemes(view));
@@ -1731,21 +1889,23 @@ void TestScreens::desktopViewsAreGermanAndRenderInBothSchemes()
     QVERIFY(m_controller->isConnected());
 }
 
-void TestScreens::helpViewsAreGermanAndRenderInBothSchemes_data()
+void TestScreens::helpViewsAreTranslatedAndRenderInBothSchemes_data()
 {
     QTest::addColumn<QString>("view");
-    QTest::addColumn<QString>("germanTitle");
+    QTest::addColumn<QString>("title");
 
-    QTest::newRow("chapter by F1") << QStringLiteral("helpContacts") << QStringLiteral("Kontakte");
+    QTest::newRow("chapter by F1")
+        << QStringLiteral("helpContacts") << byLanguage("Kontakte", "Contacts");
     QTest::newRow("start of the help")
-        << QStringLiteral("helpStart") << QStringLiteral("Erste Schritte");
-    QTest::newRow("about") << QStringLiteral("aboutDialog") << QStringLiteral("Über QPhoneManager");
+        << QStringLiteral("helpStart") << byLanguage("Erste Schritte", "Getting started");
+    QTest::newRow("about") << QStringLiteral("aboutDialog")
+                           << byLanguage("Über QPhoneManager", "About QPhoneManager");
 }
 
-void TestScreens::helpViewsAreGermanAndRenderInBothSchemes()
+void TestScreens::helpViewsAreTranslatedAndRenderInBothSchemes()
 {
     QFETCH(QString, view);
-    QFETCH(QString, germanTitle);
+    QFETCH(QString, title);
     m_window->requestActivate();
     QVERIFY(QTest::qWaitForWindowActive(m_window));
     m_window->setProperty("helpShown", false);
@@ -1757,28 +1917,28 @@ void TestScreens::helpViewsAreGermanAndRenderInBothSchemes()
         QTest::keyClick(m_window, Qt::Key_F1);
     }
     QTRY_VERIFY(m_window->property("helpShown").toBool());
-    QCOMPARE(header->property("title").toString(), QStringLiteral("Hilfe"));
+    QCOMPARE(header->property("title").toString(), byLanguage("Hilfe", "Help"));
 
     QObject *popup = nullptr;
     if (view == QLatin1StringView("aboutDialog")) {
         popup = dialog(view);
         QVERIFY(popup);
         QQuickItem *about = item(QStringLiteral("aboutButton"));
-        QCOMPARE(about->property("text").toString(), germanTitle);
+        QCOMPARE(about->property("text").toString(), title);
         about->forceActiveFocus(Qt::TabFocusReason);
         QTest::keyClick(m_window, Qt::Key_Space);
         QTRY_VERIFY(popup->property("opened").toBool());
-        QCOMPARE(popup->property("title").toString(), germanTitle);
+        QCOMPARE(popup->property("title").toString(), title);
         QVERIFY(item(QStringLiteral("aboutVersion"))
                     ->property("text")
                     .toString()
                     .startsWith(QStringLiteral("QPhoneManager ")));
-        QVERIFY(labelWithText(m_window->contentItem(), QStringLiteral("Bausteine")));
+        QVERIFY(labelWithText(m_window->contentItem(), byLanguage("Bausteine", "Components")));
     } else {
-        QTRY_COMPARE(item(QStringLiteral("helpTitle"))->property("text").toString(), germanTitle);
-        // The contents show the German titles of the handbook.
+        QTRY_COMPARE(item(QStringLiteral("helpTitle"))->property("text").toString(), title);
+        // The contents show the titles of the handbook in the language of the run.
         QVERIFY(labelWithText(item(QStringLiteral("helpContents")),
-                              QStringLiteral("Benachrichtigungen")));
+                              byLanguage("Benachrichtigungen", "Notifications")));
         QTRY_VERIFY(item(QStringLiteral("helpText"))->hasActiveFocus());
     }
 
@@ -1792,29 +1952,31 @@ void TestScreens::helpViewsAreGermanAndRenderInBothSchemes()
     QVERIFY(m_controller->isConnected());
 }
 
-void TestScreens::backupViewsAreGermanAndRenderInBothSchemes_data()
+void TestScreens::backupViewsAreTranslatedAndRenderInBothSchemes_data()
 {
     QTest::addColumn<QString>("view");
-    QTest::addColumn<QString>("germanText");
+    QTest::addColumn<QString>("shownText");
 
-    QTest::newRow("backup") << QStringLiteral("backupDialog") << QStringLiteral("Sichern");
+    QTest::newRow("backup") << QStringLiteral("backupDialog") << byLanguage("Sichern", "Back up");
     QTest::newRow("backup saved")
         << QStringLiteral("backupSaved")
-        << QStringLiteral("Die Sicherung ist gespeichert. Sie ist nicht verschlüsselt. Bewahren "
-                          "Sie sie sicher auf.");
+        << byLanguage("Die Sicherung ist gespeichert. Sie ist nicht verschlüsselt. Bewahren "
+                      "Sie sie sicher auf.",
+                      "The backup is saved. It is not encrypted, so keep it in a safe place.");
     QTest::newRow("restore preview")
         << QStringLiteral("restorePreview")
-        << QStringLiteral("Wählen Sie, was Sie wiederherstellen möchten.");
+        << byLanguage("Wählen Sie, was Sie wiederherstellen möchten.", "Choose what to restore.");
     QTest::newRow("restore done") << QStringLiteral("restoreDone")
-                                  << QStringLiteral("Die Wiederherstellung ist fertig.");
+                                  << byLanguage("Die Wiederherstellung ist fertig.",
+                                                "The restore is done.");
 }
 
 // The last views of the run: the restore gives the fake phone one of its
 // contacts back under a new number.
-void TestScreens::backupViewsAreGermanAndRenderInBothSchemes()
+void TestScreens::backupViewsAreTranslatedAndRenderInBothSchemes()
 {
     QFETCH(QString, view);
-    QFETCH(QString, germanText);
+    QFETCH(QString, shownText);
     m_window->requestActivate();
     QVERIFY(QTest::qWaitForWindowActive(m_window));
     qpm::ui::BackupController *backup = m_controller->backup();
@@ -1834,25 +1996,26 @@ void TestScreens::backupViewsAreGermanAndRenderInBothSchemes()
     QVERIFY(popup);
     QMetaObject::invokeMethod(popup, "open");
     QTRY_VERIFY(popup->property("opened").toBool());
-    QCOMPARE(popup->property("title").toString(), QStringLiteral("Sichern und wiederherstellen"));
+    QCOMPARE(popup->property("title").toString(),
+             byLanguage("Sichern und wiederherstellen", "Back up and restore"));
     QQuickItem *tabs = item(QStringLiteral("backupTabs"));
     QVERIFY(tabs);
 
     if (view == QLatin1StringView("backupDialog")) {
         tabs->setProperty("currentIndex", 0);
-        QCOMPARE(item(QStringLiteral("backupTab"))->property("text").toString(), germanText);
+        QCOMPARE(item(QStringLiteral("backupTab"))->property("text").toString(), shownText);
         QVERIFY(labelWithText(item(QStringLiteral("backupPage")),
-                              QStringLiteral("nicht verschlüsselt")));
+                              byLanguage("nicht verschlüsselt", "not encrypted")));
         item(QStringLiteral("backup-contacts"))->forceActiveFocus(Qt::TabFocusReason);
     } else if (view == QLatin1StringView("backupSaved")) {
         tabs->setProperty("currentIndex", 0);
         QVERIFY(backup->create(url, backup->sections()->chosenKeys()));
         QTRY_VERIFY_WITH_TIMEOUT(!backup->isBusy(), connectTimeoutMs);
-        QCOMPARE(backup->statusText(), germanText);
+        QCOMPARE(backup->statusText(), shownText);
         item(QStringLiteral("saveBackupButton"))->forceActiveFocus(Qt::TabFocusReason);
     } else {
         tabs->setProperty("currentIndex", 1);
-        // Jörg Weiß is gone from the phone, so the preview offers him again.
+        // The sixth contact is gone from the phone, so the preview offers it again.
         bool onPhone = false;
         for (const qpm::test::FakeSyncObject &object : m_phone->area(QStringLiteral("pb")).objects)
             onPhone = onPhone || object.luid == 6;
@@ -1871,11 +2034,11 @@ void TestScreens::backupViewsAreGermanAndRenderInBothSchemes()
             QTRY_VERIFY(restore->isEnabled());
             restore->forceActiveFocus(Qt::TabFocusReason);
         }
-        QCOMPARE(backup->statusText(), germanText);
+        QCOMPARE(backup->statusText(), shownText);
         QVERIFY(labelWithText(item(QStringLiteral("restorePage")),
                               view == QLatin1StringView("restoreDone")
-                                  ? QStringLiteral("wiederhergestellt")
-                                  : QStringLiteral("Neu: 1")));
+                                  ? byLanguage("wiederhergestellt", "restored")
+                                  : byLanguage("Neu: 1", "New: 1")));
     }
 
     QVERIFY(saveBothSchemes(view));
