@@ -151,15 +151,20 @@ MessagesArea::MessagesArea(core::protocol::PhoneConnection *connection,
       m_composer(new MessageComposer(m_service, this))
 {
     Q_ASSERT(status);
-    const auto names = [this](const QString &number) { return contactNameFor(number); };
+    const auto names = [this](const QString &number, const QString &storedName) {
+        return contactNameFor(number, storedName);
+    };
     m_composer->setNameLookup(names);
     m_scheduled->setNameLookup(names);
     m_composer->setScheduledLookup(
-        [this](quint32 luid, QStringList &numbers, QString &text, QDateTime &when, int &simSlot) {
+        [this](quint32 luid, QStringList &numbers, QHash<QString, QString> &storedNames,
+               QString &text, QDateTime &when, int &simSlot) {
             const std::optional<StoredMessage> found = m_scheduled->message(luid);
             if (!found)
                 return false;
             numbers = found->addresses;
+            for (const core::codec::MessageRecipient &recipient : found->recipients)
+                storedNames.insert(recipient.number, recipient.name);
             text = found->body;
             when = found->date;
             simSlot = found->simSlot;
@@ -263,6 +268,7 @@ void MessagesArea::setConnected(bool connected)
 void MessagesArea::refreshNames()
 {
     m_contactNames.clear();
+    m_sharedNames.clear();
     if (m_contacts) {
         const Result<QHash<QString, QString>> names = m_contacts->namesByNumber();
         if (names.hasValue()) {
@@ -272,17 +278,33 @@ void MessagesArea::refreshNames()
             qCWarning(core::lcUi) << "Contact names for the messages not read:"
                                   << names.error().message();
         }
+        const Result<QHash<QString, QStringList>> shared = m_contacts->sharedNumberNames();
+        if (shared.hasValue()) {
+            m_sharedNames = shared.value();
+        } else {
+            // A shared number then shows the first contact in name order.
+            qCWarning(core::lcUi) << "Contacts sharing a number not read:"
+                                  << shared.error().message();
+        }
     }
     m_conversations->setContactNames(m_contactNames);
-    m_composer->setNameLookup([this](const QString &number) { return contactNameFor(number); });
-    m_scheduled->setNameLookup([this](const QString &number) { return contactNameFor(number); });
+    const auto lookup = [this](const QString &number, const QString &storedName) {
+        return contactNameFor(number, storedName);
+    };
+    m_composer->setNameLookup(lookup);
+    m_scheduled->setNameLookup(lookup);
     Q_EMIT currentChanged();
 }
 
-QString MessagesArea::contactNameFor(const QString &number) const
+QString MessagesArea::contactNameFor(const QString &number, const QString &storedName) const
 {
     const QString key = core::store::ContactStore::numberKey(number);
-    return key.isEmpty() ? QString() : m_contactNames.value(key);
+    if (key.isEmpty())
+        return {};
+    const QString stored = storedName.trimmed();
+    if (!stored.isEmpty() && m_sharedNames.value(key).contains(stored))
+        return stored;
+    return m_contactNames.value(key);
 }
 
 QFuture<Result<core::store::MessageChanges>> MessagesArea::sync()

@@ -517,6 +517,32 @@ Result<QHash<QString, QString>> ContactStore::namesByNumber() const
     return names;
 }
 
+Result<QHash<QString, QStringList>> ContactStore::sharedNumberNames() const
+{
+    QSqlQuery query(QSqlDatabase::database(m_profile->connectionName(), false));
+    if (!query.exec(QStringLiteral("SELECT c.display_name, v.value, c.luid FROM contact_values v "
+                                   "JOIN contacts c ON c.luid = v.luid WHERE v.kind = 'digits' "
+                                   "ORDER BY c.sort_key, c.luid"))) {
+        return queryError(QStringLiteral("Cannot read the contact numbers"), query);
+    }
+    QHash<QString, QStringList> names;
+    QHash<QString, QSet<quint32>> owners;
+    while (query.next()) {
+        const QString key = numberKey(query.value(1).toString());
+        const quint32 luid = query.value(2).toUInt();
+        if (key.isEmpty() || owners.value(key).contains(luid))
+            continue;
+        owners[key].insert(luid);
+        names[key].append(query.value(0).toString());
+    }
+    QHash<QString, QStringList> shared;
+    for (auto entry = names.cbegin(); entry != names.cend(); ++entry) {
+        if (entry.value().size() > 1)
+            shared.insert(entry.key(), entry.value());
+    }
+    return shared;
+}
+
 Result<codec::PbMetadata> ContactStore::metadata() const
 {
     QSqlQuery query(QSqlDatabase::database(m_profile->connectionName(), false));

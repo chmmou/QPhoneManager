@@ -37,8 +37,12 @@ public:
         FailedRole,
     };
 
-    /// The contact's name for a number, or an empty string.
-    using NameLookup = std::function<QString(const QString &number)>;
+    /**
+     * The contact's name for a number, or an empty string. `storedName` is the
+     * name the message carries for the number; where contacts share the
+     * number, it tells which one is meant.
+     */
+    using NameLookup = std::function<QString(const QString &number, const QString &storedName)>;
 
     explicit ScheduledListModel(QObject *parent = nullptr);
 

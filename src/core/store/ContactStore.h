@@ -102,6 +102,12 @@ public:
      */
     [[nodiscard]] Result<QHash<QString, QString>> namesByNumber() const;
 
+    /**
+     * The shown names, in name order, for each numberKey() that more than one
+     * contact has. A number missing here belongs to one contact at most.
+     */
+    [[nodiscard]] Result<QHash<QString, QStringList>> sharedNumberNames() const;
+
     /// Accounts and groups from the last pull; empty before the first.
     [[nodiscard]] Result<codec::PbMetadata> metadata() const;
 
