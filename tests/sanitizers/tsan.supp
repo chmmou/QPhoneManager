@@ -1,0 +1,24 @@
+# ThreadSanitizer suppressions for the tsan-6.9 test preset.
+#
+# Qt comes as a binary build without ThreadSanitizer. Its mutexes, wait
+# conditions and atomics inside the libraries are invisible to the sanitizer,
+# so memory that Qt hands from one thread to another looks unsynchronised.
+#
+# The preset therefore also sets ignore_noninstrumented_modules=1. The
+# sanitizer then ignores the calls to malloc, free, memcpy and the like that
+# come from a library built without it, such as Qt, GLib or libdbus. Without
+# the option it pairs, for example, a QMetaCallEvent that Qt D-Bus allocates
+# on the main thread with its deletion by Qt Core on the D-Bus thread after
+# Qt's event queue passed it on. Accesses in project code stay checked.
+#
+# An entry below covers only a report whose accesses all lie in Qt code. A
+# report about memory that project code reads or writes is never suppressed
+# here.
+
+# QFuture::unwrap(). Qt's continuation code in qfuture_impl.h builds the
+# continuation for the inner future on one thread and runs it on the thread
+# that finishes that future. QFutureInterfaceBase::setContinuation() and
+# runContinuation() order the two under continuationMutex inside Qt Core,
+# which the sanitizer cannot see. Every reported access lies in that Qt code;
+# the project lambdas around it run in frames of their own.
+race:QtPrivate::UnwrapHandler::unwrapImpl
