@@ -450,7 +450,9 @@ void TestPhoneConnection::runningObexWorkFailsWhenTheConnectionEnds()
 }
 
 // Destroying the connection while OBEX work ran left that work's future
-// without a result.
+// without a result. Later the cancelled continuations of that work read
+// members of the half-destroyed connection; only a build with
+// UndefinedBehaviorSanitizer reports that read.
 void TestPhoneConnection::runningObexWorkFailsWhenTheConnectionIsDestroyed()
 {
     QVERIFY(reachReady(*m_connection));

@@ -6,6 +6,7 @@
 #include "core/protocol/PinAuth.h"
 #include "core/protocol/TcpTransport.h"
 
+#include <QPointer>
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <QTimer>
@@ -592,8 +593,14 @@ void PhoneConnection::runNextObexJob()
     // Ends the OBEX session and hands the result over once the phone is back
     // in AT mode. When the connection ends meanwhile, failObexJobs() hands it
     // over instead.
-    const auto finish = [this, generation](std::function<void()> deliver) {
-        if (generation != m_generation || m_session->isEnded()) {
+    //
+    // Qt cancels the continuations that have this object as their context
+    // while ~QObject runs, and the cancel handler of the work then calls this
+    // with the members already gone. The guard is cleared before that point,
+    // so only the result is handed over then.
+    const auto finish = [this, guard = QPointer<PhoneConnection>(this),
+                         generation](std::function<void()> deliver) {
+        if (!guard || generation != m_generation || m_session->isEnded()) {
             deliver();
             return;
         }
