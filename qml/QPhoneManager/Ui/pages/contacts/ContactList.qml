@@ -32,7 +32,7 @@ Item {
         section.criteria: ViewSection.FullString
         Accessible.role: Accessible.List
         Accessible.name: qsTr("Contacts")
-        ScrollBar.vertical: ScrollBar {}
+        ScrollBar.vertical: ThemedScrollBar {}
 
         section.delegate: Label {
             required property string section
@@ -49,7 +49,8 @@ Item {
         }
 
         // A plain row rather than a delegate control: the list is the one
-        // focus stop, and the row shows the current entry by its colour.
+        // focus stop, and the row shows the current entry by its colour and
+        // an outline.
         delegate: Rectangle {
             id: contactRow
 
@@ -111,6 +112,11 @@ Item {
                         elide: Text.ElideRight
                     }
                 }
+            }
+
+            CurrentMarker {
+                current: contactRow.ListView.isCurrentItem
+                viewFocused: list.activeFocus
             }
         }
 

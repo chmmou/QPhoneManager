@@ -33,7 +33,7 @@ Item {
         section.criteria: ViewSection.FullString
         Accessible.role: Accessible.List
         Accessible.name: qsTr("Appointments")
-        ScrollBar.vertical: ScrollBar {}
+        ScrollBar.vertical: ThemedScrollBar {}
 
         section.delegate: Label {
             required property string section
@@ -50,7 +50,8 @@ Item {
         }
 
         // A plain row rather than a delegate control: the list is the one
-        // focus stop, and the row shows the current entry by its colour.
+        // focus stop, and the row shows the current entry by its colour and
+        // an outline.
         delegate: Rectangle {
             id: eventRow
 
@@ -60,6 +61,7 @@ Item {
             required property string location
             required property string timeText
             required property color entryColor
+            required property string calendar
             required property bool holiday
             required property bool recurring
 
@@ -68,7 +70,7 @@ Item {
             color: ListView.isCurrentItem ? Theme.surfaceVariant : "transparent"
             Accessible.role: Accessible.ListItem
             Accessible.name: eventRow.summary.length > 0 ? eventRow.summary : qsTr("(No title)")
-            Accessible.description: eventRow.timeText
+            Accessible.description: [eventRow.timeText, eventRow.calendar].filter(part => part.length > 0).join(", ")
 
             TapHandler {
                 onTapped: {
@@ -89,10 +91,13 @@ Item {
                 spacing: Theme.gridUnit * 3
 
                 Rectangle {
-                    Layout.preferredWidth: Theme.gridUnit
+                    Layout.preferredWidth: Theme.gridUnit * 2
                     Layout.fillHeight: true
-                    radius: Theme.gridUnit / 2
+                    radius: Theme.gridUnit
                     color: eventRow.entryColor
+                    // The colour of a calendar can be close to the row; the outline keeps the bar in view.
+                    border.width: 1
+                    border.color: Theme.outline
                 }
 
                 ColumnLayout {
@@ -108,7 +113,7 @@ Item {
 
                     Label {
                         Layout.fillWidth: true
-                        text: eventRow.location.length > 0 ? qsTr("%1, %2").arg(eventRow.timeText).arg(eventRow.location) : eventRow.timeText
+                        text: [eventRow.timeText, eventRow.location, eventRow.calendar].filter(part => part.length > 0).join(", ")
                         font.pixelSize: TypeScale.hint
                         color: Theme.foregroundOnSurfaceVariant
                         elide: Text.ElideRight
@@ -122,6 +127,11 @@ Item {
                     name: "refresh"
                     color: Theme.foregroundOnSurfaceVariant
                 }
+            }
+
+            CurrentMarker {
+                current: eventRow.ListView.isCurrentItem
+                viewFocused: list.activeFocus
             }
         }
 

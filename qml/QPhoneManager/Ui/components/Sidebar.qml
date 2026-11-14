@@ -38,7 +38,7 @@ Pane {
             currentIndex: root.currentIndex
             Accessible.role: Accessible.List
             Accessible.name: qsTr("Sections")
-            ScrollBar.vertical: ScrollBar {}
+            ScrollBar.vertical: ThemedScrollBar {}
 
             delegate: SidebarButton {
                 required property SectionEntry modelData

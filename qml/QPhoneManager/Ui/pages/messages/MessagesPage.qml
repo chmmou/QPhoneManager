@@ -258,26 +258,18 @@ Item {
         title: root.pendingDeleteConversation ? qsTr("Delete the conversation with %1?").arg(root.area.currentTitle) : root.pendingDeleteScheduled ? qsTr("Delete the scheduled message?") : qsTr("Delete %n message(s)?", "", root.pendingDelete.length)
 
         footer: DialogButtonBox {
-            Button {
+            DialogButton {
                 id: confirmDeleteButton
 
                 text: qsTr("Delete")
                 DialogButtonBox.buttonRole: DialogButtonBox.AcceptRole
-
-                FocusRing {
-                    shown: confirmDeleteButton.visualFocus
-                }
             }
 
-            Button {
+            DialogButton {
                 id: cancelDeleteButton
 
                 text: qsTr("Cancel")
                 DialogButtonBox.buttonRole: DialogButtonBox.RejectRole
-
-                FocusRing {
-                    shown: cancelDeleteButton.visualFocus
-                }
             }
         }
 
@@ -310,7 +302,7 @@ Item {
         objectName: "exportMessagesDialog"
         title: root.pendingExportAll ? qsTr("Export all messages") : qsTr("Export the conversation")
         fileMode: FileDialog.SaveFile
-        nameFilters: [qsTr("Table for spreadsheets (*.csv)"), qsTr("Web page (*.html)"), qsTr("Archive file (*.xml)")]
+        nameFilters: [qsTr("CSV table (*.csv)"), qsTr("Web page (*.html)"), qsTr("Archive file (*.xml)")]
         defaultSuffix: exportDialog.selectedNameFilter.index === 2 ? "xml" : exportDialog.selectedNameFilter.index === 1 ? "html" : "csv"
         onAccepted: {
             const format = exportDialog.selectedNameFilter.index === 2 ? MessagesArea.Xml : exportDialog.selectedNameFilter.index === 1 ? MessagesArea.Html : MessagesArea.Csv;

@@ -20,16 +20,12 @@ Dialog {
     title: qsTr("Duplicate contacts")
 
     footer: DialogButtonBox {
-        Button {
+        DialogButton {
             id: closeButton
 
             objectName: "duplicatesCloseButton"
             text: qsTr("Close")
             DialogButtonBox.buttonRole: DialogButtonBox.RejectRole
-
-            FocusRing {
-                shown: closeButton.visualFocus
-            }
         }
     }
 
@@ -61,7 +57,7 @@ Dialog {
             spacing: Theme.gridUnit * 2
             Accessible.role: Accessible.List
             Accessible.name: qsTr("Duplicate contacts")
-            ScrollBar.vertical: ScrollBar {}
+            ScrollBar.vertical: ThemedScrollBar {}
 
             delegate: RowLayout {
                 id: pairRow

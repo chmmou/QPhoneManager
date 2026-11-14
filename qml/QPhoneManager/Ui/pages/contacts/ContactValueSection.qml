@@ -48,7 +48,7 @@ ColumnLayout {
                 Layout.preferredWidth: TypeScale.body * 11
                 spacing: Theme.gridUnit
 
-                ComboBox {
+                ThemedComboBox {
                     id: typeBox
 
                     Layout.fillWidth: true
@@ -63,7 +63,7 @@ ColumnLayout {
                     }
                 }
 
-                TextField {
+                ThemedTextField {
                     Layout.fillWidth: true
                     visible: entryRow.typeIndex === root.entries.customTypeIndex
                     text: entryRow.label
@@ -73,7 +73,7 @@ ColumnLayout {
                 }
             }
 
-            TextField {
+            ThemedTextField {
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignTop
                 visible: !root.isAddress
@@ -90,7 +90,7 @@ ColumnLayout {
                 columnSpacing: Theme.gridUnit * 2
                 rowSpacing: Theme.gridUnit
 
-                TextField {
+                ThemedTextField {
                     Layout.fillWidth: true
                     Layout.columnSpan: 2
                     text: entryRow.street
@@ -99,7 +99,7 @@ ColumnLayout {
                     onTextEdited: root.entries.setText(entryRow.index, "street", text)
                 }
 
-                TextField {
+                ThemedTextField {
                     Layout.preferredWidth: TypeScale.body * 6
                     text: entryRow.postcode
                     placeholderText: qsTr("Postcode")
@@ -107,7 +107,7 @@ ColumnLayout {
                     onTextEdited: root.entries.setText(entryRow.index, "postcode", text)
                 }
 
-                TextField {
+                ThemedTextField {
                     Layout.fillWidth: true
                     text: entryRow.city
                     placeholderText: qsTr("City")
@@ -115,7 +115,7 @@ ColumnLayout {
                     onTextEdited: root.entries.setText(entryRow.index, "city", text)
                 }
 
-                TextField {
+                ThemedTextField {
                     Layout.fillWidth: true
                     text: entryRow.region
                     placeholderText: qsTr("State or region")
@@ -123,7 +123,7 @@ ColumnLayout {
                     onTextEdited: root.entries.setText(entryRow.index, "region", text)
                 }
 
-                TextField {
+                ThemedTextField {
                     Layout.fillWidth: true
                     text: entryRow.country
                     placeholderText: qsTr("Country")
@@ -131,7 +131,7 @@ ColumnLayout {
                     onTextEdited: root.entries.setText(entryRow.index, "country", text)
                 }
 
-                TextField {
+                ThemedTextField {
                     Layout.fillWidth: true
                     Layout.columnSpan: 2
                     text: entryRow.poBox

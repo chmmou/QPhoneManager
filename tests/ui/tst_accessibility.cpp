@@ -27,8 +27,11 @@
 #include <QColor>
 #include <QFile>
 #include <QImage>
+#include <QMetaEnum>
+#include <QMetaProperty>
 #include <QPainter>
 #include <QQmlApplicationEngine>
+#include <QQmlContext>
 #include <QQmlExtensionPlugin>
 #include <QQuickItem>
 #include <QQuickWindow>
@@ -40,6 +43,7 @@
 #include <QTest>
 #include <QTimeZone>
 
+#include <algorithm>
 #include <cmath>
 #include <memory>
 
@@ -124,8 +128,13 @@ QList<qpm::test::FakeSyncObject> organizerObjects()
     task.summary = QStringLiteral("Fenster putzen");
     task.due = QDate(2026, 11, 20);
     task.categories = {QStringLiteral("Haushalt")};
+    qpm::core::codec::CalendarTask late;
+    late.luid = 3;
+    late.summary = QStringLiteral("Rechnung bezahlen");
+    late.due = QDate::currentDate().addDays(-3);
     return {{meeting.luid, qpm::core::codec::encodeEventAsPhoneSendsIt(meeting)},
-            {task.luid, qpm::core::codec::encodeTaskAsPhoneSendsIt(task)}};
+            {task.luid, qpm::core::codec::encodeTaskAsPhoneSendsIt(task)},
+            {late.luid, qpm::core::codec::encodeTaskAsPhoneSendsIt(late)}};
 }
 
 QByteArray exampleNote()
@@ -218,6 +227,31 @@ QColor scrimColor(QQuickItem *root)
     return {};
 }
 
+// The text item below `item` whose text holds `text`, or null.
+QQuickItem *labelWithText(QQuickItem *item, const QString &text)
+{
+    if (item->inherits("QQuickText") && item->property("text").toString().contains(text))
+        return item;
+    const QList<QQuickItem *> children = item->childItems();
+    for (QQuickItem *child : children) {
+        if (QQuickItem *found = labelWithText(child, text))
+            return found;
+    }
+    return nullptr;
+}
+
+// The outline that marks `row` as the current one of its view, or null.
+QQuickItem *currentMarkerOf(const QQuickItem *row)
+{
+    const QList<QQuickItem *> children = row->childItems();
+    for (QQuickItem *child : children) {
+        if (QString::fromLatin1(child->metaObject()->className())
+                .startsWith(QLatin1StringView("CurrentMarker")))
+            return child;
+    }
+    return nullptr;
+}
+
 // A control shows its focus ring while its focus came from the keyboard; any
 // other item shows the ring placed in it while it has the focus.
 bool focusIsShown(const QQuickItem *item)
@@ -229,6 +263,12 @@ bool focusIsShown(const QQuickItem *item)
     // An outlined text field draws its border in the accent colour while it has the focus.
     if (item->inherits("QQuickTextField") || item->inherits("QQuickTextArea"))
         return item->hasActiveFocus();
+    // The current row of a list holds the focus of the list and shows it by a
+    // strong outline inside it.
+    if (const QQuickItem *marker = currentMarkerOf(item); marker && marker->isVisible() &&
+        marker->property("border").value<QObject *>()->property("width").toReal() >= 2) {
+        return true;
+    }
     const QList<QQuickItem *> children = item->childItems();
     for (const QQuickItem *child : children) {
         const QString type = QString::fromLatin1(child->metaObject()->className());
@@ -236,6 +276,66 @@ bool focusIsShown(const QQuickItem *item)
             return true;
     }
     return false;
+}
+
+// The focus ring of the program, placed in `item`, is shown.
+bool ringIsShown(const QQuickItem *item)
+{
+    const QList<QQuickItem *> children = item->childItems();
+    for (const QQuickItem *child : children) {
+        const QString type = QString::fromLatin1(child->metaObject()->className());
+        if (type.startsWith(QLatin1StringView("FocusRing")) && child->isVisible())
+            return true;
+    }
+    return false;
+}
+
+// The relative luminance of WCAG 2.2.
+double luminance(const QColor &color)
+{
+    const auto linear = [](double value) {
+        return value <= 0.03928 ? value / 12.92 : std::pow((value + 0.055) / 1.055, 2.4);
+    };
+    return 0.2126 * linear(color.redF()) + 0.7152 * linear(color.greenF()) +
+           0.0722 * linear(color.blueF());
+}
+
+// The contrast ratio of WCAG 2.2 between `foreground`, which may be
+// translucent, and the opaque `background` it is drawn on.
+double contrast(const QColor &foreground, const QColor &background)
+{
+    const double alpha = foreground.alphaF();
+    const QColor drawn = QColor::fromRgbF(
+        float(foreground.redF() * alpha + background.redF() * (1 - alpha)),
+        float(foreground.greenF() * alpha + background.greenF() * (1 - alpha)),
+        float(foreground.blueF() * alpha + background.blueF() * (1 - alpha)));
+    const double a = luminance(drawn);
+    const double b = luminance(background);
+    return (std::max(a, b) + 0.05) / (std::min(a, b) + 0.05);
+}
+
+QColor colorOf(const QObject *object, const char *property)
+{
+    return object ? object->property(property).value<QColor>() : QColor();
+}
+
+QString ratioText(const QString &what, const QColor &foreground, const QColor &background)
+{
+    return QStringLiteral("%1: %2 on %3 is %4:1")
+        .arg(what, foreground.name(QColor::HexArgb), background.name(QColor::HexArgb))
+        .arg(contrast(foreground, background), 0, 'f', 2);
+}
+
+// The visible items below `item` whose class is `className`.
+QList<QQuickItem *> itemsOfClass(QQuickItem *item, const char *className)
+{
+    QList<QQuickItem *> found;
+    if (item->isVisible() && item->inherits(className))
+        found.append(item);
+    const QList<QQuickItem *> children = item->childItems();
+    for (QQuickItem *child : children)
+        found.append(itemsOfClass(child, className));
+    return found;
 }
 
 QString describe(const QQuickItem *item)
@@ -329,6 +429,25 @@ private Q_SLOTS:
     void helpFocusChainReachesEveryControlOnce();
     void helpIsUsedByKeyboard();
     void aboutDialogShowsItsFocusAndNamesItsControls();
+    void controlsKeepTheirContrastInBothSchemes_data();
+    void controlsKeepTheirContrastInBothSchemes();
+    void primaryButtonsKeepTheirLabelContrast_data();
+    void primaryButtonsKeepTheirLabelContrast();
+    void dialogButtonsShowTheFocusRing_data();
+    void dialogButtonsShowTheFocusRing();
+    void calendarsDialogStartsOnACalendar();
+    void overdueTaskSaysSoInWords();
+    void notificationCountStaysUnsaidWithoutAccess();
+    void formsTakeTheFocusWhenOpenedOnPurpose_data();
+    void formsTakeTheFocusWhenOpenedOnPurpose();
+    void currentRowIsMarkedBeyondItsFill();
+    void screenSwitchesShowTheirStateByShape();
+    void calendarDaysAndMarkersKeepTheirContrast();
+    void menusStandOutFromThePage();
+    void cutContentShowsItsScrollBar_data();
+    void cutContentShowsItsScrollBar();
+    void hiddenFileViewNeverKeepsTheFocus();
+    void emptyFolderKeepsAVisibleFocus();
 
 private:
     [[nodiscard]] QList<QQuickItem *> controls() const;
@@ -378,6 +497,10 @@ void TestAccessibility::initTestCase()
 
 void TestAccessibility::init()
 {
+    // A binding loop in a view of the application leaves its size to the order
+    // of evaluation.
+    QTest::failOnWarning(
+        QRegularExpression(QStringLiteral("QPhoneManager/Ui/.*Binding loop detected")));
     m_engine = std::make_unique<QQmlApplicationEngine>();
     m_engine->loadFromModule("QPhoneManager.Ui", "Main");
     QCOMPARE(m_engine->rootObjects().size(), 1);
@@ -2504,6 +2627,695 @@ void TestAccessibility::aboutDialogShowsItsFocusAndNamesItsControls()
         QMetaObject::invokeMethod(popup, "close");
         QTRY_VERIFY(!popup->property("visible").toBool());
     }
+}
+
+void TestAccessibility::controlsKeepTheirContrastInBothSchemes_data()
+{
+    QTest::addColumn<bool>("dark");
+
+    QTest::newRow("light") << false;
+    QTest::newRow("dark") << true;
+}
+
+// Text needs 4.5:1, the outline of a field 3:1. The colours are those the
+// controls actually draw with; several came from the style rather than the theme.
+void TestAccessibility::controlsKeepTheirContrastInBothSchemes()
+{
+    QFETCH(bool, dark);
+    QVERIFY(showOrganizer(6));
+    Settings *shared = settings();
+    QVERIFY(shared);
+    shared->setColorScheme(dark ? Settings::ColorScheme::Dark : Settings::ColorScheme::Light);
+    auto *theme = m_engine->singletonInstance<QObject *>("QPhoneManager.Ui", "Theme");
+    QVERIFY(theme);
+    QTRY_COMPARE(theme->property("dark").toBool(), dark);
+    const QColor surface = colorOf(theme, "surface");
+    QQuickItem *page = findItem(m_window->contentItem(), QStringLiteral("notesPage"));
+    QVERIFY(page);
+    QVERIFY(QMetaObject::invokeMethod(page, "startNew"));
+    QTRY_VERIFY(findItem(m_window->contentItem(), QStringLiteral("noteBodyArea")));
+    findItem(m_window->contentItem(), QStringLiteral("noteBodyArea"))
+        ->setProperty("text", QStringLiteral("Milch"));
+
+    QQuickItem *save = findItem(m_window->contentItem(), QStringLiteral("saveNoteButton"));
+    QVERIFY(save);
+    QTRY_VERIFY(save->isEnabled());
+    const QColor label = colorOf(save->property("contentItem").value<QQuickItem *>(), "color");
+    const QColor fill = colorOf(save->property("background").value<QQuickItem *>(), "color");
+    QVERIFY2(contrast(label, fill) >= 4.5, qPrintable(ratioText(QStringLiteral("save"), label, fill)));
+
+    auto *header = m_window->property("header").value<QQuickItem *>();
+    QVERIFY(header);
+    const QColor headerColor = colorOf(header->property("background").value<QQuickItem *>(), "color");
+    for (const QString &name : {QStringLiteral("noteNewCategoryField"),
+                                QStringLiteral("noteBodyArea"), QStringLiteral("searchField")}) {
+        QQuickItem *field = findItem(m_window->contentItem(), name);
+        QVERIFY2(field && field->isEnabled(), qPrintable(name));
+        const QColor backdrop = name == QLatin1StringView("searchField") ? headerColor : surface;
+        const QColor placeholder = colorOf(field, "placeholderTextColor");
+        QVERIFY2(contrast(placeholder, backdrop) >= 4.5,
+                 qPrintable(ratioText(name + QStringLiteral(" label"), placeholder, backdrop)));
+        const QColor outline =
+            colorOf(field->property("background").value<QQuickItem *>(), "outlineColor");
+        QVERIFY2(contrast(outline, backdrop) >= 3.0,
+                 qPrintable(ratioText(name + QStringLiteral(" outline"), outline, backdrop)));
+        const QColor selected = colorOf(field, "selectedTextColor");
+        const QColor selection = colorOf(field, "selectionColor");
+        QVERIFY2(contrast(selected, selection) >= 4.5,
+                 qPrintable(ratioText(name + QStringLiteral(" selection"), selected, selection)));
+    }
+
+    QObject *popup = openDialog(QStringLiteral("noteCategoriesDialog"));
+    QVERIFY(popup);
+    const QColor dialogColor =
+        colorOf(popup->property("background").value<QQuickItem *>(), "color");
+    auto *footer = popup->property("footer").value<QQuickItem *>();
+    QVERIFY(footer);
+    const QList<QQuickItem *> buttons = itemsOfClass(footer, "QQuickAbstractButton");
+    QVERIFY(!buttons.isEmpty());
+    for (QQuickItem *button : buttons) {
+        const QColor text = colorOf(button->property("contentItem").value<QQuickItem *>(), "color");
+        QColor behind = colorOf(button->property("background").value<QQuickItem *>(), "color");
+        behind = behind.alpha() == 0 ? dialogColor : behind;
+        QVERIFY2(contrast(text, behind) >= 4.5,
+                 qPrintable(ratioText(button->property("text").toString(), text, behind)));
+    }
+    QMetaObject::invokeMethod(popup, "close");
+    QTRY_VERIFY(!popup->property("visible").toBool());
+}
+
+void TestAccessibility::primaryButtonsKeepTheirLabelContrast_data()
+{
+    QTest::addColumn<bool>("dark");
+    QTest::addColumn<bool>("switched");
+
+    QTest::newRow("light, as created") << false << false;
+    QTest::newRow("light, after dark") << false << true;
+    QTest::newRow("dark") << true << false;
+    QTest::newRow("dark, after light") << true << true;
+}
+
+// The label of a filled main button needs 4.5:1 on its fill in every window.
+// After a change from the dark to the light scheme, the answer button of the
+// call window took the label colour of the window.
+void TestAccessibility::primaryButtonsKeepTheirLabelContrast()
+{
+    QFETCH(bool, dark);
+    QFETCH(bool, switched);
+    auto *theme = m_engine->singletonInstance<QObject *>("QPhoneManager.Ui", "Theme");
+    QVERIFY(theme);
+    // The first light row looks at the windows as they were made, without a change of scheme.
+    QVERIFY2(!theme->property("dark").toBool(), "the system scheme of the test run is dark");
+    const auto useScheme = [this, theme](bool wanted) {
+        settings()->setColorScheme(wanted ? Settings::ColorScheme::Dark
+                                          : Settings::ColorScheme::Light);
+        return QTest::qWaitFor([theme, wanted]() { return theme->property("dark").toBool() == wanted; });
+    };
+    if (switched)
+        QVERIFY(useScheme(!dark));
+    if (switched || dark)
+        QVERIFY(useScheme(dark));
+    const auto verifyLabel = [](QQuickItem *button, const QString &what) {
+        QVERIFY2(button && button->isEnabled(), qPrintable(what));
+        const QColor label = colorOf(button->property("contentItem").value<QQuickItem *>(), "color");
+        const QColor fill = colorOf(button->property("background").value<QQuickItem *>(), "color");
+        QVERIFY2(contrast(label, fill) >= 4.5, qPrintable(ratioText(what, label, fill)));
+    };
+
+    QVERIFY(showOrganizer(4));
+    auto *callWindow = m_window->findChild<QQuickWindow *>(QStringLiteral("callWindow"));
+    QVERIFY(callWindow);
+    m_phone->setCallState(6, QStringLiteral("+4930999999"));
+    QTRY_VERIFY_WITH_TIMEOUT(callWindow->isVisible(), phoneTimeoutMs);
+    QQuickItem *answer = findItem(callWindow->contentItem(), QStringLiteral("callAnswerButton"));
+    QTRY_VERIFY(answer && answer->isEnabled());
+    verifyLabel(answer, QStringLiteral("answer"));
+    if (QTest::currentTestFailed())
+        return;
+    auto *controller =
+        m_engine->singletonInstance<AppController *>("QPhoneManager.Ui", "AppController");
+    QVERIFY(controller->call()->hangUp());
+    QTRY_VERIFY_WITH_TIMEOUT(!callWindow->isVisible(), phoneTimeoutMs);
+
+    QObject *alarms = openDialog(QStringLiteral("alarmsDialog"));
+    QVERIFY(alarms);
+    QTRY_VERIFY(findItem(m_window->contentItem(), QStringLiteral("alarmTimeField")));
+    findItem(m_window->contentItem(), QStringLiteral("alarmTimeField"))
+        ->setProperty("text", QStringLiteral("07:15"));
+    QQuickItem *saveAlarm = findItem(m_window->contentItem(), QStringLiteral("saveAlarmButton"));
+    QTRY_VERIFY(saveAlarm && saveAlarm->isEnabled());
+    verifyLabel(saveAlarm, QStringLiteral("save alarm"));
+    if (QTest::currentTestFailed())
+        return;
+    QMetaObject::invokeMethod(alarms, "close");
+    QTRY_VERIFY(!alarms->property("visible").toBool());
+
+    m_window->setProperty("currentSection", 5);
+    QTRY_VERIFY(findItem(m_window->contentItem(), QStringLiteral("tasksPage")) &&
+                findItem(m_window->contentItem(), QStringLiteral("tasksPage"))->isVisible());
+    QObject *categories = openDialog(QStringLiteral("taskCategoriesDialog"));
+    QVERIFY(categories);
+    QQuickItem *name = findItem(m_window->contentItem(), QStringLiteral("categoryNameField"));
+    QVERIFY(name);
+    name->setProperty("text", QStringLiteral("Garten"));
+    QQuickItem *add = findItem(m_window->contentItem(), QStringLiteral("addCategoryButton"));
+    QTRY_VERIFY(add && add->isEnabled());
+    verifyLabel(add, QStringLiteral("add category"));
+    QMetaObject::invokeMethod(categories, "close");
+    QTRY_VERIFY(!categories->property("visible").toBool());
+}
+
+void TestAccessibility::dialogButtonsShowTheFocusRing_data()
+{
+    QTest::addColumn<QString>("dialog");
+    QTest::addColumn<QString>("tabs");
+    QTest::addColumn<QString>("focused");
+
+    QTest::newRow("QR code") << QStringLiteral("qrDialog") << QString()
+                             << QStringLiteral("qrCloseButton");
+    QTest::newRow("phones") << QStringLiteral("profilesDialog") << QString()
+                            << QStringLiteral("profilesCloseButton");
+    QTest::newRow("remove a phone") << QStringLiteral("profilesDialog/removeDialog") << QString()
+                                    << QStringLiteral("cancelRemoveProfileButton");
+    QTest::newRow("PIN") << QStringLiteral("pinDialog") << QString() << QStringLiteral("pinField");
+    QTest::newRow("settings") << QStringLiteral("settingsDialog") << QStringLiteral("settingsTabs")
+                              << QString();
+}
+
+// The ripple of the style is drawn in a corner of the window by the software
+// renderer, so the focus ring of the program is the cue that stays. A dialog
+// opening with the focus on a button shows the ring at once, also the second time.
+void TestAccessibility::dialogButtonsShowTheFocusRing()
+{
+    QFETCH(QString, dialog);
+    QFETCH(QString, tabs);
+    QFETCH(QString, focused);
+    m_window->requestActivate();
+    QVERIFY(QTest::qWaitForWindowActive(m_window));
+    const QList<QQuickItem *> before = controls();
+
+    for (int opening = 1; opening <= 2; ++opening) {
+        QObject *popup = nullptr;
+        QObject *outer = nullptr;
+        if (dialog.contains(u'/')) {
+            // A dialog inside another one opens over it and is reached by its id
+            // in the context of the other one's content.
+            outer = openDialog(dialog.section(u'/', 0, 0));
+            QVERIFY(outer);
+            auto *content = outer->property("contentItem").value<QQuickItem *>();
+            QVERIFY(content && !content->childItems().isEmpty());
+            QQmlContext *context = qmlContext(content->childItems().constFirst());
+            QVERIFY(context);
+            popup = context->objectForName(dialog.section(u'/', 1));
+            QVERIFY(popup);
+            QMetaObject::invokeMethod(popup, "open");
+            QTRY_VERIFY(popup->property("opened").toBool());
+        } else {
+            popup = openDialog(dialog);
+        }
+        QVERIFY(popup);
+        QQuickItem *focusItem = m_window->activeFocusItem();
+        QVERIFY(focusItem);
+        if (!focused.isEmpty()) {
+            QCOMPARE(focusItem->objectName(), focused);
+            QVERIFY2(focusIsShown(focusItem),
+                     qPrintable(QStringLiteral("opening %1: %2").arg(opening).arg(describe(focusItem))));
+        }
+        if (focusItem->inherits("QQuickAbstractButton")) {
+            QVERIFY2(ringIsShown(focusItem),
+                     qPrintable(QStringLiteral("opening %1: %2").arg(opening).arg(describe(focusItem))));
+        }
+        QQuickItem *tabBar = tabs.isEmpty() ? nullptr : findItem(m_window->contentItem(), tabs);
+        const int pages = tabBar ? tabBar->property("count").toInt() : 1;
+        for (int page = 0; page < pages; ++page) {
+            if (tabBar)
+                tabBar->setProperty("currentIndex", page);
+            QList<QQuickItem *> found = controls();
+            found.removeIf([&before](QQuickItem *item) { return before.contains(item); });
+            for (QQuickItem *control : std::as_const(found)) {
+                if (!control->inherits("QQuickAbstractButton") || !control->isEnabled())
+                    continue;
+                control->forceActiveFocus(Qt::TabFocusReason);
+                QTRY_VERIFY2(control->hasActiveFocus(), qPrintable(describe(control)));
+                QVERIFY2(ringIsShown(control), qPrintable(describe(control)));
+            }
+        }
+        if (tabBar)
+            tabBar->setProperty("currentIndex", 0);
+        QMetaObject::invokeMethod(popup, "close");
+        QTRY_VERIFY(!popup->property("visible").toBool());
+        if (outer) {
+            QMetaObject::invokeMethod(outer, "close");
+            QTRY_VERIFY(!outer->property("visible").toBool());
+        }
+    }
+}
+
+// Space and Enter act on the current calendar; the list used to open without one.
+void TestAccessibility::calendarsDialogStartsOnACalendar()
+{
+    QVERIFY(showOrganizer(4));
+    m_window->requestActivate();
+    QVERIFY(QTest::qWaitForWindowActive(m_window));
+    auto *controller =
+        m_engine->singletonInstance<AppController *>("QPhoneManager.Ui", "AppController");
+    qpm::ui::CalendarArea *area = controller->calendar();
+
+    for (int opening = 1; opening <= 2; ++opening) {
+        QObject *popup = openDialog(QStringLiteral("calendarsDialog"));
+        QVERIFY(popup);
+        QQuickItem *list = findItem(m_window->contentItem(), QStringLiteral("calendarChoiceList"));
+        QVERIFY(list);
+        QTRY_VERIFY(list->hasActiveFocus());
+        QCOMPARE(list->property("currentIndex").toInt(), 0);
+        const bool chosen = area->calendars()->isSelected(0);
+        QTest::keyClick(m_window, Qt::Key_Space);
+        QCOMPARE(area->calendars()->isSelected(0), !chosen);
+        // Closing without applying reads the calendars anew.
+        QMetaObject::invokeMethod(popup, "reject");
+        QTRY_VERIFY(!popup->property("visible").toBool());
+        QCOMPARE(area->calendars()->isSelected(0), chosen);
+    }
+}
+
+// The red colour of an overdue task is not the only sign of it.
+void TestAccessibility::overdueTaskSaysSoInWords()
+{
+    QVERIFY(showOrganizer(5));
+    QQuickItem *list = findItem(m_window->contentItem(), QStringLiteral("taskList"));
+    QVERIFY(list);
+    QQuickItem *late = nullptr;
+    QQuickItem *onTime = nullptr;
+    QTRY_VERIFY([&]() {
+        const QList<QQuickItem *> labels = itemsOfClass(list, "QQuickText");
+        for (QQuickItem *label : labels) {
+            if (label->property("text").toString() == QLatin1StringView("Rechnung bezahlen"))
+                late = label;
+            else if (label->property("text").toString() == QLatin1StringView("Fenster putzen"))
+                onTime = label;
+        }
+        return late && onTime;
+    }());
+    const auto rowOf = [](QQuickItem *item) {
+        while (item) {
+            QAccessibleInterface *accessible = QAccessible::queryAccessibleInterface(item);
+            if (accessible && accessible->role() == QAccessible::ListItem)
+                return item;
+            item = item->parentItem();
+        }
+        return item;
+    };
+    const auto dueText = [](QQuickItem *row) {
+        QQuickItem *due = findItem(row, QStringLiteral("taskDueText"));
+        return due ? due->property("text").toString() : QString();
+    };
+    QQuickItem *lateRow = rowOf(late);
+    QQuickItem *onTimeRow = rowOf(onTime);
+    QVERIFY(lateRow && onTimeRow);
+    // One sentence instead of fragments: "Overdue since <date>" takes the place of "Due <date>".
+    QVERIFY2(dueText(lateRow).startsWith(QStringLiteral("Overdue since ")),
+             qPrintable(dueText(lateRow)));
+    QVERIFY2(!dueText(lateRow).contains(QStringLiteral("Due ")), qPrintable(dueText(lateRow)));
+    QVERIFY2(dueText(onTimeRow).startsWith(QStringLiteral("Due ")), qPrintable(dueText(onTimeRow)));
+    const QString description =
+        QAccessible::queryAccessibleInterface(lateRow)->text(QAccessible::Description);
+    QVERIFY2(description.startsWith(QStringLiteral("Overdue since ")), qPrintable(description));
+}
+
+// Without the access, the phone reports no notifications; that is not their number.
+void TestAccessibility::notificationCountStaysUnsaidWithoutAccess()
+{
+    QVERIFY(showNotifications());
+    QQuickItem *count = findItem(m_window->contentItem(), QStringLiteral("notificationCount"));
+    QVERIFY(count);
+    QVERIFY(count->property("text").toString().contains(u'3'));
+    auto *controller =
+        m_engine->singletonInstance<AppController *>("QPhoneManager.Ui", "AppController");
+    m_phone->config().notificationAccess = qpm::test::FakePhoneConfig::NotificationAccess::Disabled;
+    QVERIFY(controller->notifications()->refresh());
+    QTRY_VERIFY_WITH_TIMEOUT(controller->notifications()->isAccessMissing(), phoneTimeoutMs);
+    QCOMPARE(count->property("text").toString(), QString());
+}
+
+void TestAccessibility::formsTakeTheFocusWhenOpenedOnPurpose_data()
+{
+    QTest::addColumn<int>("section");
+    QTest::addColumn<QString>("pageName");
+    QTest::addColumn<QString>("listName");
+    QTest::addColumn<QString>("fieldName");
+
+    QTest::newRow("task") << 5 << QStringLiteral("tasksPage") << QStringLiteral("taskList")
+                          << QStringLiteral("taskSummaryField");
+    QTest::newRow("note") << 6 << QStringLiteral("notesPage") << QStringLiteral("noteList")
+                          << QStringLiteral("noteBodyArea");
+}
+
+// A new or opened task or note puts the focus into its first field; moving
+// through the list shows the form as well and leaves the focus in the list.
+void TestAccessibility::formsTakeTheFocusWhenOpenedOnPurpose()
+{
+    QFETCH(int, section);
+    QFETCH(QString, pageName);
+    QFETCH(QString, listName);
+    QFETCH(QString, fieldName);
+    QVERIFY(showOrganizer(section));
+    m_window->requestActivate();
+    QVERIFY(QTest::qWaitForWindowActive(m_window));
+    QQuickItem *page = findItem(m_window->contentItem(), pageName);
+    QVERIFY(page);
+    const auto focusedName = [this]() {
+        const QQuickItem *focused = m_window->activeFocusItem();
+        return focused ? focused->objectName() : QString();
+    };
+
+    QVERIFY(QMetaObject::invokeMethod(page, "startNew"));
+    QTRY_COMPARE(focusedName(), fieldName);
+
+    page->setProperty("editing", false);
+    QQuickItem *list = findItem(m_window->contentItem(), listName);
+    QVERIFY(list);
+    auto *area = page->property("area").value<QObject *>();
+    QVERIFY(area);
+    area->setProperty("currentLuid", 0);
+    QTRY_COMPARE(list->property("currentIndex").toInt(), -1);
+    list->forceActiveFocus(Qt::TabFocusReason);
+    QTRY_VERIFY(list->hasActiveFocus());
+    QTest::keyClick(m_window, Qt::Key_Down);
+    QTRY_VERIFY(page->property("editing").toBool());
+    QVERIFY(list->hasActiveFocus());
+
+    QVERIFY(QMetaObject::invokeMethod(page, "startEdit"));
+    QTRY_COMPARE(focusedName(), fieldName);
+}
+
+// The fill of the current row is too faint for 3:1. The row always carries an
+// outline: a thin one in the outline colour, a strong one in the primary colour
+// while the list has the focus, set in from the focus ring of the list so that
+// the ring never covers it. The sidebar marks the section shown.
+void TestAccessibility::currentRowIsMarkedBeyondItsFill()
+{
+    QVERIFY(showContacts());
+    m_window->requestActivate();
+    QVERIFY(QTest::qWaitForWindowActive(m_window));
+    auto *theme = m_engine->singletonInstance<QObject *>("QPhoneManager.Ui", "Theme");
+    QVERIFY(theme);
+    const QColor surface = colorOf(theme, "surface");
+    QQuickItem *list = findItem(m_window->contentItem(), QStringLiteral("contactList"));
+    QVERIFY(list);
+    list->setProperty("currentIndex", 0);
+    list->forceActiveFocus(Qt::TabFocusReason);
+    QTRY_VERIFY(list->hasActiveFocus());
+    auto *row = list->property("currentItem").value<QQuickItem *>();
+    QVERIFY(row);
+    const QColor fill = colorOf(row, "color");
+    QQuickItem *marker = currentMarkerOf(row);
+    QVERIFY(marker && marker->isVisible());
+    auto *border = marker->property("border").value<QObject *>();
+    QVERIFY(border);
+    QCOMPARE(border->property("width").toReal(), 2.0);
+    QVERIFY2(contrast(colorOf(border, "color"), fill) >= 3.0,
+             qPrintable(ratioText(QStringLiteral("focused row"), colorOf(border, "color"), fill)));
+    // The ring of the list takes its outer two pixels; the outline of the first row lies inside.
+    const QRectF inList = marker->mapRectToItem(list, QRectF(0, 0, marker->width(), marker->height()));
+    QVERIFY2(inList.left() >= 3 && inList.top() >= 3 && inList.right() <= list->width() - 3,
+             qPrintable(QStringLiteral("outline at %1,%2 to %3 in a list %4 wide")
+                            .arg(inList.left())
+                            .arg(inList.top())
+                            .arg(inList.right())
+                            .arg(list->width())));
+
+    QQuickItem *button = findItem(m_window->contentItem(), QStringLiteral("newContactButton"));
+    QVERIFY(button);
+    button->forceActiveFocus(Qt::TabFocusReason);
+    QTRY_VERIFY(!list->hasActiveFocus());
+    QVERIFY(marker->isVisible());
+    QCOMPARE(border->property("width").toReal(), 1.0);
+    QVERIFY2(contrast(colorOf(border, "color"), fill) >= 3.0,
+             qPrintable(ratioText(QStringLiteral("row"), colorOf(border, "color"), fill)));
+
+    QQuickItem *section = findItem(m_window->contentItem(), QStringLiteral("section-contacts"));
+    QVERIFY(section && section->property("highlighted").toBool());
+    QQuickItem *bar = findItem(section, QStringLiteral("currentSectionMarker"));
+    QVERIFY(bar && bar->isVisible());
+    QVERIFY2(contrast(colorOf(bar, "color"), surface) >= 3.0,
+             qPrintable(ratioText(QStringLiteral("sidebar"), colorOf(bar, "color"), surface)));
+    QQuickItem *other = findItem(m_window->contentItem(), QStringLiteral("section-calls"));
+    QVERIFY(other);
+    QVERIFY(!findItem(other, QStringLiteral("currentSectionMarker"))->isVisible());
+}
+
+// A switched-on toggle shows it by an outline, not by the icon colour alone.
+void TestAccessibility::screenSwitchesShowTheirStateByShape()
+{
+    QVERIFY(showScreen(true));
+    QQuickItem *fit = findItem(m_window->contentItem(), QStringLiteral("screenFitButton"));
+    QQuickItem *keyboard = findItem(m_window->contentItem(), QStringLiteral("screenKeyboardButton"));
+    QVERIFY(fit && keyboard);
+    QQuickItem *fitMarker = findItem(fit, QStringLiteral("fitCheckedMarker"));
+    QQuickItem *keyboardMarker = findItem(keyboard, QStringLiteral("keyboardCheckedMarker"));
+    QVERIFY(fitMarker && keyboardMarker);
+    QVERIFY(fit->property("checked").toBool());
+    QVERIFY(fitMarker->isVisible());
+    QVERIFY(!keyboard->property("checked").toBool());
+    QVERIFY(!keyboardMarker->isVisible());
+    QVERIFY(QMetaObject::invokeMethod(fit, "toggle"));
+    QVERIFY(!fit->property("checked").toBool());
+    QVERIFY(!fitMarker->isVisible());
+    auto *theme = m_engine->singletonInstance<QObject *>("QPhoneManager.Ui", "Theme");
+    QVERIFY(theme);
+    auto *border = fitMarker->property("border").value<QObject *>();
+    QVERIFY(border && border->property("width").toReal() >= 1);
+    QVERIFY(contrast(colorOf(border, "color"), colorOf(theme, "surface")) >= 3.0);
+}
+
+// The days of the next and last month and the dots of the calendars of an
+// event keep their contrast; the dots carry the colour the user chose.
+void TestAccessibility::calendarDaysAndMarkersKeepTheirContrast()
+{
+    QVERIFY(showOrganizer(4));
+    auto *theme = m_engine->singletonInstance<QObject *>("QPhoneManager.Ui", "Theme");
+    QVERIFY(theme);
+    const QColor surface = colorOf(theme, "surface");
+    QQuickItem *grid = findItem(m_window->contentItem(), QStringLiteral("calendarGrid"));
+    QVERIFY(grid);
+    int outside = 0;
+    int monthNames = 0;
+    int dots = 0;
+    const auto dayCells = [grid]() {
+        QList<QQuickItem *> days = itemsOfClass(grid, "QQuickRectangle");
+        days.removeIf([](const QQuickItem *cell) {
+            return cell->metaObject()->indexOfProperty("inPeriod") < 0;
+        });
+        return days;
+    };
+    // A month has four weeks at least.
+    QTRY_VERIFY(dayCells().size() >= 28);
+    const QList<QQuickItem *> cells = itemsOfClass(grid, "QQuickRectangle");
+    for (QQuickItem *cell : cells) {
+        if (cell->metaObject()->indexOfProperty("inPeriod") >= 0 &&
+            !cell->property("inPeriod").toBool()) {
+            const QString day = cell->property("dayNumber").toString();
+            const QDate date = cell->property("date").toDate();
+            // The first day shown of another month says which month it is.
+            const bool named = cell->property("index").toInt() == 0 || day == u'1';
+            if (named) {
+                ++monthNames;
+                QVERIFY2(labelWithText(cell, QLocale().toString(date, QStringLiteral("MMM"))),
+                         qPrintable(date.toString(Qt::ISODate)));
+                const QString name =
+                    QAccessible::queryAccessibleInterface(cell)->text(QAccessible::Name);
+                QVERIFY2(name.contains(QLocale().monthName(date.month())), qPrintable(name));
+            }
+            const QList<QQuickItem *> labels = itemsOfClass(cell, "QQuickText");
+            for (QQuickItem *label : labels) {
+                const QString text = label->property("text").toString();
+                if (named ? !text.contains(day) : text != day)
+                    continue;
+                ++outside;
+                QCOMPARE(label->opacity(), 1.0);
+                QVERIFY2(contrast(colorOf(label, "color"), surface) >= 4.5,
+                         qPrintable(ratioText(day, colorOf(label, "color"), surface)));
+            }
+        }
+        if (qFuzzyCompare(cell->width(), 8.0) && qFuzzyCompare(cell->height(), 8.0) &&
+            colorOf(cell, "color").alpha() > 0) {
+            ++dots;
+            auto *border = cell->property("border").value<QObject *>();
+            QVERIFY(border && border->property("width").toReal() >= 1);
+            QVERIFY2(contrast(colorOf(border, "color"), surface) >= 3.0,
+                     qPrintable(ratioText(QStringLiteral("dot"), colorOf(border, "color"), surface)));
+        }
+    }
+    QVERIFY(outside > 0);
+    QVERIFY(monthNames > 0);
+    QVERIFY(dots > 0);
+}
+
+// A menu has the colour of the page under it; its drawn edge sets it apart.
+void TestAccessibility::menusStandOutFromThePage()
+{
+    QVERIFY(showApps());
+    QQuickItem *page = findItem(m_window->contentItem(), QStringLiteral("appsPage"));
+    QQuickItem *list = findItem(m_window->contentItem(), QStringLiteral("appList"));
+    QVERIFY(page && list);
+    list->setProperty("currentIndex", 0);
+    QVERIFY(QMetaObject::invokeMethod(page, "showMenu"));
+    QObject *menu = page->findChild<QObject *>(QStringLiteral("appMenu"));
+    QVERIFY(menu);
+    QTRY_VERIFY(menu->property("opened").toBool());
+    auto *background = menu->property("background").value<QQuickItem *>();
+    QVERIFY(background);
+    // The left edge, halfway down, against the page just outside it.
+    const QPointF edge = background->mapToScene(QPointF(0, background->height() / 2));
+    const QImage shot = m_window->grabWindow();
+    const QColor outside = shot.pixelColor(edge.toPoint() - QPoint(3, 0));
+    double best = 0;
+    for (int dx = -1; dx <= 2; ++dx)
+        best = std::max(best, contrast(shot.pixelColor(edge.toPoint() + QPoint(dx, 0)), outside));
+    QVERIFY2(best >= 3.0, qPrintable(QStringLiteral("menu edge %1:1").arg(best, 0, 'f', 2)));
+    QMetaObject::invokeMethod(menu, "close");
+    QTRY_VERIFY(!menu->property("visible").toBool());
+}
+
+void TestAccessibility::cutContentShowsItsScrollBar_data()
+{
+    QTest::addColumn<QString>("view");
+    QTest::addColumn<QString>("scroller");
+
+    QTest::newRow("settings") << QStringLiteral("settingsDialog")
+                              << QStringLiteral("settingsConnectionPage");
+    QTest::newRow("task form") << QStringLiteral("tasksPage") << QStringLiteral("taskForm");
+    QTest::newRow("appointment form") << QStringLiteral("calendarPage") << QStringLiteral("eventForm");
+    QTest::newRow("note form") << QStringLiteral("notesPage") << QStringLiteral("noteBodyScroll");
+    QTest::newRow("contact form") << QStringLiteral("contactsPage") << QStringLiteral("contactForm");
+}
+
+// Content cut off at the lower edge shows the scroll bar without a scroll
+// first; the style otherwise shows it only while scrolling. Its thumb stands
+// out from the window, and the content ends where the bar begins.
+void TestAccessibility::cutContentShowsItsScrollBar()
+{
+    QFETCH(QString, view);
+    QFETCH(QString, scroller);
+    m_window->resize(m_window->width(), m_window->minimumHeight());
+    QTRY_COMPARE(m_window->height(), m_window->minimumHeight());
+    QObject *popup = nullptr;
+    if (view == QLatin1StringView("settingsDialog")) {
+        popup = openDialog(view);
+        QVERIFY(popup);
+    } else {
+        if (view == QLatin1StringView("contactsPage"))
+            QVERIFY(showContacts());
+        else
+            QVERIFY(showOrganizer(view == QLatin1StringView("calendarPage") ? 4
+                                  : view == QLatin1StringView("tasksPage")  ? 5
+                                                                           : 6));
+        QQuickItem *page = findItem(m_window->contentItem(), view);
+        QVERIFY(page);
+        QVERIFY(QMetaObject::invokeMethod(page, "startNew"));
+        QTRY_VERIFY(findItem(m_window->contentItem(), scroller));
+        if (view == QLatin1StringView("notesPage")) {
+            QStringList lines;
+            for (int line = 1; line <= 60; ++line)
+                lines.append(QStringLiteral("Zeile %1").arg(line));
+            findItem(m_window->contentItem(), QStringLiteral("noteBodyArea"))
+                ->setProperty("text", lines.join(u'\n'));
+        }
+    }
+    QQuickItem *page = findItem(m_window->contentItem(), scroller);
+    QVERIFY(page);
+    QTRY_VERIFY2(page->property("contentHeight").toReal() > page->property("availableHeight").toReal(),
+                 "the view fits; nothing is cut off");
+    QQuickItem *bar = nullptr;
+    const QList<QQuickItem *> bars = itemsOfClass(page, "QQuickScrollBar");
+    for (QQuickItem *candidate : bars) {
+        if (candidate->property("orientation").toInt() == Qt::Vertical)
+            bar = candidate;
+    }
+    QVERIFY(bar);
+    const QMetaProperty policy =
+        bar->metaObject()->property(bar->metaObject()->indexOfProperty("policy"));
+    QCOMPARE(bar->property("policy").toInt(), policy.enumerator().keyToValue("AlwaysOn"));
+    auto *thumb = bar->property("contentItem").value<QQuickItem *>();
+    QVERIFY(thumb);
+    QTRY_COMPARE(thumb->opacity(), 1.0);
+    auto *theme = m_engine->singletonInstance<QObject *>("QPhoneManager.Ui", "Theme");
+    QVERIFY(theme);
+    const QColor behind = popup ? colorOf(popup->property("background").value<QQuickItem *>(), "color")
+                                : colorOf(theme, "surface");
+    QVERIFY2(contrast(colorOf(thumb, "color"), behind) >= 3.0,
+             qPrintable(ratioText(QStringLiteral("thumb"), colorOf(thumb, "color"), behind)));
+    auto *flickable = page->property("contentItem").value<QQuickItem *>();
+    QVERIFY(flickable);
+    auto *content = flickable->property("contentItem").value<QQuickItem *>();
+    QVERIFY(content && !content->childItems().isEmpty());
+    QQuickItem *first = content->childItems().constFirst();
+    const qreal right = first->mapToItem(page, QPointF(first->width(), 0)).x();
+    QVERIFY2(right <= bar->x() + 0.5,
+             qPrintable(QStringLiteral("content ends at %1, the bar begins at %2")
+                            .arg(right)
+                            .arg(bar->x())));
+    if (popup) {
+        QMetaObject::invokeMethod(popup, "close");
+        QTRY_VERIFY(!popup->property("visible").toBool());
+    }
+}
+
+// Switching between list and grid hid the view with the focus; the focus ring
+// of the files then showed over the grid while the hidden list held the keys.
+void TestAccessibility::hiddenFileViewNeverKeepsTheFocus()
+{
+    QVERIFY(showFiles());
+    m_window->requestActivate();
+    QVERIFY(QTest::qWaitForWindowActive(m_window));
+    QQuickItem *page = findItem(m_window->contentItem(), QStringLiteral("filesPage"));
+    QQuickItem *grid = findItem(m_window->contentItem(), QStringLiteral("fileGrid"));
+    QQuickItem *list = findItem(m_window->contentItem(), QStringLiteral("fileList"));
+    QVERIFY(page && grid && list);
+    page->setProperty("showGrid", false);
+    QTRY_VERIFY(list->isVisible());
+    list->forceActiveFocus(Qt::TabFocusReason);
+    QTRY_VERIFY(list->hasActiveFocus());
+
+    page->setProperty("showGrid", true);
+    QTRY_VERIFY(grid->isVisible());
+    QVERIFY(!list->isVisible());
+    QTRY_VERIFY(!list->hasActiveFocus());
+    QVERIFY(grid->hasActiveFocus());
+
+    page->setProperty("showGrid", false);
+    QTRY_VERIFY(list->isVisible());
+    QTRY_VERIFY(!grid->hasActiveFocus());
+    QVERIFY(list->hasActiveFocus());
+}
+
+// In an empty folder both file views are hidden; the focus ring around the
+// view area still shows where the keys go, and Backspace leads back up.
+void TestAccessibility::emptyFolderKeepsAVisibleFocus()
+{
+    QVERIFY(showFiles());
+    m_phone->addFolder(QStringLiteral("\\sdcard\\Leer"));
+    auto *controller =
+        m_engine->singletonInstance<AppController *>("QPhoneManager.Ui", "AppController");
+    qpm::ui::FileBrowserModel *files = controller->files();
+    m_window->requestActivate();
+    QVERIFY(QTest::qWaitForWindowActive(m_window));
+    QQuickItem *grid = findItem(m_window->contentItem(), QStringLiteral("fileGrid"));
+    QQuickItem *ring = findItem(m_window->contentItem(), QStringLiteral("fileViewFocusRing"));
+    QVERIFY(grid && ring);
+    grid->forceActiveFocus(Qt::TabFocusReason);
+    QTRY_VERIFY(grid->hasActiveFocus());
+
+    QVERIFY(files->open(QStringLiteral("\\sdcard\\Leer")));
+    QTRY_VERIFY_WITH_TIMEOUT(!files->isBusy() && files->path() == QStringLiteral("\\sdcard\\Leer"),
+                             phoneTimeoutMs);
+    QCOMPARE(files->count(), 0);
+    QTRY_VERIFY(!grid->isVisible());
+    QVERIFY(grid->hasActiveFocus());
+    QVERIFY(ring->isVisible());
+
+    QTest::keyClick(m_window, Qt::Key_Backspace);
+    QTRY_COMPARE_WITH_TIMEOUT(files->path(), QStringLiteral("\\sdcard"), phoneTimeoutMs);
 }
 
 QTEST_MAIN(TestAccessibility)

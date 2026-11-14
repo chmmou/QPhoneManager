@@ -189,26 +189,18 @@ Item {
         title: root.pendingDelete.length === 1 && root.pendingDeleteTitle.length > 0 ? qsTr("Delete the call with %1?").arg(root.pendingDeleteTitle) : qsTr("Delete %n call(s)?", "", root.pendingDelete.length)
 
         footer: DialogButtonBox {
-            Button {
+            DialogButton {
                 id: confirmDeleteButton
 
                 text: qsTr("Delete")
                 DialogButtonBox.buttonRole: DialogButtonBox.AcceptRole
-
-                FocusRing {
-                    shown: confirmDeleteButton.visualFocus
-                }
             }
 
-            Button {
+            DialogButton {
                 id: cancelDeleteButton
 
                 text: qsTr("Cancel")
                 DialogButtonBox.buttonRole: DialogButtonBox.RejectRole
-
-                FocusRing {
-                    shown: cancelDeleteButton.visualFocus
-                }
             }
         }
 
@@ -235,7 +227,7 @@ Item {
         objectName: "exportCallsDialog"
         title: qsTr("Export calls")
         fileMode: FileDialog.SaveFile
-        nameFilters: [qsTr("Table for spreadsheets (*.csv)")]
+        nameFilters: [qsTr("CSV table (*.csv)")]
         defaultSuffix: "csv"
         onAccepted: root.area.exportCalls(exportDialog.selectedFile)
     }

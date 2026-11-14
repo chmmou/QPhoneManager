@@ -23,19 +23,19 @@ Dialog {
     title: qsTr("Phones on this computer")
 
     footer: DialogButtonBox {
-        Button {
+        DialogButton {
             id: closeButton
 
+            objectName: "profilesCloseButton"
             text: qsTr("Close")
             DialogButtonBox.buttonRole: DialogButtonBox.RejectRole
-
-            FocusRing {
-                shown: closeButton.visualFocus
-            }
         }
     }
 
-    onOpened: closeButton.forceActiveFocus(Qt.PopupFocusReason)
+    // The tab reason makes the button show its focus ring right away; giving the
+    // focus up on closing makes the next opening set that reason again.
+    onOpened: closeButton.forceActiveFocus(Qt.TabFocusReason)
+    onClosed: closeButton.focus = false
     Component.onCompleted: Theme.calmPopup(root)
 
     ColumnLayout {
@@ -61,7 +61,7 @@ Dialog {
             spacing: Theme.gridUnit * 2
             Accessible.role: Accessible.List
             Accessible.name: qsTr("Phones on this computer")
-            ScrollBar.vertical: ScrollBar {}
+            ScrollBar.vertical: ThemedScrollBar {}
 
             delegate: RowLayout {
                 id: profileRow
@@ -90,7 +90,7 @@ Dialog {
                         text: profileRow.lastConnection.length > 0 ? qsTr("%1, last connected %2").arg(profileRow.model).arg(profileRow.lastConnection) : profileRow.model
                         font.pixelSize: TypeScale.hint
                         color: Theme.foregroundOnSurfaceVariant
-                        elide: Text.ElideRight
+                        wrapMode: Text.Wrap
                     }
                 }
 
@@ -157,13 +157,13 @@ Dialog {
         title: qsTr("Rename %1").arg(root.pendingName)
 
         footer: DialogButtonBox {
-            Button {
+            DialogButton {
                 text: qsTr("Rename")
                 enabled: nameField.text.trim().length > 0
                 DialogButtonBox.buttonRole: DialogButtonBox.AcceptRole
             }
 
-            Button {
+            DialogButton {
                 text: qsTr("Cancel")
                 DialogButtonBox.buttonRole: DialogButtonBox.RejectRole
             }
@@ -177,7 +177,7 @@ Dialog {
         onAccepted: AppController.renameDevice(root.pendingId, nameField.text)
         Component.onCompleted: Theme.calmPopup(renameDialog)
 
-        TextField {
+        ThemedTextField {
             id: nameField
 
             anchors.left: parent.left
@@ -203,20 +203,22 @@ Dialog {
         title: qsTr("Remove %1 from this computer?").arg(root.pendingName)
 
         footer: DialogButtonBox {
-            Button {
+            DialogButton {
                 text: qsTr("Remove")
                 DialogButtonBox.buttonRole: DialogButtonBox.AcceptRole
             }
 
-            Button {
+            DialogButton {
                 id: cancelRemoveButton
 
+                objectName: "cancelRemoveProfileButton"
                 text: qsTr("Cancel")
                 DialogButtonBox.buttonRole: DialogButtonBox.RejectRole
             }
         }
 
-        onOpened: cancelRemoveButton.forceActiveFocus(Qt.PopupFocusReason)
+        onOpened: cancelRemoveButton.forceActiveFocus(Qt.TabFocusReason)
+        onClosed: cancelRemoveButton.focus = false
         onAccepted: AppController.removeDevice(root.pendingId)
         Component.onCompleted: Theme.calmPopup(removeDialog)
 

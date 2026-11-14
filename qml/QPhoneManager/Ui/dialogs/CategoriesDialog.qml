@@ -25,15 +25,11 @@ Dialog {
     Material.elevation: 0
 
     footer: DialogButtonBox {
-        Button {
+        DialogButton {
             id: closeButton
 
             text: qsTr("Close")
             DialogButtonBox.buttonRole: DialogButtonBox.RejectRole
-
-            FocusRing {
-                shown: closeButton.visualFocus
-            }
         }
     }
 
@@ -112,6 +108,11 @@ Dialog {
                         elide: Text.ElideRight
                     }
                 }
+
+                CurrentMarker {
+                    current: categoryRow.ListView.isCurrentItem
+                    viewFocused: categoryList.activeFocus
+                }
             }
 
             onCurrentIndexChanged: {
@@ -132,7 +133,7 @@ Dialog {
                 text: qsTr("Name")
             }
 
-            TextField {
+            ThemedTextField {
                 id: nameField
 
                 objectName: "categoryNameField"
@@ -144,7 +145,7 @@ Dialog {
                 text: qsTr("Colour")
             }
 
-            ComboBox {
+            ThemedComboBox {
                 id: colorBox
 
                 objectName: "categoryColorBox"
@@ -195,13 +196,12 @@ Dialog {
                 }
             }
 
-            Button {
+            PrimaryButton {
                 id: addButton
 
                 objectName: "addCategoryButton"
                 text: qsTr("Add")
                 icon.source: Theme.icon("plus")
-                highlighted: true
                 enabled: root.canEdit && nameField.text.trim().length > 0
                 onClicked: root.addRequested(nameField.text, colorBox.currentIndex)
 

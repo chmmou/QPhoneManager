@@ -131,7 +131,7 @@ Item {
                     Layout.fillWidth: true
                 }
 
-                ComboBox {
+                ThemedComboBox {
                     id: groupBox
 
                     objectName: "groupFilterBox"
@@ -146,7 +146,7 @@ Item {
                     }
                 }
 
-                ComboBox {
+                ThemedComboBox {
                     id: accountBox
 
                     objectName: "accountFilterBox"
@@ -272,26 +272,18 @@ Item {
         title: qsTr("Delete contact %1?").arg(root.area.list.nameOf(root.pendingDelete))
 
         footer: DialogButtonBox {
-            Button {
+            DialogButton {
                 id: confirmDeleteButton
 
                 text: qsTr("Delete")
                 DialogButtonBox.buttonRole: DialogButtonBox.AcceptRole
-
-                FocusRing {
-                    shown: confirmDeleteButton.visualFocus
-                }
             }
 
-            Button {
+            DialogButton {
                 id: cancelDeleteButton
 
                 text: qsTr("Cancel")
                 DialogButtonBox.buttonRole: DialogButtonBox.RejectRole
-
-                FocusRing {
-                    shown: cancelDeleteButton.visualFocus
-                }
             }
         }
 
@@ -331,7 +323,7 @@ Item {
         editor: root.area.editor
     }
 
-    Menu {
+    OutlinedMenu {
         id: accountMenu
 
         Component.onCompleted: Theme.calmPopup(accountMenu)
@@ -367,7 +359,7 @@ Item {
         objectName: "exportDialog"
         title: root.pendingExport > 0 ? qsTr("Export contact") : qsTr("Export contacts")
         fileMode: FileDialog.SaveFile
-        nameFilters: [qsTr("vCard (*.vcf)"), qsTr("Table for spreadsheets (*.csv)")]
+        nameFilters: [qsTr("vCard (*.vcf)"), qsTr("CSV table (*.csv)")]
         defaultSuffix: exportDialog.selectedNameFilter.index === 1 ? "csv" : "vcf"
         onAccepted: root.area.exportContacts(exportDialog.selectedFile, exportDialog.selectedNameFilter.index === 1, root.pendingExport > 0 ? [root.pendingExport] : [])
     }

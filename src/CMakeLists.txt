@@ -176,6 +176,8 @@ set(qpm_ui_qml_files
     components/AppHeader.qml
     components/AppShortcuts.qml
     components/ContactAvatar.qml
+    components/CurrentMarker.qml
+    components/DialogButton.qml
     components/DisconnectedBanner.qml
     components/EmptyState.qml
     components/FocusRing.qml
@@ -183,7 +185,9 @@ set(qpm_ui_qml_files
     components/InfoRow.qml
     components/ListDetailView.qml
     components/MessageBar.qml
+    components/OutlinedMenu.qml
     components/OverviewCard.qml
+    components/PrimaryButton.qml
     components/Scrim.qml
     components/SectionEntry.qml
     components/SectionPage.qml
@@ -192,6 +196,11 @@ set(qpm_ui_qml_files
     components/Sidebar.qml
     components/SidebarButton.qml
     components/StatusBar.qml
+    components/ThemedComboBox.qml
+    components/ThemedScrollBar.qml
+    components/ThemedScrollView.qml
+    components/ThemedTextArea.qml
+    components/ThemedTextField.qml
     dialogs/AboutDialog.qml
     dialogs/AlarmsDialog.qml
     dialogs/BackupDialog.qml

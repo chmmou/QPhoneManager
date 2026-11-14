@@ -22,16 +22,12 @@ Dialog {
     title: qsTr("About QPhoneManager")
 
     footer: DialogButtonBox {
-        Button {
+        DialogButton {
             id: closeButton
 
             objectName: "aboutCloseButton"
             text: qsTr("Close")
             DialogButtonBox.buttonRole: DialogButtonBox.RejectRole
-
-            FocusRing {
-                shown: closeButton.visualFocus
-            }
         }
     }
 
@@ -126,7 +122,7 @@ Dialog {
                     Accessible.role: Accessible.List
                     Accessible.name: qsTr("Components")
                     Accessible.description: qsTr("The arrow keys choose a component. Its license shows next to the list.")
-                    ScrollBar.vertical: ScrollBar {}
+                    ScrollBar.vertical: ThemedScrollBar {}
 
                     delegate: ComponentRow {
                         width: ListView.view.width
@@ -143,11 +139,16 @@ Dialog {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 
-                ScrollView {
+                ThemedScrollView {
                     id: licenseScroll
 
+                    objectName: "licenseScroll"
                     anchors.fill: parent
                     contentWidth: licenseScroll.availableWidth
+                    // The text area takes the width of the view on its own, so the room
+                    // for the scroll bar is kept free on the side of the bar.
+                    leftPadding: licenseScroll.mirrored ? licenseScroll.ScrollBar.vertical.width : 0
+                    rightPadding: licenseScroll.mirrored ? 0 : licenseScroll.ScrollBar.vertical.width
 
                     TextArea {
                         id: licenseText
@@ -161,6 +162,7 @@ Dialog {
                         activeFocusOnTab: true
                         font.pixelSize: TypeScale.hint
                         text: root.currentRow ? root.currentRow.licenseText : ""
+                        selectedTextColor: Theme.foregroundOnPrimary
                         background: null
                         Accessible.name: root.currentRow ? qsTr("License of %1").arg(root.currentRow.name) : ""
                     }
@@ -221,6 +223,11 @@ Dialog {
                 color: Theme.foregroundOnSurfaceVariant
                 elide: Text.ElideRight
             }
+        }
+
+        CurrentMarker {
+            current: row.ListView.isCurrentItem
+            viewFocused: row.ListView.view.activeFocus
         }
     }
 }

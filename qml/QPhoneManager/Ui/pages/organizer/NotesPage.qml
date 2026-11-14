@@ -11,6 +11,8 @@ Item {
     readonly property NotesArea area: AppController.notes
     required property string emptyText
     property bool editing: false
+    // The form shown, or null.
+    property NoteForm form: null
     property int pendingDelete: 0
 
     signal connectRequested
@@ -32,7 +34,7 @@ Item {
                 anchors.right: parent.right
                 spacing: Theme.gridUnit * 2
 
-                ComboBox {
+                ThemedComboBox {
                     id: categoryFilterBox
 
                     objectName: "noteCategoryFilter"
@@ -140,9 +142,12 @@ Item {
         id: formComponent
 
         NoteForm {
+            id: form
+
             area: root.area
             onFinished: root.editing = false
             onDeleteRequested: luid => root.confirmDelete(luid)
+            Component.onCompleted: root.form = form
         }
     }
 
@@ -212,10 +217,14 @@ Item {
         onRemoveRequested: row => root.area.removeCategory(row)
     }
 
+    // Opening the form on purpose moves the focus into it; moving through the
+    // list shows the form as well, but leaves the focus in the list.
     function startNew(): void {
         root.area.startNew();
         root.editing = true;
         listDetail.detailOpen = true;
+        if (root.form)
+            root.form.focusFirstField();
     }
 
     function showCurrent(): void {
@@ -227,6 +236,8 @@ Item {
         if (root.area.currentLuid > 0 && root.area.editor.load(root.area.currentLuid)) {
             root.editing = true;
             listDetail.detailOpen = true;
+            if (root.form)
+                root.form.focusFirstField();
         }
     }
 

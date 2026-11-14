@@ -19,40 +19,28 @@ Dialog {
     closePolicy: Popup.NoAutoClose
 
     footer: DialogButtonBox {
-        Button {
+        DialogButton {
             id: replaceButton
 
             objectName: "replaceFileButton"
             text: qsTr("Replace")
             onClicked: root.answer(TransferQueue.Replace)
-
-            FocusRing {
-                shown: replaceButton.visualFocus
-            }
         }
 
-        Button {
+        DialogButton {
             id: keepBothButton
 
             objectName: "keepBothFilesButton"
             text: qsTr("Keep both")
             onClicked: root.answer(TransferQueue.KeepBoth)
-
-            FocusRing {
-                shown: keepBothButton.visualFocus
-            }
         }
 
-        Button {
+        DialogButton {
             id: skipButton
 
             objectName: "skipFileButton"
             text: qsTr("Skip")
             onClicked: root.answer(TransferQueue.Skip)
-
-            FocusRing {
-                shown: skipButton.visualFocus
-            }
         }
     }
 

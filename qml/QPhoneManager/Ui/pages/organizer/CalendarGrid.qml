@@ -95,7 +95,7 @@ Item {
                         spacing: Theme.gridUnit
 
                         Rectangle {
-                            Layout.preferredWidth: dayNumberLabel.implicitHeight + Theme.gridUnit
+                            Layout.preferredWidth: Math.max(dayNumberLabel.implicitWidth, dayNumberLabel.implicitHeight) + Theme.gridUnit
                             Layout.preferredHeight: dayNumberLabel.implicitHeight + Theme.gridUnit
                             radius: height / 2
                             color: dayCell.today ? Theme.primary : "transparent"
@@ -104,10 +104,12 @@ Item {
                                 id: dayNumberLabel
 
                                 anchors.centerIn: parent
-                                text: dayCell.dayNumber
+                                // The first day shown of the month before and of the month
+                                // after carries the month name, so the change of month does
+                                // not hang on the shade of the numbers alone.
+                                text: !dayCell.inPeriod && (dayCell.index === 0 || dayCell.dayNumber === 1) ? root.dayAndMonth(dayCell.date) : dayCell.dayNumber
                                 font.bold: dayCell.today
                                 color: dayCell.today ? Theme.foregroundOnPrimary : dayCell.inPeriod ? Theme.foregroundOnSurface : Theme.foregroundOnSurfaceVariant
-                                opacity: dayCell.inPeriod ? 1 : 0.6
                             }
                         }
 
@@ -139,6 +141,12 @@ Item {
                     }
                 }
 
+                CurrentMarker {
+                    current: dayCell.selected
+                    viewFocused: dayGrid.activeFocus
+                    inset: Theme.gridUnit / 2
+                }
+
                 // A week has tall cells, so a title takes up to three lines there.
                 Component {
                     id: weekEntry
@@ -153,6 +161,8 @@ Item {
                         Layout.fillWidth: true
                         text: weekLabel.modelData
                         font.pixelSize: TypeScale.hint
+                        // Breaks between words; only a word wider than the cell is split,
+                        // so that the whole title stays readable.
                         wrapMode: Text.Wrap
                         maximumLineCount: 3
                         elide: Text.ElideRight
@@ -175,6 +185,9 @@ Item {
                             radius: Theme.gridUnit
                             // An entry being removed has the index -1 for a moment.
                             color: dayCell.entryColors[weekLabel.index] ?? "transparent"
+                            // The colour of a calendar can be close to the cell; the outline keeps the dot in view.
+                            border.width: 1
+                            border.color: Theme.outline
                         }
                     }
                 }
@@ -199,6 +212,9 @@ Item {
                             radius: Theme.gridUnit
                             // An entry being removed has the index -1 for a moment.
                             color: dayCell.entryColors[monthRow.index] ?? "transparent"
+                            // The colour of a calendar can be close to the cell; the outline keeps the dot in view.
+                            border.width: 1
+                            border.color: Theme.outline
                         }
 
                         Label {
@@ -231,6 +247,13 @@ Item {
 
     FocusRing {
         shown: dayGrid.activeFocus
+    }
+
+    // The day with the short month name, in the order and with the separators
+    // of the long date format of the locale, without weekday and year.
+    function dayAndMonth(day: date): string {
+        const format = Qt.locale().dateFormat(Locale.LongFormat).replace(/d{3,4}[^dMy]*/, "").replace(/[^dM]*y+[^dM]*/, "").replace(/M{3,4}/, "MMM");
+        return day.toLocaleDateString(Qt.locale(), format);
     }
 
     function shifted(days: int): date {

@@ -165,7 +165,7 @@ Item {
                 section.criteria: ViewSection.FullString
                 Accessible.role: Accessible.List
                 Accessible.name: qsTr("Messages")
-                ScrollBar.vertical: ScrollBar {}
+                ScrollBar.vertical: ThemedScrollBar {}
 
                 section.delegate: Label {
                     required property string section
@@ -377,7 +377,7 @@ Item {
         }
     }
 
-    Menu {
+    OutlinedMenu {
         id: messageMenu
 
         objectName: "messageMenu"

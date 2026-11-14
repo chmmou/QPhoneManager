@@ -14,47 +14,47 @@
         <translation>Close</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/AboutDialog.qml" line="68"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/AboutDialog.qml" line="65"/>
         <source>QPhoneManager %1</source>
         <translation>QPhoneManager %1</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/AboutDialog.qml" line="84"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/AboutDialog.qml" line="81"/>
         <source>License: %1</source>
         <translation>License: %1</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/AboutDialog.qml" line="91"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/AboutDialog.qml" line="88"/>
         <source>Runs on Qt %1</source>
         <translation>Runs on Qt %1</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/AboutDialog.qml" line="100"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/AboutDialog.qml" line="97"/>
         <source>Components and their licenses</source>
         <translation>Components and their licenses</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/AboutDialog.qml" line="126"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/AboutDialog.qml" line="123"/>
         <source>Components</source>
         <translation>Components</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/AboutDialog.qml" line="127"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/AboutDialog.qml" line="124"/>
         <source>The arrow keys choose a component. Its license shows next to the list.</source>
         <translation>The arrow keys choose a component. Its license shows next to the list.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/AboutDialog.qml" line="164"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/AboutDialog.qml" line="167"/>
         <source>License of %1</source>
         <translation>License of %1</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/AboutDialog.qml" line="191"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/AboutDialog.qml" line="194"/>
         <source>%1 %2, %3</source>
         <translation>%1 %2, %3</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/AboutDialog.qml" line="217"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/AboutDialog.qml" line="220"/>
         <source>%1, %2</source>
         <translation>%1, %2</translation>
     </message>
@@ -72,87 +72,87 @@
         <translation>Close</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/AlarmsDialog.qml" line="54"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/AlarmsDialog.qml" line="51"/>
         <source>Connect the phone to see its alarms.</source>
         <translation>Connect the phone to see its alarms.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/AlarmsDialog.qml" line="57"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/AlarmsDialog.qml" line="54"/>
         <source>Loading the alarms of the phone.</source>
         <translation>Loading the alarms of the phone.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/AlarmsDialog.qml" line="59"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/AlarmsDialog.qml" line="56"/>
         <source>Not supported: this phone does not let the app reach its alarms. Set them on the phone itself.</source>
         <translation>Not supported: this phone does not let the app reach its alarms. Set them on the phone itself.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/AlarmsDialog.qml" line="61"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/AlarmsDialog.qml" line="58"/>
         <source>The alarms could not be loaded.</source>
         <translation>The alarms could not be loaded.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/AlarmsDialog.qml" line="83"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/AlarmsDialog.qml" line="80"/>
         <source>Alarms</source>
         <translation>Alarms</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/AlarmsDialog.qml" line="98"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/AlarmsDialog.qml" line="95"/>
         <source>%1, %2</source>
         <translation>%1, %2</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/AlarmsDialog.qml" line="145"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/AlarmsDialog.qml" line="142"/>
         <source>On</source>
         <translation>On</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/AlarmsDialog.qml" line="145"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/AlarmsDialog.qml" line="142"/>
         <source>Off</source>
         <translation>Off</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/AlarmsDialog.qml" line="159"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/AlarmsDialog.qml" line="161"/>
         <source>Change the alarm</source>
         <translation>Change the alarm</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/AlarmsDialog.qml" line="159"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/AlarmsDialog.qml" line="161"/>
         <source>New alarm</source>
         <translation>New alarm</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/AlarmsDialog.qml" line="172"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/AlarmsDialog.qml" line="174"/>
         <source>Time</source>
         <translation>Time</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/AlarmsDialog.qml" line="183"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/AlarmsDialog.qml" line="185"/>
         <source>Time of the alarm</source>
         <translation>Time of the alarm</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/AlarmsDialog.qml" line="187"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/AlarmsDialog.qml" line="189"/>
         <source>Name</source>
         <translation>Name</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/AlarmsDialog.qml" line="195"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/AlarmsDialog.qml" line="197"/>
         <source>Name of the alarm</source>
         <translation>Name of the alarm</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/AlarmsDialog.qml" line="235"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/AlarmsDialog.qml" line="237"/>
         <source>Alarm is on</source>
         <translation>Alarm is on</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/AlarmsDialog.qml" line="250"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/AlarmsDialog.qml" line="252"/>
         <source>Start new alarm</source>
         <translation>Start new alarm</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/AlarmsDialog.qml" line="263"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/AlarmsDialog.qml" line="265"/>
         <source>Save</source>
         <translation>Save</translation>
     </message>
@@ -170,28 +170,28 @@
         <translation>Phone</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/components/AppHeader.qml" line="53"/>
+        <location filename="../../qml/QPhoneManager/Ui/components/AppHeader.qml" line="54"/>
         <source>Manage phones</source>
         <translation>Manage phones</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/components/AppHeader.qml" line="89"/>
-        <location filename="../../qml/QPhoneManager/Ui/components/AppHeader.qml" line="91"/>
+        <location filename="../../qml/QPhoneManager/Ui/components/AppHeader.qml" line="90"/>
+        <location filename="../../qml/QPhoneManager/Ui/components/AppHeader.qml" line="92"/>
         <source>Search</source>
         <translation>Search</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/components/AppHeader.qml" line="98"/>
+        <location filename="../../qml/QPhoneManager/Ui/components/AppHeader.qml" line="99"/>
         <source>Sync</source>
         <translation>Sync</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/components/AppHeader.qml" line="116"/>
+        <location filename="../../qml/QPhoneManager/Ui/components/AppHeader.qml" line="117"/>
         <source>Disconnect</source>
         <translation>Disconnect</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/components/AppHeader.qml" line="116"/>
+        <location filename="../../qml/QPhoneManager/Ui/components/AppHeader.qml" line="117"/>
         <source>Connect</source>
         <translation>Connect</translation>
     </message>
@@ -204,97 +204,97 @@
         <translation>Show apps</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="57"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="58"/>
         <source>Your apps</source>
         <translation>Your apps</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="69"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="70"/>
         <source>System apps</source>
         <translation>System apps</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="81"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="82"/>
         <source>All</source>
         <translation>All</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="97"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="419"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="98"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="427"/>
         <source>Open on the phone</source>
         <translation>Open on the phone</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="115"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="425"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="116"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="433"/>
         <source>Save the APK on this computer</source>
         <translation>Save the APK on this computer</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="133"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="431"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="134"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="439"/>
         <source>Remove from the phone</source>
         <translation>Remove from the phone</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="153"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="154"/>
         <source>Install an APK from this computer</source>
         <translation>Install an APK from this computer</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="171"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="172"/>
         <source>Load the apps again</source>
         <translation>Load the apps again</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="213"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="214"/>
         <source>Apps</source>
         <translation>Apps</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="214"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="215"/>
         <source>Enter opens the app on the phone, Delete removes it, the menu key shows more</source>
         <translation>Enter opens the app on the phone, Delete removes it, the menu key shows more</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="389"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="464"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="396"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="468"/>
         <source>Cancel</source>
         <translation>Cancel</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="405"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="412"/>
         <source>Connect</source>
         <translation>Connect</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="447"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="455"/>
         <source>Remove %1?</source>
         <translation>Remove %1?</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="453"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="461"/>
         <source>Remove</source>
         <translation>Remove</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="484"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="485"/>
         <source>The phone then asks you to confirm. After that, the app and its data are deleted from the phone.</source>
         <translation>The phone then asks you to confirm. After that, the app and its data are deleted from the phone.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="493"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="494"/>
         <source>Save the APK</source>
         <translation>Save the APK</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="495"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="506"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="496"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="507"/>
         <source>Android apps (*.apk)</source>
         <translation>Android apps (*.apk)</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="504"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/apps/AppsPage.qml" line="505"/>
         <source>Install an APK on the phone</source>
         <translation>Install an APK on the phone</translation>
     </message>
@@ -312,61 +312,61 @@
         <translation>Close</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="75"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="73"/>
         <source>Back up</source>
         <translation>Back up</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="87"/>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="248"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="85"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="246"/>
         <source>Restore</source>
         <translation>Restore</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="120"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="118"/>
         <source>Choose what goes into the backup. It holds what this computer stored at the last sync.</source>
         <translation>Choose what goes into the backup. It holds what this computer stored at the last sync.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="143"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="141"/>
         <source>The backup file is not encrypted. It holds personal data such as contacts and messages, so keep it in a safe place.</source>
         <translation>The backup file is not encrypted. It holds personal data such as contacts and messages, so keep it in a safe place.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="154"/>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="309"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="152"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="307"/>
         <source>Save backup</source>
         <translation>Save backup</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="187"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="185"/>
         <source>Open a backup file. QPhoneManager compares it with the phone and shows what a restore would change.</source>
         <translation>Open a backup file. QPhoneManager compares it with the phone and shows what a restore would change.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="195"/>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="320"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="193"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="318"/>
         <source>Open backup</source>
         <translation>Open backup</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="220"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="218"/>
         <source>This backup is of another phone. A restore only adds what this phone lacks and changes nothing it has.</source>
         <translation>This backup is of another phone. A restore only adds what this phone lacks and changes nothing it has.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="277"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="275"/>
         <source>Stop</source>
         <translation>Stop</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="311"/>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="322"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="309"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="320"/>
         <source>QPhoneManager backup (*.qpmbackup)</source>
         <translation>QPhoneManager backup (*.qpmbackup)</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="322"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/BackupDialog.qml" line="320"/>
         <source>All files (*)</source>
         <translation>All files (*)</translation>
     </message>
@@ -379,7 +379,7 @@
         <translation>Days of %1</translation>
     </message>
     <message numerus="yes">
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarGrid.qml" line="132"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarGrid.qml" line="134"/>
         <source>%n more</source>
         <translation>
             <numerusform>%n more</numerusform>
@@ -395,147 +395,147 @@
         <translation>View</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="55"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="56"/>
         <source>Month</source>
         <translation>Month</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="67"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="68"/>
         <source>Week</source>
         <translation>Week</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="79"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="80"/>
         <source>Day</source>
         <translation>Day</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="91"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="92"/>
         <source>List</source>
         <translation>List</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="219"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="221"/>
         <source>Earlier</source>
         <translation>Earlier</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="236"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="238"/>
         <source>Today</source>
         <translation>Today</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="249"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="251"/>
         <source>Later</source>
         <translation>Later</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="107"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="356"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="108"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="358"/>
         <source>New appointment</source>
         <translation>New appointment</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="125"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="473"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="126"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="475"/>
         <source>Import appointments and tasks</source>
         <translation>Import appointments and tasks</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="143"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="483"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="144"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="485"/>
         <source>Export appointments and tasks</source>
         <translation>Export appointments and tasks</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="161"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="162"/>
         <source>Choose calendars</source>
         <translation>Choose calendars</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="179"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="180"/>
         <source>Alarms</source>
         <translation>Alarms</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="198"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="199"/>
         <source>No holidays</source>
         <translation>No holidays</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="198"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="199"/>
         <source>Germany</source>
         <translation>Germany</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="198"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="199"/>
         <source>Austria</source>
         <translation>Austria</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="198"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="199"/>
         <source>Switzerland</source>
         <translation>Switzerland</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="200"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="202"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="201"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="203"/>
         <source>Show public holidays of</source>
         <translation>Show public holidays of</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="305"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="307"/>
         <source>Connect</source>
         <translation>Connect</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="326"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="328"/>
         <source>No appointments this month.</source>
         <translation>No appointments this month.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="326"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="372"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="328"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="374"/>
         <source>No appointments on this day.</source>
         <translation>No appointments on this day.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="380"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="382"/>
         <source>Select an appointment in the list.</source>
         <translation>Select an appointment in the list.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="438"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="440"/>
         <source>Delete appointment %1?</source>
         <translation>Delete appointment %1?</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="439"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="441"/>
         <source>The appointment is deleted on the phone and on this computer. A repeating appointment is deleted with all its dates.</source>
         <translation>The appointment is deleted on the phone and on this computer. A repeating appointment is deleted with all its dates.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="447"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="449"/>
         <source>The appointment was changed on the phone</source>
         <translation>The appointment was changed on the phone</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="448"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="450"/>
         <source>Someone changed this appointment on the phone after it was loaded here. Choose which version to keep.</source>
         <translation>Someone changed this appointment on the phone after it was loaded here. Choose which version to keep.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="475"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="477"/>
         <source>iCalendar (*.ics *.ical *.ifb *.vcs)</source>
         <translation>iCalendar (*.ics *.ical *.ifb *.vcs)</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="475"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="477"/>
         <source>All files (*)</source>
         <translation>All files (*)</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="485"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/CalendarPage.qml" line="487"/>
         <source>iCalendar (*.ics)</source>
         <translation>iCalendar (*.ics)</translation>
     </message>
@@ -553,48 +553,48 @@
         <translation>Apply</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/CalendarsDialog.qml" line="39"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/CalendarsDialog.qml" line="35"/>
         <source>Cancel</source>
         <translation>Cancel</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/CalendarsDialog.qml" line="58"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/CalendarsDialog.qml" line="54"/>
         <source>Choose the calendars this computer shows and syncs, and the one new appointments go to. Only calendars the phone may write to can take new appointments.</source>
         <translation>Choose the calendars this computer shows and syncs, and the one new appointments go to. Only calendars the phone may write to can take new appointments.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/CalendarsDialog.qml" line="65"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/CalendarsDialog.qml" line="61"/>
         <source>Connect the phone to change the choice.</source>
         <translation>Connect the phone to change the choice.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/CalendarsDialog.qml" line="83"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/CalendarsDialog.qml" line="79"/>
         <source>Calendars</source>
         <translation>Calendars</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/CalendarsDialog.qml" line="101"/>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/CalendarsDialog.qml" line="142"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/CalendarsDialog.qml" line="97"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/CalendarsDialog.qml" line="138"/>
         <source>%1, read only</source>
         <translation>%1, read only</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/CalendarsDialog.qml" line="119"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/CalendarsDialog.qml" line="115"/>
         <source>Sync %1</source>
         <translation>Sync %1</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/CalendarsDialog.qml" line="152"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/CalendarsDialog.qml" line="148"/>
         <source>For new</source>
         <translation>For new</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/CalendarsDialog.qml" line="156"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/CalendarsDialog.qml" line="152"/>
         <source>New appointments go to %1</source>
         <translation>New appointments go to %1</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/CalendarsDialog.qml" line="169"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/CalendarsDialog.qml" line="170"/>
         <source>Space adds the chosen calendar to the sync or takes it out, Enter makes it the one for new appointments.</source>
         <translation>Space adds the chosen calendar to the sync or takes it out, Enter makes it the one for new appointments.</translation>
     </message>
@@ -660,7 +660,7 @@
         <translation>Calls</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallList.qml" line="159"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallList.qml" line="165"/>
         <source>No call matches the search or filter.</source>
         <translation>No call matches the search or filter.</translation>
     </message>
@@ -678,22 +678,22 @@
         <translation>Answer</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/CallWindow.qml" line="119"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/CallWindow.qml" line="118"/>
         <source>Decline</source>
         <translation>Decline</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/CallWindow.qml" line="119"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/CallWindow.qml" line="118"/>
         <source>Hang up</source>
         <translation>Hang up</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/CallWindow.qml" line="138"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/CallWindow.qml" line="137"/>
         <source>Mute</source>
         <translation>Mute</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/CallWindow.qml" line="156"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/CallWindow.qml" line="154"/>
         <source>Speaker</source>
         <translation>Speaker</translation>
     </message>
@@ -706,52 +706,52 @@
         <translation>Show calls</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="49"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="50"/>
         <source>All</source>
         <translation>All</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="61"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="62"/>
         <source>Incoming</source>
         <translation>Incoming</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="74"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="75"/>
         <source>Outgoing</source>
         <translation>Outgoing</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="87"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="88"/>
         <source>Missed</source>
         <translation>Missed</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="104"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="105"/>
         <source>Export the calls in the list</source>
         <translation>Export the calls in the list</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="122"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="123"/>
         <source>Delete the calls in the list</source>
         <translation>Delete the calls in the list</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="154"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="155"/>
         <source>No calls yet. Sync the phone to load the call log.</source>
         <translation>No calls yet. Sync the phone to load the call log.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="172"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="173"/>
         <source>Connect</source>
         <translation>Connect</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="188"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="189"/>
         <source>Delete the call with %1?</source>
         <translation>Delete the call with %1?</translation>
     </message>
     <message numerus="yes">
-        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="188"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="189"/>
         <source>Delete %n call(s)?</source>
         <translation>
             <numerusform>Delete %n call?</numerusform>
@@ -759,17 +759,17 @@
         </translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="194"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="195"/>
         <source>Delete</source>
         <translation>Delete</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="205"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="202"/>
         <source>Cancel</source>
         <translation>Cancel</translation>
     </message>
     <message numerus="yes">
-        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="225"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="219"/>
         <source>The phone deletes the call(s) only if its app allows it. Otherwise they stay on the phone and in this list.</source>
         <translation>
             <numerusform>The phone deletes the call only if its app allows it. Otherwise it stays on the phone and in this list.</numerusform>
@@ -777,14 +777,14 @@
         </translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="234"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="228"/>
         <source>Export calls</source>
         <translation>Export calls</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="236"/>
-        <source>Table for spreadsheets (*.csv)</source>
-        <translation>Table for spreadsheets (*.csv)</translation>
+        <location filename="../../qml/QPhoneManager/Ui/pages/calls/CallsPage.qml" line="230"/>
+        <source>CSV table (*.csv)</source>
+        <translation>CSV table (*.csv)</translation>
     </message>
 </context>
 <context>
@@ -795,47 +795,47 @@
         <translation>Close</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/CategoriesDialog.qml" line="53"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/CategoriesDialog.qml" line="50"/>
         <source>Connect the phone to change categories.</source>
         <translation>Connect the phone to change categories.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/CategoriesDialog.qml" line="72"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/CategoriesDialog.qml" line="69"/>
         <source>Categories</source>
         <translation>Categories</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/CategoriesDialog.qml" line="131"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/CategoriesDialog.qml" line="133"/>
         <source>Name</source>
         <translation>Name</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/CategoriesDialog.qml" line="139"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/CategoriesDialog.qml" line="141"/>
         <source>Name of the category</source>
         <translation>Name of the category</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/CategoriesDialog.qml" line="143"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/CategoriesDialog.qml" line="145"/>
         <source>Colour</source>
         <translation>Colour</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/CategoriesDialog.qml" line="152"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/CategoriesDialog.qml" line="154"/>
         <source>Colour of the category</source>
         <translation>Colour of the category</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/CategoriesDialog.qml" line="168"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/CategoriesDialog.qml" line="171"/>
         <source>Delete</source>
         <translation>Delete</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/CategoriesDialog.qml" line="187"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/CategoriesDialog.qml" line="190"/>
         <source>Change</source>
         <translation>Change</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/CategoriesDialog.qml" line="200"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/CategoriesDialog.qml" line="203"/>
         <source>Add</source>
         <translation>Add</translation>
     </message>
@@ -899,62 +899,62 @@
         <translation>SIM card</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ComposeView.qml" line="197"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ComposeView.qml" line="198"/>
         <source>Send later</source>
         <translation>Send later</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ComposeView.qml" line="215"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ComposeView.qml" line="216"/>
         <source>Date</source>
         <translation>Date</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ComposeView.qml" line="224"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ComposeView.qml" line="225"/>
         <source>Date to send</source>
         <translation>Date to send</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ComposeView.qml" line="229"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ComposeView.qml" line="230"/>
         <source>Time</source>
         <translation>Time</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ComposeView.qml" line="238"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ComposeView.qml" line="239"/>
         <source>Time to send</source>
         <translation>Time to send</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ComposeView.qml" line="254"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ComposeView.qml" line="255"/>
         <source>The phone sends the message on its own at this time, also when this computer is off.</source>
         <translation>The phone sends the message on its own at this time, also when this computer is off.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ComposeView.qml" line="263"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ComposeView.qml" line="264"/>
         <source>Connect the phone to send messages.</source>
         <translation>Connect the phone to send messages.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ComposeView.qml" line="277"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ComposeView.qml" line="278"/>
         <source>Delete</source>
         <translation>Delete</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ComposeView.qml" line="296"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ComposeView.qml" line="297"/>
         <source>Cancel</source>
         <translation>Cancel</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ComposeView.qml" line="309"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ComposeView.qml" line="310"/>
         <source>Save</source>
         <translation>Save</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ComposeView.qml" line="309"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ComposeView.qml" line="310"/>
         <source>Schedule</source>
         <translation>Schedule</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ComposeView.qml" line="309"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ComposeView.qml" line="310"/>
         <source>Send</source>
         <translation>Send</translation>
     </message>
@@ -967,7 +967,7 @@
         <translation>Delete</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConfirmDeleteDialog.qml" line="32"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConfirmDeleteDialog.qml" line="28"/>
         <source>Cancel</source>
         <translation>Cancel</translation>
     </message>
@@ -985,27 +985,27 @@
         <translation>Save my version</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConflictDialog.qml" line="41"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConflictDialog.qml" line="37"/>
         <source>Keep the phone&apos;s version</source>
         <translation>Keep the phone&apos;s version</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConflictDialog.qml" line="55"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConflictDialog.qml" line="47"/>
         <source>Back to editing</source>
         <translation>Back to editing</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConflictDialog.qml" line="75"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConflictDialog.qml" line="64"/>
         <source>Someone changed this contact on the phone after it was loaded here. Choose which version to keep.</source>
         <translation>Someone changed this contact on the phone after it was loaded here. Choose which version to keep.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConflictDialog.qml" line="90"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConflictDialog.qml" line="79"/>
         <source>Your version</source>
         <translation>Your version</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConflictDialog.qml" line="113"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConflictDialog.qml" line="106"/>
         <source>On the phone</source>
         <translation>On the phone</translation>
     </message>
@@ -1023,110 +1023,110 @@
         <translation>Close</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="67"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="65"/>
         <source>Wi-Fi</source>
         <translation>Wi-Fi</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="78"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="76"/>
         <source>USB</source>
         <translation>USB</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="89"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="87"/>
         <source>Bluetooth</source>
         <translation>Bluetooth</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="107"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="105"/>
         <source>Connecting</source>
         <translation>Connecting</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="112"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="110"/>
         <source>Connecting to the phone.</source>
         <translation>Connecting to the phone.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="127"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="125"/>
         <source>Wi-Fi connections are not encrypted. Use them only in a network you trust, or connect over USB.</source>
         <translation>Wi-Fi connections are not encrypted. Use them only in a network you trust, or connect over USB.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="134"/>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="141"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="132"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="139"/>
         <source>Phones in this network</source>
         <translation>Phones in this network</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="142"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="140"/>
         <source>No phone found yet. Open MyPhoneExplorer Client on the phone. The phone needs to be in the same network.</source>
         <translation>No phone found yet. Open MyPhoneExplorer Client on the phone. The phone needs to be in the same network.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="147"/>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="162"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="145"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="160"/>
         <source>Address of the phone</source>
         <translation>Address of the phone</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="160"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="158"/>
         <source>For example 192.168.1.20</source>
         <translation>For example 192.168.1.20</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="173"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="171"/>
         <source>Connect</source>
         <translation>Connect</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="187"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="185"/>
         <source>Show QR code</source>
         <translation>Show QR code</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="206"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="204"/>
         <source>Connect the phone with a USB cable and turn on USB debugging. QPhoneManager then starts MyPhoneExplorer Client on the phone.</source>
         <translation>Connect the phone with a USB cable and turn on USB debugging. QPhoneManager then starts MyPhoneExplorer Client on the phone.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="213"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="211"/>
         <source>Phones at USB</source>
         <translation>Phones at USB</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="214"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="212"/>
         <source>Looking for phones at USB.</source>
         <translation>Looking for phones at USB.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="214"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="212"/>
         <source>No phone found at USB.</source>
         <translation>No phone found at USB.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="221"/>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="256"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="219"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="254"/>
         <source>Search again</source>
         <translation>Search again</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="241"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="239"/>
         <source>Pair the phone with this computer in the system settings first. Paired phones in reach appear here.</source>
         <translation>Pair the phone with this computer in the system settings first. Paired phones in reach appear here.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="248"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="246"/>
         <source>Paired phones</source>
         <translation>Paired phones</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="249"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="247"/>
         <source>Looking for paired phones.</source>
         <translation>Looking for paired phones.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="249"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="247"/>
         <source>No paired phone found.</source>
         <translation>No paired phone found.</translation>
     </message>
@@ -1218,255 +1218,255 @@
         <translation>Save in account</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="122"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="123"/>
         <source>Account: %1</source>
         <translation>Account: %1</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="139"/>
         <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="140"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="141"/>
         <source>First name</source>
         <translation>First name</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="150"/>
         <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="151"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="152"/>
         <source>Last name</source>
         <translation>Last name</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="160"/>
         <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="161"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="162"/>
         <source>Middle name</source>
         <translation>Middle name</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="170"/>
         <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="171"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="172"/>
         <source>Nickname</source>
         <translation>Nickname</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="180"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="181"/>
         <source>Title before the name, such as Dr.</source>
         <translation>Title before the name, such as Dr.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="181"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="182"/>
         <source>Title before the name</source>
         <translation>Title before the name</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="190"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="191"/>
         <source>Addition after the name, such as jr.</source>
         <translation>Addition after the name, such as jr.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="191"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="192"/>
         <source>Addition after the name</source>
         <translation>Addition after the name</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="200"/>
         <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="201"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="202"/>
         <source>Company</source>
         <translation>Company</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="210"/>
         <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="211"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="212"/>
         <source>Department</source>
         <translation>Department</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="221"/>
         <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="222"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="223"/>
         <source>Job title</source>
         <translation>Job title</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="230"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="231"/>
         <source>Phone numbers</source>
         <translation>Phone numbers</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="231"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="232"/>
         <source>Add number</source>
         <translation>Add number</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="232"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="233"/>
         <source>phone number</source>
         <translation>phone number</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="233"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="234"/>
         <source>Number</source>
         <translation>Number</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="239"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="240"/>
         <source>Mail addresses</source>
         <translation>Mail addresses</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="240"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="241"/>
         <source>Add mail address</source>
         <translation>Add mail address</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="241"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="242"/>
         <source>mail address</source>
         <translation>mail address</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="242"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="243"/>
         <source>Mail address</source>
         <translation>Mail address</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="248"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="249"/>
         <source>Addresses</source>
         <translation>Addresses</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="249"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="250"/>
         <source>Add address</source>
         <translation>Add address</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="250"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="251"/>
         <source>address</source>
         <translation>address</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="257"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="258"/>
         <source>Websites</source>
         <translation>Websites</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="258"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="259"/>
         <source>Add website</source>
         <translation>Add website</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="259"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="260"/>
         <source>website</source>
         <translation>website</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="260"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="261"/>
         <source>Address of the website</source>
         <translation>Address of the website</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="266"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="267"/>
         <source>Messengers</source>
         <translation>Messengers</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="267"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="268"/>
         <source>Add messenger</source>
         <translation>Add messenger</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="268"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="269"/>
         <source>messenger name</source>
         <translation>messenger name</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="269"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="270"/>
         <source>Name in the messenger</source>
         <translation>Name in the messenger</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="277"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="278"/>
         <source>Dates</source>
         <translation>Dates</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="292"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="293"/>
         <source>Birthday, for example %1</source>
         <translation>Birthday, for example %1</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="293"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="294"/>
         <source>Birthday</source>
         <translation>Birthday</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="302"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="303"/>
         <source>Anniversary, for example %1</source>
         <translation>Anniversary, for example %1</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="303"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="304"/>
         <source>Anniversary</source>
         <translation>Anniversary</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="311"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="312"/>
         <source>Enter dates like %1.</source>
         <translation>Enter dates like %1.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="320"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="321"/>
         <source>Other dates</source>
         <translation>Other dates</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="321"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="322"/>
         <source>Add date</source>
         <translation>Add date</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="322"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="323"/>
         <source>date</source>
         <translation>date</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="323"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="324"/>
         <source>Date such as 2024-05-31</source>
         <translation>Date such as 2024-05-31</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="331"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="332"/>
         <source>Groups</source>
         <translation>Groups</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="367"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="368"/>
         <source>New group</source>
         <translation>New group</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="368"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="369"/>
         <source>Name of a new group</source>
         <translation>Name of a new group</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="378"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="379"/>
         <source>Add group</source>
         <translation>Add group</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="397"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="409"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="398"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="410"/>
         <source>Note</source>
         <translation>Note</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="431"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="432"/>
         <source>Saving</source>
         <translation>Saving</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="438"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="439"/>
         <source>Cancel</source>
         <translation>Cancel</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="452"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactForm.qml" line="453"/>
         <source>Save</source>
         <translation>Save</translation>
     </message>
@@ -1479,7 +1479,7 @@
         <translation>Contacts</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactList.qml" line="138"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactList.qml" line="144"/>
         <source>No contact matches the search or filter.</source>
         <translation>No contact matches the search or filter.</translation>
     </message>
@@ -1799,53 +1799,53 @@
         <translation>Type of %1</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactValueSection.qml" line="69"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactValueSection.qml" line="70"/>
         <source>Name of the type</source>
         <translation>Name of the type</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactValueSection.qml" line="70"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactValueSection.qml" line="71"/>
         <source>Own name of the type</source>
         <translation>Own name of the type</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactValueSection.qml" line="96"/>
         <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactValueSection.qml" line="97"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactValueSection.qml" line="98"/>
         <source>Street and number</source>
         <translation>Street and number</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactValueSection.qml" line="104"/>
         <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactValueSection.qml" line="105"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactValueSection.qml" line="106"/>
         <source>Postcode</source>
         <translation>Postcode</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactValueSection.qml" line="112"/>
         <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactValueSection.qml" line="113"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactValueSection.qml" line="114"/>
         <source>City</source>
         <translation>City</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactValueSection.qml" line="120"/>
         <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactValueSection.qml" line="121"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactValueSection.qml" line="122"/>
         <source>State or region</source>
         <translation>State or region</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactValueSection.qml" line="128"/>
         <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactValueSection.qml" line="129"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactValueSection.qml" line="130"/>
         <source>Country</source>
         <translation>Country</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactValueSection.qml" line="137"/>
         <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactValueSection.qml" line="138"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactValueSection.qml" line="139"/>
         <source>Post office box</source>
         <translation>Post office box</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactValueSection.qml" line="147"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactValueSection.qml" line="148"/>
         <source>Remove %1</source>
         <translation>Remove %1</translation>
     </message>
@@ -1859,7 +1859,7 @@
     </message>
     <message>
         <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactsPage.qml" line="59"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactsPage.qml" line="353"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactsPage.qml" line="350"/>
         <source>Import contacts</source>
         <translation>Import contacts</translation>
     </message>
@@ -1889,83 +1889,83 @@
         <translation>Show group</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactsPage.qml" line="154"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactsPage.qml" line="155"/>
         <source>All accounts</source>
         <translation>All accounts</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactsPage.qml" line="155"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactsPage.qml" line="156"/>
         <source>Show account</source>
         <translation>Show account</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactsPage.qml" line="181"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactsPage.qml" line="183"/>
         <source>No contacts yet. Sync the phone or add a contact.</source>
         <translation>No contacts yet. Sync the phone or add a contact.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactsPage.qml" line="198"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactsPage.qml" line="200"/>
         <source>Connect</source>
         <translation>Connect</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactsPage.qml" line="270"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactsPage.qml" line="272"/>
         <source>Delete contact %1?</source>
         <translation>Delete contact %1?</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactsPage.qml" line="276"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactsPage.qml" line="278"/>
         <source>Delete</source>
         <translation>Delete</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactsPage.qml" line="287"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactsPage.qml" line="285"/>
         <source>Cancel</source>
         <translation>Cancel</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactsPage.qml" line="305"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactsPage.qml" line="300"/>
         <source>The contact is deleted on the phone and on this computer.</source>
         <translation>The contact is deleted on the phone and on this computer.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactsPage.qml" line="355"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactsPage.qml" line="352"/>
         <source>Contacts (*.vcf *.csv)</source>
         <translation>Contacts (*.vcf *.csv)</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactsPage.qml" line="355"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactsPage.qml" line="376"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactsPage.qml" line="352"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactsPage.qml" line="373"/>
         <source>All files (*)</source>
         <translation>All files (*)</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactsPage.qml" line="363"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactsPage.qml" line="360"/>
         <source>Export contact</source>
         <translation>Export contact</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactsPage.qml" line="363"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactsPage.qml" line="360"/>
         <source>Export contacts</source>
         <translation>Export contacts</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactsPage.qml" line="365"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactsPage.qml" line="362"/>
         <source>vCard (*.vcf)</source>
         <translation>vCard (*.vcf)</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactsPage.qml" line="365"/>
-        <source>Table for spreadsheets (*.csv)</source>
-        <translation>Table for spreadsheets (*.csv)</translation>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactsPage.qml" line="362"/>
+        <source>CSV table (*.csv)</source>
+        <translation>CSV table (*.csv)</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactsPage.qml" line="374"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactsPage.qml" line="371"/>
         <source>Choose a photo</source>
         <translation>Choose a photo</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactsPage.qml" line="376"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/contacts/ContactsPage.qml" line="373"/>
         <source>Pictures (*.jpg *.jpeg *.png *.webp *.bmp *.gif)</source>
         <translation>Pictures (*.jpg *.jpeg *.png *.webp *.bmp *.gif)</translation>
     </message>
@@ -1978,7 +1978,7 @@
         <translation>Conversations</translation>
     </message>
     <message numerus="yes">
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ConversationList.qml" line="54"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ConversationList.qml" line="55"/>
         <source>%n unread, %1</source>
         <translation>
             <numerusform>%n unread, %1</numerusform>
@@ -1986,7 +1986,7 @@
         </translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ConversationList.qml" line="172"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ConversationList.qml" line="178"/>
         <source>No conversation matches the search.</source>
         <translation>No conversation matches the search.</translation>
     </message>
@@ -2005,7 +2005,7 @@
     </message>
     <message>
         <location filename="../../qml/QPhoneManager/Ui/pages/messages/ConversationView.qml" line="89"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ConversationView.qml" line="391"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ConversationView.qml" line="392"/>
         <source>Mark as read</source>
         <translation>Mark as read</translation>
     </message>
@@ -2021,7 +2021,7 @@
     </message>
     <message>
         <location filename="../../qml/QPhoneManager/Ui/pages/messages/ConversationView.qml" line="133"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ConversationView.qml" line="403"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ConversationView.qml" line="404"/>
         <source>Delete</source>
         <translation>Delete</translation>
     </message>
@@ -2061,17 +2061,17 @@
         <translation>Unread</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ConversationView.qml" line="386"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ConversationView.qml" line="387"/>
         <source>Take out of the archive</source>
         <translation>Take out of the archive</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ConversationView.qml" line="386"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ConversationView.qml" line="387"/>
         <source>Keep in the archive</source>
         <translation>Keep in the archive</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ConversationView.qml" line="397"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ConversationView.qml" line="398"/>
         <source>Save all attachments</source>
         <translation>Save all attachments</translation>
     </message>
@@ -2098,7 +2098,7 @@
     <name>DuplicatesDialog</name>
     <message>
         <location filename="../../qml/QPhoneManager/Ui/dialogs/DuplicatesDialog.qml" line="20"/>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/DuplicatesDialog.qml" line="62"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/DuplicatesDialog.qml" line="59"/>
         <source>Duplicate contacts</source>
         <translation>Duplicate contacts</translation>
     </message>
@@ -2108,42 +2108,42 @@
         <translation>Close</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/DuplicatesDialog.qml" line="47"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/DuplicatesDialog.qml" line="44"/>
         <source>Looking for duplicates.</source>
         <translation>Looking for duplicates.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/DuplicatesDialog.qml" line="47"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/DuplicatesDialog.qml" line="44"/>
         <source>No duplicates found.</source>
         <translation>No duplicates found.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/DuplicatesDialog.qml" line="47"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/DuplicatesDialog.qml" line="44"/>
         <source>Merging keeps the first contact, adds what only the second one has and deletes the second one on the phone.</source>
         <translation>Merging keeps the first contact, adds what only the second one has and deletes the second one on the phone.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/DuplicatesDialog.qml" line="82"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/DuplicatesDialog.qml" line="79"/>
         <source>%1 and %2</source>
         <translation>%1 and %2</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/DuplicatesDialog.qml" line="98"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/DuplicatesDialog.qml" line="95"/>
         <source>Merge</source>
         <translation>Merge</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/DuplicatesDialog.qml" line="101"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/DuplicatesDialog.qml" line="98"/>
         <source>Merge %1 and %2</source>
         <translation>Merge %1 and %2</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/DuplicatesDialog.qml" line="112"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/DuplicatesDialog.qml" line="109"/>
         <source>Ignore</source>
         <translation>Ignore</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/DuplicatesDialog.qml" line="114"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/DuplicatesDialog.qml" line="111"/>
         <source>Ignore %1 and %2</source>
         <translation>Ignore %1 and %2</translation>
     </message>
@@ -2272,31 +2272,31 @@
         <translation>Calendar</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventForm.qml" line="178"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventForm.qml" line="188"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventForm.qml" line="179"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventForm.qml" line="189"/>
         <source>Repeats</source>
         <translation>Repeats</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventForm.qml" line="197"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventForm.qml" line="207"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventForm.qml" line="199"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventForm.qml" line="209"/>
         <source>Colour</source>
         <translation>Colour</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventForm.qml" line="216"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventForm.qml" line="226"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventForm.qml" line="219"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventForm.qml" line="229"/>
         <source>Shown as</source>
         <translation>Shown as</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventForm.qml" line="235"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventForm.qml" line="245"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventForm.qml" line="239"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventForm.qml" line="249"/>
         <source>Visible to</source>
         <translation>Visible to</translation>
     </message>
     <message numerus="yes">
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventForm.qml" line="261"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventForm.qml" line="266"/>
         <source>%n time(s) left out of the series.</source>
         <translation>
             <numerusform>%n time left out of the series.</numerusform>
@@ -2304,48 +2304,48 @@
         </translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventForm.qml" line="268"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventForm.qml" line="273"/>
         <source>Bring back</source>
         <translation>Bring back</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventForm.qml" line="279"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventForm.qml" line="284"/>
         <source>Reminders</source>
         <translation>Reminders</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventForm.qml" line="304"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventForm.qml" line="309"/>
         <source>Remove the reminder %1</source>
         <translation>Remove the reminder %1</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventForm.qml" line="330"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventForm.qml" line="335"/>
         <source>Time of a new reminder</source>
         <translation>Time of a new reminder</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventForm.qml" line="341"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventForm.qml" line="347"/>
         <source>Add reminder</source>
         <translation>Add reminder</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventForm.qml" line="352"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventForm.qml" line="365"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventForm.qml" line="358"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventForm.qml" line="371"/>
         <source>Description</source>
         <translation>Description</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventForm.qml" line="395"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventForm.qml" line="401"/>
         <source>Saving</source>
         <translation>Saving</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventForm.qml" line="402"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventForm.qml" line="408"/>
         <source>Cancel</source>
         <translation>Cancel</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventForm.qml" line="416"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventForm.qml" line="422"/>
         <source>Save</source>
         <translation>Save</translation>
     </message>
@@ -2358,15 +2358,10 @@
         <translation>Appointments</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventList.qml" line="70"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventList.qml" line="104"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventList.qml" line="72"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventList.qml" line="109"/>
         <source>(No title)</source>
         <translation>(No title)</translation>
-    </message>
-    <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/EventList.qml" line="111"/>
-        <source>%1, %2</source>
-        <translation>%1, %2</translation>
     </message>
 </context>
 <context>
@@ -2382,27 +2377,27 @@
         <translation>Replace</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FileConflictDialog.qml" line="38"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FileConflictDialog.qml" line="34"/>
         <source>Keep both</source>
         <translation>Keep both</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FileConflictDialog.qml" line="50"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FileConflictDialog.qml" line="42"/>
         <source>Skip</source>
         <translation>Skip</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FileConflictDialog.qml" line="71"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FileConflictDialog.qml" line="60"/>
         <source>The folder on the phone already has a file with this name. Replace it, keep both files, or skip this one.</source>
         <translation>The folder on the phone already has a file with this name. Replace it, keep both files, or skip this one.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FileConflictDialog.qml" line="71"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FileConflictDialog.qml" line="60"/>
         <source>The folder on this computer already has a file with this name. Replace it, keep both files, or skip this one.</source>
         <translation>The folder on this computer already has a file with this name. Replace it, keep both files, or skip this one.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FileConflictDialog.qml" line="80"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FileConflictDialog.qml" line="69"/>
         <source>Do the same for the other files of this transfer</source>
         <translation>Do the same for the other files of this transfer</translation>
     </message>
@@ -2416,7 +2411,7 @@
     </message>
     <message>
         <location filename="../../qml/QPhoneManager/Ui/pages/files/FileNameDialog.qml" line="22"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FileNameDialog.qml" line="52"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FileNameDialog.qml" line="44"/>
         <source>New folder</source>
         <translation>New folder</translation>
     </message>
@@ -2431,12 +2426,12 @@
         <translation>Create</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FileNameDialog.qml" line="42"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FileNameDialog.qml" line="38"/>
         <source>Cancel</source>
         <translation>Cancel</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FileNameDialog.qml" line="66"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FileNameDialog.qml" line="59"/>
         <source>Name</source>
         <translation>Name</translation>
     </message>
@@ -2444,138 +2439,138 @@
 <context>
     <name>FilesPage</name>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="51"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="56"/>
         <source>Up to the folder above</source>
         <translation>Up to the folder above</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="78"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="83"/>
         <source>Path</source>
         <translation>Path</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="110"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="115"/>
         <source>Go to this folder</source>
         <translation>Go to this folder</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="126"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="131"/>
         <source>New folder</source>
         <translation>New folder</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="144"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="512"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="149"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="531"/>
         <source>Copy files from this computer</source>
         <translation>Copy files from this computer</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="162"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="597"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="748"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="167"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="618"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="762"/>
         <source>Save on this computer</source>
         <translation>Save on this computer</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="180"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="615"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="185"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="636"/>
         <source>Paste here</source>
         <translation>Paste here</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="198"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="203"/>
         <source>Load the folder again</source>
         <translation>Load the folder again</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="216"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="221"/>
         <source>Show as a list</source>
         <translation>Show as a list</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="216"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="221"/>
         <source>Show as a grid</source>
         <translation>Show as a grid</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="263"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="394"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="268"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="405"/>
         <source>Files</source>
         <translation>Files</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="264"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="269"/>
         <source>Enter opens, Backspace goes up, F2 renames, Delete deletes, the menu key shows more</source>
         <translation>Enter opens, Backspace goes up, F2 renames, Delete deletes, the menu key shows more</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="561"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="580"/>
         <source>Connect</source>
         <translation>Connect</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="573"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="593"/>
         <source>Copy files</source>
         <translation>Copy files</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="578"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="598"/>
         <source>Copy a folder</source>
         <translation>Copy a folder</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="591"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="612"/>
         <source>Open</source>
         <translation>Open</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="591"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="612"/>
         <source>Open on this computer</source>
         <translation>Open on this computer</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="603"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="624"/>
         <source>Rename</source>
         <translation>Rename</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="609"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="630"/>
         <source>Cut</source>
         <translation>Cut</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="621"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="656"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="642"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="677"/>
         <source>Delete</source>
         <translation>Delete</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="650"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="671"/>
         <source>Delete %1?</source>
         <translation>Delete %1?</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="667"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="684"/>
         <source>Cancel</source>
         <translation>Cancel</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="684"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="698"/>
         <source>The folder is deleted on the phone with everything in it. This cannot be undone.</source>
         <translation>The folder is deleted on the phone with everything in it. This cannot be undone.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="684"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="698"/>
         <source>The file is deleted on the phone. This cannot be undone.</source>
         <translation>The file is deleted on the phone. This cannot be undone.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="731"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="745"/>
         <source>Copy files to the phone</source>
         <translation>Copy files to the phone</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="740"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/files/FilesPage.qml" line="754"/>
         <source>Copy a folder to the phone</source>
         <translation>Copy a folder to the phone</translation>
     </message>
@@ -2583,37 +2578,37 @@
 <context>
     <name>HelpPage</name>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/HelpPage.qml" line="73"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/HelpPage.qml" line="74"/>
         <source>Back</source>
         <translation>Back</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/HelpPage.qml" line="91"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/HelpPage.qml" line="92"/>
         <source>Forward</source>
         <translation>Forward</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/HelpPage.qml" line="119"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/HelpPage.qml" line="120"/>
         <source>About QPhoneManager</source>
         <translation>About QPhoneManager</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/HelpPage.qml" line="189"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/HelpPage.qml" line="191"/>
         <source>Contents</source>
         <translation>Contents</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/HelpPage.qml" line="190"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/HelpPage.qml" line="192"/>
         <source>Enter opens the chapter</source>
         <translation>Enter opens the chapter</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/HelpPage.qml" line="264"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/HelpPage.qml" line="271"/>
         <source>QPhoneManager is loading the help.</source>
         <translation>QPhoneManager is loading the help.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/HelpPage.qml" line="303"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/HelpPage.qml" line="315"/>
         <source>Tab moves to the next link, Enter follows it</source>
         <translation>Tab moves to the next link, Enter follows it</translation>
     </message>
@@ -2663,69 +2658,69 @@
         <translation>Show messages</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="53"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="54"/>
         <source>Conversations</source>
         <translation>Conversations</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="66"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="67"/>
         <source>Scheduled</source>
         <translation>Scheduled</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="83"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="84"/>
         <source>New message</source>
         <translation>New message</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="101"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="326"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="102"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="320"/>
         <source>Read an archive file</source>
         <translation>Read an archive file</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="119"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="309"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="120"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="303"/>
         <source>Export all messages</source>
         <translation>Export all messages</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="161"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="162"/>
         <source>Connect</source>
         <translation>Connect</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="172"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="173"/>
         <source>No messages yet. Sync the phone to load them.</source>
         <translation>No messages yet. Sync the phone to load them.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="221"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="222"/>
         <source>Choose a scheduled message to change it, or plan a new one.</source>
         <translation>Choose a scheduled message to change it, or plan a new one.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="221"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="222"/>
         <source>No scheduled messages. The phone sends a scheduled message on its own at the time you choose.</source>
         <translation>No scheduled messages. The phone sends a scheduled message on its own at the time you choose.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="222"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="223"/>
         <source>Plan a message</source>
         <translation>Plan a message</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="257"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="258"/>
         <source>Delete the conversation with %1?</source>
         <translation>Delete the conversation with %1?</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="257"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="258"/>
         <source>Delete the scheduled message?</source>
         <translation>Delete the scheduled message?</translation>
     </message>
     <message numerus="yes">
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="257"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="258"/>
         <source>Delete %n message(s)?</source>
         <translation>
             <numerusform>Delete %n message?</numerusform>
@@ -2733,58 +2728,58 @@
         </translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="263"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="264"/>
         <source>Delete</source>
         <translation>Delete</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="274"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="271"/>
         <source>Cancel</source>
         <translation>Cancel</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="300"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="294"/>
         <source>The phone does not send it then.</source>
         <translation>The phone does not send it then.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="300"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="294"/>
         <source>The phone deletes text messages only if its app allows it. Otherwise they stay on the phone and in this list.</source>
         <translation>The phone deletes text messages only if its app allows it. Otherwise they stay on the phone and in this list.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="309"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="303"/>
         <source>Export the conversation</source>
         <translation>Export the conversation</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="311"/>
-        <source>Table for spreadsheets (*.csv)</source>
-        <translation>Table for spreadsheets (*.csv)</translation>
-    </message>
-    <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="311"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="305"/>
         <source>Web page (*.html)</source>
         <translation>Web page (*.html)</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="311"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="328"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="305"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="322"/>
         <source>Archive file (*.xml)</source>
         <translation>Archive file (*.xml)</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="328"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="305"/>
+        <source>CSV table (*.csv)</source>
+        <translation>CSV table (*.csv)</translation>
+    </message>
+    <message>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="322"/>
         <source>All files (*)</source>
         <translation>All files (*)</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="336"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="330"/>
         <source>Save the attachment</source>
         <translation>Save the attachment</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="345"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/MessagesPage.qml" line="339"/>
         <source>Save all attachments in a folder</source>
         <translation>Save all attachments in a folder</translation>
     </message>
@@ -2807,52 +2802,52 @@
         <translation>Connect the phone to save changes.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NoteForm.qml" line="46"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NoteForm.qml" line="53"/>
         <source>Write a note</source>
         <translation>Write a note</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NoteForm.qml" line="48"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NoteForm.qml" line="55"/>
         <source>Text of the note</source>
         <translation>Text of the note</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NoteForm.qml" line="57"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NoteForm.qml" line="64"/>
         <source>Categories</source>
         <translation>Categories</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NoteForm.qml" line="94"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NoteForm.qml" line="101"/>
         <source>New category</source>
         <translation>New category</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NoteForm.qml" line="95"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NoteForm.qml" line="102"/>
         <source>Name of a new category</source>
         <translation>Name of a new category</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NoteForm.qml" line="105"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NoteForm.qml" line="112"/>
         <source>Add category</source>
         <translation>Add category</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NoteForm.qml" line="127"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NoteForm.qml" line="134"/>
         <source>Delete</source>
         <translation>Delete</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NoteForm.qml" line="147"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NoteForm.qml" line="154"/>
         <source>Saving</source>
         <translation>Saving</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NoteForm.qml" line="154"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NoteForm.qml" line="161"/>
         <source>Cancel</source>
         <translation>Cancel</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NoteForm.qml" line="168"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NoteForm.qml" line="175"/>
         <source>Save</source>
         <translation>Save</translation>
     </message>
@@ -2865,7 +2860,7 @@
         <translation>Notes</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NoteList.qml" line="128"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NoteList.qml" line="134"/>
         <source>No note matches the search or filter.</source>
         <translation>No note matches the search or filter.</translation>
     </message>
@@ -2873,58 +2868,58 @@
 <context>
     <name>NotesPage</name>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NotesPage.qml" line="40"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NotesPage.qml" line="42"/>
         <source>All categories</source>
         <translation>All categories</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NotesPage.qml" line="42"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NotesPage.qml" line="44"/>
         <source>Show notes of the category</source>
         <translation>Show notes of the category</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NotesPage.qml" line="58"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NotesPage.qml" line="61"/>
         <source>New note</source>
         <translation>New note</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NotesPage.qml" line="76"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NotesPage.qml" line="205"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NotesPage.qml" line="79"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NotesPage.qml" line="211"/>
         <source>Note categories</source>
         <translation>Note categories</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NotesPage.qml" line="107"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NotesPage.qml" line="110"/>
         <source>No notes yet. Sync the phone or add a note.</source>
         <translation>No notes yet. Sync the phone or add a note.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NotesPage.qml" line="124"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NotesPage.qml" line="127"/>
         <source>Connect</source>
         <translation>Connect</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NotesPage.qml" line="134"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NotesPage.qml" line="137"/>
         <source>Select a note in the list, or add a new one.</source>
         <translation>Select a note in the list, or add a new one.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NotesPage.qml" line="181"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NotesPage.qml" line="187"/>
         <source>Delete note %1?</source>
         <translation>Delete note %1?</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NotesPage.qml" line="182"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NotesPage.qml" line="188"/>
         <source>The note is deleted on the phone and on this computer.</source>
         <translation>The note is deleted on the phone and on this computer.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NotesPage.qml" line="193"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NotesPage.qml" line="199"/>
         <source>The note was changed on the phone</source>
         <translation>The note was changed on the phone</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NotesPage.qml" line="194"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/NotesPage.qml" line="200"/>
         <source>Someone changed this note on the phone after it was loaded here. Choose which version to keep.</source>
         <translation>Someone changed this note on the phone after it was loaded here. Choose which version to keep.</translation>
     </message>
@@ -2932,7 +2927,7 @@
 <context>
     <name>NotificationsPage</name>
     <message numerus="yes">
-        <location filename="../../qml/QPhoneManager/Ui/pages/notifications/NotificationsPage.qml" line="39"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/notifications/NotificationsPage.qml" line="41"/>
         <source>%n notification(s) on the phone</source>
         <translation>
             <numerusform>%n notification on the phone</numerusform>
@@ -2940,62 +2935,62 @@
         </translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/notifications/NotificationsPage.qml" line="48"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/notifications/NotificationsPage.qml" line="50"/>
         <source>Open on the phone</source>
         <translation>Open on the phone</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/notifications/NotificationsPage.qml" line="66"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/notifications/NotificationsPage.qml" line="68"/>
         <source>Dismiss on the phone</source>
         <translation>Dismiss on the phone</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/notifications/NotificationsPage.qml" line="86"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/notifications/NotificationsPage.qml" line="88"/>
         <source>Load again</source>
         <translation>Load again</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/notifications/NotificationsPage.qml" line="130"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/notifications/NotificationsPage.qml" line="132"/>
         <source>Notifications</source>
         <translation>Notifications</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/notifications/NotificationsPage.qml" line="131"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/notifications/NotificationsPage.qml" line="133"/>
         <source>Enter opens the notification on the phone, Delete dismisses it there</source>
         <translation>Enter opens the notification on the phone, Delete dismisses it there</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/notifications/NotificationsPage.qml" line="176"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/notifications/NotificationsPage.qml" line="178"/>
         <source>%1, %2</source>
         <translation>%1, %2</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/notifications/NotificationsPage.qml" line="188"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/notifications/NotificationsPage.qml" line="190"/>
         <source>Select a notification in the list.</source>
         <translation>Select a notification in the list.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/notifications/NotificationsPage.qml" line="220"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/notifications/NotificationsPage.qml" line="222"/>
         <source>Picture of the notification</source>
         <translation>Picture of the notification</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/notifications/NotificationsPage.qml" line="243"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/notifications/NotificationsPage.qml" line="245"/>
         <source>Runs this action on the phone</source>
         <translation>Runs this action on the phone</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/notifications/NotificationsPage.qml" line="266"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/notifications/NotificationsPage.qml" line="268"/>
         <source>Connect</source>
         <translation>Connect</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/notifications/NotificationsPage.qml" line="266"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/notifications/NotificationsPage.qml" line="268"/>
         <source>Show the setting on the phone</source>
         <translation>Show the setting on the phone</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/notifications/NotificationsPage.qml" line="297"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/notifications/NotificationsPage.qml" line="299"/>
         <source>%1, %2. %3</source>
         <translation>%1, %2. %3</translation>
     </message>
@@ -3597,27 +3592,27 @@
         <translation>Use this part</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/PhotoCropDialog.qml" line="42"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/PhotoCropDialog.qml" line="38"/>
         <source>Cancel</source>
         <translation>Cancel</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/PhotoCropDialog.qml" line="68"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/PhotoCropDialog.qml" line="61"/>
         <source>Drag the frame or move it with the arrow keys. Plus and minus change its size.</source>
         <translation>Drag the frame or move it with the arrow keys. Plus and minus change its size.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/PhotoCropDialog.qml" line="80"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/PhotoCropDialog.qml" line="73"/>
         <source>Part of the picture for the photo</source>
         <translation>Part of the picture for the photo</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/PhotoCropDialog.qml" line="141"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/PhotoCropDialog.qml" line="134"/>
         <source>Size</source>
         <translation>Size</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/PhotoCropDialog.qml" line="151"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/PhotoCropDialog.qml" line="144"/>
         <source>Size of the part</source>
         <translation>Size of the part</translation>
     </message>
@@ -3635,22 +3630,22 @@
         <translation>Connect</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/PinDialog.qml" line="45"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/PinDialog.qml" line="41"/>
         <source>Cancel</source>
         <translation>Cancel</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/PinDialog.qml" line="68"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/PinDialog.qml" line="61"/>
         <source>MyPhoneExplorer Client on the phone is protected with a PIN. Enter the PIN you set in the app.</source>
         <translation>MyPhoneExplorer Client on the phone is protected with a PIN. Enter the PIN you set in the app.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/PinDialog.qml" line="87"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/PinDialog.qml" line="80"/>
         <source>The PIN is wrong. After one more wrong PIN, the app on the phone stops.</source>
         <translation>The PIN is wrong. After one more wrong PIN, the app on the phone stops.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/PinDialog.qml" line="87"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/PinDialog.qml" line="80"/>
         <source>The PIN is wrong. %n tries left.</source>
         <translation>
             <numerusform>The PIN is wrong. %n try left.</numerusform>
@@ -3658,18 +3653,18 @@
         </translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/PinDialog.qml" line="99"/>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/PinDialog.qml" line="102"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/PinDialog.qml" line="92"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/PinDialog.qml" line="95"/>
         <source>PIN</source>
         <translation>PIN</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/PinDialog.qml" line="115"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/PinDialog.qml" line="108"/>
         <source>Remember the PIN in the keyring of this computer</source>
         <translation>Remember the PIN in the keyring of this computer</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/PinDialog.qml" line="120"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/PinDialog.qml" line="117"/>
         <source>The connection is not encrypted. Use it only in a network you trust.</source>
         <translation>The connection is not encrypted. Use it only in a network you trust.</translation>
     </message>
@@ -3678,81 +3673,81 @@
     <name>ProfilesDialog</name>
     <message>
         <location filename="../../qml/QPhoneManager/Ui/dialogs/ProfilesDialog.qml" line="23"/>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ProfilesDialog.qml" line="62"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ProfilesDialog.qml" line="63"/>
         <source>Phones on this computer</source>
         <translation>Phones on this computer</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ProfilesDialog.qml" line="29"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ProfilesDialog.qml" line="30"/>
         <source>Close</source>
         <translation>Close</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ProfilesDialog.qml" line="47"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ProfilesDialog.qml" line="48"/>
         <source>No phones yet. Connect a phone to add it here.</source>
         <translation>No phones yet. Connect a phone to add it here.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ProfilesDialog.qml" line="83"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ProfilesDialog.qml" line="84"/>
         <source>%1 (shown now)</source>
         <translation>%1 (shown now)</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ProfilesDialog.qml" line="89"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ProfilesDialog.qml" line="90"/>
         <source>%1, last connected %2</source>
         <translation>%1, last connected %2</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ProfilesDialog.qml" line="99"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ProfilesDialog.qml" line="100"/>
         <source>Show</source>
         <translation>Show</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ProfilesDialog.qml" line="102"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ProfilesDialog.qml" line="103"/>
         <source>Show %1</source>
         <translation>Show %1</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ProfilesDialog.qml" line="113"/>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ProfilesDialog.qml" line="160"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ProfilesDialog.qml" line="114"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ProfilesDialog.qml" line="161"/>
         <source>Rename</source>
         <translation>Rename</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ProfilesDialog.qml" line="115"/>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ProfilesDialog.qml" line="156"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ProfilesDialog.qml" line="116"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ProfilesDialog.qml" line="157"/>
         <source>Rename %1</source>
         <translation>Rename %1</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ProfilesDialog.qml" line="130"/>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ProfilesDialog.qml" line="205"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ProfilesDialog.qml" line="131"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ProfilesDialog.qml" line="207"/>
         <source>Remove</source>
         <translation>Remove</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ProfilesDialog.qml" line="132"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ProfilesDialog.qml" line="133"/>
         <source>Remove %1</source>
         <translation>Remove %1</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ProfilesDialog.qml" line="166"/>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ProfilesDialog.qml" line="212"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ProfilesDialog.qml" line="167"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ProfilesDialog.qml" line="215"/>
         <source>Cancel</source>
         <translation>Cancel</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ProfilesDialog.qml" line="184"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ProfilesDialog.qml" line="186"/>
         <source>New name</source>
         <translation>New name</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ProfilesDialog.qml" line="201"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ProfilesDialog.qml" line="203"/>
         <source>Remove %1 from this computer?</source>
         <translation>Remove %1 from this computer?</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ProfilesDialog.qml" line="223"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ProfilesDialog.qml" line="228"/>
         <source>The stored data and the remembered PIN of this phone are deleted from this computer. Nothing changes on the phone.</source>
         <translation>The stored data and the remembered PIN of this phone are deleted from this computer. Nothing changes on the phone.</translation>
     </message>
@@ -3770,37 +3765,37 @@
         <translation>Close</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/QrConnectDialog.qml" line="56"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/QrConnectDialog.qml" line="58"/>
         <source>Open MyPhoneExplorer Client on the phone, choose the QR code scanner and point the camera at this code.</source>
         <translation>Open MyPhoneExplorer Client on the phone, choose the QR code scanner and point the camera at this code.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/QrConnectDialog.qml" line="70"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/QrConnectDialog.qml" line="72"/>
         <source>QR code for MyPhoneExplorer Client</source>
         <translation>QR code for MyPhoneExplorer Client</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/QrConnectDialog.qml" line="77"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/QrConnectDialog.qml" line="79"/>
         <source>This computer has no address in a local network. Connect it to the same Wi-Fi as the phone, then open this window again.</source>
         <translation>This computer has no address in a local network. Connect it to the same Wi-Fi as the phone, then open this window again.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/QrConnectDialog.qml" line="85"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/QrConnectDialog.qml" line="87"/>
         <source>The phone connects to this computer at %1. Both need to be in the same network.</source>
         <translation>The phone connects to this computer at %1. Both need to be in the same network.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/QrConnectDialog.qml" line="98"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/QrConnectDialog.qml" line="100"/>
         <source>Waiting</source>
         <translation>Waiting</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/QrConnectDialog.qml" line="103"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/QrConnectDialog.qml" line="105"/>
         <source>Connecting to the phone.</source>
         <translation>Connecting to the phone.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/QrConnectDialog.qml" line="103"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/QrConnectDialog.qml" line="105"/>
         <source>Waiting for the phone.</source>
         <translation>Waiting for the phone.</translation>
     </message>
@@ -3813,12 +3808,12 @@
         <translation>Scheduled messages</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ScheduledList.qml" line="96"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ScheduledList.qml" line="97"/>
         <source>%1, %2</source>
         <translation>%1, %2</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ScheduledList.qml" line="122"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/messages/ScheduledList.qml" line="128"/>
         <source>No scheduled messages.</source>
         <translation>No scheduled messages.</translation>
     </message>
@@ -3832,7 +3827,7 @@
     </message>
     <message>
         <location filename="../../qml/QPhoneManager/Ui/pages/screen/ScreenPage.qml" line="49"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/screen/ScreenPage.qml" line="327"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/screen/ScreenPage.qml" line="351"/>
         <source>Show the screen</source>
         <translation>Show the screen</translation>
     </message>
@@ -3857,72 +3852,72 @@
         <translation>Type on the phone</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/screen/ScreenPage.qml" line="142"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/screen/ScreenPage.qml" line="154"/>
         <source>Turn the picture</source>
         <translation>Turn the picture</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/screen/ScreenPage.qml" line="160"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/screen/ScreenPage.qml" line="172"/>
         <source>Fit into the window</source>
         <translation>Fit into the window</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/screen/ScreenPage.qml" line="167"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/screen/ScreenPage.qml" line="179"/>
         <source>Off shows the screen at its full size</source>
         <translation>Off shows the screen at its full size</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/screen/ScreenPage.qml" line="169"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/screen/ScreenPage.qml" line="181"/>
         <source>Full size, 100 %</source>
         <translation>Full size, 100 %</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/screen/ScreenPage.qml" line="181"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/screen/ScreenPage.qml" line="205"/>
         <source>Save a screenshot</source>
         <translation>Save a screenshot</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/screen/ScreenPage.qml" line="237"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/screen/ScreenPage.qml" line="261"/>
         <source>Open the setting on the phone</source>
         <translation>Open the setting on the phone</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/screen/ScreenPage.qml" line="250"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/screen/ScreenPage.qml" line="274"/>
         <source>Check again</source>
         <translation>Check again</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/screen/ScreenPage.qml" line="291"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/screen/ScreenPage.qml" line="315"/>
         <source>Screen of the phone</source>
         <translation>Screen of the phone</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/screen/ScreenPage.qml" line="292"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/screen/ScreenPage.qml" line="316"/>
         <source>Typing goes to the phone. Tab leaves the screen.</source>
         <translation>Typing goes to the phone. Tab leaves the screen.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/screen/ScreenPage.qml" line="292"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/screen/ScreenPage.qml" line="316"/>
         <source>Click to tap, drag to swipe, right-click to hold.</source>
         <translation>Click to tap, drag to swipe, right-click to hold.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/screen/ScreenPage.qml" line="326"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/screen/ScreenPage.qml" line="350"/>
         <source>The screen of the phone shows here. The phone asks you first whether it may share it.</source>
         <translation>The screen of the phone shows here. The phone asks you first whether it may share it.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/screen/ScreenPage.qml" line="338"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/screen/ScreenPage.qml" line="362"/>
         <source>Connect</source>
         <translation>Connect</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/screen/ScreenPage.qml" line="348"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/screen/ScreenPage.qml" line="372"/>
         <source>Save the screenshot</source>
         <translation>Save the screenshot</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/screen/ScreenPage.qml" line="350"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/screen/ScreenPage.qml" line="374"/>
         <source>PNG pictures (*.png)</source>
         <translation>PNG pictures (*.png)</translation>
     </message>
@@ -4071,32 +4066,32 @@
         <translation>Close</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="66"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="64"/>
         <source>Connection</source>
         <translation>Connection</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="77"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="75"/>
         <source>Appearance</source>
         <translation>Appearance</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="88"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="86"/>
         <source>Language and storage</source>
         <translation>Language and storage</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="100"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="98"/>
         <source>Notifications</source>
         <translation>Notifications</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="123"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="122"/>
         <source>adb program for USB</source>
         <translation>adb program for USB</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="137"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="136"/>
         <source>Path of the adb program</source>
         <translation>Path of the adb program</translation>
     </message>
@@ -4146,139 +4141,139 @@
         <translation>Try %1 later</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="222"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="224"/>
         <source>Connect to the last phone at start and after a lost connection</source>
         <translation>Connect to the last phone at start and after a lost connection</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="230"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="238"/>
         <source>Let the phone connect to this computer at any time</source>
         <translation>Let the phone connect to this computer at any time</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="237"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="249"/>
         <source>Without this, this computer waits for the phone only while the QR code is shown.</source>
         <translation>Without this, this computer waits for the phone only while the QR code is shown.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="246"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="258"/>
         <source>Wi-Fi connections are not encrypted. Use them only in a network you trust, or connect over USB.</source>
         <translation>Wi-Fi connections are not encrypted. Use them only in a network you trust, or connect over USB.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="256"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="268"/>
         <source>Colors</source>
         <translation>Colors</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="265"/>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="314"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="280"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="354"/>
         <source>Like the system</source>
         <translation>Like the system</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="272"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="294"/>
         <source>Light</source>
         <translation>Light</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="279"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="308"/>
         <source>Dark</source>
         <translation>Dark</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="287"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="323"/>
         <source>Reduce animations</source>
         <translation>Reduce animations</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="301"/>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="327"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="341"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="369"/>
         <source>Language</source>
         <translation>Language</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="333"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="376"/>
         <source>A new language applies after QPhoneManager restarts.</source>
         <translation>A new language applies after QPhoneManager restarts.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="340"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="383"/>
         <source>Storage folder</source>
         <translation>Storage folder</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="357"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="400"/>
         <source>Choose folder</source>
         <translation>Choose folder</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="368"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="411"/>
         <source>Use default folder</source>
         <translation>Use default folder</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="380"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="423"/>
         <source>Data that is already stored stays in the old folder.</source>
         <translation>Data that is already stored stays in the old folder.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="396"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="439"/>
         <source>Phone and desktop</source>
         <translation>Phone and desktop</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="403"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="448"/>
         <source>Show new notifications of the phone on this computer</source>
         <translation>Show new notifications of the phone on this computer</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="411"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="462"/>
         <source>Share the clipboard between the phone and this computer</source>
         <translation>Share the clipboard between the phone and this computer</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="418"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="473"/>
         <source>Text you copy on this computer goes to the phone. Android passes on text copied on the phone only while MyPhoneExplorer Client is open there.</source>
         <translation>Text you copy on this computer goes to the phone. Android passes on text copied on the phone only while MyPhoneExplorer Client is open there.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="425"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="480"/>
         <source>Start</source>
         <translation>Start</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="432"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="489"/>
         <source>Start in the notification area, without the window</source>
         <translation>Start in the notification area, without the window</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="439"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="500"/>
         <source>If the desktop has no notification area, the window opens anyway. This applies from the next start.</source>
         <translation>If the desktop has no notification area, the window opens anyway. This applies from the next start.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="455"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="516"/>
         <source>Choose the adb program</source>
         <translation>Choose the adb program</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="469"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="530"/>
         <source>Choose the storage folder</source>
         <translation>Choose the storage folder</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="479"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="540"/>
         <source>USB cable</source>
         <translation>USB cable</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="481"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="542"/>
         <source>Wi-Fi</source>
         <translation>Wi-Fi</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="482"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/SettingsDialog.qml" line="543"/>
         <source>Bluetooth</source>
         <translation>Bluetooth</translation>
     </message>
@@ -4422,54 +4417,54 @@
         <translation>Repeats</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="182"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="193"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="183"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="194"/>
         <source>Priority</source>
         <translation>Priority</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="203"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="205"/>
         <source>Categories</source>
         <translation>Categories</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="240"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="242"/>
         <source>New category</source>
         <translation>New category</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="241"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="243"/>
         <source>Name of a new category</source>
         <translation>Name of a new category</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="251"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="253"/>
         <source>Add category</source>
         <translation>Add category</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="265"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="278"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="267"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="280"/>
         <source>Description</source>
         <translation>Description</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="305"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="307"/>
         <source>Delete</source>
         <translation>Delete</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="325"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="327"/>
         <source>Saving</source>
         <translation>Saving</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="332"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="334"/>
         <source>Cancel</source>
         <translation>Cancel</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="346"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskForm.qml" line="348"/>
         <source>Save</source>
         <translation>Save</translation>
     </message>
@@ -4492,12 +4487,12 @@
         <translation>Done: %1</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskList.qml" line="106"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskList.qml" line="121"/>
         <source>High</source>
         <translation>High</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskList.qml" line="139"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TaskList.qml" line="159"/>
         <source>No task matches the search or filter.</source>
         <translation>No task matches the search or filter.</translation>
     </message>
@@ -4505,95 +4500,95 @@
 <context>
     <name>TasksPage</name>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="41"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="43"/>
         <source>Show tasks</source>
         <translation>Show tasks</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="49"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="52"/>
         <source>Open</source>
         <translation>Open</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="61"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="64"/>
         <source>Done</source>
         <translation>Done</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="73"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="76"/>
         <source>All</source>
         <translation>All</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="89"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="92"/>
         <source>New task</source>
         <translation>New task</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="107"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="285"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="110"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="291"/>
         <source>Import tasks</source>
         <translation>Import tasks</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="125"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="295"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="128"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="301"/>
         <source>Export tasks</source>
         <translation>Export tasks</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="143"/>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="272"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="146"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="278"/>
         <source>Task categories</source>
         <translation>Task categories</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="174"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="177"/>
         <source>No tasks yet. Sync the phone or add a task.</source>
         <translation>No tasks yet. Sync the phone or add a task.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="191"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="194"/>
         <source>Connect</source>
         <translation>Connect</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="201"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="204"/>
         <source>Select a task in the list, or add a new one.</source>
         <translation>Select a task in the list, or add a new one.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="248"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="254"/>
         <source>Delete task %1?</source>
         <translation>Delete task %1?</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="249"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="255"/>
         <source>The task is deleted on the phone and on this computer.</source>
         <translation>The task is deleted on the phone and on this computer.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="260"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="266"/>
         <source>The task was changed on the phone</source>
         <translation>The task was changed on the phone</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="261"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="267"/>
         <source>Someone changed this task on the phone after it was loaded here. Choose which version to keep.</source>
         <translation>Someone changed this task on the phone after it was loaded here. Choose which version to keep.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="287"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="293"/>
         <source>iCalendar (*.ics *.ical *.vcs)</source>
         <translation>iCalendar (*.ics *.ical *.vcs)</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="287"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="293"/>
         <source>All files (*)</source>
         <translation>All files (*)</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="297"/>
+        <location filename="../../qml/QPhoneManager/Ui/pages/organizer/TasksPage.qml" line="303"/>
         <source>iCalendar (*.ics)</source>
         <translation>iCalendar (*.ics)</translation>
     </message>
@@ -4634,22 +4629,22 @@
         <translation>Save my version</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/VersionConflictDialog.qml" line="45"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/VersionConflictDialog.qml" line="41"/>
         <source>Keep the phone&apos;s version</source>
         <translation>Keep the phone&apos;s version</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/VersionConflictDialog.qml" line="59"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/VersionConflictDialog.qml" line="51"/>
         <source>Back to editing</source>
         <translation>Back to editing</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/VersionConflictDialog.qml" line="94"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/VersionConflictDialog.qml" line="83"/>
         <source>Your version</source>
         <translation>Your version</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/VersionConflictDialog.qml" line="117"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/VersionConflictDialog.qml" line="110"/>
         <source>On the phone</source>
         <translation>On the phone</translation>
     </message>
@@ -4711,12 +4706,12 @@ The source code of Qt is available at https://download.qt.io.
 The license text is at https://www.gnu.org/licenses/lgpl-3.0.html.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/help/AboutInfo.cpp" line="91"/>
+        <location filename="../../src/ui/help/AboutInfo.cpp" line="92"/>
         <source>The icons of QPhoneManager.</source>
         <translation>The icons of QPhoneManager.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/help/AboutInfo.cpp" line="94"/>
+        <location filename="../../src/ui/help/AboutInfo.cpp" line="95"/>
         <source>Draws the QR code for connecting over Wi-Fi.</source>
         <translation>Draws the QR code for connecting over Wi-Fi.</translation>
     </message>
@@ -6197,17 +6192,17 @@ The license text is at https://www.gnu.org/licenses/lgpl-3.0.html.</translation>
 <context>
     <name>qpm::ui::HelpController</name>
     <message>
-        <location filename="../../src/ui/help/HelpController.cpp" line="241"/>
+        <location filename="../../src/ui/help/HelpController.cpp" line="243"/>
         <source>The browser did not open. Copy the address and open it yourself: %1</source>
         <translation>The browser did not open. Copy the address and open it yourself: %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/help/HelpController.cpp" line="399"/>
+        <location filename="../../src/ui/help/HelpController.cpp" line="417"/>
         <source>The manual has no chapter on this yet. Choose another chapter from the contents.</source>
         <translation>The manual has no chapter on this yet. Choose another chapter from the contents.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/help/HelpController.cpp" line="402"/>
+        <location filename="../../src/ui/help/HelpController.cpp" line="420"/>
         <source>The help cannot be loaded. Start QPhoneManager again. If that does not help, install it again.</source>
         <translation>The help cannot be loaded. Start QPhoneManager again. If that does not help, install it again.</translation>
     </message>
@@ -6256,22 +6251,22 @@ The license text is at https://www.gnu.org/licenses/lgpl-3.0.html.</translation>
         <translation>Choose a time at least one minute ahead.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/messages/MessageComposer.cpp" line="290"/>
+        <location filename="../../src/ui/messages/MessageComposer.cpp" line="304"/>
         <source>This is no phone number a message can go to.</source>
         <translation>This is no phone number a message can go to.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/messages/MessageComposer.cpp" line="294"/>
+        <location filename="../../src/ui/messages/MessageComposer.cpp" line="308"/>
         <source>A message can go to at most %1 recipients.</source>
         <translation>A message can go to at most %1 recipients.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/messages/MessageComposer.cpp" line="352"/>
+        <location filename="../../src/ui/messages/MessageComposer.cpp" line="366"/>
         <source>The message went to %1 of %2 recipients. %3</source>
         <translation>The message went to %1 of %2 recipients. %3</translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/ui/messages/MessageComposer.cpp" line="362"/>
+        <location filename="../../src/ui/messages/MessageComposer.cpp" line="376"/>
         <source>Message sent to %n recipient(s).</source>
         <translation>
             <numerusform>Message sent to %n recipient.</numerusform>
@@ -6279,12 +6274,12 @@ The license text is at https://www.gnu.org/licenses/lgpl-3.0.html.</translation>
         </translation>
     </message>
     <message>
-        <location filename="../../src/ui/messages/MessageComposer.cpp" line="397"/>
+        <location filename="../../src/ui/messages/MessageComposer.cpp" line="411"/>
         <source>The scheduled message is changed.</source>
         <translation>The scheduled message is changed.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/messages/MessageComposer.cpp" line="398"/>
+        <location filename="../../src/ui/messages/MessageComposer.cpp" line="412"/>
         <source>The message is scheduled. The phone sends it at the time you chose.</source>
         <translation>The message is scheduled. The phone sends it at the time you chose.</translation>
     </message>
@@ -6315,22 +6310,22 @@ The license text is at https://www.gnu.org/licenses/lgpl-3.0.html.</translation>
 <context>
     <name>qpm::ui::MessagesArea</name>
     <message>
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="351"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="373"/>
         <source>SIM %1</source>
         <translation>SIM %1</translation>
     </message>
     <message>
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="352"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="374"/>
         <source>SIM %1: %2</source>
         <translation>SIM %1: %2</translation>
     </message>
     <message>
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="366"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="388"/>
         <source>New message from %1.</source>
         <translation>New message from %1.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="371"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="393"/>
         <source>%n new message(s).</source>
         <translation>
             <numerusform>%n new message.</numerusform>
@@ -6338,12 +6333,12 @@ The license text is at https://www.gnu.org/licenses/lgpl-3.0.html.</translation>
         </translation>
     </message>
     <message>
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="405"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="427"/>
         <source>This is no phone number a message can go to.</source>
         <translation>This is no phone number a message can go to.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="452"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="474"/>
         <source>%n message(s) deleted.</source>
         <translation>
             <numerusform>%n message deleted.</numerusform>
@@ -6351,7 +6346,7 @@ The license text is at https://www.gnu.org/licenses/lgpl-3.0.html.</translation>
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="511"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="533"/>
         <source>%n message(s) kept in the archive on this computer.</source>
         <translation>
             <numerusform>%n message kept in the archive on this computer.</numerusform>
@@ -6359,7 +6354,7 @@ The license text is at https://www.gnu.org/licenses/lgpl-3.0.html.</translation>
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="512"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="534"/>
         <source>%n message(s) taken out of the archive.</source>
         <translation>
             <numerusform>%n message taken out of the archive.</numerusform>
@@ -6367,29 +6362,29 @@ The license text is at https://www.gnu.org/licenses/lgpl-3.0.html.</translation>
         </translation>
     </message>
     <message>
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="524"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="546"/>
         <source>This conversation is already in the archive.</source>
         <translation>This conversation is already in the archive.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="557"/>
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="675"/>
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="717"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="579"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="697"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="739"/>
         <source>Choose a file on this computer.</source>
         <translation>Choose a file on this computer.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="589"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="611"/>
         <source>The attachment is saved as %1.</source>
         <translation>The attachment is saved as %1.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="599"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="621"/>
         <source>Choose a folder on this computer.</source>
         <translation>Choose a folder on this computer.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="643"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="665"/>
         <source>%n attachment(s) saved.</source>
         <translation>
             <numerusform>%n attachment saved.</numerusform>
@@ -6397,12 +6392,12 @@ The license text is at https://www.gnu.org/licenses/lgpl-3.0.html.</translation>
         </translation>
     </message>
     <message>
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="666"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="688"/>
         <source>Messages</source>
         <translation>Messages</translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="705"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="727"/>
         <source>%n message(s) exported.</source>
         <translation>
             <numerusform>%n message exported.</numerusform>
@@ -6410,12 +6405,12 @@ The license text is at https://www.gnu.org/licenses/lgpl-3.0.html.</translation>
         </translation>
     </message>
     <message>
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="751"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="773"/>
         <source>The archive holds no message that is not here already.</source>
         <translation>The archive holds no message that is not here already.</translation>
     </message>
     <message numerus="yes">
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="752"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="774"/>
         <source>%n message(s) added to the archive on this computer.</source>
         <translation>
             <numerusform>%n message added to the archive on this computer.</numerusform>
@@ -6423,132 +6418,132 @@ The license text is at https://www.gnu.org/licenses/lgpl-3.0.html.</translation>
         </translation>
     </message>
     <message>
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="767"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="789"/>
         <source>The phone did not confirm the message. Check in the list whether it was sent before you send it again.</source>
         <translation>The phone did not confirm the message. Check in the list whether it was sent before you send it again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="770"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="792"/>
         <source>The phone is not connected. Connect it, then try again.</source>
         <translation>The phone is not connected. Connect it, then try again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="775"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="797"/>
         <source>This version of the phone app does not allow deleting text messages. You can archive the message on this computer.</source>
         <translation>This version of the phone app does not allow deleting text messages. You can archive the message on this computer.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="778"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="800"/>
         <source>This version of the phone app does not allow changing the read state. On the phone the message stays as it is.</source>
         <translation>This version of the phone app does not allow changing the read state. On the phone the message stays as it is.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="782"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="804"/>
         <source>The app on the phone may not send text messages. Allow it in the Android settings.</source>
         <translation>The app on the phone may not send text messages. Allow it in the Android settings.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="787"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="809"/>
         <source>The app on the phone may not read your messages. Allow it in the Android settings.</source>
         <translation>The app on the phone may not read your messages. Allow it in the Android settings.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="792"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="814"/>
         <source>The phone app cannot delete multimedia messages. Delete them on the phone itself.</source>
         <translation>The phone app cannot delete multimedia messages. Delete them on the phone itself.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="795"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="817"/>
         <source>The phone app cannot change the read state of multimedia messages.</source>
         <translation>The phone app cannot change the read state of multimedia messages.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="797"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="819"/>
         <source>The phone cannot send text messages. Update MyPhoneExplorer Client on the phone.</source>
         <translation>The phone cannot send text messages. Update MyPhoneExplorer Client on the phone.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="802"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="824"/>
         <source>The phone does not support this. Update MyPhoneExplorer Client on the phone.</source>
         <translation>The phone does not support this. Update MyPhoneExplorer Client on the phone.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="805"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="827"/>
         <source>This attachment stayed on the phone because it is large. Save it on the phone itself.</source>
         <translation>This attachment stayed on the phone because it is large. Save it on the phone itself.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="808"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="830"/>
         <source>This message is no longer on the phone. Sync to update the list.</source>
         <translation>This message is no longer on the phone. Sync to update the list.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="811"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="833"/>
         <source>The text is too long. Shorten it, then try again.</source>
         <translation>The text is too long. Shorten it, then try again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="813"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="835"/>
         <source>The file is too large or holds too many messages.</source>
         <translation>The file is too large or holds too many messages.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="814"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="836"/>
         <source>There are too many messages on the phone to read at once. Delete old messages on the phone, then sync again.</source>
         <translation>There are too many messages on the phone to read at once. Delete old messages on the phone, then sync again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="818"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="840"/>
         <source>The file cannot be written. Choose another folder.</source>
         <translation>The file cannot be written. Choose another folder.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="820"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="842"/>
         <source>The file cannot be read. Choose another file.</source>
         <translation>The file cannot be read. Choose another file.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="821"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="843"/>
         <source>The messages cannot be saved on this computer. Check the storage folder in the settings.</source>
         <translation>The messages cannot be saved on this computer. Check the storage folder in the settings.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="826"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="848"/>
         <source>This file is no message archive of QPhoneManager.</source>
         <translation>This file is no message archive of QPhoneManager.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="828"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="850"/>
         <source>Enter at least one recipient with a phone number and a text.</source>
         <translation>Enter at least one recipient with a phone number and a text.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="830"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="852"/>
         <source>Check the recipients, the text and the time. The time must lie at least one minute ahead.</source>
         <translation>Check the recipients, the text and the time. The time must lie at least one minute ahead.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="833"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="855"/>
         <source>This message is only on this computer, so it stays in the archive. Delete it if you no longer need it.</source>
         <translation>This message is only on this computer, so it stays in the archive. Delete it if you no longer need it.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="838"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="860"/>
         <source>Choose a phone first.</source>
         <translation>Choose a phone first.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="841"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="863"/>
         <source>The phone did not send the message. Check the number and the signal, then try again.</source>
         <translation>The phone did not send the message. Check the number and the signal, then try again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="851"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="873"/>
         <source>The phone did not accept the request. Sync, then try again.</source>
         <translation>The phone did not accept the request. Sync, then try again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/messages/MessagesArea.cpp" line="875"/>
+        <location filename="../../src/ui/messages/MessagesArea.cpp" line="897"/>
         <source>Attachment %1</source>
         <translation>Attachment %1</translation>
     </message>
@@ -6883,7 +6878,12 @@ The license text is at https://www.gnu.org/licenses/lgpl-3.0.html.</translation>
 <context>
     <name>qpm::ui::TaskListModel</name>
     <message>
-        <location filename="../../src/ui/organizer/TaskListModel.cpp" line="28"/>
+        <location filename="../../src/ui/organizer/TaskListModel.cpp" line="39"/>
+        <source>Overdue since %1</source>
+        <translation>Overdue since %1</translation>
+    </message>
+    <message>
+        <location filename="../../src/ui/organizer/TaskListModel.cpp" line="40"/>
         <source>Due %1</source>
         <translation>Due %1</translation>
     </message>

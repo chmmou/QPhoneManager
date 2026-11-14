@@ -27,6 +27,11 @@ Item {
 
     // The phone is asked for its files only once they are shown.
     onVisibleChanged: root.loadIfShown()
+    // A view that is hidden would keep the keys; the one shown takes them over.
+    onShowGridChanged: {
+        if (grid.activeFocus || list.activeFocus)
+            (root.showGrid ? grid : list).forceActiveFocus(Qt.OtherFocusReason);
+    }
     Component.onCompleted: root.loadIfShown()
 
     ColumnLayout {
@@ -262,7 +267,7 @@ Item {
                 Accessible.role: Accessible.List
                 Accessible.name: qsTr("Files")
                 Accessible.description: qsTr("Enter opens, Backspace goes up, F2 renames, Delete deletes, the menu key shows more")
-                ScrollBar.vertical: ScrollBar {}
+                ScrollBar.vertical: ThemedScrollBar {}
 
                 delegate: Item {
                     id: tile
@@ -288,6 +293,12 @@ Item {
                         anchors.margins: Theme.gridUnit
                         radius: Theme.gridUnit * 2
                         color: tile.GridView.isCurrentItem ? Theme.surfaceVariant : "transparent"
+
+                        CurrentMarker {
+                            current: tile.GridView.isCurrentItem
+                            viewFocused: grid.activeFocus
+                            inset: 0
+                        }
                     }
 
                     ColumnLayout {
@@ -393,7 +404,7 @@ Item {
                 Accessible.role: Accessible.List
                 Accessible.name: qsTr("Files")
                 Accessible.description: grid.Accessible.description
-                ScrollBar.vertical: ScrollBar {}
+                ScrollBar.vertical: ThemedScrollBar {}
 
                 delegate: Rectangle {
                     id: row
@@ -494,13 +505,21 @@ Item {
                             row.Drag.active = true;
                         }
                     }
+
+                    CurrentMarker {
+                        current: row.ListView.isCurrentItem
+                        viewFocused: list.activeFocus
+                    }
                 }
 
                 onCurrentIndexChanged: root.currentRow = list.currentIndex
                 Keys.onPressed: event => root.handleKey(event)
             }
 
+            // Around the whole view area, so that it still shows in an empty folder,
+            // where both views are hidden and the keys still go to the one with the focus.
             FocusRing {
+                objectName: "fileViewFocusRing"
                 shown: grid.activeFocus || list.activeFocus
             }
 
@@ -564,7 +583,7 @@ Item {
         }
     }
 
-    Menu {
+    OutlinedMenu {
         id: uploadMenu
 
         objectName: "uploadMenu"
@@ -581,7 +600,7 @@ Item {
         }
     }
 
-    Menu {
+    OutlinedMenu {
         id: entryMenu
 
         objectName: "fileMenu"
@@ -652,26 +671,18 @@ Item {
         title: qsTr("Delete %1?").arg(root.pendingDelete)
 
         footer: DialogButtonBox {
-            Button {
+            DialogButton {
                 id: confirmDeleteButton
 
                 text: qsTr("Delete")
                 DialogButtonBox.buttonRole: DialogButtonBox.AcceptRole
-
-                FocusRing {
-                    shown: confirmDeleteButton.visualFocus
-                }
             }
 
-            Button {
+            DialogButton {
                 id: cancelDeleteButton
 
                 text: qsTr("Cancel")
                 DialogButtonBox.buttonRole: DialogButtonBox.RejectRole
-
-                FocusRing {
-                    shown: cancelDeleteButton.visualFocus
-                }
             }
         }
 

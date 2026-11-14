@@ -16,6 +16,18 @@ ItemDelegate {
     ToolTip.visible: root.compact && root.hovered
     ToolTip.text: root.text
 
+    // The highlight fill of the style is too faint to mark the current section on its own.
+    Rectangle {
+        objectName: "currentSectionMarker"
+        anchors.left: parent.left
+        anchors.verticalCenter: parent.verticalCenter
+        width: Theme.gridUnit
+        height: parent.height - Theme.gridUnit * 2
+        visible: root.highlighted
+        radius: Theme.gridUnit / 2
+        color: Theme.primary
+    }
+
     FocusRing {
         shown: root.visualFocus
     }

@@ -15,26 +15,18 @@ Dialog {
     Material.elevation: 0
 
     footer: DialogButtonBox {
-        Button {
+        DialogButton {
             id: confirmButton
 
             text: qsTr("Delete")
             DialogButtonBox.buttonRole: DialogButtonBox.AcceptRole
-
-            FocusRing {
-                shown: confirmButton.visualFocus
-            }
         }
 
-        Button {
+        DialogButton {
             id: cancelButton
 
             text: qsTr("Cancel")
             DialogButtonBox.buttonRole: DialogButtonBox.RejectRole
-
-            FocusRing {
-                shown: cancelButton.visualFocus
-            }
         }
     }
 

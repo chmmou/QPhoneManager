@@ -42,18 +42,18 @@ Item {
         }
     }
 
-    ScrollView {
+    ThemedScrollView {
         id: scroller
 
         anchors.fill: parent
         visible: root.showsCards
-        contentWidth: scroller.availableWidth
+        contentWidth: scroller.availableWidth - scroller.ScrollBar.vertical.width
         contentHeight: cards.implicitHeight + Theme.gridUnit * 12
 
         GridLayout {
             id: cards
 
-            width: scroller.availableWidth - Theme.gridUnit * 12
+            width: scroller.contentWidth - Theme.gridUnit * 12
             x: Theme.gridUnit * 6
             y: Theme.gridUnit * 6
             columns: Math.max(1, Math.floor(cards.width / (TypeScale.body * 22)))

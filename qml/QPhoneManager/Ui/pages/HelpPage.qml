@@ -152,6 +152,7 @@ Item {
             rightPadding: Theme.gridUnit * 4
             text: HelpController.notice
             color: Theme.error
+            selectedTextColor: Theme.foregroundOnPrimary
             background: Rectangle {
                 color: Theme.surfaceContainer
             }
@@ -189,7 +190,7 @@ Item {
                     Accessible.role: Accessible.List
                     Accessible.name: qsTr("Contents")
                     Accessible.description: qsTr("Enter opens the chapter")
-                    ScrollBar.vertical: ScrollBar {}
+                    ScrollBar.vertical: ThemedScrollBar {}
 
                     // A plain row: the list carries the focus and moves through the rows.
                     delegate: Rectangle {
@@ -225,6 +226,11 @@ Item {
                                 contentsList.currentIndex = chapter.index;
                                 HelpController.openTopic(chapter.topic);
                             }
+                        }
+
+                        CurrentMarker {
+                            current: chapter.ListView.isCurrentItem
+                            viewFocused: contentsList.activeFocus
                         }
                     }
 
@@ -277,12 +283,16 @@ Item {
                     wrapMode: Text.Wrap
                 }
 
-                ScrollView {
+                ThemedScrollView {
                     id: helpScroll
 
                     anchors.fill: parent
                     visible: HelpController.currentHtml.length > 0
                     contentWidth: helpScroll.availableWidth
+                    // The text area takes the width of the view on its own, so the room
+                    // for the scroll bar is kept free on the side of the bar.
+                    leftPadding: helpScroll.mirrored ? helpScroll.ScrollBar.vertical.width : 0
+                    rightPadding: helpScroll.mirrored ? 0 : helpScroll.ScrollBar.vertical.width
 
                     TextArea {
                         id: helpText
@@ -299,6 +309,7 @@ Item {
                         topPadding: Theme.gridUnit * 4
                         bottomPadding: Theme.gridUnit * 4
                         text: HelpController.currentHtml
+                        selectedTextColor: Theme.foregroundOnPrimary
                         background: null
                         Accessible.name: HelpController.currentTitle
                         Accessible.description: qsTr("Tab moves to the next link, Enter follows it")

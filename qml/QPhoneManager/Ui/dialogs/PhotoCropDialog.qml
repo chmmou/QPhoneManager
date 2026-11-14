@@ -24,27 +24,19 @@ Dialog {
     title: qsTr("Choose the part of the picture")
 
     footer: DialogButtonBox {
-        Button {
+        DialogButton {
             id: applyButton
 
             objectName: "applyCropButton"
             text: qsTr("Use this part")
             DialogButtonBox.buttonRole: DialogButtonBox.AcceptRole
-
-            FocusRing {
-                shown: applyButton.visualFocus
-            }
         }
 
-        Button {
+        DialogButton {
             id: cancelButton
 
             text: qsTr("Cancel")
             DialogButtonBox.buttonRole: DialogButtonBox.RejectRole
-
-            FocusRing {
-                shown: cancelButton.visualFocus
-            }
         }
     }
 

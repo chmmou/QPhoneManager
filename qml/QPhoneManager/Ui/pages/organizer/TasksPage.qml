@@ -12,6 +12,8 @@ Item {
     readonly property TasksArea area: AppController.tasks
     required property string emptyText
     property bool editing: false
+    // The form shown, or null.
+    property TaskForm form: null
     property int pendingDelete: 0
 
     signal connectRequested
@@ -207,9 +209,12 @@ Item {
         id: formComponent
 
         TaskForm {
+            id: form
+
             area: root.area
             onFinished: root.editing = false
             onDeleteRequested: luid => root.confirmDelete(luid)
+            Component.onCompleted: root.form = form
         }
     }
 
@@ -300,10 +305,14 @@ Item {
         onAccepted: root.area.exportTo(exportDialog.selectedFile)
     }
 
+    // Opening the form on purpose moves the focus into it; moving through the
+    // list shows the form as well, but leaves the focus in the list.
     function startNew(): void {
         root.area.startNew();
         root.editing = true;
         listDetail.detailOpen = true;
+        if (root.form)
+            root.form.focusFirstField();
     }
 
     function showCurrent(): void {
@@ -315,6 +324,8 @@ Item {
         if (root.area.currentLuid > 0 && root.area.editor.load(root.area.currentLuid)) {
             root.editing = true;
             listDetail.detailOpen = true;
+            if (root.form)
+                root.form.focusFirstField();
         }
     }
 

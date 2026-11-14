@@ -126,6 +126,18 @@ Item {
                     ToolTip.text: keyboardButton.text
                     onToggled: root.setKeyboardInput(keyboardButton.checked)
 
+                    // The style marks the checked state by the icon colour alone.
+                    Rectangle {
+                        objectName: "keyboardCheckedMarker"
+                        anchors.fill: parent
+                        anchors.margins: Theme.gridUnit
+                        visible: keyboardButton.checked
+                        radius: Theme.gridUnit
+                        color: "transparent"
+                        border.width: 1
+                        border.color: Theme.outline
+                    }
+
                     FocusRing {
                         shown: keyboardButton.visualFocus
                     }
@@ -168,6 +180,18 @@ Item {
                     ToolTip.visible: fitButton.hovered
                     ToolTip.text: root.fitToWindow ? fitButton.text : qsTr("Full size, 100 %")
                     onToggled: root.fitToWindow = fitButton.checked
+
+                    // The style marks the checked state by the icon colour alone.
+                    Rectangle {
+                        objectName: "fitCheckedMarker"
+                        anchors.fill: parent
+                        anchors.margins: Theme.gridUnit
+                        visible: fitButton.checked
+                        radius: Theme.gridUnit
+                        color: "transparent"
+                        border.width: 1
+                        border.color: Theme.outline
+                    }
 
                     FocusRing {
                         shown: fitButton.visualFocus
@@ -274,8 +298,8 @@ Item {
                 interactive: false
                 contentWidth: screenView.width
                 contentHeight: screenView.height
-                ScrollBar.vertical: ScrollBar {}
-                ScrollBar.horizontal: ScrollBar {}
+                ScrollBar.vertical: ThemedScrollBar {}
+                ScrollBar.horizontal: ThemedScrollBar {}
 
                 ScreenMirrorItem {
                     id: screenView

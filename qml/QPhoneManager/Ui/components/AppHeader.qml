@@ -27,7 +27,7 @@ ToolBar {
         anchors.rightMargin: Theme.gridUnit * 2
         spacing: Theme.gridUnit * 3
 
-        ComboBox {
+        ThemedComboBox {
             id: deviceBox
 
             objectName: "deviceBox"
@@ -82,7 +82,7 @@ ToolBar {
             font.pixelSize: TypeScale.title
         }
 
-        TextField {
+        ThemedTextField {
             id: searchField
 
             objectName: "searchField"

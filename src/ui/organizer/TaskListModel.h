@@ -34,6 +34,7 @@ public:
         LuidRole = Qt::UserRole + 1,
         SummaryRole,
         DescriptionRole,
+        /// "Due <date>", or "Overdue since <date>" for an open task past its date.
         DueTextRole,
         OverdueRole,
         CompletedRole,
