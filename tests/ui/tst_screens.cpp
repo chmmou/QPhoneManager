@@ -5,6 +5,7 @@
 #include "core/service/ScreenMirrorClient.h"
 #include "ui/AppController.h"
 #include "ui/DeviceStatusModel.h"
+#include "ui/FoundPhoneModel.h"
 #include "ui/QrCodeProvider.h"
 #include "ui/Settings.h"
 #include "ui/apps/AppListModel.h"
@@ -29,16 +30,21 @@
 #include <QBuffer>
 #include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QGuiApplication>
 #include <QImage>
 #include <QSignalSpy>
 #include <QLibraryInfo>
 #include <QLocale>
+#include <QLockFile>
 #include <QPainter>
 #include <QQmlApplicationEngine>
 #include <QQmlExtensionPlugin>
 #include <QQuickItem>
+#include <QPointer>
 #include <QQuickWindow>
+#include <QRegularExpression>
+#include <QScopeGuard>
 #include <QTemporaryDir>
 #include <QTest>
 #include <QTimeZone>
@@ -47,6 +53,8 @@
 
 #include <cstdlib>
 #include <memory>
+
+#include <unistd.h>
 
 Q_IMPORT_QML_PLUGIN(QPhoneManager_UiPlugin)
 
@@ -612,24 +620,59 @@ void dropLayerEffects(QQuickItem *item)
 
 // The software scene graph draws the round Material ripple of a focused
 // check box or radio button at the corner of the window instead of around
-// the control. The focus ring of the program still shows the focus.
-void hideRipples(QQuickItem *item)
+// the control. The focus ring of the program still shows the focus. The
+// clipped ripple of a focused flat button leaves the rounded shape of its
+// background there even when hidden; a flat button draws nothing else with
+// that background, so it goes as well. `hidden` collects what was hidden, so
+// that it is shown again after the picture: a button may be raised later.
+void hideRipples(QQuickItem *item, QList<QPointer<QQuickItem>> &hidden)
 {
-    if (item->inherits("QQuickMaterialRipple"))
-        item->setVisible(false);
+    const auto hide = [&hidden](QQuickItem *target) {
+        if (target->isVisible()) {
+            target->setVisible(false);
+            hidden.append(target);
+        }
+    };
+    if (item->inherits("QQuickMaterialRipple")) {
+        hide(item);
+        QQuickItem *background = item->parentItem();
+        QQuickItem *control = background ? background->parentItem() : nullptr;
+        if (control && control->inherits("QQuickAbstractButton") &&
+            control->property("flat").toBool() &&
+            control->property("background").value<QQuickItem *>() == background) {
+            hide(background);
+        }
+    }
     const QList<QQuickItem *> children = item->childItems();
     for (QQuickItem *child : children)
-        hideRipples(child);
+        hideRipples(child, hidden);
+}
+
+// A turning busy indicator never holds still for a picture; stopped, it fades out.
+void stopBusyIndicators(QQuickItem *item)
+{
+    if (item->inherits("QQuickBusyIndicator") && item->isVisible())
+        item->setProperty("running", false);
+    const QList<QQuickItem *> children = item->childItems();
+    for (QQuickItem *child : children)
+        stopBusyIndicators(child);
 }
 
 // A grab once the picture has stopped changing, so no transition is caught halfway.
 QImage settledGrab(QQuickWindow *window)
 {
+    QList<QPointer<QQuickItem>> hidden;
     if (window->rendererInterface()->graphicsApi() == QSGRendererInterface::Software) {
         QQuickItem *root = window->contentItem();
         dropLayerEffects(root->parentItem() ? root->parentItem() : root);
-        hideRipples(root->parentItem() ? root->parentItem() : root);
+        hideRipples(root->parentItem() ? root->parentItem() : root, hidden);
     }
+    const auto showHidden = qScopeGuard([&hidden]() {
+        for (const QPointer<QQuickItem> &item : std::as_const(hidden)) {
+            if (item)
+                item->setVisible(true);
+        }
+    });
     constexpr int attempts = 40;
     constexpr int pauseMs = 50;
     QImage last = window->grabWindow();
@@ -698,6 +741,12 @@ private:
     QTemporaryDir m_home;
     QTemporaryDir m_shots;
     QString m_shotDir;
+    // The working folder the file dialogs show.
+    QString m_documents;
+    // The fixed working folder and its parent were made by this run.
+    bool m_madeDocuments = false;
+    bool m_madeExample = false;
+    std::unique_ptr<QLockFile> m_documentsLock;
     QTranslator m_translator;
     QTranslator m_qtBaseTranslator;
     QTranslator m_qtQuickTranslator;
@@ -785,11 +834,34 @@ void TestScreens::initTestCase()
             .arg(byLanguage("Aufstehen", "Wake up")),
         QStringLiteral("\"08:00\",2,0,\"%1\",\"6,7\",0").arg(byLanguage("Wochenende", "Weekend"))};
 
-    // A file dialog opens in the working folder, whose path would name the
-    // account that runs the test.
-    const QString documents = m_home.filePath(byLanguage("Dokumente", "Documents"));
-    QVERIFY(QDir().mkpath(documents));
-    QVERIFY(QDir::setCurrent(documents));
+    // A file dialog opens in the working folder and shows its path, which
+    // should be fixed and name neither the account nor a random folder. The
+    // runtime folder of the user qualifies: nobody else can write there, so no
+    // link can be planted. A lock keeps a parallel run of the same language
+    // away; that run falls back to its temporary folder.
+    m_documents = m_home.filePath(byLanguage("Dokumente", "Documents"));
+    const QString runtime = qEnvironmentVariable("XDG_RUNTIME_DIR");
+    const QFileInfo runtimeInfo(runtime);
+    constexpr QFile::Permissions othersMayAccess =
+        QFile::ReadGroup | QFile::WriteGroup | QFile::ExeGroup | QFile::ReadOther |
+        QFile::WriteOther | QFile::ExeOther;
+    if (!runtime.isEmpty() && runtimeInfo.isDir() && !runtimeInfo.isSymLink() &&
+        runtimeInfo.ownerId() == ::getuid() && !(runtimeInfo.permissions() & othersMayAccess)) {
+        const QString example = QDir(runtime).filePath(byLanguage("Beispiel", "Example"));
+        m_documentsLock = std::make_unique<QLockFile>(example + QStringLiteral(".lock"));
+        if (m_documentsLock->tryLock(0) && !QFileInfo(example).isSymLink()) {
+            const bool madeExample = QDir().mkdir(example);
+            const QString documents = QDir(example).filePath(byLanguage("Dokumente", "Documents"));
+            const bool madeDocuments = QDir().mkdir(documents);
+            if (QFileInfo(documents).isDir() && !QFileInfo(documents).isSymLink()) {
+                m_documents = documents;
+                m_madeExample = madeExample;
+                m_madeDocuments = madeDocuments;
+            }
+        }
+    }
+    QVERIFY(QDir().mkpath(m_documents));
+    QVERIFY(QDir::setCurrent(m_documents));
 
     m_engine = std::make_unique<QQmlApplicationEngine>();
     m_engine->loadFromModule("QPhoneManager.Ui", "Main");
@@ -820,6 +892,10 @@ void TestScreens::initTestCase()
 // message of an earlier view would show in every later picture.
 void TestScreens::init()
 {
+    // A binding loop in a view of the application leaves its size to the order
+    // of evaluation.
+    QTest::failOnWarning(
+        QRegularExpression(QStringLiteral("QPhoneManager/Ui/.*Binding loop detected")));
     QQuickItem *messageBar = item(QStringLiteral("messageBar"));
     QVERIFY(messageBar);
     messageBar->setProperty("text", QString());
@@ -837,6 +913,13 @@ void TestScreens::cleanupTestCase()
     QCoreApplication::removeTranslator(&m_qtQuickTranslator);
     if (qEnvironmentVariableIsSet("QPM_SCREENSHOT_DIR"))
         qInfo() << "Screenshots kept in" << m_shotDir;
+    // Only the empty folders this run made go; a file in them keeps them.
+    QDir::setCurrent(QDir::tempPath());
+    if (m_madeDocuments)
+        QDir().rmdir(m_documents);
+    if (m_madeExample)
+        QDir().rmdir(QFileInfo(m_documents).path());
+    m_documentsLock.reset();
 }
 
 QObject *TestScreens::dialog(const QString &name) const
@@ -910,6 +993,8 @@ void TestScreens::viewsAreTranslatedAndRenderInBothSchemes_data()
                               << byLanguage("Übersicht", "Overview");
     QTest::newRow("connect") << QStringLiteral("connectDialog") << QStringLiteral("connectDialog")
                              << -1 << connect;
+    QTest::newRow("connect, found phones") << QStringLiteral("connectFoundPhones")
+                                           << QStringLiteral("connectDialog") << -1 << connect;
     QTest::newRow("connect by USB")
         << QStringLiteral("connectUsb") << QStringLiteral("connectDialog") << 1 << connect;
     QTest::newRow("connect by Bluetooth")
@@ -926,6 +1011,11 @@ void TestScreens::viewsAreTranslatedAndRenderInBothSchemes_data()
                                           << QStringLiteral("settingsDialog") << 1 << settings;
     QTest::newRow("settings, language and storage")
         << QStringLiteral("settingsStorage") << QStringLiteral("settingsDialog") << 2 << settings;
+    QTest::newRow("settings, focus on a check box")
+        << QStringLiteral("settingsCheckBoxFocus") << QStringLiteral("settingsDialog") << -1
+        << settings;
+    QTest::newRow("phones") << QStringLiteral("profilesDialog") << QStringLiteral("profilesDialog")
+                            << -1 << byLanguage("Handys auf diesem Rechner", "Phones on this computer");
 }
 
 void TestScreens::viewsAreTranslatedAndRenderInBothSchemes()
@@ -938,6 +1028,18 @@ void TestScreens::viewsAreTranslatedAndRenderInBothSchemes()
     if (popup) {
         if (popupName == QLatin1StringView("connectDialog"))
             popup->setProperty("searchOnOpen", false);
+        if (view == QLatin1StringView("connectFoundPhones")) {
+            qpm::ui::FoundPhoneModel *found = m_controller->wifiPhones();
+            found->upsert(qpm::ui::FoundPhone{QStringLiteral("Pixel 8"),
+                                              QStringLiteral("192.0.2.21"),
+                                              QStringLiteral("192.0.2.21"),
+                                              QStringLiteral("example-phone-1"), true});
+            found->upsert(qpm::ui::FoundPhone{QStringLiteral("Pixel 7a"),
+                                              QStringLiteral("192.0.2.34"),
+                                              QStringLiteral("192.0.2.34"),
+                                              QStringLiteral("example-phone-2"), true});
+            QCOMPARE(found->count(), 2);
+        }
         if (popupName == QLatin1StringView("pinDialog")) {
             popup->setProperty("wrongPin", true);
             popup->setProperty("remainingTries", 9);
@@ -970,6 +1072,8 @@ void TestScreens::viewsAreTranslatedAndRenderInBothSchemes()
             addressLabel->setProperty(
                 "text", addressLabel->property("text").toString().replace(address, example));
         }
+        if (content)
+            stopBusyIndicators(content);
     }
     if (popupName == QLatin1StringView("settingsDialog")) {
         QQuickItem *adbBox = item(QStringLiteral("adbPathBox"));
@@ -980,6 +1084,17 @@ void TestScreens::viewsAreTranslatedAndRenderInBothSchemes()
         adbBox->setProperty("editText", QString());
         storageFolder->setProperty(
             "text", QStringLiteral("/home/user/.local/share/QPhoneManager/QPhoneManager/profiles"));
+    }
+    if (view == QLatin1StringView("settingsCheckBoxFocus")) {
+        QQuickItem *box = item(QStringLiteral("autoConnectBox"));
+        QVERIFY(box);
+        box->forceActiveFocus(Qt::TabFocusReason);
+        QTRY_VERIFY(box->property("visualFocus").toBool());
+    }
+    if (view == QLatin1StringView("profilesDialog")) {
+        QQuickItem *close = item(QStringLiteral("profilesCloseButton"));
+        QVERIFY(close);
+        QTRY_VERIFY(close->property("visualFocus").toBool());
     }
     if (tab >= 0) {
         QQuickItem *tabs =
@@ -1012,6 +1127,8 @@ void TestScreens::viewsAreTranslatedAndRenderInBothSchemes()
         QMetaObject::invokeMethod(popup, "close");
         QTRY_VERIFY(!popup->property("visible").toBool());
     }
+    if (view == QLatin1StringView("connectFoundPhones"))
+        m_controller->wifiPhones()->clear();
     QVERIFY(m_controller->isConnected());
 }
 
@@ -1583,6 +1700,7 @@ void TestScreens::fileViewsAreTranslatedAndRenderInBothSchemes_data()
     QTest::newRow("storages") << QStringLiteral("filesRoot") << byLanguage("Dateien", "Files");
     QTest::newRow("grid") << QStringLiteral("filesGrid") << byLanguage("Dateien", "Files");
     QTest::newRow("list") << QStringLiteral("filesList") << byLanguage("Dateien", "Files");
+    QTest::newRow("empty folder") << QStringLiteral("filesEmpty") << byLanguage("Dateien", "Files");
     QTest::newRow("menu") << QStringLiteral("fileMenu") << QString();
     QTest::newRow("new folder") << QStringLiteral("fileNameDialog")
                                 << byLanguage("Neuer Ordner", "New folder");
@@ -1607,12 +1725,20 @@ void TestScreens::fileViewsAreTranslatedAndRenderInBothSchemes()
     QTRY_VERIFY(item(QStringLiteral("filesPage")));
     QQuickItem *page = item(QStringLiteral("filesPage"));
     page->setProperty("showGrid", view != QLatin1StringView("filesList"));
-    const QString folder = view == QLatin1StringView("filesRoot")
-                               ? QString()
-                               : QStringLiteral("\\sdcard\\DCIM\\Camera");
+    const bool empty = view == QLatin1StringView("filesEmpty");
+    const QString folder = view == QLatin1StringView("filesRoot") ? QString()
+                           : empty ? QStringLiteral("\\sdcard\\Music")
+                                   : QStringLiteral("\\sdcard\\DCIM\\Camera");
     QVERIFY(files->open(folder));
-    QTRY_VERIFY_WITH_TIMEOUT(!files->isBusy() && files->count() > 0, connectTimeoutMs);
-    if (view == QLatin1StringView("filesRoot")) {
+    QTRY_VERIFY_WITH_TIMEOUT(!files->isBusy() && (empty || files->count() > 0),
+                             connectTimeoutMs);
+    if (empty) {
+        QCOMPARE(files->count(), 0);
+        QCOMPARE(files->crumbNames(),
+                 (QStringList{byLanguage("Handy", "Phone"),
+                              byLanguage("Interner Speicher", "Internal storage"),
+                              QStringLiteral("Music")}));
+    } else if (view == QLatin1StringView("filesRoot")) {
         QCOMPARE(files->crumbNames(), QStringList{byLanguage("Handy", "Phone")});
         QCOMPARE(
             files->data(files->index(0), qpm::ui::FileBrowserModel::DisplayNameRole).toString(),
@@ -1630,7 +1756,8 @@ void TestScreens::fileViewsAreTranslatedAndRenderInBothSchemes()
                  .isEmpty(),
             connectTimeoutMs);
     }
-    page->setProperty("currentRow", files->rowOf(travelPlan()));
+    if (!empty)
+        page->setProperty("currentRow", files->rowOf(travelPlan()));
     m_window->requestActivate();
     QVERIFY(QTest::qWaitForWindowActive(m_window));
 
@@ -1638,7 +1765,7 @@ void TestScreens::fileViewsAreTranslatedAndRenderInBothSchemes()
     QTemporaryDir target;
     QVERIFY(target.isValid());
     if (view == QLatin1StringView("filesRoot") || view == QLatin1StringView("filesGrid") ||
-        view == QLatin1StringView("filesList")) {
+        view == QLatin1StringView("filesList") || empty) {
         QQuickItem *focus =
             item(view == QLatin1StringView("filesList") ? QStringLiteral("fileList")
                                                         : QStringLiteral("fileGrid"));
@@ -1830,6 +1957,7 @@ void TestScreens::screenViewsAreTranslatedAndRenderInBothSchemes()
                     ->property("text")
                     .toString()
                     .startsWith(shownText));
+        stopBusyIndicators(page);
     } else {
         QVERIFY(mirror->start());
         QTRY_VERIFY_WITH_TIMEOUT(mirror->hasFrame(), connectTimeoutMs);
