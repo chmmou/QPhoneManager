@@ -12,15 +12,15 @@ Item {
     signal editRequested
     signal deleteRequested(int luid)
 
-    ScrollView {
+    ThemedScrollView {
         id: scroller
 
         objectName: "eventDetail"
         anchors.fill: parent
-        contentWidth: scroller.availableWidth
+        contentWidth: scroller.availableWidth - scroller.ScrollBar.vertical.width
 
         ColumnLayout {
-            width: scroller.availableWidth
+            width: scroller.contentWidth
             spacing: Theme.gridUnit * 3
 
             Pane {

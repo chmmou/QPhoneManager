@@ -34,9 +34,11 @@ Item {
                 anchors.right: parent.right
                 spacing: Theme.gridUnit
 
+                // Without access the phone reports no notifications, which says nothing about their number.
                 Label {
+                    objectName: "notificationCount"
                     Layout.fillWidth: true
-                    text: qsTr("%n notification(s) on the phone", "", root.notifications.count)
+                    text: root.notifications.accessMissing ? "" : qsTr("%n notification(s) on the phone", "", root.notifications.count)
                     color: Theme.foregroundOnSurfaceVariant
                     elide: Text.ElideRight
                 }
@@ -129,7 +131,7 @@ Item {
                     Accessible.role: Accessible.List
                     Accessible.name: qsTr("Notifications")
                     Accessible.description: qsTr("Enter opens the notification on the phone, Delete dismisses it there")
-                    ScrollBar.vertical: ScrollBar {}
+                    ScrollBar.vertical: ThemedScrollBar {}
 
                     delegate: NotificationRow {
                         width: ListView.view.width
@@ -152,16 +154,16 @@ Item {
                 color: Theme.outline
             }
 
-            ScrollView {
+            ThemedScrollView {
                 id: detailView
 
                 objectName: "notificationDetail"
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                contentWidth: detailView.availableWidth
+                contentWidth: detailView.availableWidth - detailView.ScrollBar.vertical.width
 
                 ColumnLayout {
-                    width: detailView.availableWidth
+                    width: detailView.contentWidth
                     spacing: Theme.gridUnit * 3
 
                     Item {
@@ -380,6 +382,11 @@ Item {
         TapHandler {
             onTapped: row.tapped(row.index)
             onDoubleTapped: row.activated()
+        }
+
+        CurrentMarker {
+            current: row.ListView.isCurrentItem
+            viewFocused: row.ListView.view.activeFocus
         }
     }
 

@@ -191,7 +191,7 @@ Item {
                         }
                     }
 
-                    ComboBox {
+                    ThemedComboBox {
                         id: holidayBox
 
                         objectName: "holidayBox"

@@ -213,10 +213,11 @@ Item {
                 Accessible.role: Accessible.List
                 Accessible.name: qsTr("Apps")
                 Accessible.description: qsTr("Enter opens the app on the phone, Delete removes it, the menu key shows more")
-                ScrollBar.vertical: ScrollBar {}
+                ScrollBar.vertical: ThemedScrollBar {}
 
                 // A plain row rather than a delegate control: the list is the one
-                // focus stop, and the row shows the current app by its colour.
+                // focus stop, and the row shows the current app by its colour and
+                // an outline.
                 delegate: Rectangle {
                     id: appRow
 
@@ -321,6 +322,11 @@ Item {
                         onTapped: (point, button) => root.select(appRow.index, button === Qt.RightButton)
                         onDoubleTapped: root.startCurrent()
                     }
+
+                    CurrentMarker {
+                        current: appRow.ListView.isCurrentItem
+                        viewFocused: appList.activeFocus
+                    }
                 }
 
                 onCurrentIndexChanged: {
@@ -409,7 +415,7 @@ Item {
         }
     }
 
-    Menu {
+    OutlinedMenu {
         id: appMenu
 
         objectName: "appMenu"
@@ -449,26 +455,18 @@ Item {
         title: qsTr("Remove %1?").arg(root.apps.labelOf(root.pendingRemoval))
 
         footer: DialogButtonBox {
-            Button {
+            DialogButton {
                 id: confirmUninstallButton
 
                 text: qsTr("Remove")
                 DialogButtonBox.buttonRole: DialogButtonBox.AcceptRole
-
-                FocusRing {
-                    shown: confirmUninstallButton.visualFocus
-                }
             }
 
-            Button {
+            DialogButton {
                 id: cancelUninstallButton
 
                 text: qsTr("Cancel")
                 DialogButtonBox.buttonRole: DialogButtonBox.RejectRole
-
-                FocusRing {
-                    shown: cancelUninstallButton.visualFocus
-                }
             }
         }
 

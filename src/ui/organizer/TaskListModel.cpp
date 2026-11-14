@@ -4,6 +4,15 @@
 
 namespace qpm::ui {
 
+namespace {
+
+bool isOverdue(const core::codec::CalendarTask &task)
+{
+    return !task.completed && task.due.isValid() && task.due < QDate::currentDate();
+}
+
+} // namespace
+
 TaskListModel::TaskListModel(QObject *parent) : QAbstractListModel(parent) {}
 
 int TaskListModel::rowCount(const QModelIndex &parent) const
@@ -25,10 +34,12 @@ QVariant TaskListModel::data(const QModelIndex &index, int role) const
     case DescriptionRole:
         return task.description;
     case DueTextRole:
-        return task.due.isValid() ? tr("Due %1").arg(OrganizerText::formatDate(task.due))
-                                  : QString();
+        if (!task.due.isValid())
+            return QString();
+        return isOverdue(task) ? tr("Overdue since %1").arg(OrganizerText::formatDate(task.due))
+                               : tr("Due %1").arg(OrganizerText::formatDate(task.due));
     case OverdueRole:
-        return !task.completed && task.due.isValid() && task.due < QDate::currentDate();
+        return isOverdue(task);
     case CompletedRole:
         return task.completed;
     case PriorityRole:

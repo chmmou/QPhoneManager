@@ -135,6 +135,7 @@ private Q_SLOTS:
     void numbersAreWrittenInOneForm_data();
     void numbersAreWrittenInOneForm();
     void numberLooksAlikeInConversationRecipientAndCallList();
+    void sharedNumberShowsTheContactTheMessageNames();
 
 private:
     [[nodiscard]] MessagesArea *area() const { return m_controller->messages(); }
@@ -715,6 +716,51 @@ void TestMessagesArea::numberLooksAlikeInConversationRecipientAndCallList()
     QVERIFY(area()->composeTo(stored));
     QCOMPARE(area()->composer()->recipientLabels(), QStringList{shown});
     QCOMPARE(area()->composer()->recipientNumbers(), QStringList{stored});
+}
+
+// Two contacts shared a number. The scheduled message named the one it went
+// to, but the list and the recipient chip showed the other, the first in name
+// order, because the lookup by number knows one name per number.
+void TestMessagesArea::sharedNumberShowsTheContactTheMessageNames()
+{
+    Contact other = erika();
+    other.luid = 2;
+    other.familyName = QStringLiteral("Musterman");
+    other.displayName = QStringLiteral("Erika Musterman");
+    other.phones.first().dataId = 21;
+    other.phones.first().value = QStringLiteral("0151 1234567");
+    m_phone->addObject(QStringLiteral("pb"), 2, encodeAsPhoneSendsIt(other));
+    const QFuture<Result<store::ContactChanges>> contacts = m_controller->contacts()->sync();
+    QTRY_VERIFY_WITH_TIMEOUT(contacts.isFinished(), timeoutMs);
+    QVERIFY(contacts.result().hasValue());
+    const auto scheduled = [](quint32 luid, const QByteArray &name, const QByteArray &date) {
+        return "BEGIN:VMESSAGE\r\nTYP:SMS;OUT\r\nBOX:SHEDULED\r\nRECIPIENT;CHARSET=UTF-8:" + name +
+               ";+49 151 1234567;SHEDULED;;\r\nDATE:" + date +
+               "\r\nBODY:Alles Gute\r\nX-IRMC-LUID:" + sync::IrmcSync::luidText(luid).toLatin1() +
+               "\r\nEND:VMESSAGE\r\n";
+    };
+    m_phone->addObject(QStringLiteral("msg"), 0x20000001,
+                       scheduled(0x20000001, "Erika Mustermann", "20301224T170000Z"));
+    m_phone->addObject(QStringLiteral("msg"), 0x20000002,
+                       scheduled(0x20000002, "Erika Musterman", "20301225T170000Z"));
+    m_phone->addObject(QStringLiteral("msg"), 0x20000003,
+                       scheduled(0x20000003, "Erika", "20301226T170000Z"));
+    const QFuture<Result<store::MessageChanges>> messages = area()->sync();
+    QTRY_VERIFY_WITH_TIMEOUT(messages.isFinished(), timeoutMs);
+    QVERIFY(messages.result().hasValue());
+
+    const QAbstractItemModel *list = area()->scheduled();
+    QCOMPARE(list->rowCount(), 3);
+    QCOMPARE(role(list, 0, "recipientsText"), QStringLiteral("Erika Mustermann"));
+    QCOMPARE(role(list, 1, "recipientsText"), QStringLiteral("Erika Musterman"));
+    // A name that fits neither contact leaves the choice to the name order.
+    QCOMPARE(role(list, 2, "recipientsText"), QStringLiteral("Erika Musterman"));
+    QVERIFY(area()->editScheduled(area()->scheduled()->luidAt(0)));
+    QCOMPARE(area()->composer()->recipientLabels(),
+             QStringList{QStringLiteral("Erika Mustermann (+49 151 1234567)")});
+    QVERIFY(area()->editScheduled(area()->scheduled()->luidAt(1)));
+    QCOMPARE(area()->composer()->recipientLabels(),
+             QStringList{QStringLiteral("Erika Musterman (+49 151 1234567)")});
 }
 
 QTEST_MAIN(TestMessagesArea)

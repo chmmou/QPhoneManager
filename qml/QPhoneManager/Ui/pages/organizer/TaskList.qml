@@ -28,7 +28,7 @@ Item {
         highlightMoveDuration: 0
         Accessible.role: Accessible.List
         Accessible.name: qsTr("Tasks")
-        ScrollBar.vertical: ScrollBar {}
+        ScrollBar.vertical: ThemedScrollBar {}
 
         // A plain row rather than a delegate control: the list is the one
         // focus stop; space ticks the current task off.
@@ -91,13 +91,28 @@ Item {
                         elide: Text.ElideRight
                     }
 
-                    Label {
+                    RowLayout {
                         Layout.fillWidth: true
-                        visible: text.length > 0
-                        text: [taskRow.dueText, taskRow.categoriesText].filter(part => part.length > 0).join(", ")
-                        font.pixelSize: TypeScale.hint
-                        color: taskRow.overdue ? Theme.error : Theme.foregroundOnSurfaceVariant
-                        elide: Text.ElideRight
+                        spacing: Theme.gridUnit
+
+                        // Overdue is said in words and by the icon, not by the red colour alone.
+                        TintedIcon {
+                            Layout.preferredWidth: TypeScale.hint
+                            Layout.preferredHeight: TypeScale.hint
+                            visible: taskRow.overdue
+                            name: "alert-triangle"
+                            color: Theme.error
+                        }
+
+                        Label {
+                            objectName: "taskDueText"
+                            Layout.fillWidth: true
+                            visible: text.length > 0
+                            text: [taskRow.dueText, taskRow.categoriesText].filter(part => part.length > 0).join(", ")
+                            font.pixelSize: TypeScale.hint
+                            color: taskRow.overdue ? Theme.error : Theme.foregroundOnSurfaceVariant
+                            elide: Text.ElideRight
+                        }
                     }
                 }
 
@@ -107,6 +122,11 @@ Item {
                     font.pixelSize: TypeScale.hint
                     color: Theme.error
                 }
+            }
+
+            CurrentMarker {
+                current: taskRow.ListView.isCurrentItem
+                viewFocused: list.activeFocus
             }
         }
 

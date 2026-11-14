@@ -22,16 +22,12 @@ Dialog {
     title: qsTr("Connect a phone")
 
     footer: DialogButtonBox {
-        Button {
+        DialogButton {
             id: closeButton
 
             objectName: "connectCloseButton"
             text: qsTr("Close")
             DialogButtonBox.buttonRole: DialogButtonBox.RejectRole
-
-            FocusRing {
-                shown: closeButton.visualFocus
-            }
         }
     }
 
@@ -154,7 +150,7 @@ Dialog {
                     Layout.fillWidth: true
                     spacing: Theme.gridUnit * 2
 
-                    TextField {
+                    ThemedTextField {
                         id: addressField
 
                         objectName: "addressField"

@@ -21,16 +21,16 @@ Item {
         text: qsTr("Select a contact in the list.")
     }
 
-    ScrollView {
+    ThemedScrollView {
         id: scroller
 
         objectName: "contactDetail"
         anchors.fill: parent
         visible: root.detail.hasContact
-        contentWidth: scroller.availableWidth
+        contentWidth: scroller.availableWidth - scroller.ScrollBar.vertical.width
 
         ColumnLayout {
-            width: scroller.availableWidth
+            width: scroller.contentWidth
             spacing: Theme.gridUnit * 3
 
             Pane {

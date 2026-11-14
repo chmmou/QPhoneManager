@@ -209,7 +209,12 @@ private:
     void endWork();
     bool exportMessages(const QUrl &url, ExportFormat format, const QString &title,
                         const QList<core::store::StoredMessage> &messages);
-    [[nodiscard]] QString contactNameFor(const QString &number) const;
+    /**
+     * The contact's name for `number`. Where contacts share the number,
+     * `storedName`, the name a stored message carries, picks the one meant.
+     */
+    [[nodiscard]] QString contactNameFor(const QString &number,
+                                         const QString &storedName = {}) const;
     [[nodiscard]] QList<quint32> currentLuids() const;
 
     core::service::MessagesService *m_service = nullptr;
@@ -221,6 +226,8 @@ private:
     ScheduledListModel *m_scheduled = nullptr;
     MessageComposer *m_composer = nullptr;
     QHash<QString, QString> m_contactNames;
+    /// The names for each number that several contacts share.
+    QHash<QString, QStringList> m_sharedNames;
     QString m_currentThread;
     QString m_searchText;
     bool m_composing = false;

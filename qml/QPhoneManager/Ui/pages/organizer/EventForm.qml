@@ -12,15 +12,15 @@ Item {
 
     signal finished
 
-    ScrollView {
+    ThemedScrollView {
         id: scroller
 
         objectName: "eventForm"
         anchors.fill: parent
-        contentWidth: scroller.availableWidth
+        contentWidth: scroller.availableWidth - scroller.ScrollBar.vertical.width
 
         ColumnLayout {
-            width: scroller.availableWidth
+            width: scroller.contentWidth
             spacing: Theme.gridUnit * 4
 
             Label {
@@ -49,7 +49,7 @@ Item {
                 Layout.rightMargin: Theme.gridUnit * 4
                 spacing: Theme.gridUnit * 3
 
-                TextField {
+                ThemedTextField {
                     id: summaryField
 
                     objectName: "eventSummaryField"
@@ -60,7 +60,7 @@ Item {
                     onTextEdited: root.editor.summary = summaryField.text
                 }
 
-                TextField {
+                ThemedTextField {
                     id: locationField
 
                     objectName: "eventLocationField"
@@ -94,7 +94,7 @@ Item {
                         text: qsTr("Start")
                     }
 
-                    TextField {
+                    ThemedTextField {
                         id: startDateField
 
                         objectName: "eventStartDateField"
@@ -107,7 +107,7 @@ Item {
                         onTextEdited: root.editor.startDate = startDateField.text
                     }
 
-                    TextField {
+                    ThemedTextField {
                         id: startTimeField
 
                         objectName: "eventStartTimeField"
@@ -123,7 +123,7 @@ Item {
                         text: qsTr("End")
                     }
 
-                    TextField {
+                    ThemedTextField {
                         id: endDateField
 
                         objectName: "eventEndDateField"
@@ -134,7 +134,7 @@ Item {
                         onTextEdited: root.editor.endDate = endDateField.text
                     }
 
-                    TextField {
+                    ThemedTextField {
                         id: endTimeField
 
                         objectName: "eventEndTimeField"
@@ -158,7 +158,7 @@ Item {
                         text: qsTr("Calendar")
                     }
 
-                    ComboBox {
+                    ThemedComboBox {
                         id: calendarBox
 
                         objectName: "eventCalendarBox"
@@ -179,7 +179,7 @@ Item {
                         text: qsTr("Repeats")
                     }
 
-                    ComboBox {
+                    ThemedComboBox {
                         id: repeatBox
 
                         objectName: "eventRepeatBox"
@@ -199,7 +199,7 @@ Item {
                         text: qsTr("Colour")
                     }
 
-                    ComboBox {
+                    ThemedComboBox {
                         id: colorBox
 
                         objectName: "eventColorBox"
@@ -219,7 +219,7 @@ Item {
                         text: qsTr("Shown as")
                     }
 
-                    ComboBox {
+                    ThemedComboBox {
                         id: availabilityBox
 
                         objectName: "eventAvailabilityBox"
@@ -239,7 +239,7 @@ Item {
                         text: qsTr("Visible to")
                     }
 
-                    ComboBox {
+                    ThemedComboBox {
                         id: visibilityBox
 
                         objectName: "eventVisibilityBox"
@@ -325,7 +325,7 @@ Item {
                     Layout.fillWidth: true
                     spacing: Theme.gridUnit * 2
 
-                    ComboBox {
+                    ThemedComboBox {
                         id: reminderBox
 
                         objectName: "reminderChoiceBox"
@@ -360,7 +360,7 @@ Item {
                     Accessible.role: Accessible.Heading
                 }
 
-                TextArea {
+                ThemedTextArea {
                     id: descriptionArea
 
                     objectName: "eventDescriptionArea"
@@ -415,13 +415,12 @@ Item {
                         }
                     }
 
-                    Button {
+                    PrimaryButton {
                         id: saveButton
 
                         objectName: "saveEventButton"
                         text: qsTr("Save")
                         icon.source: Theme.icon("check")
-                        highlighted: true
                         enabled: root.editor.canSave
                         onClicked: root.editor.save()
 

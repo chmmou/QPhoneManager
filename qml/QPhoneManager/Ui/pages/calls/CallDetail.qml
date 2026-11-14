@@ -16,16 +16,16 @@ Item {
         text: qsTr("Select a call in the list.")
     }
 
-    ScrollView {
+    ThemedScrollView {
         id: scroller
 
         objectName: "callDetail"
         anchors.fill: parent
         visible: root.area.hasCurrent
-        contentWidth: scroller.availableWidth
+        contentWidth: scroller.availableWidth - scroller.ScrollBar.vertical.width
 
         ColumnLayout {
-            width: scroller.availableWidth
+            width: scroller.contentWidth
             spacing: Theme.gridUnit * 3
 
             Pane {

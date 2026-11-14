@@ -13,15 +13,15 @@ Item {
     signal finished
     signal photoRequested
 
-    ScrollView {
+    ThemedScrollView {
         id: scroller
 
         objectName: "contactForm"
         anchors.fill: parent
-        contentWidth: scroller.availableWidth
+        contentWidth: scroller.availableWidth - scroller.ScrollBar.vertical.width
 
         ColumnLayout {
-            width: scroller.availableWidth
+            width: scroller.contentWidth
             spacing: Theme.gridUnit * 4
 
             Label {
@@ -100,7 +100,7 @@ Item {
                         text: qsTr("Save in account")
                     }
 
-                    ComboBox {
+                    ThemedComboBox {
                         id: accountBox
 
                         objectName: "accountBox"
@@ -131,7 +131,7 @@ Item {
                     columnSpacing: Theme.gridUnit * 3
                     rowSpacing: Theme.gridUnit * 2
 
-                    TextField {
+                    ThemedTextField {
                         id: givenField
 
                         objectName: "givenNameField"
@@ -142,7 +142,7 @@ Item {
                         onTextEdited: root.editor.givenName = givenField.text
                     }
 
-                    TextField {
+                    ThemedTextField {
                         id: familyField
 
                         objectName: "familyNameField"
@@ -153,7 +153,7 @@ Item {
                         onTextEdited: root.editor.familyName = familyField.text
                     }
 
-                    TextField {
+                    ThemedTextField {
                         id: middleField
 
                         Layout.fillWidth: true
@@ -163,7 +163,7 @@ Item {
                         onTextEdited: root.editor.middleName = middleField.text
                     }
 
-                    TextField {
+                    ThemedTextField {
                         id: nicknameField
 
                         Layout.fillWidth: true
@@ -173,7 +173,7 @@ Item {
                         onTextEdited: root.editor.nickname = nicknameField.text
                     }
 
-                    TextField {
+                    ThemedTextField {
                         id: prefixField
 
                         Layout.fillWidth: true
@@ -183,7 +183,7 @@ Item {
                         onTextEdited: root.editor.prefix = prefixField.text
                     }
 
-                    TextField {
+                    ThemedTextField {
                         id: suffixField
 
                         Layout.fillWidth: true
@@ -193,7 +193,7 @@ Item {
                         onTextEdited: root.editor.suffix = suffixField.text
                     }
 
-                    TextField {
+                    ThemedTextField {
                         id: organizationField
 
                         Layout.fillWidth: true
@@ -203,7 +203,7 @@ Item {
                         onTextEdited: root.editor.organization = organizationField.text
                     }
 
-                    TextField {
+                    ThemedTextField {
                         id: departmentField
 
                         Layout.fillWidth: true
@@ -213,7 +213,7 @@ Item {
                         onTextEdited: root.editor.department = departmentField.text
                     }
 
-                    TextField {
+                    ThemedTextField {
                         id: jobField
 
                         Layout.fillWidth: true
@@ -284,7 +284,7 @@ Item {
                         Layout.fillWidth: true
                         spacing: Theme.gridUnit * 3
 
-                        TextField {
+                        ThemedTextField {
                             id: birthdayField
 
                             objectName: "birthdayField"
@@ -295,7 +295,7 @@ Item {
                             onTextEdited: root.editor.birthday = birthdayField.text
                         }
 
-                        TextField {
+                        ThemedTextField {
                             id: anniversaryField
 
                             Layout.fillWidth: true
@@ -361,7 +361,7 @@ Item {
                         Layout.fillWidth: true
                         spacing: Theme.gridUnit * 2
 
-                        TextField {
+                        ThemedTextField {
                             id: newGroupField
 
                             Layout.fillWidth: true
@@ -400,7 +400,7 @@ Item {
                         Accessible.role: Accessible.Heading
                     }
 
-                    TextArea {
+                    ThemedTextArea {
                         id: noteArea
 
                         Layout.fillWidth: true
@@ -446,13 +446,12 @@ Item {
                         }
                     }
 
-                    Button {
+                    PrimaryButton {
                         id: saveButton
 
                         objectName: "saveContactButton"
                         text: qsTr("Save")
                         icon.source: Theme.icon("check")
-                        highlighted: true
                         enabled: root.editor.canSave
                         onClicked: root.editor.save()
 

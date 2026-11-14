@@ -11,7 +11,12 @@ QtObject {
                                      && Application.styleHints.colorScheme === Qt.ColorScheme.Dark)
 
     readonly property color primary: root.dark ? "#4FD8D6" : "#006A6A"
-    readonly property color foregroundOnPrimary: root.dark ? "#003737" : "#FFFFFF"
+    // Not pure white, here and on the error colour: the Material style drops an
+    // explicit foreground that equals the default text colour of its current
+    // theme. While the scheme turns from dark to light, a control still has the
+    // dark theme, whose default is white, and its label then took the colour of
+    // the window.
+    readonly property color foregroundOnPrimary: root.dark ? "#003737" : "#FFFFFE"
     readonly property color surface: root.dark ? "#0F1514" : "#F7FAF9"
     readonly property color surfaceVariant: root.dark ? "#3F4947" : "#DAE5E3"
     readonly property color surfaceContainer: root.dark ? "#1B2120" : "#EBF0EE"
@@ -19,7 +24,7 @@ QtObject {
     readonly property color foregroundOnSurfaceVariant: root.dark ? "#BEC9C6" : "#3F4947"
     readonly property color outline: root.dark ? "#9AA4A1" : "#6F7977"
     readonly property color error: root.dark ? "#FFB4AB" : "#BA1A1A"
-    readonly property color foregroundOnError: root.dark ? "#690005" : "#FFFFFF"
+    readonly property color foregroundOnError: root.dark ? "#690005" : "#FFFFFE"
     readonly property color success: root.dark ? "#8DD79D" : "#1E6B32"
     readonly property color warning: root.dark ? "#F2BF48" : "#7A5900"
     // The same in both schemes: half-transparent black steps the window back.

@@ -22,16 +22,12 @@ Dialog {
     title: qsTr("Settings")
 
     footer: DialogButtonBox {
-        Button {
+        DialogButton {
             id: closeButton
 
             objectName: "settingsCloseButton"
             text: qsTr("Close")
             DialogButtonBox.buttonRole: DialogButtonBox.RejectRole
-
-            FocusRing {
-                shown: closeButton.visualFocus
-            }
         }
     }
 
@@ -112,13 +108,14 @@ Dialog {
             Layout.fillHeight: true
             currentIndex: tabs.currentIndex
 
-            ScrollView {
+            ThemedScrollView {
                 id: connectionPage
 
-                contentWidth: connectionPage.availableWidth
+                objectName: "settingsConnectionPage"
+                contentWidth: connectionPage.availableWidth - connectionPage.ScrollBar.vertical.width
 
                 ColumnLayout {
-                    width: connectionPage.availableWidth
+                    width: connectionPage.contentWidth
                     spacing: Theme.gridUnit * 3
 
                     Label {
@@ -130,7 +127,7 @@ Dialog {
                         Layout.fillWidth: true
                         spacing: Theme.gridUnit * 2
 
-                        ComboBox {
+                        ThemedComboBox {
                             id: adbBox
 
                             objectName: "adbPathBox"
@@ -220,19 +217,31 @@ Dialog {
                     }
 
                     CheckBox {
+                        id: autoConnectBox
+
                         objectName: "autoConnectBox"
                         Layout.fillWidth: true
                         text: qsTr("Connect to the last phone at start and after a lost connection")
                         checked: Settings.autoConnect
                         onToggled: Settings.autoConnect = checked
+
+                        FocusRing {
+                            shown: autoConnectBox.visualFocus
+                        }
                     }
 
                     CheckBox {
+                        id: listenBox
+
                         objectName: "listenBox"
                         Layout.fillWidth: true
                         text: qsTr("Let the phone connect to this computer at any time")
                         checked: Settings.listenForPhone
                         onToggled: Settings.listenForPhone = checked
+
+                        FocusRing {
+                            shown: listenBox.visualFocus
+                        }
                     }
 
                     Label {
@@ -265,31 +274,59 @@ Dialog {
                 }
 
                 RadioButton {
+                    id: systemSchemeButton
+
+                    objectName: "systemSchemeButton"
                     text: qsTr("Like the system")
                     ButtonGroup.group: schemeGroup
                     checked: Settings.colorScheme === Settings.ColorScheme.System
                     onToggled: Settings.colorScheme = Settings.ColorScheme.System
+
+                    FocusRing {
+                        shown: systemSchemeButton.visualFocus
+                    }
                 }
 
                 RadioButton {
+                    id: lightSchemeButton
+
+                    objectName: "lightSchemeButton"
                     text: qsTr("Light")
                     ButtonGroup.group: schemeGroup
                     checked: Settings.colorScheme === Settings.ColorScheme.Light
                     onToggled: Settings.colorScheme = Settings.ColorScheme.Light
+
+                    FocusRing {
+                        shown: lightSchemeButton.visualFocus
+                    }
                 }
 
                 RadioButton {
+                    id: darkSchemeButton
+
+                    objectName: "darkSchemeButton"
                     text: qsTr("Dark")
                     ButtonGroup.group: schemeGroup
                     checked: Settings.colorScheme === Settings.ColorScheme.Dark
                     onToggled: Settings.colorScheme = Settings.ColorScheme.Dark
+
+                    FocusRing {
+                        shown: darkSchemeButton.visualFocus
+                    }
                 }
 
                 CheckBox {
+                    id: reduceMotionBox
+
+                    objectName: "reduceMotionBox"
                     Layout.fillWidth: true
                     text: qsTr("Reduce animations")
                     checked: Settings.reduceMotion
                     onToggled: Settings.reduceMotion = checked
+
+                    FocusRing {
+                        shown: reduceMotionBox.visualFocus
+                    }
                 }
 
                 Item {
@@ -305,7 +342,7 @@ Dialog {
                     font.pixelSize: TypeScale.section
                 }
 
-                ComboBox {
+                ThemedComboBox {
                     id: languageBox
 
                     objectName: "languageBox"
@@ -404,19 +441,31 @@ Dialog {
                 }
 
                 CheckBox {
+                    id: desktopNotificationsBox
+
                     objectName: "desktopNotificationsBox"
                     Layout.fillWidth: true
                     text: qsTr("Show new notifications of the phone on this computer")
                     checked: Settings.notificationsEnabled
                     onToggled: Settings.notificationsEnabled = checked
+
+                    FocusRing {
+                        shown: desktopNotificationsBox.visualFocus
+                    }
                 }
 
                 CheckBox {
+                    id: clipboardSyncBox
+
                     objectName: "clipboardSyncBox"
                     Layout.fillWidth: true
                     text: qsTr("Share the clipboard between the phone and this computer")
                     checked: Settings.clipboardSync
                     onToggled: Settings.clipboardSync = checked
+
+                    FocusRing {
+                        shown: clipboardSyncBox.visualFocus
+                    }
                 }
 
                 Label {
@@ -433,11 +482,17 @@ Dialog {
                 }
 
                 CheckBox {
+                    id: startMinimizedBox
+
                     objectName: "startMinimizedBox"
                     Layout.fillWidth: true
                     text: qsTr("Start in the notification area, without the window")
                     checked: Settings.startMinimized
                     onToggled: Settings.startMinimized = checked
+
+                    FocusRing {
+                        shown: startMinimizedBox.visualFocus
+                    }
                 }
 
                 Label {

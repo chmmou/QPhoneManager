@@ -80,9 +80,9 @@ Pane {
             keyNavigationEnabled: true
             Accessible.role: Accessible.List
             Accessible.name: qsTr("Transfers")
-            ScrollBar.vertical: ScrollBar {}
+            ScrollBar.vertical: ThemedScrollBar {}
 
-            // The row shows the current job by its colour; Delete cancels it.
+            // The row shows the current job by its colour and an outline; Delete cancels it.
             delegate: Rectangle {
                 id: jobRow
 
@@ -94,7 +94,7 @@ Pane {
                 required property bool canCancel
 
                 width: ListView.view.width
-                implicitHeight: jobContent.implicitHeight + Theme.gridUnit
+                implicitHeight: jobContent.implicitHeight + Theme.gridUnit * 3
                 color: ListView.isCurrentItem && jobList.activeFocus ? Theme.surfaceVariant : "transparent"
                 Accessible.role: Accessible.ListItem
                 Accessible.name: jobRow.name
@@ -146,6 +146,11 @@ Pane {
                         ToolTip.text: cancelJobButton.text
                         onClicked: root.transfers.cancel(jobRow.jobId)
                     }
+                }
+
+                CurrentMarker {
+                    current: jobRow.ListView.isCurrentItem
+                    viewFocused: jobList.activeFocus
                 }
             }
 

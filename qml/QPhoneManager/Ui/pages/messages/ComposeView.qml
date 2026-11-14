@@ -15,14 +15,14 @@ Item {
 
     objectName: "composeView"
 
-    ScrollView {
+    ThemedScrollView {
         id: scroller
 
         anchors.fill: parent
-        contentWidth: scroller.availableWidth
+        contentWidth: scroller.availableWidth - scroller.ScrollBar.vertical.width
 
         ColumnLayout {
-            width: scroller.availableWidth
+            width: scroller.contentWidth
             spacing: Theme.gridUnit * 3
 
             Pane {
@@ -86,7 +86,7 @@ Item {
                         Layout.fillWidth: true
                         spacing: Theme.gridUnit * 2
 
-                        TextField {
+                        ThemedTextField {
                             id: numberField
 
                             objectName: "recipientField"
@@ -116,7 +116,7 @@ Item {
 
                     // The outlined fields show their focus themselves; a ring on top
                     // would cross the floating label.
-                    TextArea {
+                    ThemedTextArea {
                         id: textArea
 
                         objectName: "messageTextArea"
@@ -174,7 +174,7 @@ Item {
                             text: qsTr("SIM card")
                         }
 
-                        ComboBox {
+                        ThemedComboBox {
                             id: simBox
 
                             objectName: "simBox"
@@ -216,7 +216,7 @@ Item {
                             text: qsTr("Date")
                         }
 
-                        TextField {
+                        ThemedTextField {
                             id: dateField
 
                             objectName: "scheduleDateField"
@@ -230,7 +230,7 @@ Item {
                             text: qsTr("Time")
                         }
 
-                        TextField {
+                        ThemedTextField {
                             id: timeField
 
                             objectName: "scheduleTimeField"
@@ -303,13 +303,12 @@ Item {
                             }
                         }
 
-                        Button {
+                        PrimaryButton {
                             id: submitButton
 
                             objectName: "submitMessageButton"
                             text: root.composer.scheduled ? (root.composer.editingLuid > 0 ? qsTr("Save") : qsTr("Schedule")) : qsTr("Send")
                             icon.source: Theme.icon(root.composer.scheduled ? "clock" : "send")
-                            highlighted: true
                             enabled: root.composer.canSubmit
                             onClicked: root.submit()
 

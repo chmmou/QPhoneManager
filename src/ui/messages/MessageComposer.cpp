@@ -70,7 +70,7 @@ QStringList MessageComposer::recipientLabels() const
 {
     QStringList labels;
     for (const QString &number : m_numbers) {
-        const QString name = m_names ? m_names(number) : QString();
+        const QString name = nameFor(number);
         const QString shown = PhoneNumberText::display(number);
         labels.append(name.isEmpty() ? shown : tr("%1 (%2)").arg(name, shown));
     }
@@ -222,9 +222,15 @@ int MessageComposer::simSlot() const
     return m_simIndex > 0 && m_simIndex <= m_simSlots.size() ? m_simSlots.at(m_simIndex - 1) : -1;
 }
 
+QString MessageComposer::nameFor(const QString &number) const
+{
+    return m_names ? m_names(number, m_storedNames.value(number)) : QString();
+}
+
 void MessageComposer::reset()
 {
     m_numbers.clear();
+    m_storedNames.clear();
     m_recipientText.clear();
     m_text.clear();
     m_length = core::codec::smsLength(QString());
@@ -258,13 +264,21 @@ void MessageComposer::startNew(const QStringList &numbers)
 bool MessageComposer::startEditing(int luid)
 {
     QStringList numbers;
+    QHash<QString, QString> storedNames;
     QString text;
     QDateTime when;
     int slot = -1;
     if (luid <= 0 || !m_scheduledLookup ||
-        !m_scheduledLookup(quint32(luid), numbers, text, when, slot))
+        !m_scheduledLookup(quint32(luid), numbers, storedNames, text, when, slot))
         return false;
     startNew(numbers);
+    for (auto entry = storedNames.cbegin(); entry != storedNames.cend(); ++entry) {
+        const QString dialable = core::service::ContactsService::dialableNumber(entry.key());
+        if (!dialable.isEmpty())
+            m_storedNames.insert(dialable, entry.value());
+    }
+    if (!m_storedNames.isEmpty())
+        Q_EMIT recipientsChanged();
     const bool could = canSubmit();
     m_editingLuid = quint32(luid);
     m_text = text;
@@ -380,7 +394,7 @@ bool MessageComposer::schedule()
     for (const QString &number : std::as_const(m_numbers)) {
         core::codec::MessageRecipient recipient;
         recipient.number = number;
-        recipient.name = m_names ? m_names(number) : QString();
+        recipient.name = nameFor(number);
         message.recipients.append(recipient);
     }
     setBusy(true);

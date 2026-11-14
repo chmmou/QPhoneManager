@@ -22,29 +22,21 @@ Dialog {
     title: root.oldName.length > 0 ? qsTr("Rename %1").arg(root.oldName) : qsTr("New folder")
 
     footer: DialogButtonBox {
-        Button {
+        DialogButton {
             id: confirmButton
 
             objectName: "confirmNameButton"
             text: root.oldName.length > 0 ? qsTr("Rename") : qsTr("Create")
             enabled: root.problem.length === 0
             DialogButtonBox.buttonRole: DialogButtonBox.AcceptRole
-
-            FocusRing {
-                shown: confirmButton.visualFocus
-            }
         }
 
-        Button {
+        DialogButton {
             id: cancelButton
 
             objectName: "cancelNameButton"
             text: qsTr("Cancel")
             DialogButtonBox.buttonRole: DialogButtonBox.RejectRole
-
-            FocusRing {
-                shown: cancelButton.visualFocus
-            }
         }
     }
 
@@ -67,7 +59,7 @@ Dialog {
             text: qsTr("Name")
         }
 
-        TextField {
+        ThemedTextField {
             id: nameField
 
             objectName: "fileNameField"

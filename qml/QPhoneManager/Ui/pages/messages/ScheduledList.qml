@@ -26,10 +26,11 @@ Item {
         highlightMoveDuration: 0
         Accessible.role: Accessible.List
         Accessible.name: qsTr("Scheduled messages")
-        ScrollBar.vertical: ScrollBar {}
+        ScrollBar.vertical: ThemedScrollBar {}
 
         // A plain row rather than a delegate control: the list is the one
-        // focus stop, and the row shows the current entry by its colour.
+        // focus stop, and the row shows the current entry by its colour and
+        // an outline.
         delegate: Rectangle {
             id: scheduledRow
 
@@ -99,6 +100,11 @@ Item {
                         elide: Text.ElideRight
                     }
                 }
+            }
+
+            CurrentMarker {
+                current: scheduledRow.ListView.isCurrentItem
+                viewFocused: list.activeFocus
             }
         }
 

@@ -97,13 +97,12 @@ Window {
             Layout.alignment: Qt.AlignHCenter
             spacing: Theme.gridUnit * 3
 
-            Button {
+            PrimaryButton {
                 id: answerButton
 
                 objectName: "callAnswerButton"
                 text: qsTr("Answer")
                 icon.source: Theme.icon("phone-call")
-                highlighted: true
                 enabled: root.ringing
                 onClicked: root.call.answer()
 
@@ -131,14 +130,13 @@ Window {
             Layout.alignment: Qt.AlignHCenter
             spacing: Theme.gridUnit * 3
 
-            Button {
+            PrimaryButton {
                 id: muteButton
 
                 objectName: "callMuteButton"
                 text: qsTr("Mute")
                 icon.source: Theme.icon("microphone-off")
                 flat: !root.call.muted
-                highlighted: root.call.muted
                 enabled: root.talking
                 Accessible.checkable: true
                 Accessible.checked: root.call.muted
@@ -149,14 +147,13 @@ Window {
                 }
             }
 
-            Button {
+            PrimaryButton {
                 id: speakerButton
 
                 objectName: "callSpeakerButton"
                 text: qsTr("Speaker")
                 icon.source: Theme.icon("volume")
                 flat: !root.call.speakerOn
-                highlighted: root.call.speakerOn
                 enabled: root.talking
                 Accessible.checkable: true
                 Accessible.checked: root.call.speakerOn

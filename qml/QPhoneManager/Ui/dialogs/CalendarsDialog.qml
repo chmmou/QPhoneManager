@@ -20,32 +20,27 @@ Dialog {
     title: qsTr("Calendars on the phone")
 
     footer: DialogButtonBox {
-        Button {
+        DialogButton {
             id: applyButton
 
             objectName: "applyCalendarsButton"
             text: qsTr("Apply")
             enabled: root.area.canEdit && root.area.calendars.modified
             DialogButtonBox.buttonRole: DialogButtonBox.AcceptRole
-
-            FocusRing {
-                shown: applyButton.visualFocus
-            }
         }
 
-        Button {
+        DialogButton {
             id: cancelButton
 
             text: qsTr("Cancel")
             DialogButtonBox.buttonRole: DialogButtonBox.RejectRole
-
-            FocusRing {
-                shown: cancelButton.visualFocus
-            }
         }
     }
 
-    onOpened: calendarList.forceActiveFocus(Qt.TabFocusReason)
+    onOpened: {
+        root.chooseFirstRow();
+        calendarList.forceActiveFocus(Qt.TabFocusReason);
+    }
     onAccepted: root.area.applyCalendarChoice()
     onRejected: root.area.calendars.revertChoice()
     Component.onCompleted: Theme.calmPopup(root)
@@ -158,6 +153,11 @@ Dialog {
                         onToggled: root.area.calendars.setDefault(calendarRow.index)
                     }
                 }
+
+                CurrentMarker {
+                    current: calendarRow.ListView.isCurrentItem
+                    viewFocused: calendarList.activeFocus
+                }
             }
 
             Keys.onSpacePressed: root.area.calendars.setSelected(calendarList.currentIndex, !root.area.calendars.isSelected(calendarList.currentIndex))
@@ -177,5 +177,19 @@ Dialog {
     FocusRing {
         parent: calendarList
         shown: calendarList.activeFocus
+    }
+
+    // Space and Enter act on the current row, which a list read anew has none of.
+    Connections {
+        target: root.area.calendars
+
+        function onModelReset(): void {
+            root.chooseFirstRow();
+        }
+    }
+
+    function chooseFirstRow(): void {
+        if (calendarList.currentIndex < 0 && calendarList.count > 0)
+            calendarList.currentIndex = 0;
     }
 }

@@ -25,29 +25,21 @@ Dialog {
     title: qsTr("Enter the PIN")
 
     footer: DialogButtonBox {
-        Button {
+        DialogButton {
             id: connectButton
 
             objectName: "pinConnectButton"
             text: qsTr("Connect")
             enabled: pinField.text.length > 0
             DialogButtonBox.buttonRole: DialogButtonBox.AcceptRole
-
-            FocusRing {
-                shown: connectButton.visualFocus
-            }
         }
 
-        Button {
+        DialogButton {
             id: cancelButton
 
             objectName: "pinCancelButton"
             text: qsTr("Cancel")
             DialogButtonBox.buttonRole: DialogButtonBox.RejectRole
-
-            FocusRing {
-                shown: cancelButton.visualFocus
-            }
         }
     }
 
@@ -92,7 +84,7 @@ Dialog {
             }
         }
 
-        TextField {
+        ThemedTextField {
             id: pinField
 
             objectName: "pinField"
@@ -114,6 +106,10 @@ Dialog {
             Layout.fillWidth: true
             visible: root.canRemember
             text: qsTr("Remember the PIN in the keyring of this computer")
+
+            FocusRing {
+                shown: rememberBox.visualFocus
+            }
         }
 
         Label {

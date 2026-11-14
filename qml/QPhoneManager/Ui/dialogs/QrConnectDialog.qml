@@ -19,24 +19,25 @@ Dialog {
     title: qsTr("Connect with a QR code")
 
     footer: DialogButtonBox {
-        Button {
+        DialogButton {
             id: closeButton
 
             objectName: "qrCloseButton"
             text: qsTr("Close")
             DialogButtonBox.buttonRole: DialogButtonBox.RejectRole
-
-            FocusRing {
-                shown: closeButton.visualFocus
-            }
         }
     }
 
+    // The tab reason makes the button show its focus ring right away; giving the
+    // focus up on closing makes the next opening set that reason again.
     onOpened: {
         root.provider.active = true;
-        closeButton.forceActiveFocus(Qt.PopupFocusReason);
+        closeButton.forceActiveFocus(Qt.TabFocusReason);
     }
-    onClosed: root.provider.active = false
+    onClosed: {
+        root.provider.active = false;
+        closeButton.focus = false;
+    }
     Component.onCompleted: Theme.calmPopup(root)
 
     Connections {

@@ -3,6 +3,7 @@
 #include "core/codec/SmsLength.h"
 
 #include <QDateTime>
+#include <QHash>
 #include <QList>
 #include <QObject>
 #include <QString>
@@ -63,8 +64,12 @@ class MessageComposer : public QObject
     Q_PROPERTY(bool canSubmit READ canSubmit NOTIFY canSubmitChanged FINAL)
 
 public:
-    /// The contact's name for a number, or an empty string.
-    using NameLookup = std::function<QString(const QString &number)>;
+    /**
+     * The contact's name for a number, or an empty string. `storedName` is the
+     * name a scheduled message being changed carries for the number; where
+     * contacts share the number, it tells which one is meant.
+     */
+    using NameLookup = std::function<QString(const QString &number, const QString &storedName)>;
 
     /// `service` must outlive this object.
     explicit MessageComposer(core::service::MessagesService *service, QObject *parent = nullptr);
@@ -115,9 +120,14 @@ public:
     /// Saves the message as a scheduled one on the phone; false when the form is not complete.
     Q_INVOKABLE bool schedule();
 
-    /// Where startEditing() takes the stored message from.
-    using ScheduledLookup = std::function<bool(quint32 luid, QStringList &numbers, QString &text,
-                                               QDateTime &when, int &simSlot)>;
+    /**
+     * Where startEditing() takes the stored message from. `storedNames` holds
+     * the name the message carries for each of its numbers.
+     */
+    using ScheduledLookup =
+        std::function<bool(quint32 luid, QStringList &numbers,
+                           QHash<QString, QString> &storedNames, QString &text, QDateTime &when,
+                           int &simSlot)>;
     void setScheduledLookup(ScheduledLookup lookup);
 
 Q_SIGNALS:
@@ -139,11 +149,14 @@ private:
     void setBusy(bool busy);
     void reset();
     [[nodiscard]] int simSlot() const;
+    [[nodiscard]] QString nameFor(const QString &number) const;
 
     core::service::MessagesService *m_service = nullptr;
     NameLookup m_names;
     ScheduledLookup m_scheduledLookup;
     QStringList m_numbers;
+    /// The names a scheduled message being changed carries, by dialable number.
+    QHash<QString, QString> m_storedNames;
     QString m_recipientText;
     QString m_text;
     core::codec::SmsLength m_length;

@@ -13,15 +13,15 @@ Item {
     signal finished
     signal deleteRequested(int luid)
 
-    ScrollView {
+    ThemedScrollView {
         id: scroller
 
         objectName: "taskForm"
         anchors.fill: parent
-        contentWidth: scroller.availableWidth
+        contentWidth: scroller.availableWidth - scroller.ScrollBar.vertical.width
 
         ColumnLayout {
-            width: scroller.availableWidth
+            width: scroller.contentWidth
             spacing: Theme.gridUnit * 4
 
             Label {
@@ -50,7 +50,7 @@ Item {
                 Layout.rightMargin: Theme.gridUnit * 4
                 spacing: Theme.gridUnit * 3
 
-                TextField {
+                ThemedTextField {
                     id: summaryField
 
                     objectName: "taskSummaryField"
@@ -84,7 +84,7 @@ Item {
                         text: qsTr("Start")
                     }
 
-                    TextField {
+                    ThemedTextField {
                         id: startField
 
                         objectName: "taskStartField"
@@ -102,7 +102,7 @@ Item {
                         text: qsTr("Due")
                     }
 
-                    TextField {
+                    ThemedTextField {
                         id: dueField
 
                         objectName: "taskDueField"
@@ -136,7 +136,7 @@ Item {
                         text: qsTr("Reminder")
                     }
 
-                    TextField {
+                    ThemedTextField {
                         id: reminderDateField
 
                         objectName: "taskReminderDateField"
@@ -147,7 +147,7 @@ Item {
                         onTextEdited: root.editor.reminderDate = reminderDateField.text
                     }
 
-                    TextField {
+                    ThemedTextField {
                         id: reminderTimeField
 
                         objectName: "taskReminderTimeField"
@@ -162,7 +162,7 @@ Item {
                         text: qsTr("Repeats")
                     }
 
-                    ComboBox {
+                    ThemedComboBox {
                         id: repeatBox
 
                         objectName: "taskRepeatBox"
@@ -183,7 +183,7 @@ Item {
                         text: qsTr("Priority")
                     }
 
-                    ComboBox {
+                    ThemedComboBox {
                         id: priorityBox
 
                         objectName: "taskPriorityBox"
@@ -234,7 +234,7 @@ Item {
                     Layout.fillWidth: true
                     spacing: Theme.gridUnit * 2
 
-                    TextField {
+                    ThemedTextField {
                         id: newCategoryField
 
                         objectName: "taskNewCategoryField"
@@ -269,7 +269,7 @@ Item {
                     Accessible.role: Accessible.Heading
                 }
 
-                TextArea {
+                ThemedTextArea {
                     id: descriptionArea
 
                     objectName: "taskDescriptionArea"
@@ -341,13 +341,12 @@ Item {
                         }
                     }
 
-                    Button {
+                    PrimaryButton {
                         id: saveButton
 
                         objectName: "saveTaskButton"
                         text: qsTr("Save")
                         icon.source: Theme.icon("check")
-                        highlighted: true
                         enabled: root.editor.canSave
                         onClicked: root.editor.save()
 

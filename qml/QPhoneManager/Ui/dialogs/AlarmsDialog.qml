@@ -22,15 +22,11 @@ Dialog {
     title: qsTr("Alarms on the phone")
 
     footer: DialogButtonBox {
-        Button {
+        DialogButton {
             id: closeButton
 
             text: qsTr("Close")
             DialogButtonBox.buttonRole: DialogButtonBox.RejectRole
-
-            FocusRing {
-                shown: closeButton.visualFocus
-            }
         }
     }
 
@@ -148,6 +144,11 @@ Dialog {
                         color: Theme.foregroundOnSurfaceVariant
                     }
                 }
+
+                CurrentMarker {
+                    current: alarmRow.ListView.isCurrentItem
+                    viewFocused: alarmList.activeFocus
+                }
             }
 
             Keys.onReturnPressed: root.edit(alarmList.currentIndex)
@@ -173,7 +174,7 @@ Dialog {
                 text: qsTr("Time")
             }
 
-            TextField {
+            ThemedTextField {
                 id: timeField
 
                 objectName: "alarmTimeField"
@@ -188,7 +189,7 @@ Dialog {
                 text: qsTr("Name")
             }
 
-            TextField {
+            ThemedTextField {
                 id: nameField
 
                 objectName: "alarmNameField"
@@ -257,13 +258,12 @@ Dialog {
                 }
             }
 
-            Button {
+            PrimaryButton {
                 id: saveButton
 
                 objectName: "saveAlarmButton"
                 text: qsTr("Save")
                 icon.source: Theme.icon("check")
-                highlighted: true
                 enabled: root.area.canEdit && timeField.text.trim().length > 0 && !root.area.busy
                 onClicked: root.area.saveAlarm(root.editingRow, timeField.text, nameField.text, root.chosenDays(), enabledBox.checked)
 

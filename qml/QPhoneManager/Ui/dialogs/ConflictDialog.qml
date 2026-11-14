@@ -19,7 +19,7 @@ Dialog {
     title: qsTr("The contact was changed on the phone")
 
     footer: DialogButtonBox {
-        Button {
+        DialogButton {
             id: keepOwnButton
 
             objectName: "keepOwnButton"
@@ -28,13 +28,9 @@ Dialog {
                 root.close();
                 root.editor.keepOwnVersion();
             }
-
-            FocusRing {
-                shown: keepOwnButton.visualFocus
-            }
         }
 
-        Button {
+        DialogButton {
             id: takePhoneButton
 
             objectName: "takePhoneButton"
@@ -43,21 +39,13 @@ Dialog {
                 root.close();
                 root.editor.takePhoneVersion();
             }
-
-            FocusRing {
-                shown: takePhoneButton.visualFocus
-            }
         }
 
-        Button {
+        DialogButton {
             id: backButton
 
             text: qsTr("Back to editing")
             DialogButtonBox.buttonRole: DialogButtonBox.RejectRole
-
-            FocusRing {
-                shown: backButton.visualFocus
-            }
         }
     }
 
@@ -93,12 +81,16 @@ Dialog {
                     Accessible.role: Accessible.Heading
                 }
 
-                ScrollView {
+                ThemedScrollView {
+                    id: ownScroll
+
                     Layout.fillWidth: true
                     Layout.fillHeight: true
+                    contentWidth: ownScroll.availableWidth - ownScroll.ScrollBar.vertical.width
 
                     Label {
                         objectName: "ownVersionText"
+                        width: ownScroll.contentWidth
                         text: root.editor.ownVersionText
                         wrapMode: Text.Wrap
                     }
@@ -116,12 +108,16 @@ Dialog {
                     Accessible.role: Accessible.Heading
                 }
 
-                ScrollView {
+                ThemedScrollView {
+                    id: phoneScroll
+
                     Layout.fillWidth: true
                     Layout.fillHeight: true
+                    contentWidth: phoneScroll.availableWidth - phoneScroll.ScrollBar.vertical.width
 
                     Label {
                         objectName: "phoneVersionText"
+                        width: phoneScroll.contentWidth
                         text: root.editor.phoneVersionText
                         wrapMode: Text.Wrap
                     }

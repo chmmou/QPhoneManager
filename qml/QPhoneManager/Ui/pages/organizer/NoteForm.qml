@@ -34,11 +34,18 @@ Item {
             wrapMode: Text.Wrap
         }
 
-        ScrollView {
+        ThemedScrollView {
+            id: bodyScroll
+
+            objectName: "noteBodyScroll"
             Layout.fillWidth: true
             Layout.fillHeight: true
+            // The text area takes the width of the view on its own, so the room
+            // for the scroll bar is kept free on the side of the bar.
+            leftPadding: bodyScroll.mirrored ? bodyScroll.ScrollBar.vertical.width : 0
+            rightPadding: bodyScroll.mirrored ? 0 : bodyScroll.ScrollBar.vertical.width
 
-            TextArea {
+            ThemedTextArea {
                 id: bodyArea
 
                 objectName: "noteBodyArea"
@@ -86,7 +93,7 @@ Item {
             Layout.fillWidth: true
             spacing: Theme.gridUnit * 2
 
-            TextField {
+            ThemedTextField {
                 id: newCategoryField
 
                 objectName: "noteNewCategoryField"
@@ -161,13 +168,12 @@ Item {
                 }
             }
 
-            Button {
+            PrimaryButton {
                 id: saveButton
 
                 objectName: "saveNoteButton"
                 text: qsTr("Save")
                 icon.source: Theme.icon("check")
-                highlighted: true
                 enabled: root.editor.canSave
                 onClicked: root.editor.save()
 

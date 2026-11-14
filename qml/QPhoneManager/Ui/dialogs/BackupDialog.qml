@@ -24,16 +24,12 @@ Dialog {
     title: qsTr("Back up and restore")
 
     footer: DialogButtonBox {
-        Button {
+        DialogButton {
             id: closeButton
 
             objectName: "backupCloseButton"
             text: qsTr("Close")
             DialogButtonBox.buttonRole: DialogButtonBox.RejectRole
-
-            FocusRing {
-                shown: closeButton.visualFocus
-            }
         }
     }
 
@@ -106,15 +102,15 @@ Dialog {
                 spacing: Theme.gridUnit * 2
 
                 // Scrolls only where the window is too low; the button below stays in view.
-                ScrollView {
+                ThemedScrollView {
                     id: backupScroll
 
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    contentWidth: backupScroll.availableWidth
+                    contentWidth: backupScroll.availableWidth - backupScroll.ScrollBar.vertical.width
 
                     ColumnLayout {
-                        width: backupScroll.availableWidth
+                        width: backupScroll.contentWidth
                         spacing: Theme.gridUnit * 2
 
                         Label {
@@ -173,15 +169,15 @@ Dialog {
                 objectName: "restorePage"
                 spacing: Theme.gridUnit * 2
 
-                ScrollView {
+                ThemedScrollView {
                     id: restoreScroll
 
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    contentWidth: restoreScroll.availableWidth
+                    contentWidth: restoreScroll.availableWidth - restoreScroll.ScrollBar.vertical.width
 
                     ColumnLayout {
-                        width: restoreScroll.availableWidth
+                        width: restoreScroll.contentWidth
                         spacing: Theme.gridUnit * 2
 
                         Label {

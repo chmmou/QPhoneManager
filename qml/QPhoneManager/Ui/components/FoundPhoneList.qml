@@ -34,7 +34,7 @@ ColumnLayout {
         model: root.phones
         Accessible.role: Accessible.List
         Accessible.name: root.listName
-        ScrollBar.vertical: ScrollBar {}
+        ScrollBar.vertical: ThemedScrollBar {}
 
         delegate: ItemDelegate {
             id: phoneDelegate

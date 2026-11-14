@@ -111,7 +111,7 @@ QString ScheduledListModel::recipientsText(const StoredMessage &message) const
 {
     QStringList names;
     for (const MessageRecipient &recipient : message.recipients) {
-        QString name = m_names ? m_names(recipient.number) : QString();
+        QString name = m_names ? m_names(recipient.number, recipient.name) : QString();
         if (name.isEmpty())
             name = recipient.name.trimmed();
         names.append(name.isEmpty() ? PhoneNumberText::display(recipient.number) : name);
