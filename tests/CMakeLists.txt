@@ -235,6 +235,16 @@ qpm_set_project_warnings(tst_help)
 add_test(NAME tst_help COMMAND tst_help)
 set_tests_properties(tst_help PROPERTIES TIMEOUT 180)
 
+# Measures the time limits for syncing, opening, scrolling and searching with
+# generated data. It runs only with QPM_TEST_PERF=1 and otherwise reports
+# itself as skipped, see the README: its result depends on the computer and
+# the build.
+qt_add_executable(tst_perf perf/tst_perf.cpp)
+target_link_libraries(tst_perf PRIVATE qpm_ui qpm_fakephone Qt6::Test)
+qpm_set_project_warnings(tst_perf)
+add_test(NAME tst_perf COMMAND tst_perf)
+set_tests_properties(tst_perf PROPERTIES TIMEOUT 300 LABELS perf)
+
 # A QML module with the fake phone, for the Qt Quick tests below.
 qt_add_library(qpm_testsupport STATIC)
 qt_add_qml_module(qpm_testsupport

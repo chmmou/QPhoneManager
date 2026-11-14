@@ -322,6 +322,20 @@ QPM_TEST_ADB=$HOME/Android/Sdk/platform-tools/adb QPM_TEST_SERIAL=emulator-5554 
     ctest --preset debug-6.9 -L device
 ```
 
+The performance test carries the CTest label `perf`. It puts 5000 contacts,
+50000 messages, 10000 appointments and 1000 apps on the fake phone. Then it
+measures the sync without changes, the opening of each list, reading the rows
+of a screen, searching and paging through the calendar. Its result depends on
+the computer and the build, and the limits are meant for the release build.
+The test therefore runs only with `QPM_TEST_PERF=1` and otherwise reports
+itself as skipped:
+
+```bash
+QPM_TEST_PERF=1 ctest --preset release-6.9 -L perf --verbose
+```
+
+Each measurement is printed as a line that starts with `perf |`.
+
 ## License
 
 QPhoneManager is released under the BSD 3-Clause License, see `LICENSE`.
