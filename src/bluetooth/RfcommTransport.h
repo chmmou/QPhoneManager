@@ -44,9 +44,10 @@ public:
 
     /**
      * The failure reported for `socketError`, with `detail` in the message.
-     * A phone that cannot be found, or that does not offer the serial port
-     * service, gives ErrorCode::BluetoothServiceNotFound; any other error
-     * gives ErrorCode::ConnectionClosed.
+     * A phone that cannot be reached, because it is off, out of range, has
+     * Bluetooth off or is no longer paired, and a phone that does not offer
+     * the serial port service both give ErrorCode::BluetoothServiceNotFound.
+     * Any other error gives ErrorCode::ConnectionClosed.
      */
     [[nodiscard]] static core::Error errorFor(QBluetoothSocket::SocketError socketError,
                                               const QString &detail);

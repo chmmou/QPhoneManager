@@ -1,6 +1,7 @@
 #include "ui/AppController.h"
 
 #include "core/protocol/PhoneConnection.h"
+#include "core/store/CallStore.h"
 #include "core/store/ProfileStore.h"
 #include "platform/SecretStore.h"
 #include "ui/DeviceStatusModel.h"
@@ -25,6 +26,7 @@
 #include <memory>
 
 using namespace qpm::core;
+using qpm::core::store::CallStore;
 using qpm::core::store::DeviceProfile;
 using qpm::core::store::ProfileStore;
 using qpm::test::FakePhone;
@@ -68,6 +70,7 @@ private Q_SLOTS:
     void errorMessagesStayShortAndSayWhatToDo_data();
     void errorMessagesStayShortAndSayWhatToDo();
     void missingBluetoothServiceNamesPermissionAndReconnect();
+    void unreachablePhoneOverBluetoothIsNamedBeforeTheRemedies();
     void connectionOrderFallsBackToTheNextWay();
     void startConnectsToThePhoneOfTheLastSession();
     void lostConnectionIsRestoredWhenAutoConnectIsOn();
@@ -83,6 +86,7 @@ private Q_SLOTS:
     void syncReportsTheChangesOfEachArea();
     void firstSyncReportsEachAreaInOrder();
     void laterSyncIsNoFirstSync();
+    void storedCallLogCountsAsAnEarlierSync();
     void firstSyncEndsWithTheConnection();
     void signalValueMapsToBars_data();
     void signalValueMapsToBars();
@@ -336,6 +340,27 @@ void TestAppController::missingBluetoothServiceNamesPermissionAndReconnect()
     QVERIFY(!message.contains(QStringLiteral("remote profile")));
     QVERIFY(message != AppController::messageFor(Error(ErrorCode::ConnectionClosed, {}),
                                                  AppController::ConnectionKind::Bluetooth));
+}
+
+// BlueZ reports a phone that is off, out of range, has Bluetooth off or is no
+// longer paired with the same error as a missing service. The text first says
+// what went wrong and then names the phone itself as the first thing to check.
+void TestAppController::unreachablePhoneOverBluetoothIsNamedBeforeTheRemedies()
+{
+    const QString message = AppController::messageFor(
+        Error(ErrorCode::BluetoothServiceNotFound,
+              QStringLiteral("Bluetooth connection failed: Host is down")),
+        AppController::ConnectionKind::Bluetooth);
+
+    static const QRegularExpression sentenceEnd(QStringLiteral("(?<=\\.)\\s+"));
+    const QStringList sentences = message.split(sentenceEnd, Qt::SkipEmptyParts);
+    QVERIFY2(sentences.size() <= 3, qPrintable(message));
+    QVERIFY2(sentences.first().contains(QStringLiteral("cannot reach MyPhoneExplorer Client")),
+             qPrintable(message));
+    QVERIFY2(
+        sentences.value(1).startsWith(QStringLiteral("Keep the phone close with Bluetooth on")),
+        qPrintable(message));
+    QVERIFY(!message.contains(QStringLiteral("Host is down")));
 }
 
 void TestAppController::connectionOrderFallsBackToTheNextWay()
@@ -657,6 +682,32 @@ void TestAppController::laterSyncIsNoFirstSync()
     QTRY_COMPARE_WITH_TIMEOUT(finished.count(), 2, connectTimeoutMs);
     QCOMPARE(steps, QList<int>({1, 2, 3, 4, 5, 0}));
     QVERIFY(!first.contains(true));
+}
+
+// A profile whose only stored data is the call log was synced before: the
+// call log keeps no time of its last read.
+void TestAppController::storedCallLogCountsAsAnEarlierSync()
+{
+    {
+        ProfileStore store(m_settings->dataDirectory(), m_phone->config().deviceId);
+        QVERIFY(store.open().hasValue());
+        qpm::core::codec::CallEntry call;
+        call.id = 1;
+        call.number = QStringLiteral("+4915112345678");
+        call.start = QDateTime::currentDateTime();
+        QVERIFY(CallStore(&store).replaceAll({call}).hasValue());
+        QVERIFY(!store.lastSync(qpm::core::sync::IrmcDomain::Contacts));
+    }
+    const std::unique_ptr<AppController> controller = makeController();
+    QSignalSpy finished(controller.get(), &AppController::syncFinished);
+    QVERIFY(controller->connectAddress(phoneAddress()));
+    QTRY_VERIFY_WITH_TIMEOUT(controller->isConnected(), connectTimeoutMs);
+
+    controller->syncAll();
+
+    QVERIFY(controller->isSyncing());
+    QVERIFY(!controller->isFirstSync());
+    QTRY_COMPARE_WITH_TIMEOUT(finished.count(), 1, connectTimeoutMs);
 }
 
 void TestAppController::firstSyncEndsWithTheConnection()

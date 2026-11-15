@@ -2583,17 +2583,17 @@
         <translation>First sync</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/FirstSyncPopup.qml" line="39"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/FirstSyncPopup.qml" line="53"/>
         <source>QPhoneManager loads the data of the phone for the first time. This can take a few minutes.</source>
         <translation>QPhoneManager loads the data of the phone for the first time. This can take a few minutes.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/FirstSyncPopup.qml" line="48"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/FirstSyncPopup.qml" line="62"/>
         <source>%1 (%2 of %3)</source>
         <translation>%1 (%2 of %3)</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/FirstSyncPopup.qml" line="63"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/FirstSyncPopup.qml" line="76"/>
         <source>Progress of the first sync</source>
         <translation>Progress of the first sync</translation>
     </message>
@@ -4760,252 +4760,252 @@ The license text is at https://www.gnu.org/licenses/lgpl-3.0.html.</translation>
 <context>
     <name>qpm::ui::AppController</name>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="177"/>
+        <location filename="../../src/ui/AppController.cpp" line="180"/>
         <source>Calls</source>
         <translation>Calls</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="168"/>
+        <location filename="../../src/ui/AppController.cpp" line="171"/>
         <source>Contacts</source>
         <translation>Contacts</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="186"/>
+        <location filename="../../src/ui/AppController.cpp" line="189"/>
         <source>Messages</source>
         <translation>Messages</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="195"/>
+        <location filename="../../src/ui/AppController.cpp" line="198"/>
         <source>Calendar and tasks</source>
         <translation>Calendar and tasks</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="204"/>
+        <location filename="../../src/ui/AppController.cpp" line="207"/>
         <source>Notes</source>
         <translation>Notes</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="298"/>
+        <location filename="../../src/ui/AppController.cpp" line="301"/>
         <source>Wi-Fi</source>
         <translation>Wi-Fi</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="300"/>
+        <location filename="../../src/ui/AppController.cpp" line="303"/>
         <source>USB</source>
         <translation>USB</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="302"/>
+        <location filename="../../src/ui/AppController.cpp" line="305"/>
         <source>Bluetooth</source>
         <translation>Bluetooth</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="347"/>
-        <location filename="../../src/ui/AppController.cpp" line="1121"/>
+        <location filename="../../src/ui/AppController.cpp" line="350"/>
+        <location filename="../../src/ui/AppController.cpp" line="1124"/>
         <source>Enter the IP address of the phone, for example 192.168.1.20. MyPhoneExplorer Client shows it on the phone.</source>
         <translation>Enter the IP address of the phone, for example 192.168.1.20. MyPhoneExplorer Client shows it on the phone.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="370"/>
+        <location filename="../../src/ui/AppController.cpp" line="373"/>
         <source>Choose a paired phone from the list.</source>
         <translation>Choose a paired phone from the list.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="400"/>
+        <location filename="../../src/ui/AppController.cpp" line="403"/>
         <source>This phone was not connected in a way that can be repeated. Choose Connect and pick how to connect.</source>
         <translation>This phone was not connected in a way that can be repeated. Choose Connect and pick how to connect.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="597"/>
+        <location filename="../../src/ui/AppController.cpp" line="600"/>
         <source>The data of this phone cannot be saved on this computer. Check the storage folder in the settings.</source>
         <translation>The data of this phone cannot be saved on this computer. Check the storage folder in the settings.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="618"/>
+        <location filename="../../src/ui/AppController.cpp" line="621"/>
         <source>The PIN could not be saved, because the keyring of the system is not available. You will be asked for it next time.</source>
         <translation>The PIN could not be saved, because the keyring of the system is not available. You will be asked for it next time.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="639"/>
+        <location filename="../../src/ui/AppController.cpp" line="642"/>
         <source>The connection to the phone was lost. QPhoneManager connects again as soon as the phone can be reached.</source>
         <translation>The connection to the phone was lost. QPhoneManager connects again as soon as the phone can be reached.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="667"/>
+        <location filename="../../src/ui/AppController.cpp" line="670"/>
         <source>This computer cannot wait for the phone, because port %1 is in use. Close the program that uses it, then try again.</source>
         <translation>This computer cannot wait for the phone, because port %1 is in use. Close the program that uses it, then try again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="703"/>
+        <location filename="../../src/ui/AppController.cpp" line="706"/>
         <source>This computer cannot search the network right now. Enter the address of the phone instead.</source>
         <translation>This computer cannot search the network right now. Enter the address of the phone instead.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="710"/>
-        <location filename="../../src/ui/AppController.cpp" line="1118"/>
+        <location filename="../../src/ui/AppController.cpp" line="713"/>
+        <location filename="../../src/ui/AppController.cpp" line="1121"/>
         <source>adb was not found. Install the Android platform tools or choose adb in the settings.</source>
         <translation>adb was not found. Install the Android platform tools or choose adb in the settings.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="719"/>
+        <location filename="../../src/ui/AppController.cpp" line="722"/>
         <source>adb did not work. Check the adb path in the settings.</source>
         <translation>adb did not work. Check the adb path in the settings.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="727"/>
+        <location filename="../../src/ui/AppController.cpp" line="730"/>
         <source>Allow USB debugging on the phone, then search again.</source>
         <translation>Allow USB debugging on the phone, then search again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="729"/>
+        <location filename="../../src/ui/AppController.cpp" line="732"/>
         <source>The phone is not ready yet. Unlock it and search again.</source>
         <translation>The phone is not ready yet. Unlock it and search again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="734"/>
+        <location filename="../../src/ui/AppController.cpp" line="737"/>
         <source>No phone found at USB. Connect the cable and allow USB debugging on the phone.</source>
         <translation>No phone found at USB. Connect the cable and allow USB debugging on the phone.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="755"/>
-        <location filename="../../src/ui/AppController.cpp" line="1105"/>
+        <location filename="../../src/ui/AppController.cpp" line="758"/>
+        <location filename="../../src/ui/AppController.cpp" line="1108"/>
         <source>This computer has no Bluetooth, or it is turned off. Turn Bluetooth on, or connect over Wi-Fi or USB.</source>
         <translation>This computer has no Bluetooth, or it is turned off. Turn Bluetooth on, or connect over Wi-Fi or USB.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="757"/>
+        <location filename="../../src/ui/AppController.cpp" line="760"/>
         <source>The Bluetooth search failed. Turn Bluetooth on and try again.</source>
         <translation>The Bluetooth search failed. Turn Bluetooth on and try again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="763"/>
+        <location filename="../../src/ui/AppController.cpp" line="766"/>
         <source>No paired phone found. Pair the phone in the system settings first.</source>
         <translation>No paired phone found. Pair the phone in the system settings first.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="818"/>
+        <location filename="../../src/ui/AppController.cpp" line="821"/>
         <source>Enter a name with 1 to 64 characters.</source>
         <translation>Enter a name with 1 to 64 characters.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="826"/>
-        <location filename="../../src/ui/AppController.cpp" line="835"/>
-        <location filename="../../src/ui/AppController.cpp" line="842"/>
+        <location filename="../../src/ui/AppController.cpp" line="829"/>
+        <location filename="../../src/ui/AppController.cpp" line="838"/>
+        <location filename="../../src/ui/AppController.cpp" line="845"/>
         <source>The name could not be saved. Check the storage folder in the settings.</source>
         <translation>The name could not be saved. Check the storage folder in the settings.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="860"/>
+        <location filename="../../src/ui/AppController.cpp" line="863"/>
         <source>The phone could not be removed from this computer. Check the storage folder in the settings, then try again.</source>
         <translation>The phone could not be removed from this computer. Check the storage folder in the settings, then try again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="915"/>
+        <location filename="../../src/ui/AppController.cpp" line="918"/>
         <source>Connect the phone first, then sync.</source>
         <translation>Connect the phone first, then sync.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="919"/>
+        <location filename="../../src/ui/AppController.cpp" line="922"/>
         <source>There is nothing to sync yet.</source>
         <translation>There is nothing to sync yet.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="949"/>
+        <location filename="../../src/ui/AppController.cpp" line="952"/>
         <source>%1: not synced. %2</source>
         <translation>%1: not synced. %2</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="953"/>
+        <location filename="../../src/ui/AppController.cpp" line="956"/>
         <source>%1: %2 new, %3 changed, %4 deleted</source>
         <translation>%1: %2 new, %3 changed, %4 deleted</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1003"/>
+        <location filename="../../src/ui/AppController.cpp" line="1006"/>
         <source>Phone</source>
         <translation>Phone</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1027"/>
+        <location filename="../../src/ui/AppController.cpp" line="1030"/>
         <source>The data of this phone cannot be opened on this computer. Check the storage folder in the settings.</source>
         <translation>The data of this phone cannot be opened on this computer. Check the storage folder in the settings.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1076"/>
+        <location filename="../../src/ui/AppController.cpp" line="1079"/>
         <source>The phone does not answer over Bluetooth. Turn Bluetooth on at the phone, keep it close and try again.</source>
         <translation>The phone does not answer over Bluetooth. Turn Bluetooth on at the phone, keep it close and try again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1079"/>
+        <location filename="../../src/ui/AppController.cpp" line="1082"/>
         <source>The phone does not answer. Check that MyPhoneExplorer Client is open on the phone, then try again.</source>
         <translation>The phone does not answer. Check that MyPhoneExplorer Client is open on the phone, then try again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1083"/>
+        <location filename="../../src/ui/AppController.cpp" line="1086"/>
         <source>The phone cannot be reached over Wi-Fi. Check that it is in the same network and that MyPhoneExplorer Client is open, then try again.</source>
         <translation>The phone cannot be reached over Wi-Fi. Check that it is in the same network and that MyPhoneExplorer Client is open, then try again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1086"/>
+        <location filename="../../src/ui/AppController.cpp" line="1089"/>
         <source>The connection to the phone ended. Open MyPhoneExplorer Client on the phone, then connect again.</source>
         <translation>The connection to the phone ended. Open MyPhoneExplorer Client on the phone, then connect again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1089"/>
+        <location filename="../../src/ui/AppController.cpp" line="1092"/>
         <source>The phone is connected to another computer. End that connection first, then try again.</source>
         <translation>The phone is connected to another computer. End that connection first, then try again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1092"/>
+        <location filename="../../src/ui/AppController.cpp" line="1095"/>
         <source>MyPhoneExplorer Client does not allow Wi-Fi connections. Allow them in the app settings on the phone, or connect over USB.</source>
         <translation>MyPhoneExplorer Client does not allow Wi-Fi connections. Allow them in the app settings on the phone, or connect over USB.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1095"/>
+        <location filename="../../src/ui/AppController.cpp" line="1098"/>
         <source>The phone asks for a PIN. Connect again and enter the PIN you set in MyPhoneExplorer Client.</source>
         <translation>The phone asks for a PIN. Connect again and enter the PIN you set in MyPhoneExplorer Client.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1098"/>
+        <location filename="../../src/ui/AppController.cpp" line="1101"/>
         <source>MyPhoneExplorer Client stopped after too many wrong PINs. Open the app on the phone again, then connect.</source>
         <translation>MyPhoneExplorer Client stopped after too many wrong PINs. Open the app on the phone again, then connect.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1101"/>
+        <location filename="../../src/ui/AppController.cpp" line="1104"/>
         <source>MyPhoneExplorer Client lacks a permission on the phone. Allow it in the Android settings under Apps.</source>
         <translation>MyPhoneExplorer Client lacks a permission on the phone. Allow it in the Android settings under Apps.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1108"/>
+        <location filename="../../src/ui/AppController.cpp" line="1111"/>
         <source>The phone does not support this. Update MyPhoneExplorer Client on the phone.</source>
         <translation>The phone does not support this. Update MyPhoneExplorer Client on the phone.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1112"/>
+        <location filename="../../src/ui/AppController.cpp" line="1115"/>
         <source>MyPhoneExplorer Client is not installed on the phone. Install it from Google Play, then try again.</source>
         <translation>MyPhoneExplorer Client is not installed on the phone. Install it from Google Play, then try again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1115"/>
+        <location filename="../../src/ui/AppController.cpp" line="1118"/>
         <source>The phone did not find what was asked for. Sync again.</source>
         <translation>The phone did not find what was asked for. Sync again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1125"/>
+        <location filename="../../src/ui/AppController.cpp" line="1128"/>
         <source>adb cannot reach the phone. Check the USB cable and allow USB debugging on the phone, then try again.</source>
         <translation>adb cannot reach the phone. Check the USB cable and allow USB debugging on the phone, then try again.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1128"/>
+        <location filename="../../src/ui/AppController.cpp" line="1131"/>
         <source>This computer could not open the connection. Try again, or restart the computer if it keeps failing.</source>
         <translation>This computer could not open the connection. Try again, or restart the computer if it keeps failing.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1131"/>
-        <source>On the phone, allow MyPhoneExplorer Client the permission &quot;Nearby devices&quot; and turn on Bluetooth in the app. If the app was started while the phone was already connected over Bluetooth, disconnect the phone once in the Bluetooth settings of this computer.</source>
-        <translation>On the phone, allow MyPhoneExplorer Client the permission &quot;Nearby devices&quot; and turn on Bluetooth in the app. If the app was started while the phone was already connected over Bluetooth, disconnect the phone once in the Bluetooth settings of this computer.</translation>
+        <location filename="../../src/ui/AppController.cpp" line="1134"/>
+        <source>This computer cannot reach MyPhoneExplorer Client on the phone over Bluetooth. Keep the phone close with Bluetooth on, allow the app the permission &quot;Nearby devices&quot; and turn on Bluetooth in the app. If the app started while the phone was already connected, disconnect the phone once in the Bluetooth settings of this computer.</source>
+        <translation>This computer cannot reach MyPhoneExplorer Client on the phone over Bluetooth. Keep the phone close with Bluetooth on, allow the app the permission &quot;Nearby devices&quot; and turn on Bluetooth in the app. If the app started while the phone was already connected, disconnect the phone once in the Bluetooth settings of this computer.</translation>
     </message>
     <message>
-        <location filename="../../src/ui/AppController.cpp" line="1140"/>
+        <location filename="../../src/ui/AppController.cpp" line="1144"/>
         <source>The phone sent an answer QPhoneManager does not understand. Update MyPhoneExplorer Client on the phone, then try again.</source>
         <translation>The phone sent an answer QPhoneManager does not understand. Update MyPhoneExplorer Client on the phone, then try again.</translation>
     </message>

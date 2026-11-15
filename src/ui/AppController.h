@@ -123,8 +123,8 @@ class AppController : public QObject
     Q_PROPERTY(bool syncing READ isSyncing NOTIFY syncingChanged FINAL)
     /**
      * The running sync is the first of the current phone: no area of its
-     * profile was synced before. Turns false when the sync ends or the
-     * connection does.
+     * profile was synced before and no call of its call log is stored. Turns
+     * false when the sync ends or the connection does.
      */
     Q_PROPERTY(bool firstSync READ isFirstSync NOTIFY syncProgressChanged FINAL)
     /// Number of the area syncing right now, from 1; 0 while no sync runs.
