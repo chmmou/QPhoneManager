@@ -139,9 +139,12 @@ Every message from QPhoneManager names the reason and the next step. The most co
 
 **No connection over Bluetooth**
 
-1. In the Android settings under Apps, allow MyPhoneExplorer Client the permission **Nearby devices**.
-2. Turn on Bluetooth in the settings of MyPhoneExplorer Client.
-3. Connect again.
+The computer cannot reach MyPhoneExplorer Client on the phone. The phone may be off, too far away or no longer paired, or the app may lack Bluetooth:
+
+1. Keep the phone close to the computer and turn on Bluetooth on the phone.
+2. In the Android settings under Apps, allow MyPhoneExplorer Client the permission **Nearby devices**.
+3. Turn on Bluetooth in the settings of MyPhoneExplorer Client.
+4. Connect again.
 
 If the phone was already connected to the computer over Bluetooth when you started the app, disconnect it once in the Bluetooth settings of the computer. The computer reads the services of the phone only once per connection.
 

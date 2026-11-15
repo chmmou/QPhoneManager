@@ -139,9 +139,12 @@ Jede Meldung von QPhoneManager nennt den Grund und den n채chsten Schritt. Die h�
 
 **Keine Verbindung 체ber Bluetooth**
 
-1. Erlauben Sie MyPhoneExplorer Client in den Android-Einstellungen unter Apps die Berechtigung **Ger채te in der N채he**.
-2. Schalten Sie Bluetooth in den Einstellungen von MyPhoneExplorer Client ein.
-3. Verbinden Sie noch einmal.
+Der Rechner erreicht MyPhoneExplorer Client auf dem Handy nicht. Das Handy kann aus, zu weit weg oder nicht mehr gekoppelt sein, oder der App fehlt Bluetooth:
+
+1. Halten Sie das Handy in die N채he des Rechners und schalten Sie Bluetooth am Handy ein.
+2. Erlauben Sie MyPhoneExplorer Client in den Android-Einstellungen unter Apps die Berechtigung **Ger채te in der N채he**.
+3. Schalten Sie Bluetooth in den Einstellungen von MyPhoneExplorer Client ein.
+4. Verbinden Sie noch einmal.
 
 War das Handy schon 체ber Bluetooth mit dem Rechner verbunden, als Sie die App gestartet haben, trennen Sie es einmal in den Bluetooth-Einstellungen des Rechners. Der Rechner liest die Dienste des Handys nur einmal je Verbindung.
 
