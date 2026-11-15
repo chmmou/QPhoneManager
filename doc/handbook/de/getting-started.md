@@ -20,7 +20,7 @@ Wie Sie QPhoneManager bauen und starten, steht in der Datei README.md im Quellte
 - **Kopfzeile:** Links wählen Sie das Handy. Daneben öffnet **Handys verwalten** die Liste aller Handys. Rechts stehen das Suchfeld, **Abgleichen** (zwei Pfeile im Kreis) und **Verbinden** oder **Trennen** (Stecker).
 - **Inhalt:** Liste und Einzelansicht stehen nebeneinander. Ist der Inhalt schmaler als 900 Pixel, sehen Sie nur eines von beiden. **Zurück** führt zur Liste.
 - **Statuszeile unten:** Sie zeigt die Verbindung, den Akkustand des Handys und laufende Übertragungen.
-- **Meldungen:** Ergebnisse und Fehler erscheinen in einer Leiste über dem Inhalt. **Meldung schließen** blendet sie aus.
+- **Meldungen:** Ergebnisse und Fehler erscheinen in einer Leiste über dem Inhalt. Die Leiste schließt sich nach 15 Sekunden von selbst. Solange der Mauszeiger auf ihr liegt oder der Tastaturfokus in ihr steht, bleibt sie offen. **Meldung schließen** blendet sie sofort aus.
 
 Die Symbole in den Werkzeugleisten tragen keinen Text. Halten Sie den Mauszeiger über ein Symbol, dann erscheint sein Name.
 
@@ -105,7 +105,7 @@ Erreicht QPhoneManager den Schlüsselbund des Systems nicht, speichert es die PI
 
 Die Statuszeile zeigt **Verbunden über WLAN**, **USB** oder **Bluetooth**. Die **Übersicht** zeigt den Zustand des Handys.
 
-Kontakte, Anrufe, Nachrichten, Kalender, Aufgaben und Notizen lädt QPhoneManager erst, wenn Sie **Abgleichen** wählen oder F5 drücken. Danach meldet eine Leiste je Bereich, was neu, geändert oder gelöscht ist. Spätere Abgleiche holen bei Kontakten, Nachrichten, Kalender, Aufgaben und Notizen nur die Änderungen. Die Anrufliste liest QPhoneManager jedes Mal ganz neu. Dateien, Apps, Benachrichtigungen und der Bildschirm kommen live vom Handy. Sie gehören nicht zum Abgleich.
+Kontakte, Anrufe, Nachrichten, Kalender, Aufgaben und Notizen lädt QPhoneManager erst, wenn Sie **Abgleichen** wählen oder F5 drücken. Beim ersten Abgleich eines Handys zeigt ein Fenster, welcher Bereich gerade geladen wird. Es schließt sich, wenn der Abgleich endet. Danach meldet eine Leiste je Bereich, was neu, geändert oder gelöscht ist. Spätere Abgleiche holen bei Kontakten, Nachrichten, Kalender, Aufgaben und Notizen nur die Änderungen. Die Anrufliste liest QPhoneManager jedes Mal ganz neu. Dateien, Apps, Benachrichtigungen und der Bildschirm kommen live vom Handy. Sie gehören nicht zum Abgleich.
 
 Ohne Verbindung zeigt QPhoneManager die Daten vom letzten Abgleich. Ein Hinweis oben nennt das Datum. Bearbeiten lässt sich nur bei stehender Verbindung.
 
@@ -136,6 +136,14 @@ Jede Meldung von QPhoneManager nennt den Grund und den nächsten Schritt. Die h�
 1. Prüfen Sie das Kabel.
 2. Schalten Sie auf dem Handy USB-Debugging ein, entsperren Sie das Handy und erlauben Sie dem Rechner den Zugriff.
 3. Wählen Sie **Erneut suchen**.
+
+**Keine Verbindung über Bluetooth**
+
+1. Erlauben Sie MyPhoneExplorer Client in den Android-Einstellungen unter Apps die Berechtigung **Geräte in der Nähe**.
+2. Schalten Sie Bluetooth in den Einstellungen von MyPhoneExplorer Client ein.
+3. Verbinden Sie noch einmal.
+
+War das Handy schon über Bluetooth mit dem Rechner verbunden, als Sie die App gestartet haben, trennen Sie es einmal in den Bluetooth-Einstellungen des Rechners. Der Rechner liest die Dienste des Handys nur einmal je Verbindung.
 
 **Der App fehlt eine Berechtigung auf dem Handy**
 

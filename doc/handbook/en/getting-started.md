@@ -20,7 +20,7 @@ How to build and start QPhoneManager is described in the file README.md in the s
 - **Header:** On the left you choose the phone. Next to it, **Manage phones** opens the list of all phones. On the right are the search field, **Sync** (two arrows in a circle) and **Connect** or **Disconnect** (a plug).
 - **Content:** List and details sit side by side. If the content is narrower than 900 pixels, you see only one of the two. **Back** returns to the list.
 - **Status line at the bottom:** It shows the connection, the battery level of the phone and running transfers.
-- **Messages:** Results and errors appear in a bar above the content. **Close message** hides it.
+- **Messages:** Results and errors appear in a bar above the content. The bar closes by itself after 15 seconds. It stays open while the mouse pointer rests on it or the keyboard focus is in it. **Close message** hides it at once.
 
 The icons in the toolbars carry no text. Hold the mouse pointer over an icon to see its name.
 
@@ -105,7 +105,7 @@ If QPhoneManager cannot reach the keyring of the system, it does not store the P
 
 The status line shows **Connected over Wi-Fi**, **USB** or **Bluetooth**. The **Overview** shows the state of the phone.
 
-QPhoneManager loads contacts, calls, messages, calendar, tasks and notes only when you choose **Sync** or press F5. Afterwards, a bar reports for each area what is new, changed or deleted. Later syncs fetch only the changes for contacts, messages, calendar, tasks and notes. QPhoneManager reads the call log in full each time. Files, apps, notifications and the screen come live from the phone. They are not part of the sync.
+QPhoneManager loads contacts, calls, messages, calendar, tasks and notes only when you choose **Sync** or press F5. During the first sync of a phone, a window shows which area is loading. It closes when the sync ends. Afterwards, a bar reports for each area what is new, changed or deleted. Later syncs fetch only the changes for contacts, messages, calendar, tasks and notes. QPhoneManager reads the call log in full each time. Files, apps, notifications and the screen come live from the phone. They are not part of the sync.
 
 Without a connection, QPhoneManager shows the data of the last sync. A note at the top gives the date. You can edit only while the connection is up.
 
@@ -136,6 +136,14 @@ Every message from QPhoneManager names the reason and the next step. The most co
 1. Check the cable.
 2. On the phone, turn on USB debugging, unlock the phone and allow the computer access.
 3. Choose **Search again**.
+
+**No connection over Bluetooth**
+
+1. In the Android settings under Apps, allow MyPhoneExplorer Client the permission **Nearby devices**.
+2. Turn on Bluetooth in the settings of MyPhoneExplorer Client.
+3. Connect again.
+
+If the phone was already connected to the computer over Bluetooth when you started the app, disconnect it once in the Bluetooth settings of the computer. The computer reads the services of the phone only once per connection.
 
 **The app lacks a permission on the phone**
 
