@@ -53,7 +53,7 @@ Pane {
             onClicked: root.text = ""
 
             FocusRing {
-                shown: closeButton.visualFocus
+                shown: closeButton.activeFocus
             }
         }
     }

@@ -55,7 +55,7 @@ Item {
                         icon.source: Theme.icon("messages")
 
                         FocusRing {
-                            shown: conversationsTab.visualFocus
+                            shown: conversationsTab.activeFocus
                         }
                     }
 
@@ -68,7 +68,7 @@ Item {
                         icon.source: Theme.icon("clock")
 
                         FocusRing {
-                            shown: scheduledTab.visualFocus
+                            shown: scheduledTab.activeFocus
                         }
                     }
                 }
@@ -91,7 +91,7 @@ Item {
                     onClicked: root.startNew()
 
                     FocusRing {
-                        shown: newButton.visualFocus
+                        shown: newButton.activeFocus
                     }
                 }
 
@@ -109,7 +109,7 @@ Item {
                     onClicked: importDialog.open()
 
                     FocusRing {
-                        shown: importButton.visualFocus
+                        shown: importButton.activeFocus
                     }
                 }
 
@@ -127,7 +127,7 @@ Item {
                     onClicked: root.startExport(true)
 
                     FocusRing {
-                        shown: exportAllButton.visualFocus
+                        shown: exportAllButton.activeFocus
                     }
                 }
             }
@@ -137,7 +137,7 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: 1
             visible: root.area.hasPhone
-            color: Theme.outline
+            color: Theme.outlineVariant
         }
 
         ListDetailView {
@@ -273,10 +273,7 @@ Item {
             }
         }
 
-        // The tab reason makes the button show its focus ring right away; giving the
-        // focus up on closing makes the next opening set that reason again.
-        onOpened: cancelDeleteButton.forceActiveFocus(Qt.TabFocusReason)
-        onClosed: cancelDeleteButton.focus = false
+        onOpened: cancelDeleteButton.forceActiveFocus(Qt.PopupFocusReason)
         onAccepted: {
             if (root.pendingDeleteConversation)
                 root.area.removeCurrentConversation();

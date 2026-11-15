@@ -48,7 +48,7 @@ Item {
                     onClicked: root.startNew()
 
                     FocusRing {
-                        shown: newButton.visualFocus
+                        shown: newButton.activeFocus
                     }
                 }
 
@@ -66,7 +66,7 @@ Item {
                     onClicked: importDialog.open()
 
                     FocusRing {
-                        shown: importButton.visualFocus
+                        shown: importButton.activeFocus
                     }
                 }
 
@@ -84,7 +84,7 @@ Item {
                     onClicked: root.startExport(0)
 
                     FocusRing {
-                        shown: exportButton.visualFocus
+                        shown: exportButton.activeFocus
                     }
                 }
 
@@ -105,7 +105,7 @@ Item {
                     }
 
                     FocusRing {
-                        shown: duplicatesButton.visualFocus
+                        shown: duplicatesButton.activeFocus
                     }
                 }
 
@@ -123,7 +123,7 @@ Item {
                     onClicked: accountMenu.popup(accountsButton, 0, accountsButton.height)
 
                     FocusRing {
-                        shown: accountsButton.visualFocus
+                        shown: accountsButton.activeFocus
                     }
                 }
 
@@ -142,7 +142,7 @@ Item {
                     Component.onCompleted: Theme.calmPopup(groupBox.popup)
 
                     FocusRing {
-                        shown: groupBox.visualFocus
+                        shown: groupBox.activeFocus
                     }
                 }
 
@@ -158,7 +158,7 @@ Item {
                     Component.onCompleted: Theme.calmPopup(accountBox.popup)
 
                     FocusRing {
-                        shown: accountBox.visualFocus
+                        shown: accountBox.activeFocus
                     }
                 }
             }
@@ -168,7 +168,7 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: 1
             visible: root.area.hasPhone
-            color: Theme.outline
+            color: Theme.outlineVariant
         }
 
         ListDetailView {
@@ -287,10 +287,7 @@ Item {
             }
         }
 
-        // The tab reason makes the button show its focus ring right away; giving the
-        // focus up on closing makes the next opening set that reason again.
-        onOpened: cancelDeleteButton.forceActiveFocus(Qt.TabFocusReason)
-        onClosed: cancelDeleteButton.focus = false
+        onOpened: cancelDeleteButton.forceActiveFocus(Qt.PopupFocusReason)
         onAccepted: root.area.removeContacts([root.pendingDelete])
         Component.onCompleted: Theme.calmPopup(deleteDialog)
 

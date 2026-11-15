@@ -76,7 +76,7 @@ Item {
                                 onClicked: root.composer.removeRecipient(recipientChip.index)
 
                                 FocusRing {
-                                    shown: recipientChip.visualFocus
+                                    shown: recipientChip.activeFocus
                                 }
                             }
                         }
@@ -109,7 +109,7 @@ Item {
                             onClicked: root.composer.addRecipient()
 
                             FocusRing {
-                                shown: addButton.visualFocus
+                                shown: addButton.activeFocus
                             }
                         }
                     }
@@ -186,7 +186,7 @@ Item {
                             Component.onCompleted: Theme.calmPopup(simBox.popup)
 
                             FocusRing {
-                                shown: simBox.visualFocus
+                                shown: simBox.activeFocus
                             }
                         }
                     }
@@ -201,7 +201,7 @@ Item {
                         onToggled: root.composer.scheduled = laterBox.checked
 
                         FocusRing {
-                            shown: laterBox.visualFocus
+                            shown: laterBox.activeFocus
                         }
                     }
 
@@ -282,7 +282,7 @@ Item {
                             onClicked: root.deleteRequested(root.composer.editingLuid)
 
                             FocusRing {
-                                shown: deleteButton.visualFocus
+                                shown: deleteButton.activeFocus
                             }
                         }
 
@@ -299,7 +299,7 @@ Item {
                             onClicked: root.cancelled()
 
                             FocusRing {
-                                shown: cancelButton.visualFocus
+                                shown: cancelButton.activeFocus
                             }
                         }
 
@@ -313,7 +313,7 @@ Item {
                             onClicked: root.submit()
 
                             FocusRing {
-                                shown: submitButton.visualFocus
+                                shown: submitButton.activeFocus
                             }
                         }
                     }

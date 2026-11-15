@@ -46,7 +46,7 @@ Item {
                     Component.onCompleted: Theme.calmPopup(categoryFilterBox.popup)
 
                     FocusRing {
-                        shown: categoryFilterBox.visualFocus
+                        shown: categoryFilterBox.activeFocus
                     }
                 }
 
@@ -68,7 +68,7 @@ Item {
                     onClicked: root.startNew()
 
                     FocusRing {
-                        shown: newButton.visualFocus
+                        shown: newButton.activeFocus
                     }
                 }
 
@@ -85,7 +85,7 @@ Item {
                     onClicked: categoriesDialog.open()
 
                     FocusRing {
-                        shown: categoriesButton.visualFocus
+                        shown: categoriesButton.activeFocus
                     }
                 }
             }
@@ -95,7 +95,7 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: 1
             visible: root.area.hasPhone
-            color: Theme.outline
+            color: Theme.outlineVariant
         }
 
         ListDetailView {

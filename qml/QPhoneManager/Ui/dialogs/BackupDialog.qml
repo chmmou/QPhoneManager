@@ -33,15 +33,9 @@ Dialog {
         }
     }
 
-    // The tab reason makes the tab show its focus ring right away; giving the
-    // focus up on closing makes the next opening set that reason again.
     onOpened: {
         root.backup.reset();
-        (tabs.currentIndex === 0 ? backupTab : restoreTab).forceActiveFocus(Qt.TabFocusReason);
-    }
-    onClosed: {
-        backupTab.focus = false;
-        restoreTab.focus = false;
+        (tabs.currentIndex === 0 ? backupTab : restoreTab).forceActiveFocus(Qt.PopupFocusReason);
     }
     Component.onCompleted: Theme.calmPopup(root)
 
@@ -73,7 +67,7 @@ Dialog {
                 text: qsTr("Back up")
 
                 FocusRing {
-                    shown: backupTab.visualFocus
+                    shown: backupTab.activeFocus
                 }
             }
 
@@ -85,7 +79,7 @@ Dialog {
                 text: qsTr("Restore")
 
                 FocusRing {
-                    shown: restoreTab.visualFocus
+                    shown: restoreTab.activeFocus
                 }
             }
         }
@@ -158,7 +152,7 @@ Dialog {
                     }
 
                     FocusRing {
-                        shown: saveButton.visualFocus
+                        shown: saveButton.activeFocus
                     }
                 }
             }
@@ -196,7 +190,7 @@ Dialog {
                             onClicked: openDialog.open()
 
                             FocusRing {
-                                shown: openButton.visualFocus
+                                shown: openButton.activeFocus
                             }
                         }
 
@@ -249,7 +243,7 @@ Dialog {
                     onClicked: root.backup.restore(root.openedFile, root.backup.restoreSections.chosenKeys)
 
                     FocusRing {
-                        shown: restoreButton.visualFocus
+                        shown: restoreButton.activeFocus
                     }
                 }
             }
@@ -277,7 +271,7 @@ Dialog {
                 onClicked: root.backup.cancel()
 
                 FocusRing {
-                    shown: stopButton.visualFocus
+                    shown: stopButton.activeFocus
                 }
             }
         }
@@ -354,7 +348,7 @@ Dialog {
             onToggled: choice.sectionModel.setChosen(choice.index, box.checked)
 
             FocusRing {
-                shown: box.visualFocus
+                shown: box.activeFocus
             }
         }
 

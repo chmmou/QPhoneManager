@@ -23,6 +23,10 @@ QtObject {
     readonly property color foregroundOnSurface: root.dark ? "#DEE4E2" : "#171D1C"
     readonly property color foregroundOnSurfaceVariant: root.dark ? "#BEC9C6" : "#3F4947"
     readonly property color outline: root.dark ? "#9AA4A1" : "#6F7977"
+    // Lines that only divide: separators, the resting outline of a field and
+    // the edge of a menu. The divider colour of the style, so that they match
+    // its own separators.
+    readonly property color outlineVariant: root.dark ? "#1EFFFFFF" : "#1E000000"
     readonly property color error: root.dark ? "#FFB4AB" : "#BA1A1A"
     readonly property color foregroundOnError: root.dark ? "#690005" : "#FFFFFE"
     readonly property color success: root.dark ? "#8DD79D" : "#1E6B32"

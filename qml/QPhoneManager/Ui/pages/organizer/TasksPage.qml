@@ -52,7 +52,7 @@ Item {
                         text: qsTr("Open")
 
                         FocusRing {
-                            shown: openTab.visualFocus
+                            shown: openTab.activeFocus
                         }
                     }
 
@@ -64,7 +64,7 @@ Item {
                         text: qsTr("Done")
 
                         FocusRing {
-                            shown: doneTab.visualFocus
+                            shown: doneTab.activeFocus
                         }
                     }
 
@@ -76,7 +76,7 @@ Item {
                         text: qsTr("All")
 
                         FocusRing {
-                            shown: allTab.visualFocus
+                            shown: allTab.activeFocus
                         }
                     }
                 }
@@ -99,7 +99,7 @@ Item {
                     onClicked: root.startNew()
 
                     FocusRing {
-                        shown: newButton.visualFocus
+                        shown: newButton.activeFocus
                     }
                 }
 
@@ -117,7 +117,7 @@ Item {
                     onClicked: importDialog.open()
 
                     FocusRing {
-                        shown: importButton.visualFocus
+                        shown: importButton.activeFocus
                     }
                 }
 
@@ -135,7 +135,7 @@ Item {
                     onClicked: exportDialog.open()
 
                     FocusRing {
-                        shown: exportButton.visualFocus
+                        shown: exportButton.activeFocus
                     }
                 }
 
@@ -152,7 +152,7 @@ Item {
                     onClicked: categoriesDialog.open()
 
                     FocusRing {
-                        shown: categoriesButton.visualFocus
+                        shown: categoriesButton.activeFocus
                     }
                 }
             }
@@ -162,7 +162,7 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: 1
             visible: root.area.hasPhone
-            color: Theme.outline
+            color: Theme.outlineVariant
         }
 
         ListDetailView {

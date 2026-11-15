@@ -57,7 +57,7 @@ Item {
                     onClicked: root.openCurrent()
 
                     FocusRing {
-                        shown: openButton.visualFocus
+                        shown: openButton.activeFocus
                     }
                 }
 
@@ -75,7 +75,7 @@ Item {
                     onClicked: root.dismissCurrent()
 
                     FocusRing {
-                        shown: dismissButton.visualFocus
+                        shown: dismissButton.activeFocus
                     }
                 }
 
@@ -94,7 +94,7 @@ Item {
                     onClicked: root.notifications.refresh()
 
                     FocusRing {
-                        shown: refreshButton.visualFocus
+                        shown: refreshButton.activeFocus
                     }
                 }
             }
@@ -104,7 +104,7 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: 1
             visible: AppController.connected
-            color: Theme.outline
+            color: Theme.outlineVariant
         }
 
         RowLayout {
@@ -151,7 +151,7 @@ Item {
             Rectangle {
                 Layout.fillHeight: true
                 Layout.preferredWidth: 1
-                color: Theme.outline
+                color: Theme.outlineVariant
             }
 
             ThemedScrollView {
@@ -246,7 +246,7 @@ Item {
                                 onClicked: root.notifications.trigger(root.currentKey, actionButton.modelData)
 
                                 FocusRing {
-                                    shown: actionButton.visualFocus
+                                    shown: actionButton.activeFocus
                                 }
                             }
                         }

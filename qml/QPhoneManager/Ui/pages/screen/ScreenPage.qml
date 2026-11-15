@@ -51,7 +51,7 @@ Item {
                     onClicked: root.toggleMirroring()
 
                     FocusRing {
-                        shown: startButton.visualFocus
+                        shown: startButton.activeFocus
                     }
                 }
 
@@ -71,7 +71,7 @@ Item {
                     onClicked: root.mirror.key("back")
 
                     FocusRing {
-                        shown: backButton.visualFocus
+                        shown: backButton.activeFocus
                     }
                 }
 
@@ -89,7 +89,7 @@ Item {
                     onClicked: root.mirror.key("home")
 
                     FocusRing {
-                        shown: homeButton.visualFocus
+                        shown: homeButton.activeFocus
                     }
                 }
 
@@ -107,7 +107,7 @@ Item {
                     onClicked: root.mirror.key("recents")
 
                     FocusRing {
-                        shown: recentsButton.visualFocus
+                        shown: recentsButton.activeFocus
                     }
                 }
 
@@ -139,7 +139,7 @@ Item {
                     }
 
                     FocusRing {
-                        shown: keyboardButton.visualFocus
+                        shown: keyboardButton.activeFocus
                     }
                 }
 
@@ -161,7 +161,7 @@ Item {
                     onClicked: root.turns = (root.turns + 1) % 4
 
                     FocusRing {
-                        shown: rotateButton.visualFocus
+                        shown: rotateButton.activeFocus
                     }
                 }
 
@@ -194,7 +194,7 @@ Item {
                     }
 
                     FocusRing {
-                        shown: fitButton.visualFocus
+                        shown: fitButton.activeFocus
                     }
                 }
 
@@ -212,7 +212,7 @@ Item {
                     onClicked: screenshotDialog.open()
 
                     FocusRing {
-                        shown: screenshotButton.visualFocus
+                        shown: screenshotButton.activeFocus
                     }
                 }
             }
@@ -222,7 +222,7 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: 1
             visible: root.mirror.connected
-            color: Theme.outline
+            color: Theme.outlineVariant
         }
 
         Pane {
@@ -262,7 +262,7 @@ Item {
                     onClicked: root.mirror.showAccessibilitySettings()
 
                     FocusRing {
-                        shown: settingsButton.visualFocus
+                        shown: settingsButton.activeFocus
                     }
                 }
 
@@ -276,7 +276,7 @@ Item {
                     onClicked: root.mirror.checkControl()
 
                     FocusRing {
-                        shown: checkButton.visualFocus
+                        shown: checkButton.activeFocus
                     }
                 }
             }
@@ -396,6 +396,6 @@ Item {
         root.keyboardInput = enabled;
         // Typing reaches the phone from the picture, so the focus goes there.
         if (enabled)
-            screenView.forceActiveFocus(Qt.TabFocusReason);
+            screenView.forceActiveFocus(Qt.OtherFocusReason);
     }
 }

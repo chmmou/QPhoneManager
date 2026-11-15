@@ -72,7 +72,7 @@ Item {
                             onClicked: root.photoRequested()
 
                             FocusRing {
-                                shown: photoButton.visualFocus
+                                shown: photoButton.activeFocus
                             }
                         }
 
@@ -85,7 +85,7 @@ Item {
                             onClicked: root.editor.clearPhoto()
 
                             FocusRing {
-                                shown: removePhotoButton.visualFocus
+                                shown: removePhotoButton.activeFocus
                             }
                         }
                     }
@@ -112,7 +112,7 @@ Item {
                         Component.onCompleted: Theme.calmPopup(accountBox.popup)
 
                         FocusRing {
-                            shown: accountBox.visualFocus
+                            shown: accountBox.activeFocus
                         }
                     }
                 }
@@ -351,7 +351,7 @@ Item {
                                 onToggled: root.editor.setGroupSelected(groupBox.modelData, groupBox.checked)
 
                                 FocusRing {
-                                    shown: groupBox.visualFocus
+                                    shown: groupBox.activeFocus
                                 }
                             }
                         }
@@ -384,7 +384,7 @@ Item {
                             }
 
                             FocusRing {
-                                shown: addGroupButton.visualFocus
+                                shown: addGroupButton.activeFocus
                             }
                         }
                     }
@@ -442,7 +442,7 @@ Item {
                         onClicked: root.finished()
 
                         FocusRing {
-                            shown: cancelButton.visualFocus
+                            shown: cancelButton.activeFocus
                         }
                     }
 
@@ -456,7 +456,7 @@ Item {
                         onClicked: root.editor.save()
 
                         FocusRing {
-                            shown: saveButton.visualFocus
+                            shown: saveButton.activeFocus
                         }
                     }
                 }

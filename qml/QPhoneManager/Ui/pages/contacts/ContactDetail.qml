@@ -102,7 +102,7 @@ Item {
                             onClicked: root.editRequested()
 
                             FocusRing {
-                                shown: editButton.visualFocus
+                                shown: editButton.activeFocus
                             }
                         }
 
@@ -115,7 +115,7 @@ Item {
                             onClicked: root.exportRequested(root.detail.luid)
 
                             FocusRing {
-                                shown: exportOneButton.visualFocus
+                                shown: exportOneButton.activeFocus
                             }
                         }
 
@@ -130,7 +130,7 @@ Item {
                             onClicked: root.deleteRequested(root.detail.luid)
 
                             FocusRing {
-                                shown: deleteButton.visualFocus
+                                shown: deleteButton.activeFocus
                             }
                         }
                     }
@@ -196,7 +196,7 @@ Item {
                             onClicked: root.area.call(entryRow.actionValue)
 
                             FocusRing {
-                                shown: callButton.visualFocus
+                                shown: callButton.activeFocus
                             }
                         }
 
@@ -213,7 +213,7 @@ Item {
                             onClicked: root.area.writeMessage(entryRow.actionValue)
 
                             FocusRing {
-                                shown: messageButton.visualFocus
+                                shown: messageButton.activeFocus
                             }
                         }
                     }

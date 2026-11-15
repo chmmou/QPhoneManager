@@ -36,7 +36,7 @@ Dialog {
     onOpened: {
         nameField.text = "";
         categoryList.currentIndex = -1;
-        nameField.forceActiveFocus(Qt.TabFocusReason);
+        nameField.forceActiveFocus(Qt.PopupFocusReason);
     }
     Component.onCompleted: Theme.calmPopup(root)
 
@@ -155,7 +155,7 @@ Dialog {
                 Component.onCompleted: Theme.calmPopup(colorBox.popup)
 
                 FocusRing {
-                    shown: colorBox.visualFocus
+                    shown: colorBox.activeFocus
                 }
             }
         }
@@ -175,7 +175,7 @@ Dialog {
                 onClicked: root.removeRequested(categoryList.currentIndex)
 
                 FocusRing {
-                    shown: removeButton.visualFocus
+                    shown: removeButton.activeFocus
                 }
             }
 
@@ -192,7 +192,7 @@ Dialog {
                 onClicked: root.editRequested(categoryList.currentIndex, nameField.text, colorBox.currentIndex)
 
                 FocusRing {
-                    shown: changeButton.visualFocus
+                    shown: changeButton.activeFocus
                 }
             }
 
@@ -206,7 +206,7 @@ Dialog {
                 onClicked: root.addRequested(nameField.text, colorBox.currentIndex)
 
                 FocusRing {
-                    shown: addButton.visualFocus
+                    shown: addButton.activeFocus
                 }
             }
         }

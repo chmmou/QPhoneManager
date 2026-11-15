@@ -81,7 +81,7 @@ Item {
                     onClicked: HelpController.back()
 
                     FocusRing {
-                        shown: backButton.visualFocus
+                        shown: backButton.activeFocus
                     }
                 }
 
@@ -99,7 +99,7 @@ Item {
                     onClicked: HelpController.forward()
 
                     FocusRing {
-                        shown: forwardButton.visualFocus
+                        shown: forwardButton.activeFocus
                     }
                 }
 
@@ -123,7 +123,7 @@ Item {
                     onClicked: root.aboutRequested()
 
                     FocusRing {
-                        shown: aboutButton.visualFocus
+                        shown: aboutButton.activeFocus
                     }
                 }
             }
@@ -132,7 +132,7 @@ Item {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 1
-            color: Theme.outline
+            color: Theme.outlineVariant
         }
 
         // Selectable, so that the address in it can be copied.
@@ -248,7 +248,7 @@ Item {
             Rectangle {
                 Layout.fillHeight: true
                 Layout.preferredWidth: 1
-                color: Theme.outline
+                color: Theme.outlineVariant
             }
 
             Item {

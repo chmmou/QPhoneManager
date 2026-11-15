@@ -1094,7 +1094,7 @@ void TestScreens::viewsAreTranslatedAndRenderInBothSchemes()
     if (view == QLatin1StringView("profilesDialog")) {
         QQuickItem *close = item(QStringLiteral("profilesCloseButton"));
         QVERIFY(close);
-        QTRY_VERIFY(close->property("visualFocus").toBool());
+        QTRY_VERIFY(close->hasActiveFocus());
     }
     if (tab >= 0) {
         QQuickItem *tabs =
@@ -1440,7 +1440,16 @@ void TestScreens::messageViewsAreTranslatedAndRenderInBothSchemes()
         // The line can sit at a fractional x; the renderer draws it on the
         // nearest pixel column.
         const QPoint top = line->mapToScene(QPointF(0, 0)).toPoint();
-        const QColor lineColor = line->property("color").value<QColor>();
+        // The line is drawn half-transparent over the window, as the separators of the style.
+        const QColor stroke = line->property("color").value<QColor>();
+        const QColor window =
+            m_engine->singletonInstance<QObject *>("QPhoneManager.Ui", "Theme")->property("surface")
+                .value<QColor>();
+        const double alpha = stroke.alphaF();
+        const QColor lineColor = QColor::fromRgbF(
+            float(stroke.redF() * alpha + window.redF() * (1 - alpha)),
+            float(stroke.greenF() * alpha + window.greenF() * (1 - alpha)),
+            float(stroke.blueF() * alpha + window.blueF() * (1 - alpha)));
         int drawn = 0;
         const int rows = int(line->height());
         for (int y = 0; y < rows; ++y) {
@@ -2191,9 +2200,8 @@ void TestScreens::backupViewsAreTranslatedAndRenderInBothSchemes_data()
         << byLanguage("Die Sicherung ist gespeichert. Sie ist nicht verschlüsselt. Bewahren "
                       "Sie sie sicher auf.",
                       "The backup is saved. It is not encrypted, so keep it in a safe place.");
-    QTest::newRow("restore preview")
-        << QStringLiteral("restorePreview")
-        << byLanguage("Wählen Sie, was Sie wiederherstellen möchten.", "Choose what to restore.");
+    // The changed section is chosen already, so no request to choose stands there.
+    QTest::newRow("restore preview") << QStringLiteral("restorePreview") << QString();
     QTest::newRow("restore done") << QStringLiteral("restoreDone")
                                   << byLanguage("Die Wiederherstellung ist fertig.",
                                                 "The restore is done.");

@@ -31,7 +31,7 @@ Item {
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: 1
                 height: parent.height
-                color: splitHandle.SplitHandle.hovered || splitHandle.SplitHandle.pressed ? Theme.primary : Theme.outline
+                color: splitHandle.SplitHandle.hovered || splitHandle.SplitHandle.pressed ? Theme.primary : Theme.outlineVariant
             }
         }
 
@@ -64,7 +64,7 @@ Item {
             onClicked: root.detailOpen = false
 
             FocusRing {
-                shown: backButton.visualFocus
+                shown: backButton.activeFocus
             }
         }
 

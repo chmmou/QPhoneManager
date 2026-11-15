@@ -83,7 +83,7 @@ Item {
                     onToggled: root.editor.setCategorySelected(categoryBox.modelData, categoryBox.checked)
 
                     FocusRing {
-                        shown: categoryBox.visualFocus
+                        shown: categoryBox.activeFocus
                     }
                 }
             }
@@ -117,7 +117,7 @@ Item {
                 }
 
                 FocusRing {
-                    shown: addCategoryButton.visualFocus
+                    shown: addCategoryButton.activeFocus
                 }
             }
         }
@@ -138,7 +138,7 @@ Item {
                 onClicked: root.deleteRequested(root.editor.luid)
 
                 FocusRing {
-                    shown: deleteButton.visualFocus
+                    shown: deleteButton.activeFocus
                 }
             }
 
@@ -164,7 +164,7 @@ Item {
                 onClicked: root.finished()
 
                 FocusRing {
-                    shown: cancelButton.visualFocus
+                    shown: cancelButton.activeFocus
                 }
             }
 
@@ -178,7 +178,7 @@ Item {
                 onClicked: root.editor.save()
 
                 FocusRing {
-                    shown: saveButton.visualFocus
+                    shown: saveButton.activeFocus
                 }
             }
         }

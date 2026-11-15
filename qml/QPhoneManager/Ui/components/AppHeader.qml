@@ -43,7 +43,7 @@ ToolBar {
             Component.onCompleted: Theme.calmPopup(deviceBox.popup)
 
             FocusRing {
-                shown: deviceBox.visualFocus
+                shown: deviceBox.activeFocus
             }
         }
 
@@ -60,7 +60,7 @@ ToolBar {
             onClicked: root.phonesRequested()
 
             FocusRing {
-                shown: phonesButton.visualFocus
+                shown: phonesButton.activeFocus
             }
         }
 
@@ -101,12 +101,16 @@ ToolBar {
             icon.source: Theme.icon("refresh")
             enabled: root.connected && !AppController.syncing
             Accessible.name: syncButton.text
-            ToolTip.visible: syncButton.hovered
-            ToolTip.text: syncButton.text
             onClicked: root.syncRequested()
 
             FocusRing {
-                shown: syncButton.visualFocus
+                shown: syncButton.activeFocus
+            }
+
+            SideToolTip {
+                parent: syncButton
+                visible: syncButton.hovered
+                text: syncButton.text
             }
         }
 
@@ -118,8 +122,6 @@ ToolBar {
             display: AbstractButton.IconOnly
             icon.source: Theme.icon(root.connected || AppController.connecting ? "plug-connected-x" : "plug-connected")
             Accessible.name: connectionButton.text
-            ToolTip.visible: connectionButton.hovered
-            ToolTip.text: connectionButton.text
             onClicked: {
                 if (root.connected || AppController.connecting)
                     AppController.disconnectPhone();
@@ -128,9 +130,22 @@ ToolBar {
             }
 
             FocusRing {
-                shown: connectionButton.visualFocus
+                shown: connectionButton.activeFocus
+            }
+
+            SideToolTip {
+                parent: connectionButton
+                visible: connectionButton.hovered
+                text: connectionButton.text
             }
         }
+    }
+
+    // Beside its button rather than below it: at the top of the window there is
+    // no room above, and below it covered the close button of a message bar.
+    component SideToolTip: ToolTip {
+        x: -width - Theme.gridUnit
+        y: ((parent?.height ?? 0) - height) / 2
     }
 
     function focusSearch(): void {

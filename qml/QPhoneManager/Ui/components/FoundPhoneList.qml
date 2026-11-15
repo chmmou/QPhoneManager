@@ -69,7 +69,7 @@ ColumnLayout {
             }
 
             FocusRing {
-                shown: phoneDelegate.visualFocus
+                shown: phoneDelegate.activeFocus
             }
         }
     }

@@ -80,7 +80,7 @@ Item {
                     onToggled: root.editor.allDay = allDayBox.checked
 
                     FocusRing {
-                        shown: allDayBox.visualFocus
+                        shown: allDayBox.activeFocus
                     }
                 }
 
@@ -171,7 +171,7 @@ Item {
                         Component.onCompleted: Theme.calmPopup(calendarBox.popup)
 
                         FocusRing {
-                            shown: calendarBox.visualFocus
+                            shown: calendarBox.activeFocus
                         }
                     }
 
@@ -191,7 +191,7 @@ Item {
                         Component.onCompleted: Theme.calmPopup(repeatBox.popup)
 
                         FocusRing {
-                            shown: repeatBox.visualFocus
+                            shown: repeatBox.activeFocus
                         }
                     }
 
@@ -211,7 +211,7 @@ Item {
                         Component.onCompleted: Theme.calmPopup(colorBox.popup)
 
                         FocusRing {
-                            shown: colorBox.visualFocus
+                            shown: colorBox.activeFocus
                         }
                     }
 
@@ -231,7 +231,7 @@ Item {
                         Component.onCompleted: Theme.calmPopup(availabilityBox.popup)
 
                         FocusRing {
-                            shown: availabilityBox.visualFocus
+                            shown: availabilityBox.activeFocus
                         }
                     }
 
@@ -251,7 +251,7 @@ Item {
                         Component.onCompleted: Theme.calmPopup(visibilityBox.popup)
 
                         FocusRing {
-                            shown: visibilityBox.visualFocus
+                            shown: visibilityBox.activeFocus
                         }
                     }
                 }
@@ -275,7 +275,7 @@ Item {
                         onClicked: root.editor.clearExceptions()
 
                         FocusRing {
-                            shown: exceptionsButton.visualFocus
+                            shown: exceptionsButton.activeFocus
                         }
                     }
                 }
@@ -315,7 +315,7 @@ Item {
                             onClicked: root.editor.removeReminder(reminderRow.index)
 
                             FocusRing {
-                                shown: removeReminderButton.visualFocus
+                                shown: removeReminderButton.activeFocus
                             }
                         }
                     }
@@ -336,7 +336,7 @@ Item {
                         Component.onCompleted: Theme.calmPopup(reminderBox.popup)
 
                         FocusRing {
-                            shown: reminderBox.visualFocus
+                            shown: reminderBox.activeFocus
                         }
                     }
 
@@ -349,7 +349,7 @@ Item {
                         onClicked: root.editor.addReminder(reminderBox.currentIndex)
 
                         FocusRing {
-                            shown: addReminderButton.visualFocus
+                            shown: addReminderButton.activeFocus
                         }
                     }
                 }
@@ -411,7 +411,7 @@ Item {
                         onClicked: root.finished()
 
                         FocusRing {
-                            shown: cancelButton.visualFocus
+                            shown: cancelButton.activeFocus
                         }
                     }
 
@@ -425,7 +425,7 @@ Item {
                         onClicked: root.editor.save()
 
                         FocusRing {
-                            shown: saveButton.visualFocus
+                            shown: saveButton.activeFocus
                         }
                     }
                 }

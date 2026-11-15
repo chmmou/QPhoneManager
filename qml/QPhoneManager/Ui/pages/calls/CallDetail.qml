@@ -89,7 +89,7 @@ Item {
                             onClicked: root.area.call(root.area.currentNumber)
 
                             FocusRing {
-                                shown: callButton.visualFocus
+                                shown: callButton.activeFocus
                             }
                         }
 
@@ -104,7 +104,7 @@ Item {
                             onClicked: root.area.writeMessage(root.area.currentNumber)
 
                             FocusRing {
-                                shown: messageButton.visualFocus
+                                shown: messageButton.activeFocus
                             }
                         }
 
@@ -119,7 +119,7 @@ Item {
                             onClicked: root.area.addCurrentToContacts()
 
                             FocusRing {
-                                shown: addContactButton.visualFocus
+                                shown: addContactButton.activeFocus
                             }
                         }
 
@@ -134,7 +134,7 @@ Item {
                             onClicked: root.deleteRequested(root.area.currentId)
 
                             FocusRing {
-                                shown: deleteButton.visualFocus
+                                shown: deleteButton.activeFocus
                             }
                         }
                     }

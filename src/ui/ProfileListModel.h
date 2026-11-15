@@ -25,7 +25,7 @@ public:
     enum Role {
         DeviceIdRole = Qt::UserRole + 1,
         DisplayNameRole,
-        ModelRole,
+        PhoneModelRole,
         LastConnectionRole,
         CurrentRole,
     };

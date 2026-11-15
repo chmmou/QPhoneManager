@@ -70,7 +70,7 @@ Item {
                     onToggled: root.editor.completed = completedBox.checked
 
                     FocusRing {
-                        shown: completedBox.visualFocus
+                        shown: completedBox.activeFocus
                     }
                 }
 
@@ -175,7 +175,7 @@ Item {
                         Component.onCompleted: Theme.calmPopup(repeatBox.popup)
 
                         FocusRing {
-                            shown: repeatBox.visualFocus
+                            shown: repeatBox.activeFocus
                         }
                     }
 
@@ -196,7 +196,7 @@ Item {
                         Component.onCompleted: Theme.calmPopup(priorityBox.popup)
 
                         FocusRing {
-                            shown: priorityBox.visualFocus
+                            shown: priorityBox.activeFocus
                         }
                     }
                 }
@@ -224,7 +224,7 @@ Item {
                             onToggled: root.editor.setCategorySelected(categoryBox.modelData, categoryBox.checked)
 
                             FocusRing {
-                                shown: categoryBox.visualFocus
+                                shown: categoryBox.activeFocus
                             }
                         }
                     }
@@ -258,7 +258,7 @@ Item {
                         }
 
                         FocusRing {
-                            shown: addCategoryButton.visualFocus
+                            shown: addCategoryButton.activeFocus
                         }
                     }
                 }
@@ -311,7 +311,7 @@ Item {
                         onClicked: root.deleteRequested(root.editor.luid)
 
                         FocusRing {
-                            shown: deleteButton.visualFocus
+                            shown: deleteButton.activeFocus
                         }
                     }
 
@@ -337,7 +337,7 @@ Item {
                         onClicked: root.finished()
 
                         FocusRing {
-                            shown: cancelButton.visualFocus
+                            shown: cancelButton.activeFocus
                         }
                     }
 
@@ -351,7 +351,7 @@ Item {
                         onClicked: root.editor.save()
 
                         FocusRing {
-                            shown: saveButton.visualFocus
+                            shown: saveButton.activeFocus
                         }
                     }
                 }

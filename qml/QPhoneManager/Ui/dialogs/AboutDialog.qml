@@ -33,7 +33,7 @@ Dialog {
 
     onOpened: {
         componentList.currentIndex = 0;
-        componentList.forceActiveFocus(Qt.TabFocusReason);
+        componentList.forceActiveFocus(Qt.PopupFocusReason);
     }
     Component.onCompleted: Theme.calmPopup(root)
 

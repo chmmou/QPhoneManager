@@ -40,7 +40,7 @@ Pane {
                 onClicked: root.transfers.cancelAll()
 
                 FocusRing {
-                    shown: cancelAllButton.visualFocus
+                    shown: cancelAllButton.activeFocus
                 }
             }
 
@@ -54,7 +54,7 @@ Pane {
                 onClicked: root.transfers.clearFinished()
 
                 FocusRing {
-                    shown: clearButton.visualFocus
+                    shown: clearButton.activeFocus
                 }
             }
         }

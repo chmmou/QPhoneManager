@@ -49,10 +49,7 @@ Dialog {
         }
     }
 
-    // The tab reason makes the button show its focus ring right away; giving the
-    // focus up on closing makes the next opening set that reason again.
-    onOpened: backButton.forceActiveFocus(Qt.TabFocusReason)
-    onClosed: backButton.focus = false
+    onOpened: backButton.forceActiveFocus(Qt.PopupFocusReason)
     Component.onCompleted: Theme.calmPopup(root)
 
     ColumnLayout {
