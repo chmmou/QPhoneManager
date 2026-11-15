@@ -48,6 +48,13 @@ struct AtReply
 };
 
 /**
+ * Returns `command` without what follows its "=" or "?", for example "AT*PIN"
+ * for "AT*PIN=<hash>". Messages and log lines name a command this way only,
+ * since its arguments can carry a secret or personal data.
+ */
+[[nodiscard]] QString commandWithoutArguments(const QString &command);
+
+/**
  * Line-based AT session with the phone client on top of a Transport. Lives in
  * the main thread and never blocks.
  *

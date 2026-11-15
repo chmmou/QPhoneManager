@@ -67,6 +67,16 @@ bool endsWithReason(const QString &line, QLatin1StringView reason)
 
 } // namespace
 
+QString commandWithoutArguments(const QString &command)
+{
+    const QString trimmed = command.trimmed();
+    for (qsizetype i = 0; i < trimmed.size(); ++i) {
+        if (trimmed.at(i) == u'=' || trimmed.at(i) == u'?')
+            return trimmed.left(i);
+    }
+    return trimmed;
+}
+
 AtSession::AtSession(Transport *transport, QObject *parent)
     : QObject(parent), m_transport(transport), m_timer(new QTimer(this))
 {

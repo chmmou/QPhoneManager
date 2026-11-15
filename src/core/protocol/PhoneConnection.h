@@ -127,7 +127,10 @@ public:
     /**
      * Connects over USB: starts the adb server, forwards free local ports to
      * the phone ports 5210, 5213, 5216 and 5217, starts the client and
-     * connects to the forwarded 5210. `adbPath` must be absolute.
+     * connects to the forwarded 5210. `adbPath` must be absolute. A client
+     * that adb has just started may not listen yet: while it closes the
+     * connection before its first answer, connecting is tried again for up
+     * to about ten seconds, and the state stays Connecting meanwhile.
      */
     void connectAdb(const QString &adbPath, const QString &serial);
 
@@ -239,6 +242,8 @@ private:
     void enqueueObexJob(ObexJob job);
     void runNextObexJob();
     void afterObex();
+    /// Connects again to the client that adb started, while it may still be starting.
+    void retryClient();
     void reconnect();
 
     Options m_options;
@@ -265,6 +270,9 @@ private:
     QTcpServer *m_server = nullptr;
     QTimer *m_statusTimer = nullptr;
     QTimer *m_reconnectTimer = nullptr;
+    /// Connections left to try while the client that adb started may not listen yet.
+    int m_clientWaitAttempts = 0;
+    QTimer *m_clientWaitTimer = nullptr;
     std::unique_ptr<AdbBridge> m_adb;
     std::unique_ptr<Transport> m_transport;
     std::unique_ptr<AtSession> m_session;
