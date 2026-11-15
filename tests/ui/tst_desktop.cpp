@@ -16,6 +16,7 @@
 #include "FakePhone.h"
 #include "WaitFor.h"
 
+#include <QAtomicInt>
 #include <QBuffer>
 #include <QClipboard>
 #include <QDBusConnection>
@@ -28,6 +29,7 @@
 #include <QMutex>
 #include <QMutexLocker>
 #include <QProcess>
+#include <QScopeGuard>
 #include <QSignalSpy>
 #include <QStandardPaths>
 #include <QTemporaryDir>
@@ -125,7 +127,9 @@ public:
             bus.send(message.createReply(uint(m_actions.size())));
         } else if (message.member() == QLatin1StringView("CloseNotification")) {
             m_closed.append(message.arguments().value(0).toUInt());
-            bus.send(message.createReply());
+            bus.send(m_closeFails ? message.createErrorReply(
+                                        QStringLiteral("org.freedesktop.DBus.Error.Failed"), {})
+                                  : message.createReply());
         } else {
             bus.send(message.createErrorReply(
                 QStringLiteral("org.freedesktop.DBus.Error.UnknownMethod"), {}));
@@ -151,12 +155,35 @@ public:
         return m_closed;
     }
 
+    /// Answers every later CloseNotification with an error.
+    void setCloseFails(bool fails)
+    {
+        QMutexLocker locker(&m_mutex);
+        m_closeFails = fails;
+    }
+
 private:
     mutable QMutex m_mutex;
     QList<QStringList> m_actions;
     QStringList m_bodies;
     QList<uint> m_closed;
+    bool m_closeFails = false;
 };
+
+QtMessageHandler previousHandler = nullptr;
+QAtomicInt notClosedLogs;
+
+// Counts the log lines of a failed close and passes every message on, so that
+// QTest::ignoreMessage still sees them.
+void countNotClosedLogs(QtMsgType type, const QMessageLogContext &context, const QString &message)
+{
+    if (type == QtInfoMsg && qstrcmp(context.category, "qpm.ui") == 0 &&
+        message.startsWith(QLatin1StringView("Desktop notification not closed:"))) {
+        notClosedLogs.fetchAndAddRelaxed(1);
+    }
+    if (previousHandler)
+        previousHandler(type, context, message);
+}
 
 } // namespace
 
@@ -188,6 +215,7 @@ private Q_SLOTS:
     void clipboardStaysWhileSharingIsOff();
     void desktopNotificationOffersTheActionsOfThePhone();
     void desktopNotificationsStayOffWhenSwitchedOff();
+    void failedCloseOfADesktopNotificationIsOnlyLogged();
 
 private:
     [[nodiscard]] bool connectPhone();
@@ -551,6 +579,45 @@ void TestDesktop::desktopNotificationsStayOffWhenSwitchedOff()
     // Messages on the bus keep their order, so the first one shown is the later post.
     QTRY_COMPARE_WITH_TIMEOUT(m_service->bodies().size(), 1, timeoutMs);
     QCOMPARE(m_service->bodies().constFirst(), QStringLiteral("Chat\nDanach"));
+}
+
+void TestDesktop::failedCloseOfADesktopNotificationIsOnlyLogged()
+{
+    if (!startNotificationService())
+        QSKIP("dbus-daemon is not installed");
+    m_service->setCloseFails(true);
+    DesktopIntegration integration(m_settings.get(), m_notifications.get(), m_clipboard.get());
+    integration.setNotifier(m_notifier.get());
+    QVERIFY(connectPhone());
+    QTRY_COMPARE_WITH_TIMEOUT(m_notifications->access(), NotificationService::Access::Granted,
+                              timeoutMs);
+    QSignalSpy requested(&integration, &DesktopIntegration::notificationsRequested);
+    const FakeNotification message = chat(11, QStringLiteral("Anna"));
+    m_phone->postNotification(message);
+    QTRY_COMPARE_WITH_TIMEOUT(m_service->actions().size(), 1, timeoutMs);
+    // The click travels behind the answer to Notify, so once it is reported
+    // the integration knows the id it has to close.
+    QDBusMessage click = QDBusMessage::createSignal(
+        QStringLiteral("/org/freedesktop/Notifications"),
+        QStringLiteral("org.freedesktop.Notifications"), QStringLiteral("ActionInvoked"));
+    click << 1u << QStringLiteral("default");
+    QVERIFY(QDBusConnection(QStringLiteral("service-%1").arg(m_round)).send(click));
+    QTRY_COMPARE_WITH_TIMEOUT(requested.count(), 1, timeoutMs);
+    notClosedLogs.storeRelaxed(0);
+    previousHandler = qInstallMessageHandler(countNotClosedLogs);
+    const auto restore = qScopeGuard([]() { qInstallMessageHandler(previousHandler); });
+    QTest::ignoreMessage(QtInfoMsg,
+                         "Desktop notification not closed: \"Notification call "
+                         "CloseNotification failed: org.freedesktop.DBus.Error.Failed\"");
+
+    m_phone->removeNotification(message.key());
+
+    QTRY_COMPARE_WITH_TIMEOUT(m_service->closed(), QList<uint>{1u}, timeoutMs);
+    QTRY_COMPARE_WITH_TIMEOUT(notClosedLogs.loadRelaxed(), 1, timeoutMs);
+    // The integration goes on showing what the phone posts next.
+    m_phone->postNotification(chat(12, QStringLiteral("Bernd")));
+    QTRY_COMPARE_WITH_TIMEOUT(m_service->actions().size(), 2, timeoutMs);
+    QCOMPARE(m_service->closed(), QList<uint>{1u});
 }
 
 QTEST_MAIN(TestDesktop)

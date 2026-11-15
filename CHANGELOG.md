@@ -105,6 +105,10 @@ numbers follow [Semantic Versioning](https://semver.org/).
   refuse it and what then happens.
 - The German texts are shorter and more direct, and the button that starts a
   new alarm names its action.
+- The AppImage carries the license texts of Qt, ICU, the AppImage runtime
+  and the system libraries it brings, and `THIRD_PARTY.md` lists them.
+- The release workflows name each action by its commit and the build image by
+  its digest, and the image installs aqtinstall with a hash for every package.
 
 ### Fixed
 
@@ -117,3 +121,5 @@ numbers follow [Semantic Versioning](https://semver.org/).
   back unchanged.
 - The dialogs of the contacts show where the keyboard focus is when they
   open.
+- A new search for phones no longer lists the phones an earlier search found
+  over Wi-Fi.
