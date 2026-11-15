@@ -56,7 +56,7 @@ Item {
                             text: qsTr("Month")
 
                             FocusRing {
-                                shown: monthTab.visualFocus
+                                shown: monthTab.activeFocus
                             }
                         }
 
@@ -68,7 +68,7 @@ Item {
                             text: qsTr("Week")
 
                             FocusRing {
-                                shown: weekTab.visualFocus
+                                shown: weekTab.activeFocus
                             }
                         }
 
@@ -80,7 +80,7 @@ Item {
                             text: qsTr("Day")
 
                             FocusRing {
-                                shown: dayTab.visualFocus
+                                shown: dayTab.activeFocus
                             }
                         }
 
@@ -92,7 +92,7 @@ Item {
                             text: qsTr("List")
 
                             FocusRing {
-                                shown: listTab.visualFocus
+                                shown: listTab.activeFocus
                             }
                         }
                     }
@@ -115,7 +115,7 @@ Item {
                         onClicked: root.startNew()
 
                         FocusRing {
-                            shown: newButton.visualFocus
+                            shown: newButton.activeFocus
                         }
                     }
 
@@ -133,7 +133,7 @@ Item {
                         onClicked: importDialog.open()
 
                         FocusRing {
-                            shown: importButton.visualFocus
+                            shown: importButton.activeFocus
                         }
                     }
 
@@ -151,7 +151,7 @@ Item {
                         onClicked: exportDialog.open()
 
                         FocusRing {
-                            shown: exportButton.visualFocus
+                            shown: exportButton.activeFocus
                         }
                     }
 
@@ -169,7 +169,7 @@ Item {
                         onClicked: calendarsDialog.open()
 
                         FocusRing {
-                            shown: calendarsButton.visualFocus
+                            shown: calendarsButton.activeFocus
                         }
                     }
 
@@ -187,7 +187,7 @@ Item {
                         onClicked: alarmsDialog.open()
 
                         FocusRing {
-                            shown: alarmsButton.visualFocus
+                            shown: alarmsButton.activeFocus
                         }
                     }
 
@@ -195,7 +195,8 @@ Item {
                         id: holidayBox
 
                         objectName: "holidayBox"
-                        Layout.preferredWidth: TypeScale.body * 10
+                        // Wide enough for the longest entry, so the shown one is never cut off.
+                        implicitContentWidthPolicy: ComboBox.WidestText
                         model: [qsTr("No holidays"), qsTr("Germany"), qsTr("Austria"), qsTr("Switzerland")]
                         currentIndex: Math.max(0, root.holidayRegions.indexOf(Settings.holidayRegion))
                         Accessible.name: qsTr("Show public holidays of")
@@ -205,7 +206,7 @@ Item {
                         Component.onCompleted: Theme.calmPopup(holidayBox.popup)
 
                         FocusRing {
-                            shown: holidayBox.visualFocus
+                            shown: holidayBox.activeFocus
                         }
                     }
                 }
@@ -227,7 +228,7 @@ Item {
                         onClicked: root.area.previous()
 
                         FocusRing {
-                            shown: previousButton.visualFocus
+                            shown: previousButton.activeFocus
                         }
                     }
 
@@ -240,7 +241,7 @@ Item {
                         onClicked: root.area.goToToday()
 
                         FocusRing {
-                            shown: todayButton.visualFocus
+                            shown: todayButton.activeFocus
                         }
                     }
 
@@ -257,7 +258,7 @@ Item {
                         onClicked: root.area.next()
 
                         FocusRing {
-                            shown: nextButton.visualFocus
+                            shown: nextButton.activeFocus
                         }
                     }
 
@@ -277,7 +278,7 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: 1
             visible: root.area.hasPhone
-            color: Theme.outline
+            color: Theme.outlineVariant
         }
 
         ListDetailView {
@@ -361,7 +362,7 @@ Item {
                     onClicked: root.startNew()
 
                     FocusRing {
-                        shown: newOnDayButton.visualFocus
+                        shown: newOnDayButton.activeFocus
                     }
                 }
             }

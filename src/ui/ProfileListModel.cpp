@@ -24,7 +24,7 @@ QVariant ProfileListModel::data(const QModelIndex &index, int role) const
     case DisplayNameRole:
     case Qt::DisplayRole:
         return profile.displayName;
-    case ModelRole:
+    case PhoneModelRole:
         return profile.model;
     case LastConnectionRole:
         return profile.lastConnection.isValid()
@@ -43,7 +43,9 @@ QHash<int, QByteArray> ProfileListModel::roleNames() const
     return {
         {DeviceIdRole, QByteArrayLiteral("deviceId")},
         {DisplayNameRole, QByteArrayLiteral("displayName")},
-        {ModelRole, QByteArrayLiteral("model")},
+        // Not "model": a role of that name hides the model object from a
+        // delegate, and the delegates of the style read their text through it.
+        {PhoneModelRole, QByteArrayLiteral("phoneModel")},
         {LastConnectionRole, QByteArrayLiteral("lastConnection")},
         {CurrentRole, QByteArrayLiteral("current")},
     };

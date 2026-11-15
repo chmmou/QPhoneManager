@@ -28,16 +28,11 @@ Dialog {
         }
     }
 
-    // The tab reason makes the button show its focus ring right away; giving the
-    // focus up on closing makes the next opening set that reason again.
     onOpened: {
         root.provider.active = true;
-        closeButton.forceActiveFocus(Qt.TabFocusReason);
+        closeButton.forceActiveFocus(Qt.PopupFocusReason);
     }
-    onClosed: {
-        root.provider.active = false;
-        closeButton.focus = false;
-    }
+    onClosed: root.provider.active = false
     Component.onCompleted: Theme.calmPopup(root)
 
     Connections {

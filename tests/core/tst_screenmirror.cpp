@@ -52,6 +52,9 @@ QByteArray portraitFrame(const QByteArray &fill = "screen")
 // A connection to the fake phone, with the screen channel found on its own port.
 struct Session
 {
+    Session() = default;
+    Q_DISABLE_COPY_MOVE(Session)
+
     FakePhone phone;
     PhoneConnection connection;
     std::unique_ptr<ScreenMirrorClient> client;

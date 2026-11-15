@@ -275,6 +275,8 @@ qt_add_qml_module(qpm_ui
         ui/AppController.cpp
         ui/DeviceStatusModel.h
         ui/DeviceStatusModel.cpp
+        ui/FocusVisibility.h
+        ui/FocusVisibility.cpp
         ui/FoundPhoneModel.h
         ui/FoundPhoneModel.cpp
         ui/PhoneNumberText.h

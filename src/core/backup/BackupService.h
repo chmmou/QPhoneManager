@@ -33,6 +33,11 @@ struct SectionPreview
     /// Entries the phone has in another form; restoring writes the backup's form.
     int changed = 0;
     int unchanged = 0;
+    /**
+     * Appointments left out because their calendar is read-only on the phone;
+     * the phone would not take them there, and they never belonged elsewhere.
+     */
+    int skipped = 0;
 };
 
 /// What restoring a backup would do, per section it holds.
@@ -52,6 +57,8 @@ struct SectionOutcome
 {
     int restored = 0;
     int failed = 0;
+    /// Entries left out on purpose, see SectionPreview::skipped.
+    int skipped = 0;
     /// Why the first failed entry failed; no error when none failed.
     Error firstError;
 };
@@ -73,7 +80,10 @@ struct RestoreReport
  * notes are written to the phone, each new entry created and each changed
  * one replaced by the backup's form. An entry counts as changed only when the
  * backup was made of the same phone and holds it under the same number; a
- * backup of another phone only adds what the phone lacks. Messages go only into the archive on
+ * backup of another phone only adds what the phone lacks. An appointment of a
+ * calendar that the phone has, by address and title, and may not write to is
+ * skipped and counted as such. A new appointment whose calendar the phone
+ * lacks, or that names none, goes into the phone's writable default calendar. Messages go only into the archive on
  * this computer, since the phone app does not take messages. The call log is
  * kept in the backup only: the phone app may not change the call log of the
  * phone, and the call log on this computer always mirrors the phone's.

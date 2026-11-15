@@ -29,10 +29,7 @@ Dialog {
         }
     }
 
-    // The tab reason makes the button show its focus ring right away; giving the
-    // focus up on closing makes the next opening set that reason again.
-    onOpened: closeButton.forceActiveFocus(Qt.TabFocusReason)
-    onClosed: closeButton.focus = false
+    onOpened: closeButton.forceActiveFocus(Qt.PopupFocusReason)
     Component.onCompleted: Theme.calmPopup(root)
 
     ColumnLayout {
@@ -99,7 +96,7 @@ Dialog {
                     onClicked: root.area.mergeDuplicate(pairRow.index)
 
                     FocusRing {
-                        shown: mergeButton.visualFocus
+                        shown: mergeButton.activeFocus
                     }
                 }
 
@@ -112,7 +109,7 @@ Dialog {
                     onClicked: root.area.ignoreDuplicate(pairRow.index)
 
                     FocusRing {
-                        shown: ignoreButton.visualFocus
+                        shown: ignoreButton.activeFocus
                     }
                 }
             }

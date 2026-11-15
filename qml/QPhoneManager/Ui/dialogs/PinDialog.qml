@@ -108,7 +108,7 @@ Dialog {
             text: qsTr("Remember the PIN in the keyring of this computer")
 
             FocusRing {
-                shown: rememberBox.visualFocus
+                shown: rememberBox.activeFocus
             }
         }
 

@@ -28,6 +28,11 @@ constexpr int maxApiLevel = 1000;
 constexpr int minTemperature = -100;
 constexpr int maxTemperature = 200;
 constexpr int maxVoltage = 100000;
+// The client that adb has just started needs a moment before it listens. Up
+// to this many connections are tried, this far apart, before the link counts
+// as lost.
+constexpr int clientStartAttempts = 20;
+constexpr std::chrono::milliseconds clientStartRetryDelay{500};
 
 // The desktop version announced to the client. 2.3.0 enables every branch
 // of client 4.15, among them categories and external storage.
@@ -64,12 +69,16 @@ Error closedError()
 } // namespace
 
 PhoneConnection::PhoneConnection(QObject *parent)
-    : QObject(parent), m_statusTimer(new QTimer(this)), m_reconnectTimer(new QTimer(this))
+    : QObject(parent), m_statusTimer(new QTimer(this)), m_reconnectTimer(new QTimer(this)),
+      m_clientWaitTimer(new QTimer(this))
 {
     m_statusTimer->setInterval(m_options.statusInterval);
     connect(m_statusTimer, &QTimer::timeout, this, &PhoneConnection::refreshStatus);
     m_reconnectTimer->setSingleShot(true);
     connect(m_reconnectTimer, &QTimer::timeout, this, &PhoneConnection::reconnect);
+    m_clientWaitTimer->setSingleShot(true);
+    m_clientWaitTimer->setInterval(clientStartRetryDelay);
+    connect(m_clientWaitTimer, &QTimer::timeout, this, &PhoneConnection::retryClient);
 }
 
 PhoneConnection::~PhoneConnection()
@@ -140,6 +149,7 @@ void PhoneConnection::forwardNextPort(QList<quint16> phonePorts)
             }
             m_host = QStringLiteral("127.0.0.1");
             m_port = m_forwards.value(atPort);
+            m_clientWaitAttempts = clientStartAttempts;
             start(std::make_unique<TcpTransport>(m_host, m_port), Method::Adb);
         });
         return;
@@ -341,12 +351,19 @@ void PhoneConnection::start(std::unique_ptr<Transport> transport, Method method)
 
 void PhoneConnection::beginHandshake()
 {
-    setState(State::Authenticating);
+    // A forwarded adb port takes the connection before the client listens
+    // behind it, so over adb the link counts as made once the client answers.
+    if (m_clientWaitAttempts == 0)
+        setState(State::Authenticating);
     const quint64 generation = m_generation;
     m_session->send(QStringLiteral("AT+CGSN"), m_options.commandTimeout)
         .then(this, [this, generation](const AtReply &reply) {
             if (generation != m_generation || reply.status == AtReply::Status::Closed)
                 return;
+            if (m_clientWaitAttempts > 0) {
+                m_clientWaitAttempts = 0;
+                setState(State::Authenticating);
+            }
             const QString deviceId = reply.lines.value(0).trimmed();
             if (reply.status != AtReply::Status::Ok || deviceId.isEmpty() ||
                 deviceId.size() > maxDeviceIdLength) {
@@ -482,7 +499,8 @@ bool PhoneConnection::lostOnTimeout(const AtReply &reply)
     if (reply.status != AtReply::Status::Timeout)
         return false;
     onLost(Error(ErrorCode::Timeout,
-                 QStringLiteral("The phone did not answer %1").arg(reply.command)));
+                 QStringLiteral("The phone did not answer %1")
+                     .arg(commandWithoutArguments(reply.command))));
     return true;
 }
 
@@ -504,6 +522,17 @@ void PhoneConnection::onLost(const Error &error)
 {
     if (m_state == State::Disconnected || m_state == State::Lost)
         return;
+    if (m_clientWaitAttempts > 0 && m_method == Method::Adb && m_state == State::Connecting &&
+        error.code() == ErrorCode::ConnectionClosed) {
+        const int attemptsLeft = m_clientWaitAttempts - 1;
+        teardown();
+        if (attemptsLeft > 0) {
+            qCInfo(lcProtocol) << "The phone client does not answer yet; connecting again";
+            m_clientWaitAttempts = attemptsLeft;
+            m_clientWaitTimer->start();
+            return;
+        }
+    }
     Error reported = error;
     if (m_pinInFlight && error.code() == ErrorCode::ConnectionClosed) {
         reported = Error(ErrorCode::WrongPin,
@@ -523,6 +552,8 @@ void PhoneConnection::teardown()
 {
     ++m_generation;
     m_statusTimer->stop();
+    m_clientWaitTimer->stop();
+    m_clientWaitAttempts = 0;
     m_pinPending = false;
     m_pinInFlight = false;
     m_statusPending = false;
@@ -653,6 +684,13 @@ void PhoneConnection::afterObex()
             });
     }
     runNextObexJob();
+}
+
+void PhoneConnection::retryClient()
+{
+    if (m_state != State::Connecting || m_method != Method::Adb || m_clientWaitAttempts == 0)
+        return;
+    start(std::make_unique<TcpTransport>(m_host, m_port), Method::Adb);
 }
 
 void PhoneConnection::reconnect()

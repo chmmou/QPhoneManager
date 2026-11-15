@@ -132,7 +132,8 @@ void DeviceStatusService::handleReply(const AtReply &reply)
         // the value unknown, which the overview shows as such. A closed or
         // silent link is reported by the connection itself.
         if (reply.status != AtReply::Status::Closed && reply.status != AtReply::Status::Timeout)
-            qCInfo(lcProtocol) << "Phone detail not available:" << command << int(reply.status);
+            qCInfo(lcProtocol) << "Phone detail not available:"
+                               << protocol::commandWithoutArguments(command) << int(reply.status);
         return;
     }
     if (command == QLatin1StringView("AT*SOPS"))

@@ -33,9 +33,8 @@ Dialog {
     onOpened: {
         root.area.loadAlarms();
         root.startNew();
-        closeButton.forceActiveFocus(Qt.TabFocusReason);
+        closeButton.forceActiveFocus(Qt.PopupFocusReason);
     }
-    onClosed: closeButton.focus = false
     Component.onCompleted: Theme.calmPopup(root)
 
     ColumnLayout {
@@ -219,7 +218,7 @@ Dialog {
                     Accessible.name: Qt.locale().dayName((dayBox.index + 1) % 7, Locale.LongFormat)
 
                     FocusRing {
-                        shown: dayBox.visualFocus
+                        shown: dayBox.activeFocus
                     }
                 }
             }
@@ -238,7 +237,7 @@ Dialog {
                 checked: true
 
                 FocusRing {
-                    shown: enabledBox.visualFocus
+                    shown: enabledBox.activeFocus
                 }
             }
 
@@ -254,7 +253,7 @@ Dialog {
                 onClicked: root.startNew()
 
                 FocusRing {
-                    shown: newButton.visualFocus
+                    shown: newButton.activeFocus
                 }
             }
 
@@ -268,7 +267,7 @@ Dialog {
                 onClicked: root.area.saveAlarm(root.editingRow, timeField.text, nameField.text, root.chosenDays(), enabledBox.checked)
 
                 FocusRing {
-                    shown: saveButton.visualFocus
+                    shown: saveButton.activeFocus
                 }
             }
         }
@@ -293,7 +292,7 @@ Dialog {
         const days = root.area.alarmDays(row);
         for (let i = 0; i < 7; ++i)
             (dayBoxes.itemAt(i) as CheckBox).checked = days.indexOf(i + 1) >= 0;
-        timeField.forceActiveFocus(Qt.TabFocusReason);
+        timeField.forceActiveFocus(Qt.OtherFocusReason);
     }
 
     function chosenDays(): list<int> {

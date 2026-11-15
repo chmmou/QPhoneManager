@@ -63,7 +63,7 @@ Item {
                     onClicked: root.goUp()
 
                     FocusRing {
-                        shown: upButton.visualFocus
+                        shown: upButton.activeFocus
                     }
                 }
 
@@ -116,7 +116,7 @@ Item {
                                     onClicked: root.files.open(root.files.crumbPaths[crumb.index])
 
                                     FocusRing {
-                                        shown: crumbButton.visualFocus
+                                        shown: crumbButton.activeFocus
                                     }
                                 }
                             }
@@ -138,7 +138,7 @@ Item {
                     onClicked: root.startNewFolder()
 
                     FocusRing {
-                        shown: newFolderButton.visualFocus
+                        shown: newFolderButton.activeFocus
                     }
                 }
 
@@ -156,7 +156,7 @@ Item {
                     onClicked: uploadMenu.popup(uploadButton, 0, uploadButton.height)
 
                     FocusRing {
-                        shown: uploadButton.visualFocus
+                        shown: uploadButton.activeFocus
                     }
                 }
 
@@ -174,7 +174,7 @@ Item {
                     onClicked: downloadDialog.open()
 
                     FocusRing {
-                        shown: downloadButton.visualFocus
+                        shown: downloadButton.activeFocus
                     }
                 }
 
@@ -192,7 +192,7 @@ Item {
                     onClicked: root.files.paste()
 
                     FocusRing {
-                        shown: pasteButton.visualFocus
+                        shown: pasteButton.activeFocus
                     }
                 }
 
@@ -210,7 +210,7 @@ Item {
                     onClicked: root.files.refresh()
 
                     FocusRing {
-                        shown: refreshButton.visualFocus
+                        shown: refreshButton.activeFocus
                     }
                 }
 
@@ -227,7 +227,7 @@ Item {
                     onClicked: root.showGrid = !root.showGrid
 
                     FocusRing {
-                        shown: viewButton.visualFocus
+                        shown: viewButton.activeFocus
                     }
                 }
             }
@@ -237,7 +237,7 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: 1
             visible: root.files.canEdit
-            color: Theme.outline
+            color: Theme.outlineVariant
         }
 
         Item {
@@ -686,8 +686,7 @@ Item {
             }
         }
 
-        onOpened: cancelDeleteButton.forceActiveFocus(Qt.TabFocusReason)
-        onClosed: cancelDeleteButton.focus = false
+        onOpened: cancelDeleteButton.forceActiveFocus(Qt.PopupFocusReason)
         onAccepted: root.files.remove([root.pendingDelete])
         Component.onCompleted: Theme.calmPopup(deleteDialog)
 

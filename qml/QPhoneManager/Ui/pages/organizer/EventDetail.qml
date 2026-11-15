@@ -80,7 +80,7 @@ Item {
                             onClicked: root.editRequested()
 
                             FocusRing {
-                                shown: editButton.visualFocus
+                                shown: editButton.activeFocus
                             }
                         }
 
@@ -96,7 +96,7 @@ Item {
                             onClicked: root.area.skipCurrentOccurrence()
 
                             FocusRing {
-                                shown: skipButton.visualFocus
+                                shown: skipButton.activeFocus
                             }
                         }
 
@@ -111,7 +111,7 @@ Item {
                             onClicked: root.deleteRequested(root.area.currentLuid)
 
                             FocusRing {
-                                shown: deleteButton.visualFocus
+                                shown: deleteButton.activeFocus
                             }
                         }
 
@@ -125,7 +125,7 @@ Item {
                             onClicked: root.area.selectEvent(0, 0)
 
                             FocusRing {
-                                shown: backButton.visualFocus
+                                shown: backButton.activeFocus
                             }
                         }
                     }

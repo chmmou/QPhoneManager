@@ -240,6 +240,18 @@ QQuickItem *labelWithText(QQuickItem *item, const QString &text)
     return nullptr;
 }
 
+// The focus ring of the program placed in `item`, or null.
+const QQuickItem *ringOf(const QQuickItem *item)
+{
+    const QList<QQuickItem *> children = item->childItems();
+    for (const QQuickItem *child : children) {
+        if (QString::fromLatin1(child->metaObject()->className())
+                .startsWith(QLatin1StringView("FocusRing")))
+            return child;
+    }
+    return nullptr;
+}
+
 // The outline that marks `row` as the current one of its view, or null.
 QQuickItem *currentMarkerOf(const QQuickItem *row)
 {
@@ -252,29 +264,24 @@ QQuickItem *currentMarkerOf(const QQuickItem *row)
     return nullptr;
 }
 
-// A control shows its focus ring while its focus came from the keyboard; any
-// other item shows the ring placed in it while it has the focus.
+// Whether the focus is drawn at `item`: the ring of the program where the item
+// carries one, the outline of a text field, the marker of the current row of a
+// list, and the visual focus of the style for a control without a ring.
 bool focusIsShown(const QQuickItem *item)
 {
     if (!item)
         return false;
-    if (item->metaObject()->indexOfProperty("visualFocus") >= 0)
-        return item->property("visualFocus").toBool();
     // An outlined text field draws its border in the accent colour while it has the focus.
     if (item->inherits("QQuickTextField") || item->inherits("QQuickTextArea"))
         return item->hasActiveFocus();
-    // The current row of a list holds the focus of the list and shows it by a
-    // strong outline inside it.
-    if (const QQuickItem *marker = currentMarkerOf(item); marker && marker->isVisible() &&
-        marker->property("border").value<QObject *>()->property("width").toReal() >= 2) {
-        return true;
-    }
-    const QList<QQuickItem *> children = item->childItems();
-    for (const QQuickItem *child : children) {
-        const QString type = QString::fromLatin1(child->metaObject()->className());
-        if (type.startsWith(QLatin1StringView("FocusRing")) && child->isVisible())
-            return true;
-    }
+    if (const QQuickItem *ring = ringOf(item))
+        return ring->isVisible();
+    // The current row of a list holds the focus of the list and shows it by an
+    // outline inside it.
+    if (const QQuickItem *marker = currentMarkerOf(item))
+        return marker->isVisible();
+    if (item->metaObject()->indexOfProperty("visualFocus") >= 0)
+        return item->property("visualFocus").toBool();
     return false;
 }
 
@@ -448,6 +455,10 @@ private Q_SLOTS:
     void cutContentShowsItsScrollBar();
     void hiddenFileViewNeverKeepsTheFocus();
     void emptyFolderKeepsAVisibleFocus();
+    void phonesDialogShowsTheRingOnlyWhenOpenedByKeyboard();
+    void singlePhoneShowsFullyEachTimeItIsOpened();
+    void holidayChoiceShowsItsWholeText();
+    void headerToolTipsLeaveTheMessageCloseButtonFree();
 
 private:
     [[nodiscard]] QList<QQuickItem *> controls() const;
@@ -473,6 +484,12 @@ private:
     /// Opens the help with F1 in the contacts area, as a user does.
     [[nodiscard]] bool showHelp();
     static void announceAccessibility();
+    /// Presses a key that acts on nothing, as a user does before the key that
+    /// opens a dialog; the window counts as worked from the keyboard then.
+    void pressKey(QWindow *window = nullptr);
+    /// Clicks the status line, which acts on nothing; the window counts as
+    /// worked with the mouse then.
+    void clickMouse();
 
     QTemporaryDir m_config;
     std::unique_ptr<qpm::test::FakePhone> m_phone;
@@ -787,6 +804,19 @@ bool TestAccessibility::showContacts()
     return shown;
 }
 
+void TestAccessibility::pressKey(QWindow *window)
+{
+    QTest::keyClick(window ? window : m_window, Qt::Key_F24);
+}
+
+void TestAccessibility::clickMouse()
+{
+    QQuickItem *status = findItem(m_window->contentItem(), QStringLiteral("connectionStatus"));
+    QVERIFY(status);
+    const QPointF centre = status->mapToScene(QPointF(status->width() / 2, status->height() / 2));
+    QTest::mouseClick(m_window, Qt::LeftButton, {}, centre.toPoint());
+}
+
 // Controls made after accessibility was switched on only fill in name and
 // role when they hear of it, as they do when an assistive tool starts.
 void TestAccessibility::announceAccessibility()
@@ -895,8 +925,10 @@ void TestAccessibility::contactDialogsShowTheFocusOnOpening_data()
     contactDialogControlsHaveANameAndARole_data();
 }
 
-// A dialog that opens without a visible focus leaves a keyboard user guessing
-// where a key press goes; the second opening has to show it as well.
+// A dialog that opens from the keyboard without a visible focus leaves the
+// user guessing where a key press goes; a later opening has to show it as
+// well. Opened with the mouse, a ring on the first button looked like a
+// leftover, so it stays hidden until a key is pressed.
 void TestAccessibility::contactDialogsShowTheFocusOnOpening()
 {
     QFETCH(QString, dialog);
@@ -904,16 +936,27 @@ void TestAccessibility::contactDialogsShowTheFocusOnOpening()
     QVERIFY(prepareContactDialog(dialog));
     const QList<QQuickItem *> before = controls();
 
-    for (int opening = 1; opening <= 2; ++opening) {
-        if (opening == 2)
+    for (int opening = 1; opening <= 3; ++opening) {
+        const bool byKeyboard = opening != 2;
+        if (opening > 1)
             QVERIFY(prepareContactDialog(dialog));
+        if (byKeyboard)
+            pressKey();
+        else
+            clickMouse();
         QObject *popup = openDialog(dialog);
         QVERIFY(popup);
         QQuickItem *focused = m_window->activeFocusItem();
         QVERIFY2(focused, qPrintable(dialog));
         QVERIFY2(!before.contains(focused), qPrintable(describe(focused)));
-        QVERIFY2(focusIsShown(focused),
+        const bool textField =
+            focused->inherits("QQuickTextField") || focused->inherits("QQuickTextArea");
+        QVERIFY2(focusIsShown(focused) == (byKeyboard || textField),
                  qPrintable(QStringLiteral("opening %1: %2").arg(opening).arg(describe(focused))));
+        if (!byKeyboard) {
+            pressKey();
+            QVERIFY2(focusIsShown(focused), qPrintable(describe(focused)));
+        }
         QMetaObject::invokeMethod(popup, "close");
         QTRY_VERIFY(!popup->property("visible").toBool());
     }
@@ -1063,6 +1106,7 @@ void TestAccessibility::callDialogControlsHaveANameAndARole()
     QObject *popup = page->findChild<QObject *>(QStringLiteral("deleteCallsDialog"));
     QVERIFY(popup);
     const QList<QQuickItem *> before = controls();
+    pressKey();
     QVERIFY(QMetaObject::invokeMethod(page, "confirmDelete", Q_ARG(int, 2)));
     QTRY_VERIFY(popup->property("opened").toBool());
     announceAccessibility();
@@ -1075,16 +1119,17 @@ void TestAccessibility::callDialogControlsHaveANameAndARole()
     QQuickItem *focused = m_window->activeFocusItem();
     QVERIFY(focused);
     QCOMPARE(focused->property("text").toString(), QStringLiteral("Cancel"));
-    QVERIFY2(focused->property("visualFocus").toBool(), "the focus is not shown");
+    QVERIFY2(focusIsShown(focused), "the focus is not shown");
     QMetaObject::invokeMethod(popup, "close");
     QTRY_VERIFY(!popup->property("visible").toBool());
 
     // Opened a second time, the dialog shows the focus again.
+    pressKey();
     QVERIFY(QMetaObject::invokeMethod(page, "confirmDeleteShown"));
     QTRY_VERIFY(popup->property("opened").toBool());
     QVERIFY(m_window->activeFocusItem());
     QCOMPARE(m_window->activeFocusItem()->property("text").toString(), QStringLiteral("Cancel"));
-    QVERIFY2(m_window->activeFocusItem()->property("visualFocus").toBool(),
+    QVERIFY2(focusIsShown(m_window->activeFocusItem()),
              "the focus is not shown after opening again");
     QMetaObject::invokeMethod(popup, "close");
     QTRY_VERIFY(!popup->property("visible").toBool());
@@ -1262,6 +1307,7 @@ void TestAccessibility::messageDialogShowsItsFocusAndNamesItsControls()
     const QList<QQuickItem *> before = controls();
 
     for (int opening = 1; opening <= 2; ++opening) {
+        pressKey();
         QVERIFY(QMetaObject::invokeMethod(page, "confirmDeleteConversation"));
         QTRY_VERIFY(popup->property("opened").toBool());
         announceAccessibility();
@@ -1501,6 +1547,7 @@ void TestAccessibility::organizerDialogsShowTheFocusAndNameTheirControls()
     QVERIFY(QTest::qWaitForWindowActive(m_window));
     const QList<QQuickItem *> before = controls();
 
+    pressKey();
     QObject *popup = openDialog(dialog);
     QVERIFY(popup);
     if (dialog == QLatin1StringView("alarmsDialog")) {
@@ -1762,6 +1809,7 @@ void TestAccessibility::fileDialogsShowTheFocusAndNameTheirControls()
     page->setProperty("currentRow", 1);
     const QList<QQuickItem *> before = controls();
 
+    pressKey();
     QObject *popup = nullptr;
     if (dialog == QLatin1StringView("fileNameDialog")) {
         QVERIFY(QMetaObject::invokeMethod(page, "startNewFolder"));
@@ -1956,6 +2004,7 @@ void TestAccessibility::appDialogsShowTheFocusAndNameTheirControls()
     list->setProperty("currentIndex", 1);
     const QList<QQuickItem *> before = controls();
 
+    pressKey();
     QVERIFY(QMetaObject::invokeMethod(
         page, dialog == QLatin1StringView("appMenu") ? "showMenu" : "confirmUninstall"));
     QObject *popup = page->findChild<QObject *>(dialog);
@@ -2378,6 +2427,9 @@ void TestAccessibility::callWindowNamesItsControlsAndShowsItsFocus()
     QVERIFY(!found.at(2)->isEnabled());
     QVERIFY(!found.at(3)->isEnabled());
     QTRY_VERIFY(answer->hasActiveFocus());
+    // The window came up on its own, so the ring waits for the first key.
+    QVERIFY(!focusIsShown(answer));
+    pressKey(callWindow);
     QVERIFY(focusIsShown(answer));
     QCOMPARE(found.at(1)->property("text").toString(), QStringLiteral("Decline"));
 
@@ -2408,6 +2460,7 @@ void TestAccessibility::backupDialogIsUsedByKeyboard()
         return false;
     };
     const QList<QQuickItem *> before = controls();
+    pressKey();
     QObject *popup = openDialog(QStringLiteral("backupDialog"));
     QVERIFY(popup);
     announceAccessibility();
@@ -2595,6 +2648,7 @@ void TestAccessibility::aboutDialogShowsItsFocusAndNamesItsControls()
     QVERIFY(QTest::qWaitForWindowActive(m_window));
     const QList<QQuickItem *> before = controls();
     for (int opening = 1; opening <= 2; ++opening) {
+        pressKey();
         QObject *popup = openDialog(QStringLiteral("aboutDialog"));
         QVERIFY(popup);
         announceAccessibility();
@@ -2675,10 +2729,25 @@ void TestAccessibility::controlsKeepTheirContrastInBothSchemes()
         const QColor placeholder = colorOf(field, "placeholderTextColor");
         QVERIFY2(contrast(placeholder, backdrop) >= 4.5,
                  qPrintable(ratioText(name + QStringLiteral(" label"), placeholder, backdrop)));
-        const QColor outline =
-            colorOf(field->property("background").value<QQuickItem *>(), "outlineColor");
-        QVERIFY2(contrast(outline, backdrop) >= 3.0,
-                 qPrintable(ratioText(name + QStringLiteral(" outline"), outline, backdrop)));
+        // At rest the outline is as subtle as the separators; the outline of the
+        // field with the focus keeps 3:1. The style reports the colour of the
+        // resting outline as the focused one too, so the drawn edge is read.
+        auto *background = field->property("background").value<QQuickItem *>();
+        QCOMPARE(colorOf(background, "outlineColor"), colorOf(theme, "outlineVariant"));
+        field->forceActiveFocus(Qt::TabFocusReason);
+        const QPoint edge =
+            background->mapToScene(QPointF(0, background->height() / 2)).toPoint();
+        double focusedEdge = 0;
+        QTRY_VERIFY2(
+            [&]() {
+                const QImage shot = m_window->grabWindow();
+                focusedEdge = 0;
+                for (int dx = 0; dx <= 2; ++dx)
+                    focusedEdge = std::max(
+                        focusedEdge, contrast(shot.pixelColor(edge + QPoint(dx, 0)), backdrop));
+                return focusedEdge >= 3.0;
+            }(),
+            qPrintable(QStringLiteral("%1 focused outline %2:1").arg(name).arg(focusedEdge, 0, 'f', 2)));
         const QColor selected = colorOf(field, "selectedTextColor");
         const QColor selection = colorOf(field, "selectionColor");
         QVERIFY2(contrast(selected, selection) >= 4.5,
@@ -2804,7 +2873,8 @@ void TestAccessibility::dialogButtonsShowTheFocusRing_data()
 
 // The ripple of the style is drawn in a corner of the window by the software
 // renderer, so the focus ring of the program is the cue that stays. A dialog
-// opening with the focus on a button shows the ring at once, also the second time.
+// opened from the keyboard with the focus on a button shows the ring at once,
+// also a later time; opened with the mouse it shows the ring after a key.
 void TestAccessibility::dialogButtonsShowTheFocusRing()
 {
     QFETCH(QString, dialog);
@@ -2814,7 +2884,12 @@ void TestAccessibility::dialogButtonsShowTheFocusRing()
     QVERIFY(QTest::qWaitForWindowActive(m_window));
     const QList<QQuickItem *> before = controls();
 
-    for (int opening = 1; opening <= 2; ++opening) {
+    for (int opening = 1; opening <= 3; ++opening) {
+        const bool byKeyboard = opening != 2;
+        if (byKeyboard)
+            pressKey();
+        else
+            clickMouse();
         QObject *popup = nullptr;
         QObject *outer = nullptr;
         if (dialog.contains(u'/')) {
@@ -2836,14 +2911,18 @@ void TestAccessibility::dialogButtonsShowTheFocusRing()
         QVERIFY(popup);
         QQuickItem *focusItem = m_window->activeFocusItem();
         QVERIFY(focusItem);
+        const QString where = QStringLiteral("opening %1: %2").arg(opening).arg(describe(focusItem));
         if (!focused.isEmpty()) {
             QCOMPARE(focusItem->objectName(), focused);
-            QVERIFY2(focusIsShown(focusItem),
-                     qPrintable(QStringLiteral("opening %1: %2").arg(opening).arg(describe(focusItem))));
+            const bool textField = focusItem->inherits("QQuickTextField");
+            QVERIFY2(focusIsShown(focusItem) == (byKeyboard || textField), qPrintable(where));
         }
         if (focusItem->inherits("QQuickAbstractButton")) {
-            QVERIFY2(ringIsShown(focusItem),
-                     qPrintable(QStringLiteral("opening %1: %2").arg(opening).arg(describe(focusItem))));
+            QVERIFY2(ringIsShown(focusItem) == byKeyboard, qPrintable(where));
+            if (!byKeyboard) {
+                pressKey();
+                QVERIFY2(ringIsShown(focusItem), qPrintable(where));
+            }
         }
         QQuickItem *tabBar = tabs.isEmpty() ? nullptr : findItem(m_window->contentItem(), tabs);
         const int pages = tabBar ? tabBar->property("count").toInt() : 1;
@@ -3008,10 +3087,12 @@ void TestAccessibility::formsTakeTheFocusWhenOpenedOnPurpose()
     QTRY_COMPARE(focusedName(), fieldName);
 }
 
-// The fill of the current row is too faint for 3:1. The row always carries an
-// outline: a thin one in the outline colour, a strong one in the primary colour
-// while the list has the focus, set in from the focus ring of the list so that
-// the ring never covers it. The sidebar marks the section shown.
+// The current row is marked by its fill. While the list holds the focus from
+// the keyboard, a thin outline in the primary colour shows where the keys go,
+// set in from the focus ring of the list so that the ring never covers it.
+// Without the focus, or after a click, the fill stands alone; a two pixel
+// outline and a grey one on every chosen row read as a high contrast mode.
+// The sidebar marks the section shown.
 void TestAccessibility::currentRowIsMarkedBeyondItsFill()
 {
     QVERIFY(showContacts());
@@ -3032,9 +3113,11 @@ void TestAccessibility::currentRowIsMarkedBeyondItsFill()
     QVERIFY(marker && marker->isVisible());
     auto *border = marker->property("border").value<QObject *>();
     QVERIFY(border);
-    QCOMPARE(border->property("width").toReal(), 2.0);
+    QCOMPARE(border->property("width").toReal(), 1.0);
+    QCOMPARE(colorOf(border, "color"), colorOf(theme, "primary"));
     QVERIFY2(contrast(colorOf(border, "color"), fill) >= 3.0,
              qPrintable(ratioText(QStringLiteral("focused row"), colorOf(border, "color"), fill)));
+    QVERIFY(fill != colorOf(theme, "surface"));
     // The ring of the list takes its outer two pixels; the outline of the first row lies inside.
     const QRectF inList = marker->mapRectToItem(list, QRectF(0, 0, marker->width(), marker->height()));
     QVERIFY2(inList.left() >= 3 && inList.top() >= 3 && inList.right() <= list->width() - 3,
@@ -3048,10 +3131,21 @@ void TestAccessibility::currentRowIsMarkedBeyondItsFill()
     QVERIFY(button);
     button->forceActiveFocus(Qt::TabFocusReason);
     QTRY_VERIFY(!list->hasActiveFocus());
+    QVERIFY(!marker->isVisible());
+    QCOMPARE(colorOf(row, "color"), fill);
+
+    // Worked with the mouse, the list keeps its focus and the row its fill alone.
+    list->forceActiveFocus(Qt::TabFocusReason);
+    QTRY_VERIFY(list->hasActiveFocus());
     QVERIFY(marker->isVisible());
-    QCOMPARE(border->property("width").toReal(), 1.0);
-    QVERIFY2(contrast(colorOf(border, "color"), fill) >= 3.0,
-             qPrintable(ratioText(QStringLiteral("row"), colorOf(border, "color"), fill)));
+    clickMouse();
+    QVERIFY(list->hasActiveFocus());
+    QVERIFY(!marker->isVisible());
+    QVERIFY(!ringIsShown(list));
+    QTest::keyClick(m_window, Qt::Key_Down);
+    auto *next = list->property("currentItem").value<QQuickItem *>();
+    QVERIFY(next && next != row);
+    QTRY_VERIFY(currentMarkerOf(next) && currentMarkerOf(next)->isVisible());
 
     QQuickItem *section = findItem(m_window->contentItem(), QStringLiteral("section-contacts"));
     QVERIFY(section && section->property("highlighted").toBool());
@@ -3151,7 +3245,9 @@ void TestAccessibility::calendarDaysAndMarkersKeepTheirContrast()
     QVERIFY(dots > 0);
 }
 
-// A menu has the colour of the page under it; its drawn edge sets it apart.
+// A menu has the colour of the page under it; its drawn edge sets it apart,
+// in the subtle colour of the separators. The list of a combo box in a
+// dialog has the colour of the dialog and gets the same edge.
 void TestAccessibility::menusStandOutFromThePage()
 {
     QVERIFY(showApps());
@@ -3172,9 +3268,29 @@ void TestAccessibility::menusStandOutFromThePage()
     double best = 0;
     for (int dx = -1; dx <= 2; ++dx)
         best = std::max(best, contrast(shot.pixelColor(edge.toPoint() + QPoint(dx, 0)), outside));
-    QVERIFY2(best >= 3.0, qPrintable(QStringLiteral("menu edge %1:1").arg(best, 0, 'f', 2)));
+    QVERIFY2(best >= 1.1, qPrintable(QStringLiteral("menu edge %1:1").arg(best, 0, 'f', 2)));
+    auto *theme = m_engine->singletonInstance<QObject *>("QPhoneManager.Ui", "Theme");
+    QVERIFY(theme);
+    auto *menuEdge = background->property("border").value<QObject *>();
+    QVERIFY(menuEdge);
+    QCOMPARE(colorOf(menuEdge, "color"), colorOf(theme, "outlineVariant"));
     QMetaObject::invokeMethod(menu, "close");
     QTRY_VERIFY(!menu->property("visible").toBool());
+
+    QObject *settings = openDialog(QStringLiteral("settingsDialog"));
+    QVERIFY(settings);
+    QQuickItem *box = findItem(m_window->contentItem(), QStringLiteral("languageBox"));
+    QVERIFY(box);
+    auto *choices = box->property("popup").value<QObject *>();
+    QVERIFY(choices);
+    auto *listBackground = choices->property("background").value<QQuickItem *>();
+    QVERIFY(listBackground);
+    auto *listEdge = listBackground->property("border").value<QObject *>();
+    QVERIFY(listEdge);
+    QCOMPARE(listEdge->property("width").toReal(), 1.0);
+    QCOMPARE(colorOf(listEdge, "color"), colorOf(theme, "outlineVariant"));
+    QMetaObject::invokeMethod(settings, "close");
+    QTRY_VERIFY(!settings->property("visible").toBool());
 }
 
 void TestAccessibility::cutContentShowsItsScrollBar_data()
@@ -3316,6 +3432,204 @@ void TestAccessibility::emptyFolderKeepsAVisibleFocus()
 
     QTest::keyClick(m_window, Qt::Key_Backspace);
     QTRY_COMPARE_WITH_TIMEOUT(files->path(), QStringLiteral("\\sdcard"), phoneTimeoutMs);
+}
+
+// The phones dialog put the focus on Close with the ring shown, also when it
+// was opened with the mouse, which looked like a leftover.
+void TestAccessibility::phonesDialogShowsTheRingOnlyWhenOpenedByKeyboard()
+{
+    m_window->requestActivate();
+    QVERIFY(QTest::qWaitForWindowActive(m_window));
+    QQuickItem *phones = findItem(m_window->contentItem(), QStringLiteral("phonesButton"));
+    QVERIFY(phones);
+    QObject *dialog = m_window->findChild<QObject *>(QStringLiteral("profilesDialog"));
+    QVERIFY(dialog);
+    const auto closeButton = [this]() {
+        return findItem(m_window->contentItem(), QStringLiteral("profilesCloseButton"));
+    };
+
+    phones->forceActiveFocus(Qt::TabFocusReason);
+    QVERIFY(ringIsShown(phones));
+    QTest::keyClick(m_window, Qt::Key_Space);
+    QTRY_VERIFY(dialog->property("opened").toBool());
+    QTRY_VERIFY(closeButton() && closeButton()->hasActiveFocus());
+    QVERIFY(ringIsShown(closeButton()));
+    QTest::keyClick(m_window, Qt::Key_Escape);
+    QTRY_VERIFY(!dialog->property("visible").toBool());
+
+    const QPointF centre = phones->mapToScene(QPointF(phones->width() / 2, phones->height() / 2));
+    QTest::mouseClick(m_window, Qt::LeftButton, {}, centre.toPoint());
+    QTRY_VERIFY(dialog->property("opened").toBool());
+    QTRY_VERIFY(closeButton()->hasActiveFocus());
+    QVERIFY(!ringIsShown(closeButton()));
+    QVERIFY(!closeButton()->property("visualFocus").toBool());
+
+    // A key pressed in the window shows where the next one goes.
+    pressKey();
+    QVERIFY(ringIsShown(closeButton()));
+    QTest::keyClick(m_window, Qt::Key_Escape);
+    QTRY_VERIFY(!dialog->property("visible").toBool());
+}
+
+// With one phone only, the phone list of the header and the phones dialog
+// opened a second time have to show that phone in full, as the first time.
+void TestAccessibility::singlePhoneShowsFullyEachTimeItIsOpened()
+{
+    QVERIFY(showContacts());
+    m_window->requestActivate();
+    QVERIFY(QTest::qWaitForWindowActive(m_window));
+    auto *controller =
+        m_engine->singletonInstance<AppController *>("QPhoneManager.Ui", "AppController");
+    QTRY_COMPARE(controller->property("devices").value<QObject *>()->property("count").toInt(), 1);
+    QTemporaryDir shots;
+    QVERIFY(shots.isValid());
+    shots.setAutoRemove(qEnvironmentVariableIsEmpty("QPM_KEEP_SCREENSHOTS"));
+    QQuickItem *box = findItem(m_window->contentItem(), QStringLiteral("deviceBox"));
+    QVERIFY(box);
+    auto *popup = box->property("popup").value<QObject *>();
+    QVERIFY(popup);
+    const QString name = box->property("currentText").toString();
+    QVERIFY(!name.isEmpty());
+
+    for (int opening = 1; opening <= 3; ++opening) {
+        const QPointF centre = box->mapToScene(QPointF(box->width() / 2, box->height() / 2));
+        QTest::mouseClick(m_window, Qt::LeftButton, {}, centre.toPoint());
+        QTRY_VERIFY2(popup->property("opened").toBool(), qPrintable(QString::number(opening)));
+        auto *view = popup->property("contentItem").value<QQuickItem *>();
+        QVERIFY(view);
+        QTRY_COMPARE(view->property("count").toInt(), 1);
+        QVERIFY(m_window->grabWindow().save(
+            shots.filePath(QStringLiteral("deviceBox-%1.png").arg(opening))));
+        QQuickItem *entry = nullptr;
+        QTRY_VERIFY2((entry = labelWithText(view, name)) && entry->isVisible() &&
+                         entry->height() > 0,
+                     qPrintable(QStringLiteral("opening %1: %2 texts in a list %3 high")
+                                    .arg(opening)
+                                    .arg(itemsOfClass(view, "QQuickText").size())
+                                    .arg(view->height())));
+        const QRectF shown = entry->mapRectToScene(QRectF(0, 0, entry->width(), entry->height()));
+        auto *frame = popup->property("background").value<QQuickItem *>();
+        const QRectF inside = frame->mapRectToScene(QRectF(0, 0, frame->width(), frame->height()));
+        QVERIFY2(inside.contains(shown),
+                 qPrintable(QStringLiteral("opening %1: entry %2,%3 %4x%5 outside the list %6,%7 "
+                                           "%8x%9")
+                                .arg(opening)
+                                .arg(shown.x()).arg(shown.y()).arg(shown.width()).arg(shown.height())
+                                .arg(inside.x()).arg(inside.y()).arg(inside.width())
+                                .arg(inside.height())));
+        // The second time the entry is chosen again, the third time the list is left with Escape.
+        if (opening == 2) {
+            const QPointF at = entry->mapToScene(QPointF(entry->width() / 2, entry->height() / 2));
+            QTest::mouseClick(m_window, Qt::LeftButton, {}, at.toPoint());
+        } else {
+            QTest::keyClick(m_window, Qt::Key_Escape);
+        }
+        QTRY_VERIFY(!popup->property("visible").toBool());
+        QCOMPARE(box->property("currentText").toString(), name);
+    }
+
+    QObject *dialog = m_window->findChild<QObject *>(QStringLiteral("profilesDialog"));
+    QVERIFY(dialog);
+    for (int opening = 1; opening <= 2; ++opening) {
+        QMetaObject::invokeMethod(dialog, "open");
+        QTRY_VERIFY(dialog->property("opened").toBool());
+        QQuickItem *list = findItem(m_window->contentItem(), QStringLiteral("profileList"));
+        QVERIFY(list);
+        QTRY_COMPARE(list->property("count").toInt(), 1);
+        QQuickItem *label = findItem(list, QStringLiteral("profileName"));
+        QVERIFY2(label && label->isVisible(), qPrintable(QString::number(opening)));
+        QVERIFY2(!label->property("truncated").toBool(), qPrintable(QString::number(opening)));
+        QVERIFY(label->height() > 0);
+        QVERIFY(m_window->grabWindow().save(
+            shots.filePath(QStringLiteral("profilesDialog-%1.png").arg(opening))));
+        QMetaObject::invokeMethod(dialog, "close");
+        QTRY_VERIFY(!dialog->property("visible").toBool());
+    }
+    if (!shots.autoRemove())
+        qInfo() << "Screenshots kept in" << shots.path();
+}
+
+// "No holidays" in German was cut off by a box of a fixed width.
+void TestAccessibility::holidayChoiceShowsItsWholeText()
+{
+    QVERIFY(showOrganizer(4));
+    QQuickItem *box = findItem(m_window->contentItem(), QStringLiteral("holidayBox"));
+    QVERIFY(box);
+    auto *text = box->property("contentItem").value<QQuickItem *>();
+    QVERIFY(text);
+    const int count = box->property("count").toInt();
+    QVERIFY(count >= 2);
+    for (int index = 0; index < count; ++index) {
+        box->setProperty("currentIndex", index);
+        QTRY_VERIFY2(text->implicitWidth() <= text->width() + 0.5,
+                     qPrintable(QStringLiteral("%1 needs %2, gets %3")
+                                    .arg(box->property("currentText").toString())
+                                    .arg(text->implicitWidth())
+                                    .arg(text->width())));
+    }
+}
+
+// The tooltip of a button at the right of the header had no room above it and
+// opened below, beside or over the close button of a message bar under the
+// header, where it read as a button of the bar.
+void TestAccessibility::headerToolTipsLeaveTheMessageCloseButtonFree()
+{
+    // Syncing is offered only while a phone is connected.
+    QVERIFY(showContacts());
+    m_window->requestActivate();
+    QVERIFY(QTest::qWaitForWindowActive(m_window));
+    QQuickItem *bar = findItem(m_window->contentItem(), QStringLiteral("messageBar"));
+    QVERIFY(bar);
+    QVERIFY(QMetaObject::invokeMethod(
+        bar, "show", Q_ARG(QString, QStringLiteral("Contacts: 1 new\nCalls: 0 new\nMessages: 0 new")),
+        Q_ARG(bool, false)));
+    QQuickItem *close = findItem(m_window->contentItem(), QStringLiteral("messageCloseButton"));
+    QTRY_VERIFY(close && close->isVisible());
+    const QRectF closeArea = close->mapRectToScene(QRectF(0, 0, close->width(), close->height()));
+    auto *header = m_window->property("header").value<QQuickItem *>();
+    QVERIFY(header);
+    const QRectF headerArea = header->mapRectToScene(QRectF(0, 0, header->width(), header->height()));
+    for (const QString &name : {QStringLiteral("syncButton"), QStringLiteral("connectionButton")}) {
+        QQuickItem *button = findItem(m_window->contentItem(), name);
+        QVERIFY2(button, qPrintable(name));
+        // The offscreen platform reports no pointer that hovers, as a desktop does.
+        button->setProperty("hoverEnabled", true);
+        QTest::mouseMove(m_window, QPoint(1, 1));
+        const QPointF centre =
+            button->mapToScene(QPointF(button->width() / 2, button->height() / 2));
+        QTest::mouseMove(m_window, centre.toPoint());
+        QTRY_VERIFY2(button->property("hovered").toBool(), qPrintable(name));
+        QQuickItem *tip = nullptr;
+        QTRY_VERIFY2([&]() {
+            const QList<QQuickItem *> tips = itemsOfClass(m_window->contentItem()->parentItem()
+                                                              ? m_window->contentItem()->parentItem()
+                                                              : m_window->contentItem(),
+                                                          "QQuickPopupItem");
+            for (QQuickItem *candidate : tips) {
+                if (labelWithText(candidate, button->property("text").toString()) &&
+                    candidate->opacity() > 0.99) {
+                    tip = candidate;
+                    return true;
+                }
+            }
+            return false;
+        }(), qPrintable(name));
+        const QRectF tipArea = tip->mapRectToScene(QRectF(0, 0, tip->width(), tip->height()));
+        // In German the wider text reached into the close button; in any
+        // language the tooltip ends above it.
+        QVERIFY2(tipArea.bottom() <= closeArea.top(),
+                 qPrintable(QStringLiteral("%1: tooltip ends at %2, the close button starts at %3")
+                                .arg(name)
+                                .arg(tipArea.bottom())
+                                .arg(closeArea.top())));
+        QVERIFY2(tipArea.top() < headerArea.bottom(), qPrintable(name));
+        QVERIFY2(!tipArea.intersects(closeArea),
+                 qPrintable(QStringLiteral("%1: tooltip %2,%3 %4x%5, close button %6,%7 %8x%9")
+                                .arg(name)
+                                .arg(tipArea.x()).arg(tipArea.y()).arg(tipArea.width())
+                                .arg(tipArea.height()).arg(closeArea.x()).arg(closeArea.y())
+                                .arg(closeArea.width()).arg(closeArea.height())));
+    }
 }
 
 QTEST_MAIN(TestAccessibility)

@@ -78,7 +78,7 @@ Item {
                         onClicked: root.area.replyToCurrent()
 
                         FocusRing {
-                            shown: replyButton.visualFocus
+                            shown: replyButton.activeFocus
                         }
                     }
 
@@ -93,7 +93,7 @@ Item {
                         onClicked: root.area.markCurrentRead()
 
                         FocusRing {
-                            shown: readButton.visualFocus
+                            shown: readButton.activeFocus
                         }
                     }
 
@@ -107,7 +107,7 @@ Item {
                         onClicked: root.area.archiveCurrentConversation()
 
                         FocusRing {
-                            shown: archiveButton.visualFocus
+                            shown: archiveButton.activeFocus
                         }
                     }
 
@@ -122,7 +122,7 @@ Item {
                         onClicked: root.exportRequested()
 
                         FocusRing {
-                            shown: exportButton.visualFocus
+                            shown: exportButton.activeFocus
                         }
                     }
 
@@ -137,7 +137,7 @@ Item {
                         onClicked: root.deleteConversationRequested()
 
                         FocusRing {
-                            shown: deleteButton.visualFocus
+                            shown: deleteButton.activeFocus
                         }
                     }
                 }
@@ -222,7 +222,7 @@ Item {
                         x: messageRow.outgoing ? messageRow.width - bubble.width - Theme.gridUnit * 4 : Theme.gridUnit * 4
                         radius: Theme.cardRadius
                         color: messageRow.outgoing ? Theme.primary : Theme.surfaceContainer
-                        border.width: messageRow.ListView.isCurrentItem && list.activeFocus ? 2 : 0
+                        border.width: FocusVisibility.keyboard && messageRow.ListView.isCurrentItem && list.activeFocus ? 1 : 0
                         border.color: messageRow.outgoing ? Theme.foregroundOnSurface : Theme.primary
 
                         ColumnLayout {
@@ -329,7 +329,7 @@ Item {
                                         onClicked: root.saveAttachmentRequested(messageRow.luid, partRow.position)
 
                                         FocusRing {
-                                            shown: savePartButton.visualFocus
+                                            shown: savePartButton.activeFocus
                                         }
                                     }
                                 }

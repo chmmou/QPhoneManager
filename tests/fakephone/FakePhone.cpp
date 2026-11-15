@@ -455,6 +455,12 @@ FakePhone::FakePhone(QObject *parent)
     connect(m_server, &QTcpServer::newConnection, this, [this]() {
         while (m_server->hasPendingConnections()) {
             QTcpSocket *socket = m_server->nextPendingConnection();
+            if (m_config.closeFirstConnections > 0) {
+                --m_config.closeFirstConnections;
+                connect(socket, &QTcpSocket::disconnected, socket, &QObject::deleteLater);
+                socket->disconnectFromHost();
+                continue;
+            }
             if (m_config.rejectAsAlreadyConnected) {
                 socket->write("ALREADY CONNECTED\r\nERROR\r\n");
                 socket->flush();

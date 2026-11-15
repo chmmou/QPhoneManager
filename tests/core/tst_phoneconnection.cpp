@@ -6,6 +6,7 @@
 #include <QCryptographicHash>
 #include <QFile>
 #include <QPromise>
+#include <QScopeGuard>
 #include <QSignalSpy>
 #include <QTcpServer>
 #include <QTemporaryDir>
@@ -49,6 +50,46 @@ QString expectedPinCommand(const QString &pin)
                    .toUpper());
 }
 
+// Collects every message while a test listens, and passes it on.
+QStringList *collectedLog = nullptr;
+QtMessageHandler passOnHandler = nullptr;
+
+void collectMessage(QtMsgType type, const QMessageLogContext &context, const QString &message)
+{
+    if (collectedLog)
+        collectedLog->append(message);
+    if (passOnHandler)
+        passOnHandler(type, context, message);
+}
+
+// Writes a stand-in for adb to `adb` that logs its arguments to `calls`,
+// forwards the client port to `atPort` and starts the client without fault.
+bool writeFakeAdb(const QString &adb, const QString &calls, quint16 atPort)
+{
+    QFile script(adb);
+    if (!script.open(QIODevice::WriteOnly))
+        return false;
+    script.write("#!/bin/sh\n"
+                 "echo \"$@\" >> '" +
+                 calls.toUtf8() +
+                 "'\n"
+                 "case \"$3\" in\n"
+                 "forward)\n"
+                 "  case \"$5\" in\n"
+                 "  tcp:5210) echo " +
+                 QByteArray::number(atPort) +
+                 " ;;\n"
+                 "  tcp:5213) echo 40013 ;;\n"
+                 "  tcp:5216) echo 40016 ;;\n"
+                 "  tcp:5217) echo 40017 ;;\n"
+                 "  esac ;;\n"
+                 "shell) echo 'Starting: Intent' ;;\n"
+                 "esac\n"
+                 "exit 0\n");
+    script.close();
+    return script.setPermissions(QFile::ReadOwner | QFile::WriteOwner | QFile::ExeOwner);
+}
+
 } // namespace
 
 class TestPhoneConnection : public QObject
@@ -79,12 +120,17 @@ private Q_SLOTS:
     void obexWorkFailsWhenTheConnectionDrops();
     void phoneCanConnectToThisComputer();
     void usbConnectionGoesThroughForwardedPorts();
+    void usbConnectionWaitsForTheStartingClient();
+    void usbConnectionGivesUpOnAClientThatNeverListens();
+    void disconnectWhileWaitingForTheClientStopsTheTries();
+    void newConnectionWhileWaitingForTheClientStopsTheTries();
     void runningObexWorkFailsWhenTheConnectionEnds();
     void runningObexWorkFailsWhenTheConnectionIsDestroyed();
     void unansweredStatusPollCountsAsLostLink();
     void statusPollsDoNotPileUpBehindSlowAnswers();
     void droppedLinkBeforeAnyPinIsNoWrongPin();
     void pinIsSentOnceWhileItsAnswerIsPending();
+    void unansweredPinKeepsItsHashOutOfMessageAndLog();
 
 private:
     [[nodiscard]] bool reachReady(PhoneConnection &connection);
@@ -389,27 +435,7 @@ void TestPhoneConnection::usbConnectionGoesThroughForwardedPorts()
     QVERIFY(directory.isValid());
     const QString calls = directory.filePath(QStringLiteral("calls"));
     const QString adb = directory.filePath(QStringLiteral("adb"));
-    QFile script(adb);
-    QVERIFY(script.open(QIODevice::WriteOnly));
-    script.write("#!/bin/sh\n"
-                 "echo \"$@\" >> '" +
-                 calls.toUtf8() +
-                 "'\n"
-                 "case \"$3\" in\n"
-                 "forward)\n"
-                 "  case \"$5\" in\n"
-                 "  tcp:5210) echo " +
-                 QByteArray::number(m_phone->port()) +
-                 " ;;\n"
-                 "  tcp:5213) echo 40013 ;;\n"
-                 "  tcp:5216) echo 40016 ;;\n"
-                 "  tcp:5217) echo 40017 ;;\n"
-                 "  esac ;;\n"
-                 "shell) echo 'Starting: Intent' ;;\n"
-                 "esac\n"
-                 "exit 0\n");
-    script.close();
-    QVERIFY(script.setPermissions(QFile::ReadOwner | QFile::WriteOwner | QFile::ExeOwner));
+    QVERIFY(writeFakeAdb(adb, calls, m_phone->port()));
 
     m_connection->connectAdb(adb, QStringLiteral("emulator-5554"));
 
@@ -424,6 +450,47 @@ void TestPhoneConnection::usbConnectionGoesThroughForwardedPorts()
     QVERIFY(invoked.startsWith("start-server\n"));
     QVERIFY(invoked.contains("-s emulator-5554 shell am start -n "
                              "com.fjsoft.myphoneexplorer.client/.MainActivity --ez adb true\n"));
+}
+
+// The first connection right after adb started the client failed: the
+// forwarded port took it and closed it again, since the client did not listen
+// yet, and the link counted as lost. The second attempt by hand then worked.
+void TestPhoneConnection::usbConnectionWaitsForTheStartingClient()
+{
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    const QString adb = directory.filePath(QStringLiteral("adb"));
+    QVERIFY(writeFakeAdb(adb, directory.filePath(QStringLiteral("calls")), m_phone->port()));
+    m_phone->config().closeFirstConnections = 2;
+    QSignalSpy failed(m_connection.get(), &PhoneConnection::failed);
+    QSignalSpy states(m_connection.get(), &PhoneConnection::stateChanged);
+
+    m_connection->connectAdb(adb, QStringLiteral("emulator-5554"));
+
+    QTRY_COMPARE_WITH_TIMEOUT(m_connection->state(), State::Ready, connectTimeoutMs);
+    QCOMPARE(failed.count(), 0);
+    QCOMPARE(m_phone->config().closeFirstConnections, 0);
+    for (const QList<QVariant> &change : std::as_const(states))
+        QVERIFY(change.first().value<State>() != State::Lost);
+}
+
+// A client that never listens behind the forwarded port ends the attempt
+// after a bounded number of tries, with the connection reported as lost.
+void TestPhoneConnection::usbConnectionGivesUpOnAClientThatNeverListens()
+{
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    const QString adb = directory.filePath(QStringLiteral("adb"));
+    QVERIFY(writeFakeAdb(adb, directory.filePath(QStringLiteral("calls")), m_phone->port()));
+    m_phone->config().closeFirstConnections = 1000;
+    QSignalSpy failed(m_connection.get(), &PhoneConnection::failed);
+
+    m_connection->connectAdb(adb, QStringLiteral("emulator-5554"));
+
+    QTRY_COMPARE_WITH_TIMEOUT(failed.count(), 1, 30000);
+    QCOMPARE(failed.first().first().value<Error>().code(), ErrorCode::ConnectionClosed);
+    QCOMPARE(m_connection->state(), State::Lost);
+    QVERIFY(m_phone->config().closeFirstConnections < 1000);
 }
 
 // OBEX work that still ran when the connection ended kept its future open for
@@ -545,6 +612,96 @@ void TestPhoneConnection::pinIsSentOnceWhileItsAnswerIsPending()
 
     QTRY_COMPARE_WITH_TIMEOUT(m_connection->state(), State::Ready, connectTimeoutMs);
     QCOMPARE(m_phone->receivedCommands().count(expectedPinCommand(QStringLiteral("2580"))), 1);
+}
+
+// Ending the connection while the client that adb started is waited for
+// leaves no try behind that would connect again later.
+void TestPhoneConnection::disconnectWhileWaitingForTheClientStopsTheTries()
+{
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    const QString adb = directory.filePath(QStringLiteral("adb"));
+    QVERIFY(writeFakeAdb(adb, directory.filePath(QStringLiteral("calls")), m_phone->port()));
+    constexpr int closed = 1000;
+    m_phone->config().closeFirstConnections = closed;
+    QSignalSpy failed(m_connection.get(), &PhoneConnection::failed);
+    m_connection->connectAdb(adb, QStringLiteral("emulator-5554"));
+    QTRY_VERIFY_WITH_TIMEOUT(m_phone->config().closeFirstConnections < closed, connectTimeoutMs);
+    QCOMPARE(m_connection->state(), State::Connecting);
+
+    m_connection->disconnectFromPhone();
+
+    QCOMPARE(m_connection->state(), State::Disconnected);
+    const int taken = m_phone->config().closeFirstConnections;
+    QSignalSpy states(m_connection.get(), &PhoneConnection::stateChanged);
+    // Longer than two intervals between tries.
+    QVERIFY(!states.wait(1500));
+    // A connection already on its way may still reach the phone; no new one follows.
+    QVERIFY(taken - m_phone->config().closeFirstConnections <= 1);
+    QCOMPARE(failed.count(), 0);
+    QCOMPARE(m_connection->state(), State::Disconnected);
+}
+
+// A connection started while the client that adb started is waited for
+// replaces the wait; no later try tears the new connection down.
+void TestPhoneConnection::newConnectionWhileWaitingForTheClientStopsTheTries()
+{
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    const QString adb = directory.filePath(QStringLiteral("adb"));
+    QVERIFY(writeFakeAdb(adb, directory.filePath(QStringLiteral("calls")), m_phone->port()));
+    constexpr int closed = 1000;
+    m_phone->config().closeFirstConnections = closed;
+    QSignalSpy failed(m_connection.get(), &PhoneConnection::failed);
+    m_connection->connectAdb(adb, QStringLiteral("emulator-5554"));
+    QTRY_VERIFY_WITH_TIMEOUT(m_phone->config().closeFirstConnections < closed, connectTimeoutMs);
+
+    m_phone->config().closeFirstConnections = 0;
+    QVERIFY(reachReady(*m_connection));
+
+    QSignalSpy states(m_connection.get(), &PhoneConnection::stateChanged);
+    // Longer than two intervals between tries.
+    QVERIFY(!states.wait(1500));
+    QCOMPARE(m_connection->state(), State::Ready);
+    QCOMPARE(failed.count(), 0);
+}
+
+// A PIN without an answer ended the connection with "The phone did not
+// answer AT*PIN=<hash>", in the error the window shows and in the log.
+void TestPhoneConnection::unansweredPinKeepsItsHashOutOfMessageAndLog()
+{
+    PhoneConnection::Options options;
+    options.commandTimeout = std::chrono::milliseconds(300);
+    m_connection->setOptions(options);
+    m_phone->config().pin = QStringLiteral("2580");
+    const QString command = expectedPinCommand(QStringLiteral("2580"));
+    const QString hash = command.mid(command.indexOf(u'=') + 1);
+    QVERIFY(hash.size() >= 32);
+    m_phone->config().unanswered.insert(command);
+    QSignalSpy pinRequired(m_connection.get(), &PhoneConnection::pinRequired);
+    QSignalSpy failed(m_connection.get(), &PhoneConnection::failed);
+    m_connection->connectTcp(QStringLiteral("127.0.0.1"), m_phone->port());
+    QVERIFY(pinRequired.wait());
+    QStringList log;
+    collectedLog = &log;
+    passOnHandler = qInstallMessageHandler(collectMessage);
+    const auto stopCollecting = qScopeGuard([]() {
+        qInstallMessageHandler(passOnHandler);
+        collectedLog = nullptr;
+        passOnHandler = nullptr;
+    });
+
+    m_connection->submitPin(QStringLiteral("2580"));
+
+    QVERIFY(failed.wait());
+    const Error error = failed.first().first().value<Error>();
+    QCOMPARE(error.code(), ErrorCode::Timeout);
+    QVERIFY2(error.message().contains(QStringLiteral("AT*PIN")), qPrintable(error.message()));
+    QVERIFY(!error.message().contains(hash));
+    QVERIFY(m_phone->receivedCommands().contains(command));
+    QVERIFY(!log.isEmpty());
+    for (const QString &line : std::as_const(log))
+        QVERIFY2(!line.contains(hash), "a log line carries the PIN hash");
 }
 
 QTEST_GUILESS_MAIN(TestPhoneConnection)

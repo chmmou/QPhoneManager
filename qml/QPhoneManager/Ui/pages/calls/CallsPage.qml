@@ -50,7 +50,7 @@ Item {
                         text: qsTr("All")
 
                         FocusRing {
-                            shown: allTab.visualFocus
+                            shown: allTab.activeFocus
                         }
                     }
 
@@ -63,7 +63,7 @@ Item {
                         icon.source: Theme.icon("phone-incoming")
 
                         FocusRing {
-                            shown: incomingTab.visualFocus
+                            shown: incomingTab.activeFocus
                         }
                     }
 
@@ -76,7 +76,7 @@ Item {
                         icon.source: Theme.icon("phone-outgoing")
 
                         FocusRing {
-                            shown: outgoingTab.visualFocus
+                            shown: outgoingTab.activeFocus
                         }
                     }
 
@@ -89,7 +89,7 @@ Item {
                         icon.source: Theme.icon("phone-x")
 
                         FocusRing {
-                            shown: missedTab.visualFocus
+                            shown: missedTab.activeFocus
                         }
                     }
                 }
@@ -112,7 +112,7 @@ Item {
                     onClicked: exportDialog.open()
 
                     FocusRing {
-                        shown: exportButton.visualFocus
+                        shown: exportButton.activeFocus
                     }
                 }
 
@@ -130,7 +130,7 @@ Item {
                     onClicked: root.confirmDeleteShown()
 
                     FocusRing {
-                        shown: deleteShownButton.visualFocus
+                        shown: deleteShownButton.activeFocus
                     }
                 }
             }
@@ -140,7 +140,7 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: 1
             visible: root.area.hasPhone
-            color: Theme.outline
+            color: Theme.outlineVariant
         }
 
         ListDetailView {
@@ -204,11 +204,7 @@ Item {
             }
         }
 
-        // With the tab reason the button shows its focus ring right away. A
-        // button that kept its focus from the last opening would keep the
-        // reason of then, so it gives the focus up on closing.
-        onOpened: cancelDeleteButton.forceActiveFocus(Qt.TabFocusReason)
-        onClosed: cancelDeleteButton.focus = false
+        onOpened: cancelDeleteButton.forceActiveFocus(Qt.PopupFocusReason)
         onAccepted: root.area.removeCalls(root.pendingDelete)
         Component.onCompleted: Theme.calmPopup(deleteDialog)
 

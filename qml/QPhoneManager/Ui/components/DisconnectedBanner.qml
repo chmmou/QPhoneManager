@@ -35,7 +35,7 @@ Pane {
             onClicked: root.connectRequested()
 
             FocusRing {
-                shown: connectButton.visualFocus
+                shown: connectButton.activeFocus
             }
         }
     }

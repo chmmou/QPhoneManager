@@ -55,6 +55,8 @@ private:
     void onPosted(const core::codec::PhoneNotification &notification);
     void onPhoneListChanged();
     void onActionInvoked(uint id, const QString &key);
+    /// Closes desktop notification `id`; a failure is only logged.
+    void closeShown(uint id);
     void onDesktopClipboardChanged();
     void onPhoneClipboardChanged(const QString &text);
 

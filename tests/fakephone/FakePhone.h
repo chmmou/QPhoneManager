@@ -148,6 +148,12 @@ struct FakePhoneConfig
     std::chrono::milliseconds replyDelay{0};
     /// Answer every new connection with ALREADY CONNECTED and close it.
     bool rejectAsAlreadyConnected = false;
+    /**
+     * Number of connections closed right after they are taken, before any
+     * answer, as adb does with a forwarded port while the client behind it
+     * does not listen yet.
+     */
+    int closeFirstConnections = 0;
     /// AT command -> chunks written verbatim, each with its own write, echo included.
     QHash<QString, QList<QByteArray>> scriptedReplies;
     /// AT commands that get no answer at all.

@@ -333,6 +333,7 @@ struct BackupService::Plan
     QList<CalendarEvent> newEvents;
     QList<CalendarEvent> changedEvents;
     int unchangedEvents = 0;
+    int skippedEvents = 0;
     QList<CalendarTask> newTasks;
     QList<CalendarTask> changedTasks;
     int unchangedTasks = 0;
@@ -521,10 +522,27 @@ Result<BackupService::Plan> BackupService::computePlan(const QString &profilesDi
                  &codec::sameEventContent, result.newEvents, result.changedEvents,
                  result.unchangedEvents);
         const Result<codec::CalMetadata> metadata = organizerStore.calendarMetadata();
-        if (metadata.hasValue())
+        if (metadata.hasValue()) {
             result.calendars = metadata.value().calendars;
-        else
+            // The phone reports no other sign of a read-only calendar than its access level,
+            // and an appointment names its calendar by address and title. The backup keeps
+            // no access level, so only the calendar of this phone can tell.
+            const auto readOnly = [&result](const CalendarEvent &event) {
+                return std::any_of(result.calendars.cbegin(), result.calendars.cend(),
+                                   [&event](const codec::CalendarInfo &info) {
+                                       return !info.isWritable() &&
+                                              info.url == event.calendarUrl &&
+                                              info.title == event.calendarTitle;
+                                   });
+            };
+            for (QList<CalendarEvent> *events : {&result.newEvents, &result.changedEvents}) {
+                const qsizetype before = events->size();
+                events->removeIf(readOnly);
+                result.skippedEvents += int(before - events->size());
+            }
+        } else {
             result.calendarsError = metadata.error();
+        }
     }
     if (holds(BackupSection::Tasks)) {
         const Result<QList<CalendarTask>> stored = organizerStore.tasks();
@@ -650,7 +668,7 @@ QFuture<Result<BackupPreview>> BackupService::preview(const Backup &backup)
                     break;
                 case BackupSection::Calendar:
                     section = {int(result.newEvents.size()), int(result.changedEvents.size()),
-                               result.unchangedEvents};
+                               result.unchangedEvents, result.skippedEvents};
                     break;
                 case BackupSection::Tasks:
                     section = {int(result.newTasks.size()), int(result.changedTasks.size()),
@@ -806,6 +824,7 @@ void BackupService::addJobs(const std::shared_ptr<RestoreRun> &run, const Plan &
         }
     }
     if (sections.contains(BackupSection::Calendar)) {
+        run->report.sections[BackupSection::Calendar].skipped = todo.skippedEvents;
         if (todo.calendarsError.isError()) {
             failAll(BackupSection::Calendar, todo.newEvents.size(), todo.calendarsError);
         } else {
@@ -822,6 +841,8 @@ void BackupService::addJobs(const std::shared_ptr<RestoreRun> &run, const Plan &
                                                                 info.url == event.calendarUrl &&
                                                                 info.title == event.calendarTitle;
                                                      });
+                // A calendar this phone lacks, as after a reset or a change of phone, and an
+                // appointment without one give way to its writable default, as for contacts.
                 if (!ownCalendar && fallback) {
                     event.calendarUrl = fallback->url;
                     event.calendarTitle = fallback->title;

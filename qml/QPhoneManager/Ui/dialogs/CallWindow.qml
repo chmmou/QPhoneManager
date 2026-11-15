@@ -107,7 +107,7 @@ Window {
                 onClicked: root.call.answer()
 
                 FocusRing {
-                    shown: answerButton.visualFocus
+                    shown: answerButton.activeFocus
                 }
             }
 
@@ -121,7 +121,7 @@ Window {
                 onClicked: root.call.hangUp()
 
                 FocusRing {
-                    shown: hangUpButton.visualFocus
+                    shown: hangUpButton.activeFocus
                 }
             }
         }
@@ -143,7 +143,7 @@ Window {
                 onClicked: root.call.setMuted(!root.call.muted)
 
                 FocusRing {
-                    shown: muteButton.visualFocus
+                    shown: muteButton.activeFocus
                 }
             }
 
@@ -160,7 +160,7 @@ Window {
                 onClicked: root.call.setSpeakerOn(!root.call.speakerOn)
 
                 FocusRing {
-                    shown: speakerButton.visualFocus
+                    shown: speakerButton.activeFocus
                 }
             }
         }
@@ -168,8 +168,8 @@ Window {
 
     function focusFirstButton(): void {
         if (root.ringing)
-            answerButton.forceActiveFocus(Qt.TabFocusReason);
+            answerButton.forceActiveFocus(Qt.OtherFocusReason);
         else
-            hangUpButton.forceActiveFocus(Qt.TabFocusReason);
+            hangUpButton.forceActiveFocus(Qt.OtherFocusReason);
     }
 }

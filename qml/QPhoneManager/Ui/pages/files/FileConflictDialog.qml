@@ -45,8 +45,7 @@ Dialog {
     }
 
     // Keeping both loses nothing, so it takes the focus first.
-    onOpened: keepBothButton.forceActiveFocus(Qt.TabFocusReason)
-    onClosed: keepBothButton.focus = false
+    onOpened: keepBothButton.forceActiveFocus(Qt.PopupFocusReason)
     Component.onCompleted: Theme.calmPopup(root)
 
     ColumnLayout {
@@ -69,7 +68,7 @@ Dialog {
             text: qsTr("Do the same for the other files of this transfer")
 
             FocusRing {
-                shown: forAllBox.visualFocus
+                shown: forAllBox.activeFocus
             }
         }
     }
@@ -89,6 +88,6 @@ Dialog {
         if (root.transfers.conflictId === 0)
             root.close();
         else
-            keepBothButton.forceActiveFocus(Qt.TabFocusReason);
+            keepBothButton.forceActiveFocus(Qt.OtherFocusReason);
     }
 }

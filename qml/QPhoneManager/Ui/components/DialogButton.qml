@@ -11,6 +11,6 @@ Button {
     flat: true
 
     FocusRing {
-        shown: root.visualFocus
+        shown: root.activeFocus
     }
 }

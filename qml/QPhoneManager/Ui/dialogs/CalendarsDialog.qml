@@ -39,7 +39,7 @@ Dialog {
 
     onOpened: {
         root.chooseFirstRow();
-        calendarList.forceActiveFocus(Qt.TabFocusReason);
+        calendarList.forceActiveFocus(Qt.PopupFocusReason);
     }
     onAccepted: root.area.applyCalendarChoice()
     onRejected: root.area.calendars.revertChoice()

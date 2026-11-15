@@ -145,7 +145,7 @@ Dialog {
                 onMoved: root.resizeSelection(sizeSlider.value - selection.side)
 
                 FocusRing {
-                    shown: sizeSlider.visualFocus
+                    shown: sizeSlider.activeFocus
                 }
             }
         }

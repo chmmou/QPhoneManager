@@ -957,6 +957,11 @@ QStringList AppController::adbSuggestions() const
     return found;
 }
 
+bool AppController::adbUsable(const QString &path) const
+{
+    return path.isEmpty() ? !adbSuggestions().isEmpty() : isExecutableFile(path);
+}
+
 QString AppController::resolveAdbPath() const
 {
     const QString configured = m_settings ? m_settings->adbPath() : QString();

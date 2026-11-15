@@ -43,7 +43,7 @@ Dialog {
     onOpened: {
         nameField.text = root.oldName.length > 0 ? root.oldName : qsTr("New folder");
         nameField.selectAll();
-        nameField.forceActiveFocus(Qt.TabFocusReason);
+        nameField.forceActiveFocus(Qt.PopupFocusReason);
     }
     onAccepted: root.nameChosen(nameField.text)
     Component.onCompleted: Theme.calmPopup(root)

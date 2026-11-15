@@ -244,11 +244,16 @@ Result<QList<CalendarEvent>> eventsFrom(QSqlQuery &query)
 {
     QList<CalendarEvent> events;
     while (query.next()) {
+        const quint32 luid = query.value(0).toUInt();
         const Result<CalendarEvent> parsed = codec::parsePhoneEvent(query.value(1).toByteArray());
-        if (!parsed.hasValue())
+        if (!parsed.hasValue()) {
+            // The list goes on without the entry; its stored row stays as it is.
+            qCWarning(lcStore) << "Appointment" << sync::IrmcSync::luidText(luid)
+                               << "not readable:" << parsed.error().message();
             continue;
+        }
         CalendarEvent event = parsed.value();
-        event.luid = query.value(0).toUInt();
+        event.luid = luid;
         events.append(event);
     }
     return events;
@@ -490,11 +495,16 @@ Result<QList<CalendarTask>> OrganizerStore::tasks() const
     }
     QList<CalendarTask> tasks;
     while (query.next()) {
+        const quint32 luid = query.value(0).toUInt();
         const Result<CalendarTask> parsed = codec::parsePhoneTask(query.value(1).toByteArray());
-        if (!parsed.hasValue())
+        if (!parsed.hasValue()) {
+            // The list goes on without the entry; its stored row stays as it is.
+            qCWarning(lcStore) << "Task" << sync::IrmcSync::luidText(luid)
+                               << "not readable:" << parsed.error().message();
             continue;
+        }
         CalendarTask task = parsed.value();
-        task.luid = query.value(0).toUInt();
+        task.luid = luid;
         tasks.append(task);
     }
     return tasks;
@@ -526,11 +536,16 @@ Result<QList<Note>> OrganizerStore::notes() const
         return queryError(QStringLiteral("Cannot read the notes"), query);
     QList<Note> notes;
     while (query.next()) {
+        const quint32 luid = query.value(0).toUInt();
         const Result<Note> parsed = codec::parsePhoneNote(query.value(1).toByteArray());
-        if (!parsed.hasValue())
+        if (!parsed.hasValue()) {
+            // The list goes on without the entry; its stored row stays as it is.
+            qCWarning(lcStore) << "Note" << sync::IrmcSync::luidText(luid)
+                               << "not readable:" << parsed.error().message();
             continue;
+        }
         Note note = parsed.value();
-        note.luid = query.value(0).toUInt();
+        note.luid = luid;
         notes.append(note);
     }
     return notes;

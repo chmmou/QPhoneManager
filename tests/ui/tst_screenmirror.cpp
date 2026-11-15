@@ -55,6 +55,9 @@ QByteArray pngFrame(const QSize &screen, int padding = 0)
 
 struct Mirror
 {
+    Mirror() = default;
+    Q_DISABLE_COPY_MOVE(Mirror)
+
     FakePhone phone;
     PhoneConnection connection;
     std::unique_ptr<ScreenMirrorClient> client;

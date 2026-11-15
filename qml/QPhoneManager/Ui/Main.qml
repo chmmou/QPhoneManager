@@ -324,7 +324,7 @@ ApplicationWindow {
         Rectangle {
             Layout.fillHeight: true
             Layout.preferredWidth: 1
-            color: Theme.outline
+            color: Theme.outlineVariant
         }
 
         ColumnLayout {

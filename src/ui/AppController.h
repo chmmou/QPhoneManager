@@ -304,6 +304,13 @@ public:
     [[nodiscard]] Q_INVOKABLE QStringList adbSuggestions() const;
 
     /**
+     * Whether connecting over USB would find adb with `path` as the setting:
+     * an absolute path to an executable file, or empty while adbSuggestions()
+     * finds one.
+     */
+    [[nodiscard]] Q_INVOKABLE bool adbUsable(const QString &path) const;
+
+    /**
      * The translated text for a failure while connecting over `kind`: what
      * went wrong and what to do. Empty for a cancelled operation.
      */

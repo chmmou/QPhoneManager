@@ -1,8 +1,9 @@
 import QtQuick
 
-// The outline of the current row, tile or day of a view: a thin one in the
-// outline colour, a strong one in the primary colour while the view has the
-// focus. Inset, so that the focus ring of the view never covers it.
+// The outline of the current row, tile or day of a view, shown while the view
+// has the focus and the user works from the keyboard. The fill of the row
+// marks the selection on its own otherwise. Inset, so that the focus ring of
+// the view never covers it.
 Rectangle {
     id: root
 
@@ -12,9 +13,9 @@ Rectangle {
 
     anchors.fill: parent
     anchors.margins: root.inset
-    visible: root.current
+    visible: FocusVisibility.keyboard && root.current && root.viewFocused
     radius: Theme.gridUnit
     color: "transparent"
-    border.width: root.viewFocused ? 2 : 1
-    border.color: root.viewFocused ? Theme.primary : Theme.outline
+    border.width: 1
+    border.color: Theme.primary
 }

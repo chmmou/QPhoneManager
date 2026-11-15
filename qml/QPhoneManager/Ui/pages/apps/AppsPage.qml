@@ -58,7 +58,7 @@ Item {
                         text: qsTr("Your apps")
 
                         FocusRing {
-                            shown: userTab.visualFocus
+                            shown: userTab.activeFocus
                         }
                     }
 
@@ -70,7 +70,7 @@ Item {
                         text: qsTr("System apps")
 
                         FocusRing {
-                            shown: systemTab.visualFocus
+                            shown: systemTab.activeFocus
                         }
                     }
 
@@ -82,7 +82,7 @@ Item {
                         text: qsTr("All")
 
                         FocusRing {
-                            shown: allTab.visualFocus
+                            shown: allTab.activeFocus
                         }
                     }
                 }
@@ -105,7 +105,7 @@ Item {
                     onClicked: root.startCurrent()
 
                     FocusRing {
-                        shown: startButton.visualFocus
+                        shown: startButton.activeFocus
                     }
                 }
 
@@ -123,7 +123,7 @@ Item {
                     onClicked: root.startBackup()
 
                     FocusRing {
-                        shown: backupButton.visualFocus
+                        shown: backupButton.activeFocus
                     }
                 }
 
@@ -141,7 +141,7 @@ Item {
                     onClicked: root.confirmUninstall()
 
                     FocusRing {
-                        shown: uninstallButton.visualFocus
+                        shown: uninstallButton.activeFocus
                     }
                 }
 
@@ -161,7 +161,7 @@ Item {
                     onClicked: installDialog.open()
 
                     FocusRing {
-                        shown: installButton.visualFocus
+                        shown: installButton.activeFocus
                     }
                 }
 
@@ -179,7 +179,7 @@ Item {
                     onClicked: root.apps.refresh()
 
                     FocusRing {
-                        shown: refreshButton.visualFocus
+                        shown: refreshButton.activeFocus
                     }
                 }
             }
@@ -189,7 +189,7 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: 1
             visible: root.apps.canEdit
-            color: Theme.outline
+            color: Theme.outlineVariant
         }
 
         Item {
@@ -398,7 +398,7 @@ Item {
                     onClicked: root.apps.cancelTransfer()
 
                     FocusRing {
-                        shown: cancelTransferButton.visualFocus
+                        shown: cancelTransferButton.activeFocus
                     }
                 }
             }
@@ -470,11 +470,7 @@ Item {
             }
         }
 
-        // With the tab reason the button shows its focus ring right away. A
-        // button that kept its focus from the last opening would keep the
-        // reason of then, so it gives the focus up on closing.
-        onOpened: cancelUninstallButton.forceActiveFocus(Qt.TabFocusReason)
-        onClosed: cancelUninstallButton.focus = false
+        onOpened: cancelUninstallButton.forceActiveFocus(Qt.PopupFocusReason)
         onAccepted: root.apps.uninstall(root.pendingRemoval)
         Component.onCompleted: Theme.calmPopup(uninstallDialog)
 

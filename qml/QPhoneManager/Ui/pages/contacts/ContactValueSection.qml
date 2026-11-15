@@ -59,7 +59,7 @@ ColumnLayout {
                     Component.onCompleted: Theme.calmPopup(typeBox.popup)
 
                     FocusRing {
-                        shown: typeBox.visualFocus
+                        shown: typeBox.activeFocus
                     }
                 }
 
@@ -154,7 +154,7 @@ ColumnLayout {
                 onClicked: root.entries.remove(entryRow.index)
 
                 FocusRing {
-                    shown: removeButton.visualFocus
+                    shown: removeButton.activeFocus
                 }
             }
         }
@@ -170,7 +170,7 @@ ColumnLayout {
         onClicked: root.entries.append()
 
         FocusRing {
-            shown: addButton.visualFocus
+            shown: addButton.activeFocus
         }
     }
 }

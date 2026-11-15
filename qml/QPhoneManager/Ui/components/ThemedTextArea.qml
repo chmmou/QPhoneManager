@@ -2,18 +2,20 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Controls.Material
 
-// A text area whose placeholder, outline and selected text stay readable in
-// both colour schemes. The placeholder may serve as the label of the area.
+// A text area with the subtle resting outline of the program, and a
+// placeholder and selected text that stay readable in both colour schemes.
+// The placeholder may serve as the label of the area.
 TextArea {
     id: root
 
     selectedTextColor: Theme.foregroundOnPrimary
     placeholderTextColor: !root.enabled ? root.Material.hintTextColor : root.activeFocus ? Theme.primary : Theme.foregroundOnSurfaceVariant
 
-    // The style draws the outline in its hint colour, below 3:1 against the window.
+    // At rest and switched off the outline takes the colour of the
+    // separators; hover and focus keep the colours of the style.
     Binding {
         target: root.background
         property: "outlineColor"
-        value: !root.enabled ? root.Material.hintTextColor : root.hovered ? root.Material.primaryTextColor : Theme.outline
+        value: root.enabled && root.hovered ? root.Material.primaryTextColor : Theme.outlineVariant
     }
 }

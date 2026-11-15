@@ -44,7 +44,7 @@ Item {
             onClicked: root.actionTriggered()
 
             FocusRing {
-                shown: actionButton.visualFocus
+                shown: actionButton.activeFocus
             }
         }
     }

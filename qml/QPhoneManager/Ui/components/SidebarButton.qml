@@ -29,6 +29,6 @@ ItemDelegate {
     }
 
     FocusRing {
-        shown: root.visualFocus
+        shown: root.activeFocus
     }
 }

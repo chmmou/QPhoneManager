@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Controls.Material
 
-// A menu with an outline, so that it stands apart from a page of its own colour.
+// A menu with a thin edge, so that it stands apart from a page of its own colour.
 Menu {
     id: root
 
@@ -14,6 +14,6 @@ Menu {
         radius: root.Material.roundedScale
         color: root.Material.dialogColor
         border.width: 1
-        border.color: Theme.outline
+        border.color: Theme.outlineVariant
     }
 }

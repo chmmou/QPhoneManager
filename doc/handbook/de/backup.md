@@ -55,7 +55,7 @@ Stammt die Sicherung von einem anderen Handy, sagt die Vorschau das. Dann fügt 
 ### Was bei einzelnen Teilen gilt
 
 - **Kontakte:** Neue Kontakte in einem Konto, das das Handy nicht hat, landen im Standardkonto des Handys. Bei neuen Kontakten entfällt ein Foto über 200 KB. Bei geänderten Kontakten bleibt das Foto des Handys.
-- **Kalender:** Neue Termine in einem unbekannten oder schreibgeschützten Kalender gehen in den Standardkalender, in den das Handy schreiben darf.
+- **Kalender:** Termine aus einem Kalender, der auf dem Handy schreibgeschützt ist, werden nicht wiederhergestellt. Die Vorschau zeigt, wie viele das sind. Termine ohne Kalender oder aus einem Kalender, den das Handy nicht hat, gehen in den Standardkalender, in den das Handy schreiben darf.
 
 ### Abbrechen und Ergebnis
 

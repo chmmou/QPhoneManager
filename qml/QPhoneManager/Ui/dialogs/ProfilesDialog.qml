@@ -32,10 +32,7 @@ Dialog {
         }
     }
 
-    // The tab reason makes the button show its focus ring right away; giving the
-    // focus up on closing makes the next opening set that reason again.
-    onOpened: closeButton.forceActiveFocus(Qt.TabFocusReason)
-    onClosed: closeButton.focus = false
+    onOpened: closeButton.forceActiveFocus(Qt.PopupFocusReason)
     Component.onCompleted: Theme.calmPopup(root)
 
     ColumnLayout {
@@ -68,7 +65,7 @@ Dialog {
 
                 required property string deviceId
                 required property string displayName
-                required property string model
+                required property string phoneModel
                 required property string lastConnection
                 required property bool current
 
@@ -81,13 +78,14 @@ Dialog {
 
                     Label {
                         Layout.fillWidth: true
+                        objectName: "profileName"
                         text: profileRow.current ? qsTr("%1 (shown now)").arg(profileRow.displayName) : profileRow.displayName
-                        elide: Text.ElideRight
+                        wrapMode: Text.Wrap
                     }
 
                     Label {
                         Layout.fillWidth: true
-                        text: profileRow.lastConnection.length > 0 ? qsTr("%1, last connected %2").arg(profileRow.model).arg(profileRow.lastConnection) : profileRow.model
+                        text: profileRow.lastConnection.length > 0 ? qsTr("%1, last connected %2").arg(profileRow.phoneModel).arg(profileRow.lastConnection) : profileRow.phoneModel
                         font.pixelSize: TypeScale.hint
                         color: Theme.foregroundOnSurfaceVariant
                         wrapMode: Text.Wrap
@@ -104,7 +102,7 @@ Dialog {
                     onClicked: AppController.selectDevice(profileRow.deviceId)
 
                     FocusRing {
-                        shown: showButton.visualFocus
+                        shown: showButton.activeFocus
                     }
                 }
 
@@ -121,7 +119,7 @@ Dialog {
                     }
 
                     FocusRing {
-                        shown: renameButton.visualFocus
+                        shown: renameButton.activeFocus
                     }
                 }
 
@@ -138,7 +136,7 @@ Dialog {
                     }
 
                     FocusRing {
-                        shown: removeButton.visualFocus
+                        shown: removeButton.activeFocus
                     }
                 }
             }
@@ -217,8 +215,7 @@ Dialog {
             }
         }
 
-        onOpened: cancelRemoveButton.forceActiveFocus(Qt.TabFocusReason)
-        onClosed: cancelRemoveButton.focus = false
+        onOpened: cancelRemoveButton.forceActiveFocus(Qt.PopupFocusReason)
         onAccepted: AppController.removeDevice(root.pendingId)
         Component.onCompleted: Theme.calmPopup(removeDialog)
 

@@ -66,7 +66,7 @@ Dialog {
                 icon.source: Theme.icon("wifi")
 
                 FocusRing {
-                    shown: wifiTab.visualFocus
+                    shown: wifiTab.activeFocus
                 }
             }
 
@@ -77,7 +77,7 @@ Dialog {
                 icon.source: Theme.icon("usb")
 
                 FocusRing {
-                    shown: usbTab.visualFocus
+                    shown: usbTab.activeFocus
                 }
             }
 
@@ -88,7 +88,7 @@ Dialog {
                 icon.source: Theme.icon("bluetooth")
 
                 FocusRing {
-                    shown: bluetoothTab.visualFocus
+                    shown: bluetoothTab.activeFocus
                 }
             }
         }
@@ -173,7 +173,7 @@ Dialog {
                         onClicked: AppController.connectAddress(addressField.text)
 
                         FocusRing {
-                            shown: addressButton.visualFocus
+                            shown: addressButton.activeFocus
                         }
                     }
                 }
@@ -187,7 +187,7 @@ Dialog {
                     onClicked: root.qrCodeRequested()
 
                     FocusRing {
-                        shown: qrButton.visualFocus
+                        shown: qrButton.activeFocus
                     }
                 }
 
@@ -222,7 +222,7 @@ Dialog {
                     onClicked: AppController.startSearch()
 
                     FocusRing {
-                        shown: usbSearchButton.visualFocus
+                        shown: usbSearchButton.activeFocus
                     }
                 }
 
@@ -257,7 +257,7 @@ Dialog {
                     onClicked: AppController.startSearch()
 
                     FocusRing {
-                        shown: bluetoothSearchButton.visualFocus
+                        shown: bluetoothSearchButton.activeFocus
                     }
                 }
 

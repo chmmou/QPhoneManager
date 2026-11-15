@@ -64,7 +64,7 @@ Dialog {
                 text: qsTr("Connection")
 
                 FocusRing {
-                    shown: connectionTab.visualFocus
+                    shown: connectionTab.activeFocus
                 }
             }
 
@@ -75,7 +75,7 @@ Dialog {
                 text: qsTr("Appearance")
 
                 FocusRing {
-                    shown: appearanceTab.visualFocus
+                    shown: appearanceTab.activeFocus
                 }
             }
 
@@ -86,7 +86,7 @@ Dialog {
                 text: qsTr("Language and storage")
 
                 FocusRing {
-                    shown: storageTab.visualFocus
+                    shown: storageTab.activeFocus
                 }
             }
 
@@ -98,7 +98,7 @@ Dialog {
                 text: qsTr("Notifications")
 
                 FocusRing {
-                    shown: notificationsTab.visualFocus
+                    shown: notificationsTab.activeFocus
                 }
             }
         }
@@ -150,14 +150,17 @@ Dialog {
                             onClicked: adbFileDialog.open()
 
                             FocusRing {
-                                shown: chooseAdbButton.visualFocus
+                                shown: chooseAdbButton.activeFocus
                             }
                         }
                     }
 
                     Label {
+                        objectName: "adbHint"
                         Layout.fillWidth: true
-                        text: Settings.adbPath.length === 0 && adbBox.count > 0 ? qsTr("Empty means: use %1.").arg(adbBox.textAt(0)) : (adbBox.count === 0 ? qsTr("adb was not found on this computer. Install the Android platform tools, then choose adb here.") : "")
+                        // Follows the stored path, which changes when editing is done,
+                        // so the text does not change with every key.
+                        text: root.adbHint(Settings.adbPath, adbBox.count)
                         visible: text.length > 0
                         font.pixelSize: TypeScale.hint
                         color: Theme.foregroundOnSurfaceVariant
@@ -196,7 +199,7 @@ Dialog {
                                 onClicked: root.moveWay(orderRow.index, -1)
 
                                 FocusRing {
-                                    shown: earlierButton.visualFocus
+                                    shown: earlierButton.activeFocus
                                 }
                             }
 
@@ -210,7 +213,7 @@ Dialog {
                                 onClicked: root.moveWay(orderRow.index, 1)
 
                                 FocusRing {
-                                    shown: laterButton.visualFocus
+                                    shown: laterButton.activeFocus
                                 }
                             }
                         }
@@ -226,7 +229,7 @@ Dialog {
                         onToggled: Settings.autoConnect = checked
 
                         FocusRing {
-                            shown: autoConnectBox.visualFocus
+                            shown: autoConnectBox.activeFocus
                         }
                     }
 
@@ -240,7 +243,7 @@ Dialog {
                         onToggled: Settings.listenForPhone = checked
 
                         FocusRing {
-                            shown: listenBox.visualFocus
+                            shown: listenBox.activeFocus
                         }
                     }
 
@@ -283,7 +286,7 @@ Dialog {
                     onToggled: Settings.colorScheme = Settings.ColorScheme.System
 
                     FocusRing {
-                        shown: systemSchemeButton.visualFocus
+                        shown: systemSchemeButton.activeFocus
                     }
                 }
 
@@ -297,7 +300,7 @@ Dialog {
                     onToggled: Settings.colorScheme = Settings.ColorScheme.Light
 
                     FocusRing {
-                        shown: lightSchemeButton.visualFocus
+                        shown: lightSchemeButton.activeFocus
                     }
                 }
 
@@ -311,7 +314,7 @@ Dialog {
                     onToggled: Settings.colorScheme = Settings.ColorScheme.Dark
 
                     FocusRing {
-                        shown: darkSchemeButton.visualFocus
+                        shown: darkSchemeButton.activeFocus
                     }
                 }
 
@@ -325,7 +328,7 @@ Dialog {
                     onToggled: Settings.reduceMotion = checked
 
                     FocusRing {
-                        shown: reduceMotionBox.visualFocus
+                        shown: reduceMotionBox.activeFocus
                     }
                 }
 
@@ -401,7 +404,7 @@ Dialog {
                         onClicked: folderDialog.open()
 
                         FocusRing {
-                            shown: chooseFolderButton.visualFocus
+                            shown: chooseFolderButton.activeFocus
                         }
                     }
 
@@ -413,7 +416,7 @@ Dialog {
                         onClicked: Settings.dataDirectory = ""
 
                         FocusRing {
-                            shown: defaultFolderButton.visualFocus
+                            shown: defaultFolderButton.activeFocus
                         }
                     }
                 }
@@ -450,7 +453,7 @@ Dialog {
                     onToggled: Settings.notificationsEnabled = checked
 
                     FocusRing {
-                        shown: desktopNotificationsBox.visualFocus
+                        shown: desktopNotificationsBox.activeFocus
                     }
                 }
 
@@ -464,7 +467,7 @@ Dialog {
                     onToggled: Settings.clipboardSync = checked
 
                     FocusRing {
-                        shown: clipboardSyncBox.visualFocus
+                        shown: clipboardSyncBox.activeFocus
                     }
                 }
 
@@ -491,7 +494,7 @@ Dialog {
                     onToggled: Settings.startMinimized = checked
 
                     FocusRing {
-                        shown: startMinimizedBox.visualFocus
+                        shown: startMinimizedBox.activeFocus
                     }
                 }
 
@@ -533,6 +536,14 @@ Dialog {
             if (path.length > 0)
                 Settings.dataDirectory = path;
         }
+    }
+
+    function adbHint(path: string, found: int): string {
+        if (AppController.adbUsable(path))
+            return path.length === 0 ? qsTr("Empty means: use %1.").arg(adbBox.textAt(0)) : "";
+        if (found > 0)
+            return qsTr("No usable adb at this path. Choose adb, or leave the field empty to use %1.").arg(adbBox.textAt(0));
+        return qsTr("adb was not found on this computer. Install the Android platform tools, then choose adb here.");
     }
 
     function wayName(key: string): string {
