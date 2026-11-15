@@ -637,11 +637,14 @@ install(FILES "${PROJECT_SOURCE_DIR}/res/icons/app/qphonemanager.svg"
 # portal gives the file dialogs of the desktop. The program uses only
 # the SQLite driver; the other drivers need the client library of their
 # database. The QML debugging, EGLFS, network information and TLS plugins
-# serve features the program does not use.
+# serve features the program does not use. The help plugin of Qt Help serves
+# the QML language server and needs Qt Qml Compiler, which is not offered
+# under the LGPL.
 qt_import_plugins(qphonemanager
     INCLUDE_BY_TYPE platforms Qt6::QXcbIntegrationPlugin Qt6::QOffscreenIntegrationPlugin
     INCLUDE_BY_TYPE sqldrivers Qt6::QSQLiteDriverPlugin
     INCLUDE_BY_TYPE platformthemes Qt6::QXdgDesktopPortalThemePlugin
+    EXCLUDE_BY_TYPE help
     EXCLUDE_BY_TYPE qmltooling
     EXCLUDE_BY_TYPE egldeviceintegrations
     EXCLUDE_BY_TYPE networkinformation

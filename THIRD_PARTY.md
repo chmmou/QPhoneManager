@@ -56,11 +56,6 @@ the Tabler Icons and the QR Code generator library.
 - The AppImage carries the platform theme plugin
   `plugins/platformthemes/libqxdgdesktopportal.so` of Qt Base under the same
   license (`LGPL-3.0-only`). It shows the file dialogs of the desktop portal.
-- The AppImage also carries the help plugin of the QML language server,
-  `plugins/help/libhelpplugin.so`, and the library it needs,
-  `libQt6QmlCompiler.so.6`. That library is offered under
-  `LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0` only.
-  The program uses neither of them.
 - The Qt libraries contain code of third parties, for example PCRE2 and
   HarfBuzz. Qt lists them with their licenses at
   https://doc.qt.io/qt-6/licenses-used-in-qt.html.
