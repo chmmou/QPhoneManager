@@ -486,6 +486,7 @@ QString BackupController::errorText(const Error &error, Step step)
         return tr("An entry is no longer on the phone. Open the backup again.");
     case ErrorCode::WrongPin:
     case ErrorCode::AlreadyConnected:
+    case ErrorCode::BluetoothServiceNotFound:
     case ErrorCode::WifiDisabled:
     case ErrorCode::Rejected:
     case ErrorCode::ProtocolError:

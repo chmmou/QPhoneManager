@@ -8,15 +8,33 @@ Pane {
 
     property string text: ""
     property bool isError: true
+    /// Milliseconds a message stays before it closes on its own.
+    property int autoCloseInterval: 15000
+    /// The time to close runs; it waits while the pointer rests on the bar
+    /// or the keyboard focus is in it, and starts anew after.
+    readonly property bool closing: closeTimer.running
 
     visible: root.text.length > 0
     padding: Theme.gridUnit * 3
+    // On a desktop without hover effects the bar still has to notice the pointer.
+    hoverEnabled: true
     Material.background: root.isError ? Theme.error : Theme.surfaceVariant
     Material.foreground: root.isError ? Theme.foregroundOnError : Theme.foregroundOnSurface
 
     onTextChanged: {
         if (root.text.length > 0)
             messageLabel.Accessible.announce(root.text);
+    }
+
+    // Closing on its own limits the time to read a message, which the
+    // accessibility guidelines want adjustable. Waiting while the pointer
+    // rests on the bar or the focus is in it gives that time back.
+    Timer {
+        id: closeTimer
+
+        interval: root.autoCloseInterval
+        running: root.text.length > 0 && !root.hovered && !closeButton.activeFocus
+        onTriggered: root.text = ""
     }
 
     RowLayout {

@@ -42,9 +42,7 @@ RfcommTransport::RfcommTransport(const QBluetoothAddress &address, QObject *pare
                     return;
                 m_connectTimer->stop();
                 qCWarning(core::lcProtocol) << "Bluetooth transport error" << socketError;
-                Q_EMIT failed(Error(ErrorCode::ConnectionClosed,
-                                    QStringLiteral("Bluetooth connection failed: %1")
-                                        .arg(socket->errorString())));
+                Q_EMIT failed(errorFor(socketError, socket->errorString()));
                 if (socket->state() == QBluetoothSocket::SocketState::UnconnectedState)
                     emitClosedOnce();
             });
@@ -112,6 +110,19 @@ bool RfcommTransport::isOpen() const
 QString RfcommTransport::peerDescription() const
 {
     return QStringLiteral("Bluetooth");
+}
+
+Error RfcommTransport::errorFor(QBluetoothSocket::SocketError socketError, const QString &detail)
+{
+    const QString message = QStringLiteral("Bluetooth connection failed: %1").arg(detail);
+    // BlueZ reports a phone app without Bluetooth access the same way as a
+    // service list read before the app offered its service: the host or the
+    // service is not found.
+    if (socketError == QBluetoothSocket::SocketError::HostNotFoundError ||
+        socketError == QBluetoothSocket::SocketError::ServiceNotFoundError) {
+        return Error(ErrorCode::BluetoothServiceNotFound, message);
+    }
+    return Error(ErrorCode::ConnectionClosed, message);
 }
 
 void RfcommTransport::onConnected()

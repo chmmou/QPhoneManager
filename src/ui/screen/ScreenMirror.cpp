@@ -404,6 +404,7 @@ QString ScreenMirror::messageFor(const Error &error)
     case ErrorCode::WrongPin:
     case ErrorCode::NotFound:
     case ErrorCode::AlreadyConnected:
+    case ErrorCode::BluetoothServiceNotFound:
     case ErrorCode::WifiDisabled:
     case ErrorCode::IoFailure:
         break;

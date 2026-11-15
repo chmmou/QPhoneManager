@@ -30,6 +30,9 @@ enum class ErrorCode {
     InvalidInput,
     LimitExceeded,
     Cancelled,
+    /// The phone could not be reached over Bluetooth, or it did not offer
+    /// the serial port service of the phone app.
+    BluetoothServiceNotFound,
 };
 
 /**

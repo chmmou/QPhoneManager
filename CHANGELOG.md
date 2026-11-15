@@ -89,6 +89,8 @@ numbers follow [Semantic Versioning](https://semver.org/).
   container image, signs it with GPG, embedded and as a separate `.asc` file,
   and publishes it with SHA-256 checksums. A manual run makes an unsigned test
   build.
+- The first sync of a phone shows a window with a progress bar and the area
+  being synced. It closes when the sync ends, fails or the connection ends.
 
 ### Changed
 
@@ -109,6 +111,15 @@ numbers follow [Semantic Versioning](https://semver.org/).
   and the system libraries it brings, and `THIRD_PARTY.md` lists them.
 - The release workflows name each action by its commit and the build image by
   its digest, and the image installs aqtinstall with a hash for every package.
+- Messages and the sync summary close by themselves after 15 seconds. They
+  stay open while the mouse pointer rests on them or the keyboard focus is in
+  them.
+- When a Bluetooth connection fails because the phone offers no service, the
+  message names the permission "Nearby devices" of the phone app and says to
+  disconnect the phone once in the Bluetooth settings of the computer. The
+  handbook has the same steps.
+- The AppImage no longer carries the help plugin of the QML language server
+  and Qt Qml Compiler, which the program does not use.
 
 ### Fixed
 
@@ -123,3 +134,5 @@ numbers follow [Semantic Versioning](https://semver.org/).
   open.
 - A new search for phones no longer lists the phones an earlier search found
   over Wi-Fi.
+- The backup dialog shows the status of a backup only on the tab Back up and
+  the status of a restore only on the tab Restore.

@@ -2485,10 +2485,16 @@ void TestAccessibility::backupDialogIsUsedByKeyboard()
 
     QQuickItem *tabs = findItem(m_window->contentItem(), QStringLiteral("backupTabs"));
     QVERIFY(tabs);
+    QQuickItem *status = findItem(m_window->contentItem(), QStringLiteral("backupStatus"));
+    QVERIFY(status);
+    QTRY_VERIFY(status->isVisible());
     QVERIFY(tabTo(QStringLiteral("restoreTab")));
     QVERIFY(focusIsShown(m_window->activeFocusItem()));
     QTest::keyClick(m_window, Qt::Key_Space);
     QTRY_COMPARE(tabs->property("currentIndex").toInt(), 1);
+    // The note that the backup is saved stayed on the restore tab, where it
+    // read as the outcome of a restore.
+    QVERIFY(!status->isVisible());
     popup->setProperty("openedFile", url);
     QVERIFY(backup->preview(url));
     QTRY_VERIFY_WITH_TIMEOUT(!backup->isBusy(), phoneTimeoutMs);

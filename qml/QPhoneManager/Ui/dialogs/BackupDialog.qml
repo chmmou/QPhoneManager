@@ -11,6 +11,9 @@ Dialog {
 
     readonly property BackupController backup: AppController.backup
     property url openedFile: ""
+    // The tab the status line belongs to. The tabs are locked while a step
+    // runs, so a status always comes from the tab in view when it changes.
+    property int statusTab: 0
 
     parent: Overlay.overlay
     anchors.centerIn: parent
@@ -38,6 +41,14 @@ Dialog {
         (tabs.currentIndex === 0 ? backupTab : restoreTab).forceActiveFocus(Qt.PopupFocusReason);
     }
     Component.onCompleted: Theme.calmPopup(root)
+
+    Connections {
+        target: root.backup
+
+        function onStatusChanged(): void {
+            root.statusTab = tabs.currentIndex;
+        }
+    }
 
     // The shortcut of the window does not reach past a modal dialog, so F1
     // asks for the chapter here. Off while closed, so the two never compete.
@@ -281,7 +292,7 @@ Dialog {
 
             objectName: "backupStatus"
             Layout.fillWidth: true
-            visible: statusLabel.text.length > 0
+            visible: statusLabel.text.length > 0 && tabs.currentIndex === root.statusTab
             text: root.backup.statusText
             textFormat: Text.PlainText
             color: root.backup.statusIsError ? Theme.error : Theme.foregroundOnSurface
