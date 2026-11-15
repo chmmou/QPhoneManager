@@ -114,10 +114,13 @@ numbers follow [Semantic Versioning](https://semver.org/).
 - Messages and the sync summary close by themselves after 15 seconds. They
   stay open while the mouse pointer rests on them or the keyboard focus is in
   them.
-- When a Bluetooth connection fails because the phone offers no service, the
-  message names the permission "Nearby devices" of the phone app and says to
-  disconnect the phone once in the Bluetooth settings of the computer. The
-  handbook has the same steps.
+- When a Bluetooth connection fails because the computer cannot reach the
+  phone app, the message says so first. It then says to keep the phone close
+  with Bluetooth on, names the permission "Nearby devices" of the phone app
+  and says to disconnect the phone once in the Bluetooth settings of the
+  computer. The handbook has the same steps.
+- The Bluetooth tab of the connect dialog lists only phones, not headsets or
+  other paired devices.
 - The AppImage no longer carries the help plugin of the QML language server
   and Qt Qml Compiler, which the program does not use.
 
@@ -136,3 +139,9 @@ numbers follow [Semantic Versioning](https://semver.org/).
   over Wi-Fi.
 - The backup dialog shows the status of a backup only on the tab Back up and
   the status of a restore only on the tab Restore.
+- The window of the first sync keeps the last area and step while it closes,
+  instead of showing "(0 of 0)".
+- Screen readers announce each area of the first sync once, without a text in
+  between.
+- A phone whose only data on this computer is the call log no longer gets the
+  window of a first sync.
