@@ -1013,120 +1013,120 @@
 <context>
     <name>ConnectDialog</name>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="22"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="28"/>
         <source>Connect a phone</source>
         <translation>Handy verbinden</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="29"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="35"/>
         <source>Close</source>
         <translation>Schließen</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="65"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="83"/>
         <source>Wi-Fi</source>
         <translation>WLAN</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="76"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="94"/>
         <source>USB</source>
         <translation>USB</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="87"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="105"/>
         <source>Bluetooth</source>
         <translation>Bluetooth</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="105"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="123"/>
         <source>Connecting</source>
         <translation>Verbindung wird aufgebaut</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="110"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="128"/>
         <source>Connecting to the phone.</source>
         <translation>Die Verbindung zum Handy wird aufgebaut.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="125"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="169"/>
         <source>Wi-Fi connections are not encrypted. Use them only in a network you trust, or connect over USB.</source>
         <translation>WLAN-Verbindungen sind nicht verschlüsselt. Nutzen Sie sie nur in einem Netz, dem Sie vertrauen, oder verbinden Sie über USB.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="132"/>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="139"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="176"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="183"/>
         <source>Phones in this network</source>
         <translation>Handys in diesem Netz</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="140"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="184"/>
         <source>No phone found yet. Open MyPhoneExplorer Client on the phone. The phone needs to be in the same network.</source>
         <translation>Noch kein Handy gefunden. Öffnen Sie MyPhoneExplorer Client auf dem Handy. Das Handy muss im selben Netz sein.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="145"/>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="160"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="189"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="204"/>
         <source>Address of the phone</source>
         <translation>Adresse des Handys</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="158"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="202"/>
         <source>For example 192.168.1.20</source>
         <translation>Zum Beispiel 192.168.1.20</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="171"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="215"/>
         <source>Connect</source>
         <translation>Verbinden</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="185"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="229"/>
         <source>Show QR code</source>
         <translation>QR-Code anzeigen</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="204"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="248"/>
         <source>Connect the phone with a USB cable and turn on USB debugging. QPhoneManager then starts MyPhoneExplorer Client on the phone.</source>
         <translation>Schließen Sie das Handy per USB-Kabel an und schalten Sie USB-Debugging ein. QPhoneManager startet dann MyPhoneExplorer Client auf dem Handy.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="211"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="255"/>
         <source>Phones at USB</source>
         <translation>Handys an USB</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="212"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="256"/>
         <source>Looking for phones at USB.</source>
         <translation>Handys an USB werden gesucht.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="212"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="256"/>
         <source>No phone found at USB.</source>
         <translation>Kein Handy an USB gefunden.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="219"/>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="254"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="263"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="298"/>
         <source>Search again</source>
         <translation>Erneut suchen</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="239"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="283"/>
         <source>Pair the phone with this computer in the system settings first. Paired phones in reach appear here.</source>
         <translation>Koppeln Sie das Handy zuerst in den Systemeinstellungen mit diesem Rechner. Gekoppelte Handys in Reichweite erscheinen hier.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="246"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="290"/>
         <source>Paired phones</source>
         <translation>Gekoppelte Handys</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="247"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="291"/>
         <source>Looking for paired phones.</source>
         <translation>Gekoppelte Handys werden gesucht.</translation>
     </message>
     <message>
-        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="247"/>
+        <location filename="../../qml/QPhoneManager/Ui/dialogs/ConnectDialog.qml" line="291"/>
         <source>No paired phone found.</source>
         <translation>Kein gekoppeltes Handy gefunden.</translation>
     </message>

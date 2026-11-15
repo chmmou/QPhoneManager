@@ -20,7 +20,7 @@ How to build and start QPhoneManager is described in the file README.md in the s
 - **Header:** On the left you choose the phone. Next to it, **Manage phones** opens the list of all phones. On the right are the search field, **Sync** (two arrows in a circle) and **Connect** or **Disconnect** (a plug).
 - **Content:** List and details sit side by side. If the content is narrower than 900 pixels, you see only one of the two. **Back** returns to the list.
 - **Status line at the bottom:** It shows the connection, the battery level of the phone and running transfers.
-- **Messages:** Results and errors appear in a bar above the content. The bar closes by itself after 15 seconds. It stays open while the mouse pointer rests on it or the keyboard focus is in it. **Close message** hides it at once.
+- **Messages:** Results and errors appear in a bar above the content. The bar closes by itself after 15 seconds. It stays open while the mouse pointer rests on it or the keyboard focus is in it. **Close message** hides it at once. While the dialog **Connect a phone** is open, it shows connection errors itself. The message stays there until you try again or close the dialog.
 
 The icons in the toolbars carry no text. Hold the mouse pointer over an icon to see its name.
 

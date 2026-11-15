@@ -7,6 +7,12 @@ Dialog {
     id: root
 
     property bool searchOnOpen: true
+    /// The failure shown in the dialog; empty once the next attempt starts or
+    /// the dialog closes.
+    property string failureText: ""
+    /// While true, the dialog shows the failures AppController reports and the
+    /// window leaves them out of its message bar.
+    readonly property bool showsFailures: root.opened && !AppController.connected
 
     signal qrCodeRequested
 
@@ -36,15 +42,27 @@ Dialog {
             AppController.startSearch();
         addressField.forceActiveFocus(Qt.PopupFocusReason);
     }
-    onClosed: AppController.stopSearch()
+    onClosed: {
+        AppController.stopSearch();
+        root.failureText = "";
+    }
     Component.onCompleted: Theme.calmPopup(root)
 
     Connections {
         target: AppController
 
         function onConnectionStateChanged(): void {
+            if (AppController.connecting)
+                root.failureText = "";
             if (AppController.connected && root.opened)
                 root.close();
+        }
+
+        function onErrorOccurred(message: string): void {
+            if (!root.showsFailures)
+                return;
+            root.failureText = message;
+            failureLabel.Accessible.announce(message);
         }
     }
 
@@ -108,6 +126,32 @@ Dialog {
             Label {
                 Layout.fillWidth: true
                 text: qsTr("Connecting to the phone.")
+            }
+        }
+
+        RowLayout {
+            objectName: "connectFailure"
+            Layout.fillWidth: true
+            visible: root.failureText.length > 0 && !AppController.connecting
+            spacing: Theme.gridUnit * 2
+
+            TintedIcon {
+                Layout.preferredWidth: Theme.listIconSize
+                Layout.preferredHeight: Theme.listIconSize
+                Layout.alignment: Qt.AlignTop
+                name: "alert-triangle"
+                color: Theme.error
+            }
+
+            Label {
+                id: failureLabel
+
+                objectName: "connectFailureText"
+                Layout.fillWidth: true
+                text: root.failureText
+                color: Theme.error
+                wrapMode: Text.Wrap
+                Accessible.role: Accessible.AlertMessage
             }
         }
 

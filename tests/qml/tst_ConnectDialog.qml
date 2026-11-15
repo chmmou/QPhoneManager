@@ -34,6 +34,7 @@ Item {
         }
 
         function cleanup(): void {
+            TestPhone.setRejectAsAlreadyConnected(false);
             AppController.disconnectPhone();
             findChild(dialog.contentItem, "addressField").text = "";
             dialog.close();
@@ -72,6 +73,58 @@ Item {
         function test_qrButtonAsksForTheQrCode(): void {
             mouseClick(findChild(dialog.contentItem, "qrButton"));
             compare(qrSpy.count, 1);
+        }
+
+        function failAnAttempt(): void {
+            TestPhone.setRejectAsAlreadyConnected(true);
+            findChild(dialog.contentItem, "addressField").text = TestPhone.address;
+            mouseClick(findChild(dialog.contentItem, "addressConnectButton"));
+            tryCompare(findChild(dialog.contentItem, "connectFailure"), "visible", true, 10000);
+        }
+
+        // The failure went only to the message bar of the window, which the
+        // open dialog covers, and closed there unread.
+        function test_failedAttemptShowsItsMessageInTheDialog(): void {
+            failAnAttempt();
+
+            const text = findChild(dialog.contentItem, "connectFailureText");
+            verify(text.text.indexOf("another computer") >= 0);
+            verify(dialog.opened);
+            verify(dialog.showsFailures);
+        }
+
+        function test_nextAttemptClearsTheFailure(): void {
+            failAnAttempt();
+            TestPhone.setRejectAsAlreadyConnected(false);
+
+            mouseClick(findChild(dialog.contentItem, "addressConnectButton"));
+
+            verify(AppController.connecting);
+            compare(dialog.failureText, "");
+            verify(!findChild(dialog.contentItem, "connectFailure").visible);
+            tryCompare(AppController, "connected", true, 10000);
+        }
+
+        function test_closingTheDialogClearsTheFailure(): void {
+            failAnAttempt();
+
+            dialog.close();
+            tryCompare(dialog, "visible", false);
+            compare(dialog.failureText, "");
+            verify(!dialog.showsFailures);
+
+            dialog.open();
+            tryCompare(dialog, "opened", true);
+            verify(!findChild(dialog.contentItem, "connectFailure").visible);
+        }
+
+        function test_longFailureWrapsAndLeavesTheButtonsInTheDialog(): void {
+            dialog.failureText = "This computer cannot reach MyPhoneExplorer Client on the phone over Bluetooth. Keep the phone close with Bluetooth on, allow the app the permission \"Nearby devices\" and turn on Bluetooth in the app. If the app started while the phone was already connected, disconnect the phone once in the Bluetooth settings of this computer.";
+
+            const text = findChild(dialog.contentItem, "connectFailureText");
+            tryVerify(() => text.lineCount > 1);
+            const qrButton = findChild(dialog.contentItem, "qrButton");
+            tryVerify(() => qrButton.mapToItem(dialog.contentItem, 0, qrButton.height).y <= dialog.contentItem.height);
         }
     }
 }

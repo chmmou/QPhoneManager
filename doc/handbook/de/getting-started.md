@@ -20,7 +20,7 @@ Wie Sie QPhoneManager bauen und starten, steht in der Datei README.md im Quellte
 - **Kopfzeile:** Links wählen Sie das Handy. Daneben öffnet **Handys verwalten** die Liste aller Handys. Rechts stehen das Suchfeld, **Abgleichen** (zwei Pfeile im Kreis) und **Verbinden** oder **Trennen** (Stecker).
 - **Inhalt:** Liste und Einzelansicht stehen nebeneinander. Ist der Inhalt schmaler als 900 Pixel, sehen Sie nur eines von beiden. **Zurück** führt zur Liste.
 - **Statuszeile unten:** Sie zeigt die Verbindung, den Akkustand des Handys und laufende Übertragungen.
-- **Meldungen:** Ergebnisse und Fehler erscheinen in einer Leiste über dem Inhalt. Die Leiste schließt sich nach 15 Sekunden von selbst. Solange der Mauszeiger auf ihr liegt oder der Tastaturfokus in ihr steht, bleibt sie offen. **Meldung schließen** blendet sie sofort aus.
+- **Meldungen:** Ergebnisse und Fehler erscheinen in einer Leiste über dem Inhalt. Die Leiste schließt sich nach 15 Sekunden von selbst. Solange der Mauszeiger auf ihr liegt oder der Tastaturfokus in ihr steht, bleibt sie offen. **Meldung schließen** blendet sie sofort aus. Solange der Dialog **Handy verbinden** offen ist, zeigt er Fehler beim Verbinden selbst an. Die Meldung bleibt dort stehen, bis Sie es erneut versuchen oder den Dialog schließen.
 
 Die Symbole in den Werkzeugleisten tragen keinen Text. Halten Sie den Mauszeiger über ein Symbol, dann erscheint sein Name.
 

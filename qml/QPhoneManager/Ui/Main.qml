@@ -253,7 +253,9 @@ ApplicationWindow {
         target: AppController
 
         function onErrorOccurred(message: string): void {
-            messageBar.show(message, true);
+            // The open connect dialog covers the bar and shows the failure itself.
+            if (!connectDialog.showsFailures)
+                messageBar.show(message, true);
         }
 
         function onSyncFinished(summary: string): void {

@@ -28,6 +28,8 @@ public:
 
     /// Requires `pin` from the next connection on; empty turns the PIN off.
     Q_INVOKABLE void setPin(const QString &pin);
+    /// Answers every new connection with ALREADY CONNECTED and closes it while `reject` is true.
+    Q_INVOKABLE void setRejectAsAlreadyConnected(bool reject);
 
 private:
     FakePhone m_phone;
