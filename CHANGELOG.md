@@ -145,3 +145,6 @@ numbers follow [Semantic Versioning](https://semver.org/).
   between.
 - A phone whose only data on this computer is the call log no longer gets the
   window of a first sync.
+- When connecting from the connect dialog fails, the dialog shows the message
+  with a warning sign until the next attempt or until it closes. Before, the
+  message went to the message bar behind the dialog and closed there unread.
