@@ -24,4 +24,9 @@ void TestPhone::setPin(const QString &pin)
     m_phone.config().pin = pin;
 }
 
+void TestPhone::setRejectAsAlreadyConnected(bool reject)
+{
+    m_phone.config().rejectAsAlreadyConnected = reject;
+}
+
 } // namespace qpm::test
