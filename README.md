@@ -39,6 +39,13 @@ cmake --preset debug-6.9
 cmake --build --preset debug-6.9
 ```
 
+The test presets `asan-6.9` and `tsan-6.9` read their suppressions from
+`tests/sanitizers/`. A prebuilt Qt is not built with ThreadSanitizer, so the
+sanitizer cannot see the locking inside Qt. The `tsan-6.9` test preset
+therefore also sets `ignore_noninstrumented_modules=1`. The suppressions
+cover only reports from inside Qt and the system libraries it calls, and
+each file gives its reasons.
+
 The presets take the Qt directory from two environment variables. Set them
 before you configure:
 

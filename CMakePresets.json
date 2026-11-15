@@ -133,7 +133,21 @@
         { "name": "release-6.9", "inherits": "base", "configurePreset": "release-6.9" },
         { "name": "debug-6.12", "inherits": "base", "configurePreset": "debug-6.12" },
         { "name": "release-6.12", "inherits": "base", "configurePreset": "release-6.12" },
-        { "name": "asan-6.9", "inherits": "base", "configurePreset": "asan-6.9" },
-        { "name": "tsan-6.9", "inherits": "base", "configurePreset": "tsan-6.9" }
+        {
+            "name": "asan-6.9",
+            "inherits": "base",
+            "configurePreset": "asan-6.9",
+            "environment": {
+                "LSAN_OPTIONS": "suppressions=${sourceDir}/tests/sanitizers/lsan.supp"
+            }
+        },
+        {
+            "name": "tsan-6.9",
+            "inherits": "base",
+            "configurePreset": "tsan-6.9",
+            "environment": {
+                "TSAN_OPTIONS": "ignore_noninstrumented_modules=1:suppressions=${sourceDir}/tests/sanitizers/tsan.supp"
+            }
+        }
     ]
 }
