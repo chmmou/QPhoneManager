@@ -181,6 +181,17 @@ keeps the AppImage as an artifact of the run.
 
 The workflow builds in the image `ghcr.io/chmmou/qphonemanager/ci-ubuntu`
 from `res/ci/ubuntu/Dockerfile`. The workflow `deps-image.yml` builds it.
+`release.yml` names the image by its digest, so a new image is used only
+after its digest is written there. `deps-image.yml` shows the digest in the
+summary of its run. Both workflows name each action by the commit of its
+release.
+
+The image installs aqtinstall and its dependencies from
+`res/ci/ubuntu/aqtinstall-requirements.txt`, with a hash for every package.
+To change the version, edit `res/ci/ubuntu/aqtinstall.in` and write the file
+again with `pip-compile --generate-hashes --strip-extras --no-emit-index-url
+--output-file aqtinstall-requirements.txt aqtinstall.in` in that directory,
+under the Python 3.10 of Ubuntu 22.04.
 
 The workflow needs one secret, `GPG_PRIVATE_KEY`: the owner's secret key,
 ASCII-armored and without a passphrase. A tag run without it stops with an

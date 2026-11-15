@@ -16,9 +16,6 @@
 # The minimum the project declares.
 ARG QT_VERSION=6.9.3
 
-# aqtinstall checks every Qt archive against the checksum the Qt server lists.
-ARG AQTINSTALL_VERSION=3.3.0
-
 # The CMake of Ubuntu 22.04 is older than the 3.28 the presets require. The
 # checksum is written here rather than read from the file beside the archive,
 # which travels the same way as the archive and would confirm whatever arrives.
@@ -28,7 +25,6 @@ ARG CMAKE_SHA256=0dc2e9a6860f06bf10bd8fadc03e35d9eeb4df46e33763a7e480e987758f385
 FROM ubuntu:22.04@sha256:74b12b11ffa550fba1929ad4d8d16533c34f6612728469671afba1b03b66881c
 
 ARG QT_VERSION
-ARG AQTINSTALL_VERSION
 ARG CMAKE_VERSION
 ARG CMAKE_SHA256
 
@@ -94,17 +90,25 @@ RUN curl --fail --location --silent --show-error --proto '=https' \
     && tar -xzf /tmp/cmake.tar.gz -C /usr/local --strip-components=1 \
     && rm /tmp/cmake.tar.gz
 
+# aqtinstall and every package it pulls in are pinned with their hashes in
+# aqtinstall-requirements.txt, which pip-compile writes from aqtinstall.in;
+# pip refuses a package whose hash does not match. aqtinstall itself checks
+# every Qt archive against the SHA-256 sum it fetches from download.qt.io,
+# whichever mirror the archive comes from.
+#
 # The base archives without qtwayland, which the AppImage does not ship, and
 # Qt Connectivity for Bluetooth. Qt Help and qhelpgenerator are part of
 # qttools, Qt SVG of qtsvg.
+COPY aqtinstall-requirements.txt /tmp/aqtinstall-requirements.txt
 RUN cd /tmp \
     && python3 -m venv /tmp/aqt \
-    && /tmp/aqt/bin/pip install --no-cache-dir "aqtinstall==${AQTINSTALL_VERSION}" \
+    && /tmp/aqt/bin/pip install --no-cache-dir --require-hashes \
+        --requirement /tmp/aqtinstall-requirements.txt \
     && /tmp/aqt/bin/aqt install-qt linux desktop "${QT_VERSION}" linux_gcc_64 \
         --outputdir /opt/qt \
         --archives icu qtbase qtdeclarative qtsvg qttools qttranslations \
         --modules qtconnectivity \
-    && rm -rf /tmp/aqt /tmp/aqtinstall.log
+    && rm -rf /tmp/aqt /tmp/aqtinstall.log /tmp/aqtinstall-requirements.txt
 
 # The versions and checksums of linuxdeploy, appimagetool and the AppImage
 # runtime live in the script alone. It fetches them here, and on every later
