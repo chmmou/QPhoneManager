@@ -20,9 +20,10 @@ struct PairedDevice
 };
 
 /**
- * Lists the Bluetooth devices that are paired with this computer and in
- * reach. Lives in the main thread; start() returns at once and the devices
- * arrive through deviceFound().
+ * Lists the phones that are paired with this computer over Bluetooth and in
+ * reach; other paired devices, such as headsets, are left out. Lives in the
+ * main thread; start() returns at once and the phones arrive through
+ * deviceFound().
  *
  * Without a Bluetooth adapter, or when the adapter is off, failed() reports
  * ErrorCode::NotSupported. Every run ends with finished().
@@ -39,6 +40,9 @@ public:
     void start();
     void stop();
     [[nodiscard]] bool isRunning() const;
+
+    /// Whether `info` announces itself as a phone through its major device class.
+    [[nodiscard]] static bool isPhone(const QBluetoothDeviceInfo &info);
 
 Q_SIGNALS:
     void deviceFound(const qpm::PairedDevice &device);

@@ -61,9 +61,14 @@ bool BluetoothDeviceFinder::isRunning() const
     return m_agent && m_agent->isActive();
 }
 
+bool BluetoothDeviceFinder::isPhone(const QBluetoothDeviceInfo &info)
+{
+    return info.majorDeviceClass() == QBluetoothDeviceInfo::PhoneDevice;
+}
+
 void BluetoothDeviceFinder::onDiscovered(const QBluetoothDeviceInfo &info)
 {
-    if (m_local->pairingStatus(info.address()) == QBluetoothLocalDevice::Unpaired)
+    if (!isPhone(info) || m_local->pairingStatus(info.address()) == QBluetoothLocalDevice::Unpaired)
         return;
     Q_EMIT deviceFound(PairedDevice{info.address().toString(), info.name()});
 }

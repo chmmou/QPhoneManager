@@ -70,6 +70,12 @@ qpm_set_project_warnings(tst_rfcomm)
 add_test(NAME tst_rfcomm COMMAND tst_rfcomm)
 set_tests_properties(tst_rfcomm PROPERTIES TIMEOUT 60)
 
+qt_add_executable(tst_bluetoothdevicefinder bluetooth/tst_bluetoothdevicefinder.cpp)
+target_link_libraries(tst_bluetoothdevicefinder PRIVATE qpm_bluetooth Qt6::Test)
+qpm_set_project_warnings(tst_bluetoothdevicefinder)
+add_test(NAME tst_bluetoothdevicefinder COMMAND tst_bluetoothdevicefinder)
+set_tests_properties(tst_bluetoothdevicefinder PROPERTIES TIMEOUT 60)
+
 qt_add_executable(tst_secretstore platform/tst_secretstore.cpp)
 target_link_libraries(tst_secretstore PRIVATE qpm_platform qpm_fakephone Qt6::DBus Qt6::Test)
 qpm_set_project_warnings(tst_secretstore)

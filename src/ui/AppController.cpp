@@ -14,6 +14,7 @@
 #include "core/service/NotificationService.h"
 #include "core/service/ScreenMirrorClient.h"
 #include "core/service/ThumbnailChannel.h"
+#include "core/store/CallStore.h"
 #include "core/store/ContactStore.h"
 #include "platform/DesktopNotifier.h"
 #include "platform/SecretStore.h"
@@ -97,7 +98,8 @@ bool isExecutableFile(const QString &path)
     return info.isAbsolute() && info.isFile() && info.isExecutable();
 }
 
-bool syncedBefore(const ProfileStore &store)
+// The call log keeps no time of its last read, so a stored call stands in for it.
+bool syncedBefore(ProfileStore &store)
 {
     using core::sync::IrmcDomain;
     for (const IrmcDomain domain :
@@ -105,7 +107,8 @@ bool syncedBefore(const ProfileStore &store)
         if (store.lastSync(domain))
             return true;
     }
-    return false;
+    const Result<QList<core::codec::CallEntry>> calls = core::store::CallStore(&store).calls();
+    return calls.hasValue() && !calls.value().isEmpty();
 }
 
 } // namespace
@@ -1128,10 +1131,11 @@ QString AppController::messageFor(const Error &error, ConnectionKind kind)
         return tr("This computer could not open the connection. Try again, or restart the "
                   "computer if it keeps failing.");
     case ErrorCode::BluetoothServiceNotFound:
-        return tr("On the phone, allow MyPhoneExplorer Client the permission \"Nearby devices\" "
-                  "and turn on Bluetooth in the app. If the app was started while the phone was "
-                  "already connected over Bluetooth, disconnect the phone once in the Bluetooth "
-                  "settings of this computer.");
+        return tr("This computer cannot reach MyPhoneExplorer Client on the phone over Bluetooth. "
+                  "Keep the phone close with Bluetooth on, allow the app the permission \"Nearby "
+                  "devices\" and turn on Bluetooth in the app. If the app started while the phone "
+                  "was already connected, disconnect the phone once in the Bluetooth settings of "
+                  "this computer.");
     case ErrorCode::Rejected:
     case ErrorCode::ProtocolError:
     case ErrorCode::LimitExceeded:

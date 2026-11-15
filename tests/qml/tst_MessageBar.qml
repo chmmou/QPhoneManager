@@ -30,6 +30,13 @@ Item {
         activeFocusOnTab: true
     }
 
+    SignalSpy {
+        id: closingSpy
+
+        target: bar
+        signalName: "closingChanged"
+    }
+
     TestCase {
         name: "MessageBar"
         when: windowShown
@@ -89,12 +96,20 @@ Item {
             tryCompare(bar, "text", "");
         }
 
+        // The second message gets the full time: the wait stops and starts
+        // anew, rather than running on from the first message.
         function test_newMessageStartsTheWaitAgain(): void {
             bar.show("First", false);
-            bar.autoCloseInterval = 50;
+            verify(bar.closing);
+            closingSpy.clear();
+
             bar.show("Second", true);
+
             compare(bar.text, "Second");
             verify(bar.isError);
+            verify(bar.closing);
+            compare(closingSpy.count, 2);
+            bar.autoCloseInterval = 50;
             tryCompare(bar, "text", "");
         }
 

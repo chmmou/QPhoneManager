@@ -115,9 +115,10 @@ QString RfcommTransport::peerDescription() const
 Error RfcommTransport::errorFor(QBluetoothSocket::SocketError socketError, const QString &detail)
 {
     const QString message = QStringLiteral("Bluetooth connection failed: %1").arg(detail);
-    // BlueZ reports a phone app without Bluetooth access the same way as a
-    // service list read before the app offered its service: the host or the
-    // service is not found.
+    // BlueZ cannot tell these cases apart: a phone that is off, out of range
+    // or unpaired, a phone app without Bluetooth access, and a service list
+    // read before the app offered its service. Each ends with the host or
+    // the service not found.
     if (socketError == QBluetoothSocket::SocketError::HostNotFoundError ||
         socketError == QBluetoothSocket::SocketError::ServiceNotFoundError) {
         return Error(ErrorCode::BluetoothServiceNotFound, message);
