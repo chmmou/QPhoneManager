@@ -12,6 +12,7 @@
 #include <QQmlApplicationEngine>
 #include <QQmlExtensionPlugin>
 #include <QQuickWindow>
+#include <QStandardPaths>
 #include <QTranslator>
 
 #include <cstdlib>
@@ -46,6 +47,16 @@ void installCatalogue(QTranslator &translator, const QString &name, const QStrin
     QCoreApplication::installTranslator(&translator);
 }
 
+// Whether the session offers the desktop portal, which draws the file
+// dialogs of the desktop.
+bool portalOffered()
+{
+    return !QStandardPaths::locate(
+                QStandardPaths::GenericDataLocation,
+                QStringLiteral("dbus-1/services/org.freedesktop.portal.Desktop.service"))
+                .isEmpty();
+}
+
 } // namespace
 
 int main(int argc, char *argv[])
@@ -57,7 +68,17 @@ int main(int argc, char *argv[])
     // the entry and its icon through it.
     QGuiApplication::setDesktopFileName(QStringLiteral("io.github.chmmou.QPhoneManager"));
 
+    // Without a platform theme that knows the portal, Qt draws a file dialog
+    // of its own. A theme the user set stays.
+    const bool portalTheme =
+        qEnvironmentVariableIsEmpty("QT_QPA_PLATFORMTHEME") && portalOffered();
+    if (portalTheme)
+        qputenv("QT_QPA_PLATFORMTHEME", "xdgdesktopportal");
     QApplication app(argc, argv);
+    // Qt has read the theme while building the application object. Programs
+    // started from here, such as a viewer for a saved file, keep their own.
+    if (portalTheme)
+        qunsetenv("QT_QPA_PLATFORMTHEME");
     QApplication::setWindowIcon(QIcon(QStringLiteral(":/icons/app/qphonemanager.svg")));
 
     const qpm::ui::Settings startup;

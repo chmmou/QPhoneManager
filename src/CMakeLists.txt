@@ -631,13 +631,15 @@ install(FILES "${PROJECT_SOURCE_DIR}/res/icons/app/qphonemanager.svg"
 )
 
 # The plugins the deployment installs with the program. The offscreen
-# platform lets the program start without a display. The program uses only
+# platform lets the program start without a display. The theme of the desktop
+# portal gives the file dialogs of the desktop. The program uses only
 # the SQLite driver; the other drivers need the client library of their
 # database. The QML debugging, EGLFS, network information and TLS plugins
 # serve features the program does not use.
 qt_import_plugins(qphonemanager
     INCLUDE_BY_TYPE platforms Qt6::QXcbIntegrationPlugin Qt6::QOffscreenIntegrationPlugin
     INCLUDE_BY_TYPE sqldrivers Qt6::QSQLiteDriverPlugin
+    INCLUDE_BY_TYPE platformthemes Qt6::QXdgDesktopPortalThemePlugin
     EXCLUDE_BY_TYPE qmltooling
     EXCLUDE_BY_TYPE egldeviceintegrations
     EXCLUDE_BY_TYPE networkinformation
