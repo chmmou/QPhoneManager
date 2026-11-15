@@ -664,6 +664,7 @@ void AppController::updateListening()
 void AppController::startSearch()
 {
     stopSearch();
+    m_wifiPhones->clear();
     m_usbPhones->clear();
     m_bluetoothPhones->clear();
     m_wifiHint.clear();

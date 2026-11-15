@@ -70,6 +70,7 @@ private Q_SLOTS:
     void startConnectsToThePhoneOfTheLastSession();
     void lostConnectionIsRestoredWhenAutoConnectIsOn();
     void usbSearchListsTheAdbDevices();
+    void newSearchForgetsThePhonesOfTheLastOne();
     void missingAdbIsExplained();
     void profileCanBeRenamedAndRemoved();
     void invalidNameIsRefused();
@@ -391,6 +392,26 @@ void TestAppController::usbSearchListsTheAdbDevices()
     QVERIFY(!usb->data(usb->index(1), FoundPhoneModel::AvailableRole).toBool());
     QVERIFY(row(usb, 1, "detail").contains(QStringLiteral("USB debugging")));
     QVERIFY(controller->usbHint().isEmpty());
+}
+
+// startSearch() emptied the USB and Bluetooth lists but not the Wi-Fi one, so
+// a phone found by an earlier search stayed listed after it had gone.
+void TestAppController::newSearchForgetsThePhonesOfTheLastOne()
+{
+    const std::unique_ptr<AppController> controller = makeController();
+    for (FoundPhoneModel *found :
+         {controller->wifiPhones(), controller->usbPhones(), controller->bluetoothPhones()}) {
+        found->upsert(qpm::ui::FoundPhone{QStringLiteral("Pixel 8"), QStringLiteral("old"),
+                                          QStringLiteral("192.0.2.21"),
+                                          QStringLiteral("example-phone-1"), true});
+        QCOMPARE(found->count(), 1);
+    }
+
+    controller->startSearch();
+
+    QCOMPARE(controller->wifiPhones()->count(), 0);
+    QCOMPARE(controller->usbPhones()->count(), 0);
+    QCOMPARE(controller->bluetoothPhones()->count(), 0);
 }
 
 void TestAppController::missingAdbIsExplained()
