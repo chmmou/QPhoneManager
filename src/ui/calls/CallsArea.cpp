@@ -47,6 +47,7 @@ QString errorText(const Error &error)
         return CallsArea::tr("Choose a phone first.");
     case ErrorCode::WrongPin:
     case ErrorCode::AlreadyConnected:
+    case ErrorCode::BluetoothServiceNotFound:
     case ErrorCode::WifiDisabled:
     case ErrorCode::Rejected:
     case ErrorCode::ProtocolError:

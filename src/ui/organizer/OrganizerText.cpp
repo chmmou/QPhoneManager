@@ -199,6 +199,7 @@ QString OrganizerText::errorText(const core::Error &error, Area area)
         return tr("The entry is too large for the phone. Shorten the text.");
     case ErrorCode::WrongPin:
     case ErrorCode::AlreadyConnected:
+    case ErrorCode::BluetoothServiceNotFound:
     case ErrorCode::WifiDisabled:
     case ErrorCode::Rejected:
     case ErrorCode::ProtocolError:

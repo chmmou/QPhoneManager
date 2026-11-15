@@ -432,6 +432,14 @@ ApplicationWindow {
         objectName: "profilesDialog"
     }
 
+    FirstSyncPopup {
+        objectName: "firstSyncPopup"
+        running: AppController.firstSync
+        step: AppController.syncStep
+        stepCount: AppController.syncStepCount
+        areaName: AppController.syncArea
+    }
+
     CallWindow {
         objectName: "callWindow"
     }

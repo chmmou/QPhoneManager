@@ -121,6 +121,18 @@ class AppController : public QObject
     /// The folder that holds the data of the phones.
     Q_PROPERTY(QString profilesDirectory READ profilesDirectory NOTIFY profilesDirectoryChanged FINAL)
     Q_PROPERTY(bool syncing READ isSyncing NOTIFY syncingChanged FINAL)
+    /**
+     * The running sync is the first of the current phone: no area of its
+     * profile was synced before. Turns false when the sync ends or the
+     * connection does.
+     */
+    Q_PROPERTY(bool firstSync READ isFirstSync NOTIFY syncProgressChanged FINAL)
+    /// Number of the area syncing right now, from 1; 0 while no sync runs.
+    Q_PROPERTY(int syncStep READ syncStep NOTIFY syncProgressChanged FINAL)
+    /// Number of areas the running sync covers; 0 while no sync runs.
+    Q_PROPERTY(int syncStepCount READ syncStepCount NOTIFY syncProgressChanged FINAL)
+    /// Translated name of the area syncing right now; empty while no sync runs.
+    Q_PROPERTY(QString syncArea READ syncArea NOTIFY syncProgressChanged FINAL)
     /// A PIN can be kept in the keyring of the system.
     Q_PROPERTY(bool canRememberPin READ canRememberPin CONSTANT FINAL)
     Q_PROPERTY(qpm::ui::ContactsArea *contacts READ contacts CONSTANT FINAL)
@@ -204,6 +216,10 @@ public:
     [[nodiscard]] QrCodeProvider *qrCode() const { return m_qrCode; }
     [[nodiscard]] QString profilesDirectory() const { return m_profilesDirectory; }
     [[nodiscard]] bool isSyncing() const { return m_syncing; }
+    [[nodiscard]] bool isFirstSync() const { return m_firstSync; }
+    [[nodiscard]] int syncStep() const { return m_syncStep; }
+    [[nodiscard]] int syncStepCount() const { return m_syncing ? int(m_syncAreas.size()) : 0; }
+    [[nodiscard]] QString syncArea() const { return m_syncArea; }
     [[nodiscard]] bool canRememberPin() const { return m_secrets != nullptr; }
     [[nodiscard]] ContactsArea *contacts() const { return m_contacts; }
     [[nodiscard]] CallsArea *calls() const { return m_calls; }
@@ -324,6 +340,7 @@ Q_SIGNALS:
     void hintsChanged();
     void profilesDirectoryChanged();
     void syncingChanged();
+    void syncProgressChanged();
     /**
      * The phone needs its PIN. `wrongPin` is true when the last PIN was
      * wrong; `remainingTries` 0 means the phone stops on the next wrong one.
@@ -411,6 +428,8 @@ private:
     QString m_bluetoothHint;
     QString m_pinToRemember;
     QList<std::pair<QString, SyncRunner>> m_syncAreas;
+    QString m_syncArea;
+    int m_syncStep = 0;
     std::chrono::milliseconds m_reconnectDelay{0};
     quint64 m_pinLookup = 0;
     int m_pendingSearches = 0;
@@ -425,6 +444,7 @@ private:
     /// The current connection was opened by the phone, after the QR code.
     bool m_inbound = false;
     bool m_syncing = false;
+    bool m_firstSync = false;
 };
 
 } // namespace qpm::ui

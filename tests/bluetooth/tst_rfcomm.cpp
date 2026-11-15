@@ -37,6 +37,8 @@ private Q_SLOTS:
     void phoneClosingTheStreamEndsTheTransport();
     void closedStreamCannotBeOpened();
     void writesAfterCloseAreDropped();
+    void socketErrorMapsToItsCode_data();
+    void socketErrorMapsToItsCode();
 
 private:
     [[nodiscard]] std::unique_ptr<RfcommTransport> openedTransport();
@@ -137,6 +139,36 @@ void TestRfcomm::writesAfterCloseAreDropped()
     QCOMPARE(closed.count(), 1);
     QVERIFY(!transport.isOpen());
     QCOMPARE(buffer->data(), QByteArrayLiteral("ATI\r\n"));
+}
+
+void TestRfcomm::socketErrorMapsToItsCode_data()
+{
+    QTest::addColumn<QBluetoothSocket::SocketError>("socketError");
+    QTest::addColumn<int>("code");
+
+    QTest::newRow("host not found") << QBluetoothSocket::SocketError::HostNotFoundError
+                                    << int(ErrorCode::BluetoothServiceNotFound);
+    QTest::newRow("service not found") << QBluetoothSocket::SocketError::ServiceNotFoundError
+                                       << int(ErrorCode::BluetoothServiceNotFound);
+    QTest::newRow("network") << QBluetoothSocket::SocketError::NetworkError
+                             << int(ErrorCode::ConnectionClosed);
+    QTest::newRow("unknown") << QBluetoothSocket::SocketError::UnknownSocketError
+                             << int(ErrorCode::ConnectionClosed);
+}
+
+// A connect that BlueZ answers with "Cannot connect to remote profile" ended
+// as a closed connection, whose text did not say what to do on the phone.
+void TestRfcomm::socketErrorMapsToItsCode()
+{
+    QFETCH(QBluetoothSocket::SocketError, socketError);
+    QFETCH(int, code);
+
+    const Error error =
+        RfcommTransport::errorFor(socketError, QStringLiteral("Cannot connect to remote profile"));
+
+    QCOMPARE(error.code(), ErrorCode(code));
+    QCOMPARE(error.message(),
+             QStringLiteral("Bluetooth connection failed: Cannot connect to remote profile"));
 }
 
 QTEST_GUILESS_MAIN(TestRfcomm)

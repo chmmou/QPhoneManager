@@ -3,6 +3,7 @@
 #include "core/protocol/Transport.h"
 
 #include <QBluetoothAddress>
+#include <QBluetoothSocket>
 #include <QString>
 
 class QIODevice;
@@ -40,6 +41,15 @@ public:
     [[nodiscard]] bool isOpen() const override;
     /// Always "Bluetooth".
     [[nodiscard]] QString peerDescription() const override;
+
+    /**
+     * The failure reported for `socketError`, with `detail` in the message.
+     * A phone that cannot be found, or that does not offer the serial port
+     * service, gives ErrorCode::BluetoothServiceNotFound; any other error
+     * gives ErrorCode::ConnectionClosed.
+     */
+    [[nodiscard]] static core::Error errorFor(QBluetoothSocket::SocketError socketError,
+                                              const QString &detail);
 
 private:
     void watchStream();

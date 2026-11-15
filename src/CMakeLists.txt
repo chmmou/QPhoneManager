@@ -211,6 +211,7 @@ set(qpm_ui_qml_files
     dialogs/ConflictDialog.qml
     dialogs/ConnectDialog.qml
     dialogs/DuplicatesDialog.qml
+    dialogs/FirstSyncPopup.qml
     dialogs/PhotoCropDialog.qml
     dialogs/PinDialog.qml
     dialogs/ProfilesDialog.qml

@@ -866,6 +866,7 @@ QString MessagesArea::errorText(const Error &error, Action action)
         break;
     case ErrorCode::WrongPin:
     case ErrorCode::AlreadyConnected:
+    case ErrorCode::BluetoothServiceNotFound:
     case ErrorCode::WifiDisabled:
     case ErrorCode::ProtocolError:
         break;

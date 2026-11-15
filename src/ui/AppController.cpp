@@ -97,6 +97,17 @@ bool isExecutableFile(const QString &path)
     return info.isAbsolute() && info.isFile() && info.isExecutable();
 }
 
+bool syncedBefore(const ProfileStore &store)
+{
+    using core::sync::IrmcDomain;
+    for (const IrmcDomain domain :
+         {IrmcDomain::Contacts, IrmcDomain::Calendar, IrmcDomain::Notes, IrmcDomain::Messages}) {
+        if (store.lastSync(domain))
+            return true;
+    }
+    return false;
+}
+
 } // namespace
 
 AppController::AppController(Settings *settings, std::unique_ptr<SecretStore> secrets,
@@ -474,6 +485,10 @@ void AppController::onStateChanged()
     if (m_connection->state() == PhoneConnection::State::Disconnected ||
         m_connection->state() == PhoneConnection::State::Lost) {
         m_waitingForPin = false;
+    }
+    if (m_firstSync && !isConnected()) {
+        m_firstSync = false;
+        Q_EMIT syncProgressChanged();
     }
     m_contacts->setConnected(isConnected());
     m_calls->setConnected(isConnected());
@@ -905,6 +920,7 @@ void AppController::syncAll()
         return;
     }
     m_syncing = true;
+    m_firstSync = m_store && !syncedBefore(*m_store);
     Q_EMIT syncingChanged();
     runNextSyncArea(0, {});
 }
@@ -913,11 +929,20 @@ void AppController::runNextSyncArea(int index, QStringList lines)
 {
     if (index >= m_syncAreas.size()) {
         m_syncing = false;
+        m_firstSync = false;
+        m_syncStep = 0;
+        m_syncArea.clear();
+        // The progress ends before the summary arrives, so the summary is
+        // not shown behind the dialog of a first sync.
+        Q_EMIT syncProgressChanged();
         Q_EMIT syncingChanged();
         Q_EMIT syncFinished(lines.join(u'\n'));
         return;
     }
     const QString title = m_syncAreas.at(index).first;
+    m_syncStep = index + 1;
+    m_syncArea = title;
+    Q_EMIT syncProgressChanged();
     m_syncAreas.at(index).second().then(
         this, [this, index, title, lines](const Result<SyncChanges> &result) mutable {
             if (!result.hasValue()) {
@@ -1102,6 +1127,11 @@ QString AppController::messageFor(const Error &error, ConnectionKind kind)
         }
         return tr("This computer could not open the connection. Try again, or restart the "
                   "computer if it keeps failing.");
+    case ErrorCode::BluetoothServiceNotFound:
+        return tr("On the phone, allow MyPhoneExplorer Client the permission \"Nearby devices\" "
+                  "and turn on Bluetooth in the app. If the app was started while the phone was "
+                  "already connected over Bluetooth, disconnect the phone once in the Bluetooth "
+                  "settings of this computer.");
     case ErrorCode::Rejected:
     case ErrorCode::ProtocolError:
     case ErrorCode::LimitExceeded:

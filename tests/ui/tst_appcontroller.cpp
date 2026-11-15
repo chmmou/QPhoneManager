@@ -16,6 +16,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QLocale>
+#include <QPromise>
 #include <QRegularExpression>
 #include <QSignalSpy>
 #include <QTemporaryDir>
@@ -66,6 +67,7 @@ private Q_SLOTS:
     void phoneBusyWithAnotherComputerIsExplained();
     void errorMessagesStayShortAndSayWhatToDo_data();
     void errorMessagesStayShortAndSayWhatToDo();
+    void missingBluetoothServiceNamesPermissionAndReconnect();
     void connectionOrderFallsBackToTheNextWay();
     void startConnectsToThePhoneOfTheLastSession();
     void lostConnectionIsRestoredWhenAutoConnectIsOn();
@@ -79,6 +81,9 @@ private Q_SLOTS:
     void ownAddressPrefersAPrivateIpv4Address();
     void syncNeedsAConnectionAndAlwaysCoversTheContacts();
     void syncReportsTheChangesOfEachArea();
+    void firstSyncReportsEachAreaInOrder();
+    void laterSyncIsNoFirstSync();
+    void firstSyncEndsWithTheConnection();
     void signalValueMapsToBars_data();
     void signalValueMapsToBars();
 
@@ -277,6 +282,7 @@ void TestAppController::errorMessagesStayShortAndSayWhatToDo_data()
         ErrorCode::NotSupported,     ErrorCode::NotFound,         ErrorCode::Rejected,
         ErrorCode::AlreadyConnected, ErrorCode::WifiDisabled,     ErrorCode::IoFailure,
         ErrorCode::InvalidInput,     ErrorCode::LimitExceeded,
+        ErrorCode::BluetoothServiceNotFound,
     };
     const QList<AppController::ConnectionKind> kinds = {
         AppController::ConnectionKind::None, AppController::ConnectionKind::Wifi,
@@ -312,6 +318,24 @@ void TestAppController::errorMessagesStayShortAndSayWhatToDo()
     QVERIFY(AppController::messageFor(Error(ErrorCode::Cancelled, {}),
                                       AppController::ConnectionKind(kind))
                 .isEmpty());
+}
+
+// A phone app without the Bluetooth permission, and a service list BlueZ read
+// before the app was running, both end the connection the same way; the text
+// has to name the remedy for each.
+void TestAppController::missingBluetoothServiceNamesPermissionAndReconnect()
+{
+    const QString message = AppController::messageFor(
+        Error(ErrorCode::BluetoothServiceNotFound,
+              QStringLiteral("Bluetooth connection failed: Cannot connect to remote profile")),
+        AppController::ConnectionKind::Bluetooth);
+
+    QVERIFY2(message.contains(QStringLiteral("\"Nearby devices\"")), qPrintable(message));
+    QVERIFY2(message.contains(QStringLiteral("turn on Bluetooth in the app")), qPrintable(message));
+    QVERIFY2(message.contains(QStringLiteral("disconnect the phone once")), qPrintable(message));
+    QVERIFY(!message.contains(QStringLiteral("remote profile")));
+    QVERIFY(message != AppController::messageFor(Error(ErrorCode::ConnectionClosed, {}),
+                                                 AppController::ConnectionKind::Bluetooth));
 }
 
 void TestAppController::connectionOrderFallsBackToTheNextWay()
@@ -577,6 +601,90 @@ void TestAppController::syncReportsTheChangesOfEachArea()
     QCOMPARE(lines.at(5), QStringLiteral("Calendar: 1 new, 2 changed, 3 deleted"));
     QVERIFY(lines.at(6).startsWith(QStringLiteral("Notes: not synced.")));
     QVERIFY(!controller->isSyncing());
+}
+
+void TestAppController::firstSyncReportsEachAreaInOrder()
+{
+    const std::unique_ptr<AppController> controller = makeController();
+    QStringList progress;
+    connect(controller.get(), &AppController::syncProgressChanged, controller.get(), [&]() {
+        progress.append(QStringLiteral("%1 %2/%3 %4")
+                            .arg(controller->syncArea())
+                            .arg(controller->syncStep())
+                            .arg(controller->syncStepCount())
+                            .arg(controller->isFirstSync() ? QStringLiteral("first")
+                                                           : QStringLiteral("later")));
+    });
+    QSignalSpy finished(controller.get(), &AppController::syncFinished);
+    QVERIFY(controller->connectAddress(phoneAddress()));
+    QTRY_VERIFY_WITH_TIMEOUT(controller->isConnected(), connectTimeoutMs);
+    QVERIFY(!controller->isFirstSync());
+    QCOMPARE(controller->syncStep(), 0);
+    QCOMPARE(controller->syncStepCount(), 0);
+
+    controller->syncAll();
+    QVERIFY(controller->isFirstSync());
+
+    QTRY_COMPARE_WITH_TIMEOUT(finished.count(), 1, connectTimeoutMs);
+    QCOMPARE(progress, QStringList({QStringLiteral("Contacts 1/5 first"),
+                                    QStringLiteral("Calls 2/5 first"),
+                                    QStringLiteral("Messages 3/5 first"),
+                                    QStringLiteral("Calendar and tasks 4/5 first"),
+                                    QStringLiteral("Notes 5/5 first"),
+                                    QStringLiteral(" 0/0 later")}));
+    QVERIFY(!controller->isFirstSync());
+    QVERIFY(controller->syncArea().isEmpty());
+}
+
+void TestAppController::laterSyncIsNoFirstSync()
+{
+    const std::unique_ptr<AppController> controller = makeController();
+    QSignalSpy finished(controller.get(), &AppController::syncFinished);
+    QVERIFY(controller->connectAddress(phoneAddress()));
+    QTRY_VERIFY_WITH_TIMEOUT(controller->isConnected(), connectTimeoutMs);
+    controller->syncAll();
+    QTRY_COMPARE_WITH_TIMEOUT(finished.count(), 1, connectTimeoutMs);
+
+    QList<bool> first;
+    QList<int> steps;
+    connect(controller.get(), &AppController::syncProgressChanged, controller.get(), [&]() {
+        first.append(controller->isFirstSync());
+        steps.append(controller->syncStep());
+    });
+    controller->syncAll();
+    QVERIFY(controller->isSyncing());
+    QVERIFY(!controller->isFirstSync());
+    QTRY_COMPARE_WITH_TIMEOUT(finished.count(), 2, connectTimeoutMs);
+    QCOMPARE(steps, QList<int>({1, 2, 3, 4, 5, 0}));
+    QVERIFY(!first.contains(true));
+}
+
+void TestAppController::firstSyncEndsWithTheConnection()
+{
+    const std::unique_ptr<AppController> controller = makeController();
+    auto pending = std::make_shared<QPromise<Result<AppController::SyncChanges>>>();
+    controller->registerSyncArea(QStringLiteral("Pending"), [pending]() {
+        pending->start();
+        return pending->future();
+    });
+    QSignalSpy finished(controller.get(), &AppController::syncFinished);
+    QVERIFY(controller->connectAddress(phoneAddress()));
+    QTRY_VERIFY_WITH_TIMEOUT(controller->isConnected(), connectTimeoutMs);
+    controller->syncAll();
+    QTRY_COMPARE_WITH_TIMEOUT(controller->syncArea(), QStringLiteral("Pending"), connectTimeoutMs);
+    QVERIFY(controller->isFirstSync());
+    QSignalSpy progress(controller.get(), &AppController::syncProgressChanged);
+
+    controller->disconnectPhone();
+
+    QVERIFY(!controller->isFirstSync());
+    QCOMPARE(progress.count(), 1);
+    pending->addResult(Result<AppController::SyncChanges>(
+        Error(ErrorCode::ConnectionClosed, QStringLiteral("connection ended"))));
+    pending->finish();
+    QTRY_COMPARE(finished.count(), 1);
+    QVERIFY(!controller->isSyncing());
+    QVERIFY(finished.first().first().toString().contains(QStringLiteral("Pending: not synced.")));
 }
 
 void TestAppController::signalValueMapsToBars_data()

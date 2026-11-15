@@ -197,6 +197,7 @@ QString ContactTypes::errorText(const core::Error &error)
         return tr("The phone does not support this. Update MyPhoneExplorer Client on the phone.");
     case ErrorCode::WrongPin:
     case ErrorCode::AlreadyConnected:
+    case ErrorCode::BluetoothServiceNotFound:
     case ErrorCode::WifiDisabled:
     case ErrorCode::Rejected:
     case ErrorCode::ProtocolError:
