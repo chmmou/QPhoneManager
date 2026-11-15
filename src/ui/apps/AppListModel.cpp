@@ -398,9 +398,9 @@ QString AppListModel::backupFileName(const QString &package) const
     if (!entry)
         return {};
     QString name = entry->version.isEmpty() ? entry->label : entry->label + u'-' + entry->version;
-    for (QChar &c : name) {
-        if (!isFileNameCharacter(c))
-            c = u'_';
+    for (qsizetype i = 0; i < name.size(); ++i) {
+        if (!isFileNameCharacter(name.at(i)))
+            name[i] = u'_';
     }
     name = name.trimmed();
     if (name.isEmpty() || name.startsWith(u'.'))

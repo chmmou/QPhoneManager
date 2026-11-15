@@ -9,6 +9,8 @@
 #include <QClipboard>
 #include <QGuiApplication>
 
+#include <utility>
+
 namespace qpm::ui {
 
 namespace {
@@ -80,7 +82,7 @@ void DesktopIntegration::applySettings()
     if (m_settings->notificationsEnabled() || !m_notifier)
         return;
     for (auto it = m_shown.cbegin(); it != m_shown.cend(); ++it)
-        static_cast<void>(m_notifier->close(it.key()));
+        closeShown(it.key());
     m_shown.clear();
 }
 
@@ -114,14 +116,21 @@ void DesktopIntegration::onPhoneListChanged()
 {
     if (!m_notifier)
         return;
-    for (auto it = m_shown.begin(); it != m_shown.end();) {
-        if (m_notifications->notification(it.value())) {
-            ++it;
-            continue;
-        }
-        static_cast<void>(m_notifier->close(it.key()));
-        it = m_shown.erase(it);
-    }
+    m_shown.removeIf([this](const std::pair<const uint &, QString &> &shown) {
+        if (m_notifications->notification(shown.second))
+            return false;
+        closeShown(shown.first);
+        return true;
+    });
+}
+
+void DesktopIntegration::closeShown(uint id)
+{
+    m_notifier->close(id).then(this, [](const Result<void> &closed) {
+        // The desktop drops it on its own after its time runs out.
+        if (!closed.hasValue())
+            qCInfo(core::lcUi) << "Desktop notification not closed:" << closed.error().message();
+    });
 }
 
 void DesktopIntegration::onActionInvoked(uint id, const QString &key)
