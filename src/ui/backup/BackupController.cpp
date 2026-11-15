@@ -50,6 +50,8 @@ BackupController::BackupController(const BackupService::Services &services, QObj
             [this](int done, int total) { setProgress(total > 0 ? double(done) / total : -1); });
     for (const BackupSection section : core::backup::allBackupSections)
         m_restoreSections->setState(section, false, false);
+    connect(m_restoreSections, &BackupSectionModel::chosenChanged, this,
+            &BackupController::updateChoiceHint);
 }
 
 QString BackupController::archiveText() const
@@ -216,12 +218,15 @@ bool BackupController::preview(const QUrl &url)
                 m_preview = compared.value();
                 updateRestoreChoice();
                 Q_EMIT previewChanged();
-                setStatus(compared.value().comparedWithPhone
-                              ? tr("Choose what to restore.")
-                              : tr("The phone is not connected, so the backup was compared with "
-                                   "the data stored on this computer. Connect the phone to "
-                                   "restore contacts, calendar, tasks and notes."),
-                          false);
+                if (compared.value().comparedWithPhone) {
+                    setStatus(QString(), false);
+                    updateChoiceHint();
+                } else {
+                    setStatus(tr("The phone is not connected, so the backup was compared with "
+                                 "the data stored on this computer. Connect the phone to "
+                                 "restore contacts, calendar, tasks and notes."),
+                              false);
+                }
             });
         });
     return true;
@@ -327,6 +332,8 @@ void BackupController::updateRestoreChoice()
                          .arg(found.added)
                          .arg(found.changed)
                          .arg(found.unchanged);
+            if (found.skipped > 0)
+                detail += u' ' + skippedText(found.skipped);
         }
         m_restoreSections->setState(section, selectable, selectable);
         m_restoreSections->setDetail(section, detail);
@@ -342,17 +349,20 @@ void BackupController::showReport(const RestoreReport &report)
     bool anyFailed = false;
     for (auto it = report.sections.cbegin(); it != report.sections.cend(); ++it) {
         const SectionOutcome &outcome = it.value();
+        const QString skipped =
+            outcome.skipped > 0 ? u' ' + skippedText(outcome.skipped) : QString();
         if (outcome.failed == 0) {
-            m_restoreSections->setDetail(it.key(),
-                                         tr("%n entry(s) restored.", nullptr, outcome.restored));
+            m_restoreSections->setDetail(
+                it.key(), tr("%n entry(s) restored.", nullptr, outcome.restored) + skipped);
             continue;
         }
         anyFailed = true;
         m_restoreSections->setDetail(it.key(),
                                      tr("Restored: %1, failed: %2. %3")
-                                         .arg(outcome.restored)
-                                         .arg(outcome.failed)
-                                         .arg(errorText(outcome.firstError, Step::Restore)));
+                                             .arg(outcome.restored)
+                                             .arg(outcome.failed)
+                                             .arg(errorText(outcome.firstError, Step::Restore)) +
+                                         skipped);
     }
     if (report.cancelled)
         setStatus(tr("The restore was stopped. What was restored until then stays."), false);
@@ -383,8 +393,27 @@ void BackupController::setBusy(bool busy)
     Q_EMIT busyChanged();
 }
 
+void BackupController::updateChoiceHint()
+{
+    bool selectable = false;
+    for (int row = 0; row < m_restoreSections->rowCount(); ++row) {
+        selectable = selectable || m_restoreSections->data(m_restoreSections->index(row),
+                                                           BackupSectionModel::SelectableRole)
+                                       .toBool();
+    }
+    const bool wanted = !m_busy && m_preview && m_preview->comparedWithPhone && selectable &&
+                        m_restoreSections->chosenKeys().isEmpty();
+    if (wanted) {
+        setStatus(tr("Choose what to restore."), false);
+        m_choiceHintShown = true;
+    } else if (m_choiceHintShown) {
+        setStatus(QString(), false);
+    }
+}
+
 void BackupController::setStatus(const QString &text, bool isError)
 {
+    m_choiceHintShown = false;
     if (m_statusText == text && m_statusIsError == isError)
         return;
     m_statusText = text;
@@ -398,6 +427,12 @@ void BackupController::setProgress(double progress)
         return;
     m_progress = progress;
     Q_EMIT progressChanged();
+}
+
+QString BackupController::skippedText(int count)
+{
+    return tr("%n appointment(s) left out: their calendar is read-only on the phone.", nullptr,
+              count);
 }
 
 QString BackupController::errorText(const Error &error, Step step)

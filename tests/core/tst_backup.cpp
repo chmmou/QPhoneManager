@@ -18,6 +18,9 @@
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QRegularExpression>
+#include <QSqlDatabase>
+#include <QSqlQuery>
 #include <QSemaphore>
 #include <QSignalSpy>
 #include <QTemporaryDir>
@@ -330,6 +333,8 @@ private Q_SLOTS:
     void withoutConnectionThePreviewComparesWithThisComputer();
     void secondOperationWhileOneRunsIsRefused();
     void backupOfAnotherPhoneOnlyAdds();
+    void appointmentsOfReadOnlyCalendarsAreLeftOut();
+    void unreadableStoredEntriesAreSkippedAndLogged();
     void archiveImportStaysWithTheStoreItStartedWith();
     void partNamesStayUniqueAndPortable();
 
@@ -937,6 +942,73 @@ void TestBackup::backupOfAnotherPhoneOnlyAdds()
     QVERIFY(wait(m_contacts->sync()).hasValue());
     QCOMPARE(m_contactStore->contact(2).value().givenName, QStringLiteral("Max"));
     QCOMPARE(m_contactStore->allContacts().value().size(), 5);
+}
+
+// A restore wrote a copy of an entry of a read-only holiday calendar into a
+// writable calendar of the user, and the preview counted it as new. Only such
+// an entry is left out: one whose calendar this phone lacks, as after a reset,
+// and one that names no calendar go into the writable default calendar.
+void TestBackup::appointmentsOfReadOnlyCalendarsAreLeftOut()
+{
+    const Result<Backup> made = backupAndOpen({BackupSection::Calendar});
+    QVERIFY(made.hasValue());
+    Backup backup = made.value();
+    CalendarEvent unknown = meeting();
+    unknown.luid = 0x10000009;
+    unknown.summary = QStringLiteral("Termin eines anderen Kalenders");
+    unknown.calendarTitle = QStringLiteral("Verein");
+    CalendarEvent unnamed = meeting();
+    unnamed.luid = 0x1000000A;
+    unnamed.summary = QStringLiteral("Termin ohne Kalender");
+    unnamed.calendarUrl.clear();
+    unnamed.calendarTitle.clear();
+    backup.data.events.append(unknown);
+    backup.data.events.append(unnamed);
+    m_phone->removeObject(QStringLiteral("cal"), holidayLuid);
+    m_phone->removeObject(QStringLiteral("cal"), meetingLuid);
+
+    const Result<BackupPreview> preview = wait(m_backup->preview(backup));
+
+    QVERIFY2(preview.hasValue(), qPrintable(preview.error().message()));
+    const SectionPreview calendar = preview.value().sections.value(BackupSection::Calendar);
+    QCOMPARE(calendar.added, 3);
+    QCOMPARE(calendar.changed, 0);
+    QCOMPARE(calendar.skipped, 1);
+
+    const Result<RestoreReport> report = wait(m_backup->restore(backup, {BackupSection::Calendar}));
+
+    QVERIFY(report.hasValue());
+    const SectionOutcome outcome = report.value().sections.value(BackupSection::Calendar);
+    QCOMPARE(outcome.restored, 3);
+    QCOMPARE(outcome.failed, 0);
+    QCOMPARE(outcome.skipped, 1);
+    QVERIFY(wait(m_calendar->sync()).hasValue());
+    const QList<CalendarEvent> events = m_organizerStore->allEvents().value();
+    QStringList summaries;
+    for (const CalendarEvent &event : events) {
+        summaries.append(event.summary);
+        QCOMPARE(event.calendarTitle, QStringLiteral("Familie"));
+        QCOMPARE(event.calendarUrl, QString(accountUrl));
+    }
+    summaries.sort();
+    QCOMPARE(summaries, (QStringList{meeting().summary, unknown.summary, unnamed.summary}));
+}
+
+// A stored entry the reader cannot take any more was left out of every list
+// without a word.
+void TestBackup::unreadableStoredEntriesAreSkippedAndLogged()
+{
+    QSqlDatabase db = QSqlDatabase::database(m_profile->connectionName(), false);
+    QSqlQuery query(db);
+    QVERIFY(query.exec(QStringLiteral("UPDATE contacts SET vcard = 'kaputt' WHERE luid = 2")));
+    QVERIFY(query.exec(QStringLiteral("UPDATE notes SET raw = 'kaputt' WHERE luid = 1")));
+    QTest::ignoreMessage(QtWarningMsg,
+                         QRegularExpression(QStringLiteral("^Contact \\S+ not readable:")));
+    QTest::ignoreMessage(QtWarningMsg,
+                         QRegularExpression(QStringLiteral("^Note \\S+ not readable:")));
+
+    QCOMPARE(m_contactStore->allContacts().value().size(), 3);
+    QVERIFY(m_organizerStore->notes().value().isEmpty());
 }
 
 // A switch of the phone while the parts are prepared must not put the

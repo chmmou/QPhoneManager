@@ -3,6 +3,7 @@
 #include "ui/backup/BackupController.h"
 #include "ui/backup/BackupSectionModel.h"
 
+#include "core/codec/PhoneVCal.h"
 #include "core/codec/PhoneVCard.h"
 #include "core/codec/VNote.h"
 #include "platform/SecretStore.h"
@@ -14,6 +15,7 @@
 #include <QSignalSpy>
 #include <QTemporaryDir>
 #include <QTest>
+#include <QTimeZone>
 #include <QTranslator>
 #include <QUrl>
 
@@ -87,6 +89,8 @@ private Q_SLOTS:
     void fileThatIsNoBackupIsReported();
     void chosenKeysFollowTheChoice();
     void stopWhileReadingKeepsTheComparisonFromStarting();
+    void choiceHintShowsOnlyWhileNothingIsChosen();
+    void previewSaysWhyAppointmentsAreLeftOut();
 
 private:
     [[nodiscard]] BackupController *backup() const { return m_controller->backup(); }
@@ -326,6 +330,69 @@ void TestBackupController::stopWhileReadingKeepsTheComparisonFromStarting()
     const QStringList commands = m_phone->receivedCommands();
     for (const QString &command : commands)
         QVERIFY2(!command.startsWith(QLatin1StringView("OBEX")), qPrintable(command));
+}
+
+// After a preview the status asked to choose what to restore, although the
+// sections were chosen already, and the request stayed.
+void TestBackupController::choiceHintShowsOnlyWhileNothingIsChosen()
+{
+    const QString path = m_dir->filePath(QStringLiteral("phone.qpmbackup"));
+    QVERIFY(saveBackup(path));
+    m_phone->removeObject(QStringLiteral("pb"), 2);
+    const QString hint = QStringLiteral("Choose what to restore.");
+
+    QVERIFY(previewBackup(path));
+
+    BackupSectionModel *sections = backup()->restoreSections();
+    QCOMPARE(sections->chosenKeys(), QStringList{QStringLiteral("contacts")});
+    QVERIFY(backup()->statusText() != hint);
+    sections->setChosen(sections->rowOf(BackupSection::Contacts), false);
+    QCOMPARE(backup()->statusText(), hint);
+    sections->setChosen(sections->rowOf(BackupSection::Contacts), true);
+    QVERIFY(backup()->statusText().isEmpty());
+
+    QVERIFY(backup()->restore(QUrl::fromLocalFile(path), sections->chosenKeys()));
+    QTRY_VERIFY_WITH_TIMEOUT(!backup()->isBusy(), timeoutMs);
+    QCOMPARE(backup()->statusText(), QStringLiteral("The restore is done."));
+}
+
+// An entry of a read-only calendar is left out of a restore, and the preview
+// says how many and why.
+void TestBackupController::previewSaysWhyAppointmentsAreLeftOut()
+{
+    CalendarEvent holiday;
+    holiday.luid = 0x10000002;
+    holiday.summary = QStringLiteral("Tag der Deutschen Einheit");
+    holiday.allDay = true;
+    holiday.start = QDateTime(QDate(2026, 10, 3), QTime(0, 0), QTimeZone::UTC);
+    holiday.end = holiday.start.addDays(1);
+    holiday.calendarUrl = QStringLiteral("anna@example.org@com.google/NULL");
+    holiday.calendarTitle = QStringLiteral("Feiertage");
+    m_phone->setObjects(QStringLiteral("cal"),
+                        {{holiday.luid, encodeEventAsPhoneSendsIt(holiday)}});
+    m_phone->setMetadata(
+        QStringLiteral("cal"),
+        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<metadata version=\"1.0\">\r\n"
+        "<calendars filter_disabled=\"0\">\r\n"
+        "<calendar selected=\"1\" default=\"1\" url=\"anna@example.org@com.google/NULL\" "
+        "title=\"Familie\" color=\"FF33B679\" hidden=\"0\" timezone=\"Europe/Berlin\" "
+        "access_level=\"700\"/>\r\n"
+        "<calendar selected=\"1\" url=\"anna@example.org@com.google/NULL\" title=\"Feiertage\" "
+        "color=\"FF0B8043\" hidden=\"0\" timezone=\"Europe/Berlin\" access_level=\"200\"/>\r\n"
+        "</calendars>\r\n<tasksupport>1</tasksupport>\r\n</metadata>");
+    const QFuture<Result<store::OrganizerChanges>> pulled = m_controller->calendar()->sync();
+    QTRY_VERIFY_WITH_TIMEOUT(pulled.isFinished(), timeoutMs);
+    QVERIFY(pulled.result().hasValue());
+    const QString path = m_dir->filePath(QStringLiteral("phone.qpmbackup"));
+    QVERIFY(saveBackup(path));
+    m_phone->removeObject(QStringLiteral("cal"), holiday.luid);
+
+    QVERIFY(previewBackup(path));
+
+    QCOMPARE(detailOf(backup()->restoreSections(), BackupSection::Calendar),
+             QStringLiteral("New: 0, changed: 0, unchanged: 0. 1 appointment left out: its "
+                            "calendar is read-only on the phone."));
+    QVERIFY(!selectable(backup()->restoreSections(), BackupSection::Calendar));
 }
 
 QTEST_MAIN(TestBackupController)

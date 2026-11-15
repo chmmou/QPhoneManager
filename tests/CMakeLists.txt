@@ -56,6 +56,7 @@ qpm_add_core_test(tst_clipboard)
 qpm_add_core_test(tst_callmonitor)
 qpm_add_core_test(tst_zipstore)
 qpm_add_core_test(tst_backup)
+target_link_libraries(tst_backup PRIVATE Qt6::Sql)
 # Every function syncs all areas with the fake phone first.
 set_tests_properties(tst_backup PROPERTIES TIMEOUT 120)
 qpm_add_core_test(tst_nothirdpartyservices)

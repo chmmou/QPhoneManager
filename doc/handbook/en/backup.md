@@ -55,7 +55,7 @@ If the backup comes from another phone, the preview says so. The restore then on
 ### What applies to single parts
 
 - **Contacts:** New contacts in an account that the phone does not have land in the default account of the phone. For new contacts, a photo over 200 KB is dropped. For changed contacts, the photo of the phone stays.
-- **Calendar:** New appointments in an unknown or read-only calendar go to the default calendar that the phone may write to.
+- **Calendar:** Appointments from a calendar that is read-only on the phone are not restored. The preview shows how many. Appointments without a calendar, or from a calendar the phone does not have, go to the default calendar that the phone may write to.
 
 ### Stop and result
 

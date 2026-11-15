@@ -454,11 +454,16 @@ Result<QList<Contact>> ContactStore::allContacts() const
         return queryError(QStringLiteral("Cannot read the contacts"), query);
     QList<Contact> contacts;
     while (query.next()) {
+        const quint32 luid = query.value(0).toUInt();
         const Result<Contact> parsed = codec::parsePhoneVCard(query.value(1).toByteArray());
-        if (!parsed.hasValue())
+        if (!parsed.hasValue()) {
+            // The list goes on without the entry; its stored row stays as it is.
+            qCWarning(lcStore) << "Contact" << sync::IrmcSync::luidText(luid)
+                               << "not readable:" << parsed.error().message();
             continue;
+        }
         Contact contact = parsed.value();
-        contact.luid = query.value(0).toUInt();
+        contact.luid = luid;
         contacts.append(contact);
     }
     return contacts;

@@ -123,6 +123,8 @@ private:
 
     /// What went wrong in `step` and what to do, translated.
     [[nodiscard]] static QString errorText(const core::Error &error, Step step);
+    /// Why `count` appointments are not restored, translated.
+    [[nodiscard]] static QString skippedText(int count);
     /// Forgets the opened backup and its preview, but not the last message.
     void forgetBackup();
     void setBusy(bool busy);
@@ -131,6 +133,11 @@ private:
     void showPreview(const core::backup::BackupPreview &preview);
     void showReport(const core::backup::RestoreReport &report);
     void updateRestoreChoice();
+    /**
+     * Asks to choose what to restore while there is something to choose and
+     * nothing is chosen, and takes the request back once something is.
+     */
+    void updateChoiceHint();
     [[nodiscard]] static std::optional<QList<core::backup::BackupSection>>
     sectionsFrom(const QStringList &keys);
 
@@ -149,6 +156,8 @@ private:
     bool m_statusIsError = false;
     bool m_connected = false;
     bool m_busy = false;
+    /// statusText is the request to choose what to restore.
+    bool m_choiceHintShown = false;
 };
 
 } // namespace qpm::ui
