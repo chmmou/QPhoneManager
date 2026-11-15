@@ -29,6 +29,20 @@ Dialog {
     title: qsTr("First sync")
 
     Component.onCompleted: Theme.calmPopup(root)
+    onRunningChanged: root.takeProgress()
+    onStepChanged: root.takeProgress()
+    onStepCountChanged: root.takeProgress()
+    onAreaNameChanged: root.takeProgress()
+
+    // The values on screen. They stay at the last progress while the popup
+    // fades out, because the progress is reset when the sync ends.
+    QtObject {
+        id: shown
+
+        property int step: 0
+        property int stepCount: 0
+        property string areaName: ""
+    }
 
     ColumnLayout {
         anchors.fill: parent
@@ -45,22 +59,36 @@ Dialog {
 
             objectName: "firstSyncArea"
             Layout.fillWidth: true
-            text: qsTr("%1 (%2 of %3)").arg(root.areaName).arg(root.step).arg(root.stepCount)
+            text: qsTr("%1 (%2 of %3)").arg(shown.areaName).arg(shown.step).arg(shown.stepCount)
             textFormat: Text.PlainText
             wrapMode: Text.Wrap
-            onTextChanged: {
-                if (root.running && root.areaName.length > 0)
-                    areaLabel.Accessible.announce(areaLabel.text);
-            }
+            // Step and area change one after the other; only the text they
+            // end up with is announced.
+            onTextChanged: Qt.callLater(root.announceArea)
         }
 
         ProgressBar {
             objectName: "firstSyncProgress"
             Layout.fillWidth: true
             from: 0
-            to: Math.max(1, root.stepCount)
-            value: Math.max(0, root.step - 1)
+            to: Math.max(1, shown.stepCount)
+            value: Math.max(0, shown.step - 1)
             Accessible.name: qsTr("Progress of the first sync")
         }
+    }
+
+    // Takes the progress only while it is complete; a value already reset at
+    // the end of the sync does not reach the screen.
+    function takeProgress(): void {
+        if (!root.running || root.step < 1 || root.stepCount < 1 || root.areaName.length === 0)
+            return;
+        shown.step = root.step;
+        shown.stepCount = root.stepCount;
+        shown.areaName = root.areaName;
+    }
+
+    function announceArea(): void {
+        if (root.running)
+            areaLabel.Accessible.announce(areaLabel.text);
     }
 }
