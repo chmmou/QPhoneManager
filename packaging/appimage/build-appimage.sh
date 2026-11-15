@@ -119,6 +119,32 @@ export APPIMAGE_EXTRACT_AND_RUN=1
     --deploy-deps-only "$appdir/usr/plugins" \
     --deploy-deps-only "$appdir/usr/qml"
 
+# The licenses of Qt, ICU and the runtime require their texts to travel with
+# the AppImage. THIRD_PARTY.md says which text belongs to which part.
+doc_dir="$appdir/usr/share/doc/qphonemanager"
+install -d "$doc_dir/LICENSES"
+install -m 644 "$source_dir/LICENSE" "$source_dir/THIRD_PARTY.md" "$doc_dir/"
+install -m 644 "$source_dir"/LICENSES/*.txt "$doc_dir/LICENSES/"
+
+# linuxdeploy copies the Debian copyright file of the system libraries it
+# adds, but misses those that dpkg registers below /lib rather than /usr/lib.
+if command -v dpkg-query >/dev/null; then
+    for library in "$appdir"/usr/lib/*.so*; do
+        name="$(basename "$library")"
+        case "$name" in
+            libQt6* | libicu*) continue ;;
+        esac
+        package="$(dpkg-query --search "*/$name" 2>/dev/null | head -n 1 | cut -d: -f1)" || true
+        [ -n "$package" ] || fail "no Debian package found for $name"
+        copyright="/usr/share/doc/$package/copyright"
+        [ -f "$copyright" ] || fail "the package $package has no copyright file"
+        target="$appdir/usr/share/doc/$package/copyright"
+        [ -f "$target" ] || install -D -m 644 "$copyright" "$target"
+    done
+else
+    echo "build-appimage.sh: dpkg-query not found; the system libraries in the AppImage carry no license files" >&2
+fi
+
 mkdir -p "$dist_dir"
 output="$dist_dir/QPhoneManager-$version-x86_64.AppImage"
 rm -f "$output"
