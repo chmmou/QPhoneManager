@@ -42,7 +42,7 @@ jobs:
     # change what a release is built in. deps-image.yml reports the digest of
     # each image it pushes; write it here to move to that image.
     container:
-      image: ghcr.io/chmmou/qphonemanager/ci-ubuntu:qt6.9.3@sha256:2265bda3d722f157ca97a21d4ab0d244ffc0a12604d5b9b1a8c1b20c1fb5c5b2
+      image: ghcr.io/chmmou/qphonemanager/ci-ubuntu:qt6.9.3@sha256:f45900f3f2298db0025e23c1720a1401f826f53364b258a0faea184e027eff10
       # The package may be private; the token reads it through packages: read.
       credentials:
         username: ${{ github.actor }}
